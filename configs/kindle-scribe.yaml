@@ -1,0 +1,139 @@
+# Kindle Scribe — 1860×2480 @ 300 PPI → 446.4×595.2 pt = 157.48×209.97 mm
+# Close to the original LYP 158×210 leftie gist config.
+
+version: "0.2"
+
+template: mos
+debug: false
+
+device: kindle-scribe
+
+document:
+  layout:
+    dimensions:
+      width: 157.48mm
+      height: 209.97mm
+
+    margin:
+      top: 10mm
+      bottom: 0mm
+      left: 0mm
+      right: 5mm
+
+  text:
+    size: 10pt
+    h1: 10mm
+
+planner:
+  params:
+    regular_stroke: 0.4pt
+    thick_stroke: 0.8pt
+    regular_height: 5mm
+    scratch_pad: dotted
+    link_padding: 8pt
+    regular_column_gutter: 10pt
+
+    start_date: "2026-01-01"
+    end_date: "2026-12-31"
+    weekday_start: Monday
+
+    little_calendar:
+      week_placement: left
+      inset: 5pt
+
+    mos_layout:
+      side_menu_position: left
+      side_menu_width: 10mm
+      column_gutter: 2mm
+      row_gutter: 2mm
+      menu_rotate: 270deg
+      reverse_months_quarters: true
+      reverse_months_quarters_items: true
+
+    heading:
+      height: 10mm
+      align: horizon
+
+  sections:
+    - name: cover
+      class: cover_plain
+      enabled: true
+      params:
+        name: "2026\n\nPlanner"
+        font_size: 48pt
+
+    - name: annual
+      class: annual
+      enabled: true
+      params:
+        little_calendar:
+          show_month_name: true
+        row_gutter: 5pt
+
+    - name: quarterly
+      class: quarterly
+      enabled: true
+      params:
+        months_column: left
+        little_calendar:
+          show_month_name: true
+
+    - name: monthly
+      class: monthly
+      enabled: true
+      params:
+        month_params:
+          week_placement: left
+          week_label_rotation: 90deg
+          daily_cell_height: 2.5cm
+
+    - name: weekly
+      class: weekly
+      enabled: true
+      params:
+        column_gutter: 5pt
+
+    - name: daily
+      class: daily
+      enabled: true
+      params:
+        columns_width: (3fr, 5fr)
+        items_spacing: 5mm
+
+        left_column:
+          - name: schedule
+            class: schedule
+            enabled: true
+            params:
+              from: 8
+              to: 20
+              time_format: "%k"
+              trailing_30_minutes: true
+
+          - name: little calendar
+            class: little_calendar
+            enabled: true
+            params:
+              week_placement: left
+              inset: 5pt
+
+        right_column:
+          - name: top priorities
+            class: top_priorities
+            enabled: true
+            params:
+              number: 5
+
+          - name: notes
+            class: notes
+            enabled: true
+            params:
+              title_height: 5mm
+              notes_height: 1fr
+              pattern: dotted
+
+    - name: daily_notes
+      class: daily_notes
+      enabled: true
+      params:
+        pages: 2

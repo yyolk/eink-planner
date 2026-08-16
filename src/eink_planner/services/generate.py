@@ -1,0 +1,25 @@
+"""Select a planner template and emit Typst source."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from eink_planner import ConfigError
+from eink_planner.config import StrictDict
+from eink_planner.i18n import I18n
+from eink_planner.mos.coordinator import Coordinator
+
+
+class Generate:
+    def __init__(self, i18n: I18n) -> None:
+        self.i18n = i18n
+
+    def generate(self, data: StrictDict | dict[str, Any]) -> str:
+        dto = data if isinstance(data, StrictDict) else StrictDict(data)
+        return self._select_planner(dto).generate()
+
+    def _select_planner(self, dto: StrictDict) -> Coordinator:
+        template = dto.get("template")
+        if template == "mos":
+            return Coordinator(dto, i18n=self.i18n)
+        raise ConfigError(f"Bad template: {template}")

@@ -1,0 +1,62 @@
+en:
+  week_name_full: Week
+  schedule: Schedule
+  top_priorities: Top priorities
+  monthly_notes: Notes
+  daily_notes: Notes
+  more_daily_notes: More
+  notes: Notes
+
+  quarters:
+    short: Q
+    long: Quarter
+
+  months:
+    short:
+      january: Jan
+      february: Feb
+      march: Mar
+      april: Apr
+      may: May
+      june: Jun
+      july: Jul
+      august: Aug
+      september: Sep
+      october: Oct
+      november: Nov
+      december: Dec
+
+    full:
+      january: January
+      february: February
+      march: March
+      april: April
+      may: May
+      june: June
+      july: July
+      august: August
+      september: September
+      october: October
+      november: November
+      december: December
+
+  weekday:
+    one_letter:
+      week: W
+
+      monday: M
+      tuesday: T
+      wednesday: W
+      thursday: T
+      friday: F
+      saturday: S
+      sunday: S
+
+    full:
+      monday: Monday
+      tuesday: Tuesday
+      wednesday: Wednesday
+      thursday: Thursday
+      friday: Friday
+      saturday: Saturday
+      sunday: Sunday
