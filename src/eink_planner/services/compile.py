@@ -215,10 +215,33 @@ def _find_typst_binary(root: Path) -> Path | None:
     return None
 
 
+def _zip_member_target(dest_dir: Path, name: str) -> Path:
+    """Return the extract path if ``name`` stays inside ``dest_dir``.
+
+    Raises CompileError on Zip Slip (``../``, absolute paths).
+    """
+    dest = dest_dir.resolve()
+    if Path(name).is_absolute():
+        raise CompileError(f"refusing to extract {name!r} outside {dest}")
+    target = (dest / name).resolve()
+    try:
+        target.relative_to(dest)
+    except ValueError as exc:
+        raise CompileError(f"refusing to extract {name!r} outside {dest}") from exc
+    return target
+
+
+def _extract_zip(archive: Path, dest_dir: Path) -> None:
+    dest = dest_dir.resolve()
+    with zipfile.ZipFile(archive) as zf:
+        for info in zf.infolist():
+            _zip_member_target(dest, info.filename)
+        zf.extractall(dest)
+
+
 def _extract_archive(archive: Path, dest_dir: Path) -> None:
     if archive.suffix == ".zip" or archive.name.endswith(".zip"):
-        with zipfile.ZipFile(archive) as zf:
-            zf.extractall(dest_dir)
+        _extract_zip(archive, dest_dir)
         return
     with tarfile.open(archive, "r:xz") as tar:
         tar.extractall(dest_dir, filter="data")
