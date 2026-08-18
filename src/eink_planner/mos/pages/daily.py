@@ -97,8 +97,12 @@ class Daily:
                     **params,
                 ).generate()
             )
-        return f"""stack(
-  dir: ttb,
-  spacing: {self.items_spacing},
+        if not pieces:
+            return "[]"
+        rows = ", ".join(["auto"] * (len(pieces) - 1) + ["1fr"])
+        return f"""grid(
+  columns: 1fr,
+  rows: ({rows}),
+  row-gutter: {self.items_spacing},
   {",\n".join(pieces)}
 )"""

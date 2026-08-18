@@ -37,6 +37,7 @@ class LittleCalendar:
   inset: {self.inset},
   stroke: {self._stroke()},
   columns: ({self._columns()}),
+  rows: 1fr,
 
   {self._optional_month_name()}
   {self._heading()}, grid.hline(stroke: regular_stroke),
