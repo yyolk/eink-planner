@@ -15,7 +15,7 @@ cd eink-planner
 uv sync
 ```
 
-`typst` is used to compile the PDF. If it is not on `PATH`, the compile step downloads the official Linux x64 binary into `.tools/typst`.
+`typst` is used to compile the PDF. If it is not on `PATH`, the compile step downloads the official Typst v0.15.1 binary for the current OS/arch into `.tools/typst` (`.tools/typst.exe` on Windows).
 
 ## Generate
 
