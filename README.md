@@ -1,6 +1,6 @@
 # eink-planner
 
-Python port of [Vitaliy Kudryk's LYP](https://github.com/kudrykv/LYP) (MIT, 2026).
+Python port of [Vitaliy Kudryk's latex-yearly-planner](https://github.com/kudrykv/latex-yearly-planner/tree/alpha) ([fork point commit](https://github.com/kudrykv/latex-yearly-planner/commit/a59229770cfbf4a05b68a656dd70c02913a7df49), MIT, 2026).
 
 LYP generates a yearly planner by emitting **Typst**, then compiling that to **PDF**. This package keeps that architecture: Python reads a YAML config, walks calendar entities, and writes `index.typst` + `index.pdf`. It does **not** draw PDFs with reportlab/fpdf.
 
