@@ -1,0 +1,643 @@
+"""KDL 2.0 device profiles → the MOS generator's existing config shape.
+
+ckdl 1.0 implements KDL 2.0 but does not accept digit-leading unit tokens
+(``8mm``, ``0.3pt``, ``3fr``, ``270deg``) or hour ranges (``8..20``). Those
+are valid in our profile style, so we quote them before ``ckdl.parse`` and
+keep the original token text (``8mm``, not a split number + unit).
+"""
+
+from __future__ import annotations
+
+import calendar
+import re
+from pathlib import Path
+from typing import Any, Iterable
+
+import ckdl
+
+from eink_planner import ConfigError
+from eink_planner.config import StrictDict
+
+_TOP_LEVEL = frozenset({"device", "year", "week-starts", "style", "layout", "section"})
+_STYLE_NODES = frozenset(
+    {
+        "stroke",
+        "type",
+        "margin",
+        "gutter",
+        "regular-height",
+        "link-padding",
+        "scratch-pad",
+        "heading",
+        "little-calendar",
+    }
+)
+_STROKE_NODES = frozenset({"regular", "thick"})
+_TYPE_NODES = frozenset({"body", "h1"})
+_MARGIN_NODES = frozenset({"top", "bottom", "left", "right"})
+_GUTTER_NODES = frozenset({"column", "row"})
+_HEADING_NODES = frozenset({"height", "align"})
+_LAYOUT_NODES = frozenset(
+    {
+        "side-menu",
+        "reverse-months-quarters",
+        "reverse-months-quarters-items",
+        "menu-rotate",
+        "column-gutter",
+        "row-gutter",
+    }
+)
+_SECTION_TYPES = frozenset(
+    {"cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily-notes"}
+)
+_LITTLE_CAL_NODES = frozenset({"show-month-name", "week-placement", "inset"})
+_COVER_NODES = frozenset({"title", "font-size"})
+_ANNUAL_NODES = frozenset({"little-calendar", "row-gutter"})
+_QUARTERLY_NODES = frozenset({"months-column", "little-calendar"})
+_MONTHLY_NODES = frozenset({"week-placement", "week-label-rotation", "daily-cell-height"})
+_WEEKLY_NODES = frozenset({"column-gutter"})
+_DAILY_NODES = frozenset({"columns", "item-spacing", "left", "right"})
+_DAILY_LEFT = frozenset({"schedule", "little-calendar"})
+_DAILY_RIGHT = frozenset({"top-priorities", "notes"})
+_SCHEDULE_NODES = frozenset({"time-format", "trailing-half-hour"})
+_NOTES_NODES = frozenset({"pattern", "title-height", "height"})
+_DAILY_NOTES_NODES = frozenset({"pages", "pattern"})
+_DEVICE_NODES = frozenset({"page-size", "ppi"})
+
+_SECTION_CLASS = {
+    "cover": "cover_plain",
+    "annual": "annual",
+    "quarterly": "quarterly",
+    "monthly": "monthly",
+    "weekly": "weekly",
+    "daily": "daily",
+    "daily-notes": "daily_notes",
+}
+
+_SECTION_NAME = {
+    "cover": "cover",
+    "annual": "annual",
+    "quarterly": "quarterly",
+    "monthly": "monthly",
+    "weekly": "weekly",
+    "daily": "daily",
+    "daily-notes": "daily_notes",
+}
+
+# Bare tokens that ckdl 1.0 cannot parse: units, fr tracks, hour ranges,
+# and Typst-style ``(3fr 5fr)`` column tuples.
+_BARE_TOKEN = re.compile(
+    r"""
+    \(\s*\d+(?:\.\d+)?fr(?:[ \t]+\d+(?:\.\d+)?fr)+\s*\)
+    |
+    \d+\.\.\d+
+    |
+    \d+(?:\.\d+)?(?:mm|cm|pt|fr|deg|in|em)
+    """,
+    re.VERBOSE,
+)
+
+
+def load_kdl(path: str | Path) -> StrictDict:
+    source = Path(path)
+    try:
+        text = source.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise ConfigError(f"{source}: {exc}") from exc
+    return parse_kdl(text, source=str(source))
+
+
+def parse_kdl(text: str, source: str = "<kdl>") -> StrictDict:
+    quoted = quote_kdl_tokens(text)
+    try:
+        doc = ckdl.parse(quoted, version=2)
+    except ckdl.ParseError as exc:
+        raise ConfigError(f"{source}: {exc}") from exc
+    try:
+        data = kdl_document_to_dto(doc)
+    except ConfigError as exc:
+        raise ConfigError(f"{source}: {exc}") from exc
+    return StrictDict(data)
+
+
+def quote_kdl_tokens(text: str) -> str:
+    """Quote digit-leading unit/range tokens so ckdl can parse the profile."""
+    out: list[str] = []
+    i = 0
+    n = len(text)
+    while i < n:
+        if text.startswith("//", i):
+            end = text.find("\n", i)
+            if end < 0:
+                out.append(text[i:])
+                break
+            out.append(text[i:end])
+            i = end
+            continue
+        if text.startswith("/*", i):
+            end = text.find("*/", i + 2)
+            if end < 0:
+                out.append(text[i:])
+                break
+            out.append(text[i : end + 2])
+            i = end + 2
+            continue
+        if text[i] == '"':
+            chunk, i = _consume_quoted(text, i)
+            out.append(chunk)
+            continue
+        match = _BARE_TOKEN.match(text, i)
+        if match:
+            out.append(f'"{match.group(0)}"')
+            i = match.end()
+            continue
+        out.append(text[i])
+        i += 1
+    return "".join(out)
+
+
+def _consume_quoted(text: str, start: int) -> tuple[str, int]:
+    i = start + 1
+    n = len(text)
+    while i < n:
+        ch = text[i]
+        if ch == "\\":
+            i += 2
+            continue
+        if ch == '"':
+            return text[start : i + 1], i + 1
+        i += 1
+    return text[start:], n
+
+
+def kdl_document_to_dto(doc: ckdl.Document) -> dict[str, Any]:
+    nodes = list(doc.nodes)
+    if _first(nodes, "debug") is not None:
+        raise ConfigError("debug does not belong in the config; use `lyp generate --debug`")
+    _reject_unknown(nodes, _TOP_LEVEL, "")
+
+    device_node = _require(nodes, "device")
+    year_node = _require(nodes, "year")
+    week_node = _require(nodes, "week-starts")
+    style_node = _require(nodes, "style")
+    layout_node = _require(nodes, "layout")
+    section_nodes = [n for n in nodes if n.name == "section"]
+
+    device_name, width, height, _ppi = _parse_device(device_node)
+    year = _int_arg(year_node, "year")
+    weekday = _str_arg(week_node, "week-starts")
+    style = _parse_style(style_node)
+    template, mos_layout = _parse_layout(layout_node)
+    sections, extras = _parse_sections(section_nodes)
+
+    heading = style.get("heading") or {}
+    heading_height = heading.get("height") or style["h1"]
+    heading_align = heading.get("align") or "horizon"
+
+    little = dict(style.get("little_calendar") or {})
+    if extras.get("daily_little_calendar"):
+        for key, value in extras["daily_little_calendar"].items():
+            little.setdefault(key, value)
+    little.setdefault("week_placement", "left")
+    little.setdefault("inset", "3pt")
+
+    scratch = style.get("scratch_pad") or extras.get("scratch_pad") or "dotted"
+    regular_height = style.get("regular_height") or _default_regular_height(style["body"])
+    link_padding = style.get("link_padding") or _default_link_padding(style["body"])
+
+    reverse = mos_layout["reverse_months_quarters"]
+    mos_layout.setdefault("reverse_months_quarters_items", reverse)
+
+    start_date = f"{year:04d}-01-01"
+    last_day = calendar.monthrange(year, 12)[1]
+    end_date = f"{year:04d}-12-{last_day:02d}"
+
+    return {
+        "template": template,
+        "device": device_name,
+        "document": {
+            "layout": {
+                "dimensions": {"width": width, "height": height},
+                "margin": style["margin"],
+            },
+            "text": {"size": style["body"], "h1": style["h1"]},
+        },
+        "planner": {
+            "params": {
+                "regular_stroke": style["regular_stroke"],
+                "thick_stroke": style["thick_stroke"],
+                "regular_height": regular_height,
+                "scratch_pad": scratch,
+                "link_padding": link_padding,
+                "regular_column_gutter": style["column_gutter"],
+                "start_date": start_date,
+                "end_date": end_date,
+                "weekday_start": weekday,
+                "little_calendar": little,
+                "mos_layout": mos_layout,
+                "heading": {"height": heading_height, "align": heading_align},
+            },
+            "sections": sections,
+        },
+    }
+
+
+def _parse_device(node: ckdl.Node) -> tuple[str, str, str, int | None]:
+    name = _str_arg(node, "device")
+    _reject_unknown(node.children, _DEVICE_NODES, "device")
+    page = _require(node.children, "page-size", "device")
+    args = [_plain(a) for a in page.args]
+    if len(args) != 2:
+        raise ConfigError("device.page-size: expected width height")
+    ppi_node = _first(node.children, "ppi")
+    ppi = _int_arg(ppi_node, "device.ppi") if ppi_node is not None else None
+    return name, _token(args[0]), _token(args[1]), ppi
+
+
+def _parse_style(node: ckdl.Node) -> dict[str, Any]:
+    _reject_unknown(node.children, _STYLE_NODES, "style")
+    stroke = _require(node.children, "stroke", "style")
+    typ = _require(node.children, "type", "style")
+    margin = _require(node.children, "margin", "style")
+    gutter = _require(node.children, "gutter", "style")
+
+    _reject_unknown(stroke.children, _STROKE_NODES, "style.stroke")
+    _reject_unknown(typ.children, _TYPE_NODES, "style.type")
+    _reject_unknown(margin.children, _MARGIN_NODES, "style.margin")
+    _reject_unknown(gutter.children, _GUTTER_NODES, "style.gutter")
+
+    out: dict[str, Any] = {
+        "regular_stroke": _token(_child_arg(stroke, "regular", "style.stroke")),
+        "thick_stroke": _token(_child_arg(stroke, "thick", "style.stroke")),
+        "body": _token(_child_arg(typ, "body", "style.type")),
+        "h1": _token(_child_arg(typ, "h1", "style.type")),
+        "margin": {
+            "top": _token(_child_arg(margin, "top", "style.margin")),
+            "bottom": _token(_child_arg(margin, "bottom", "style.margin")),
+            "left": _token(_child_arg(margin, "left", "style.margin")),
+            "right": _token(_child_arg(margin, "right", "style.margin")),
+        },
+        "column_gutter": _token(_child_arg(gutter, "column", "style.gutter")),
+    }
+    row = _first(gutter.children, "row")
+    if row is not None:
+        out["row_gutter"] = _token(_arg0(row, "style.gutter.row"))
+
+    if (rh := _first(node.children, "regular-height")) is not None:
+        out["regular_height"] = _token(_arg0(rh, "style.regular-height"))
+    if (lp := _first(node.children, "link-padding")) is not None:
+        out["link_padding"] = _token(_arg0(lp, "style.link-padding"))
+    if (sp := _first(node.children, "scratch-pad")) is not None:
+        out["scratch_pad"] = _plain(_arg0(sp, "style.scratch-pad"))
+    if (heading := _first(node.children, "heading")) is not None:
+        _reject_unknown(heading.children, _HEADING_NODES, "style.heading")
+        out["heading"] = {}
+        if (h := _first(heading.children, "height")) is not None:
+            out["heading"]["height"] = _token(_arg0(h, "style.heading.height"))
+        if (a := _first(heading.children, "align")) is not None:
+            out["heading"]["align"] = _plain(_arg0(a, "style.heading.align"))
+    if (lc := _first(node.children, "little-calendar")) is not None:
+        out["little_calendar"] = _parse_little_calendar(lc, "style.little-calendar")
+    return out
+
+
+def _parse_layout(node: ckdl.Node) -> tuple[str, dict[str, Any]]:
+    template = _str_arg(node, "layout")
+    if template != "mos":
+        raise ConfigError(f"layout: unknown template {template!r}")
+    _reject_unknown(node.children, _LAYOUT_NODES, "layout")
+    side = _require(node.children, "side-menu", "layout")
+    side_args = [_plain(a) for a in side.args]
+    if len(side_args) != 2:
+        raise ConfigError("layout.side-menu: expected position width")
+    reverse = _bool_arg(_require(node.children, "reverse-months-quarters", "layout"), "layout.reverse-months-quarters")
+    mos: dict[str, Any] = {
+        "side_menu_position": str(side_args[0]),
+        "side_menu_width": _token(side_args[1]),
+        "column_gutter": _token(_child_arg(node, "column-gutter", "layout")),
+        "row_gutter": _token(_child_arg(node, "row-gutter", "layout")),
+        "menu_rotate": _token(_child_arg(node, "menu-rotate", "layout")),
+        "reverse_months_quarters": reverse,
+    }
+    items = _first(node.children, "reverse-months-quarters-items")
+    if items is not None:
+        mos["reverse_months_quarters_items"] = _bool_arg(items, "layout.reverse-months-quarters-items")
+    return template, mos
+
+
+def _parse_sections(nodes: list[ckdl.Node]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    extras: dict[str, Any] = {}
+    sections: list[dict[str, Any]] = []
+    for node in nodes:
+        if not node.args:
+            raise ConfigError("section: missing type argument")
+        kind = str(_plain(node.args[0]))
+        if kind not in _SECTION_TYPES:
+            raise ConfigError(f"unknown section: {kind}")
+        builder = {
+            "cover": _section_cover,
+            "annual": _section_annual,
+            "quarterly": _section_quarterly,
+            "monthly": _section_monthly,
+            "weekly": _section_weekly,
+            "daily": lambda n: _section_daily(n, extras),
+            "daily-notes": lambda n: _section_daily_notes(n, extras),
+        }[kind]
+        params = builder(node)
+        sections.append(
+            {
+                "name": _SECTION_NAME[kind],
+                "class": _SECTION_CLASS[kind],
+                "enabled": True,
+                "params": params,
+            }
+        )
+    return sections, extras
+
+
+def _section_cover(node: ckdl.Node) -> dict[str, Any]:
+    _reject_unknown(node.children, _COVER_NODES, "section.cover")
+    return {
+        "name": _plain(_child_arg(node, "title", "section.cover")),
+        "font_size": _token(_child_arg(node, "font-size", "section.cover")),
+    }
+
+
+def _section_annual(node: ckdl.Node) -> dict[str, Any]:
+    _reject_unknown(node.children, _ANNUAL_NODES, "section.annual")
+    params: dict[str, Any] = {}
+    if (lc := _first(node.children, "little-calendar")) is not None:
+        params["little_calendar"] = _parse_little_calendar(lc, "section.annual.little-calendar")
+    if (rg := _first(node.children, "row-gutter")) is not None:
+        params["row_gutter"] = _token(_arg0(rg, "section.annual.row-gutter"))
+    return params
+
+
+def _section_quarterly(node: ckdl.Node) -> dict[str, Any]:
+    _reject_unknown(node.children, _QUARTERLY_NODES, "section.quarterly")
+    params: dict[str, Any] = {
+        "months_column": _plain(_child_arg(node, "months-column", "section.quarterly")),
+    }
+    if (lc := _first(node.children, "little-calendar")) is not None:
+        params["little_calendar"] = _parse_little_calendar(lc, "section.quarterly.little-calendar")
+    return params
+
+
+def _section_monthly(node: ckdl.Node) -> dict[str, Any]:
+    _reject_unknown(node.children, _MONTHLY_NODES, "section.monthly")
+    return {
+        "month_params": {
+            "week_placement": _plain(_child_arg(node, "week-placement", "section.monthly")),
+            "week_label_rotation": _token(_child_arg(node, "week-label-rotation", "section.monthly")),
+            "daily_cell_height": _token(_child_arg(node, "daily-cell-height", "section.monthly")),
+        }
+    }
+
+
+def _section_weekly(node: ckdl.Node) -> dict[str, Any]:
+    _reject_unknown(node.children, _WEEKLY_NODES, "section.weekly")
+    return {"column_gutter": _token(_child_arg(node, "column-gutter", "section.weekly"))}
+
+
+def _section_daily(node: ckdl.Node, extras: dict[str, Any]) -> dict[str, Any]:
+    _reject_unknown(node.children, _DAILY_NODES, "section.daily")
+    columns = _require(node.children, "columns", "section.daily")
+    params: dict[str, Any] = {
+        "columns_width": _typst_columns(columns, "section.daily.columns"),
+        "items_spacing": _token(_child_arg(node, "item-spacing", "section.daily")),
+        "left_column": [],
+        "right_column": [],
+    }
+    if (left := _first(node.children, "left")) is not None:
+        _reject_unknown(left.children, _DAILY_LEFT, "section.daily.left")
+        params["left_column"] = _daily_left(left, extras)
+    if (right := _first(node.children, "right")) is not None:
+        _reject_unknown(right.children, _DAILY_RIGHT, "section.daily.right")
+        params["right_column"] = _daily_right(right, extras)
+    return params
+
+
+def _daily_left(node: ckdl.Node, extras: dict[str, Any]) -> list[dict[str, Any]]:
+    comps: list[dict[str, Any]] = []
+    for child in node.children:
+        if child.name == "schedule":
+            comps.append(_component_schedule(child))
+        elif child.name == "little-calendar":
+            lc = _parse_little_calendar(child, "section.daily.left.little-calendar")
+            extras["daily_little_calendar"] = lc
+            comps.append(
+                {
+                    "name": "little calendar",
+                    "class": "little_calendar",
+                    "enabled": True,
+                    "params": lc,
+                }
+            )
+        else:
+            raise ConfigError(f"unknown node: section.daily.left.{child.name}")
+    return comps
+
+
+def _daily_right(node: ckdl.Node, extras: dict[str, Any]) -> list[dict[str, Any]]:
+    comps: list[dict[str, Any]] = []
+    for child in node.children:
+        if child.name == "top-priorities":
+            comps.append(
+                {
+                    "name": "top priorities",
+                    "class": "top_priorities",
+                    "enabled": True,
+                    "params": {"number": _int_arg(child, "section.daily.right.top-priorities")},
+                }
+            )
+        elif child.name == "notes":
+            _reject_unknown(child.children, _NOTES_NODES, "section.daily.right.notes")
+            pattern_node = _first(child.children, "pattern")
+            title = _token(_child_arg(child, "title-height", "section.daily.right.notes"))
+            height_node = _first(child.children, "height")
+            notes = {
+                "title_height": title,
+                "notes_height": _token(_arg0(height_node, "section.daily.right.notes.height"))
+                if height_node is not None
+                else "1fr",
+            }
+            if pattern_node is not None:
+                notes["pattern"] = _plain(_arg0(pattern_node, "section.daily.right.notes.pattern"))
+                extras.setdefault("scratch_pad", notes["pattern"])
+            comps.append(
+                {
+                    "name": "notes",
+                    "class": "notes",
+                    "enabled": True,
+                    "params": notes,
+                }
+            )
+        else:
+            raise ConfigError(f"unknown node: section.daily.right.{child.name}")
+    return comps
+
+
+def _component_schedule(node: ckdl.Node) -> dict[str, Any]:
+    _reject_unknown(node.children, _SCHEDULE_NODES, "section.daily.left.schedule")
+    start, end = _hour_range(node, "section.daily.left.schedule")
+    params: dict[str, Any] = {"from": start, "to": end}
+    if (fmt := _first(node.children, "time-format")) is not None:
+        params["time_format"] = _plain(_arg0(fmt, "section.daily.left.schedule.time-format"))
+    if (trail := _first(node.children, "trailing-half-hour")) is not None:
+        params["trailing_30_minutes"] = _bool_arg(trail, "section.daily.left.schedule.trailing-half-hour")
+    else:
+        params["trailing_30_minutes"] = True
+    return {"name": "schedule", "class": "schedule", "enabled": True, "params": params}
+
+
+def _section_daily_notes(node: ckdl.Node, extras: dict[str, Any]) -> dict[str, Any]:
+    _reject_unknown(node.children, _DAILY_NOTES_NODES, "section.daily-notes")
+    params: dict[str, Any] = {"pages": _int_arg(_require(node.children, "pages", "section.daily-notes"), "section.daily-notes.pages")}
+    if (pattern := _first(node.children, "pattern")) is not None:
+        extras.setdefault("scratch_pad", _plain(_arg0(pattern, "section.daily-notes.pattern")))
+    return params
+
+
+def _parse_little_calendar(node: ckdl.Node, path: str) -> dict[str, Any]:
+    _reject_unknown(node.children, _LITTLE_CAL_NODES, path)
+    out: dict[str, Any] = {}
+    if (show := _first(node.children, "show-month-name")) is not None:
+        out["show_month_name"] = _bool_arg(show, f"{path}.show-month-name")
+    if (place := _first(node.children, "week-placement")) is not None:
+        out["week_placement"] = _plain(_arg0(place, f"{path}.week-placement"))
+    if (inset := _first(node.children, "inset")) is not None:
+        out["inset"] = _token(_arg0(inset, f"{path}.inset"))
+    return out
+
+
+def _hour_range(node: ckdl.Node, path: str) -> tuple[int, int]:
+    args = [_plain(a) for a in node.args]
+    if len(args) == 1 and isinstance(args[0], str) and ".." in args[0]:
+        left, right = args[0].split("..", 1)
+        try:
+            return int(left), int(right)
+        except ValueError as exc:
+            raise ConfigError(f"{path}: expected hour range like 8..20") from exc
+    if len(args) == 2:
+        try:
+            return int(args[0]), int(args[1])
+        except (TypeError, ValueError) as exc:
+            raise ConfigError(f"{path}: expected hour range like 8..20") from exc
+    raise ConfigError(f"{path}: expected hour range like 8..20")
+
+
+def _typst_columns(node: ckdl.Node, path: str) -> str:
+    args = [_token(_plain(a)) for a in node.args]
+    if not args:
+        raise ConfigError(f"{path}: missing column tracks")
+    if len(args) == 1:
+        raw = args[0].strip()
+        if raw.startswith("(") and raw.endswith(")"):
+            parts = raw[1:-1].replace(",", " ").split()
+            if not parts:
+                raise ConfigError(f"{path}: missing column tracks")
+            return "(" + ", ".join(parts) + ")"
+        return raw
+    return "(" + ", ".join(args) + ")"
+
+
+def _default_regular_height(body: str) -> str:
+    pt = _pt_number(body)
+    if pt is not None:
+        half = pt / 2
+        return f"{int(half)}mm" if half == int(half) else f"{half}mm"
+    return "5mm"
+
+
+def _default_link_padding(body: str) -> str:
+    pt = _pt_number(body)
+    if pt is not None:
+        pad = pt - 2
+        return f"{int(pad)}pt" if pad == int(pad) else f"{pad}pt"
+    return "8pt"
+
+
+def _pt_number(token: str) -> float | None:
+    text = str(token).strip()
+    if not text.endswith("pt"):
+        return None
+    try:
+        return float(text[:-2])
+    except ValueError:
+        return None
+
+
+def apply_debug(dto: StrictDict, debug: bool) -> StrictDict:
+    """CLI overlay: debug is not a KDL key."""
+    if not debug:
+        return dto
+    data = dto.to_plain()
+    data["debug"] = True
+    return StrictDict(data)
+
+
+def _reject_unknown(nodes: Iterable[ckdl.Node], allowed: frozenset[str], path: str) -> None:
+    for node in nodes:
+        if node.name not in allowed:
+            loc = f"{path}.{node.name}" if path else node.name
+            raise ConfigError(f"unknown node: {loc}")
+
+
+def _require(nodes: Iterable[ckdl.Node], name: str, path: str = "") -> ckdl.Node:
+    found = [n for n in nodes if n.name == name]
+    loc = f"{path}.{name}" if path else name
+    if not found:
+        raise ConfigError(f"missing node: {loc}")
+    if len(found) > 1 and name != "section":
+        raise ConfigError(f"duplicate node: {loc}")
+    return found[0]
+
+
+def _first(nodes: Iterable[ckdl.Node], name: str) -> ckdl.Node | None:
+    for node in nodes:
+        if node.name == name:
+            return node
+    return None
+
+
+def _child_arg(parent: ckdl.Node, name: str, path: str) -> Any:
+    return _arg0(_require(parent.children, name, path), f"{path}.{name}")
+
+
+def _arg0(node: ckdl.Node, path: str) -> Any:
+    if not node.args:
+        raise ConfigError(f"{path}: missing argument")
+    return _plain(node.args[0])
+
+
+def _str_arg(node: ckdl.Node, path: str) -> str:
+    return str(_arg0(node, path))
+
+
+def _int_arg(node: ckdl.Node, path: str) -> int:
+    value = _arg0(node, path)
+    if isinstance(value, bool) or not isinstance(value, int):
+        try:
+            return int(value)
+        except (TypeError, ValueError) as exc:
+            raise ConfigError(f"{path}: expected integer") from exc
+    return int(value)
+
+
+def _bool_arg(node: ckdl.Node, path: str) -> bool:
+    value = _arg0(node, path)
+    if not isinstance(value, bool):
+        raise ConfigError(f"{path}: expected #true or #false")
+    return value
+
+
+def _plain(value: Any) -> Any:
+    if isinstance(value, ckdl.Value):
+        if value.type_annotation:
+            return f"{value.value}{value.type_annotation}"
+        return value.value
+    return value
+
+
+def _token(value: Any) -> str:
+    return str(value)

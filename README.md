@@ -2,9 +2,9 @@
 
 Python port of [Vitaliy Kudryk's LYP (latex-yearly-planner)](https://github.com/kudrykv/latex-yearly-planner/tree/alpha) ([fork point commit](https://github.com/kudrykv/latex-yearly-planner/commit/a59229770cfbf4a05b68a656dd70c02913a7df49), MIT, 2026).
 
-LYP generates a yearly planner by emitting **Typst**, then compiling that to **PDF**. This package keeps that architecture: Python reads a YAML config, walks calendar entities, and writes `index.typst` + `index.pdf`. It does **not** draw PDFs with reportlab/fpdf.
+LYP generates a yearly planner by emitting **Typst**, then compiling that to **PDF**. This package keeps that architecture: Python reads a **KDL 2.0** device profile (YAML still accepted), walks calendar entities, and writes `index.typst` + `index.pdf`. It does **not** draw PDFs with reportlab/fpdf.
 
-Default device is the **SuperNote Nomad** (A6 X2). Kindle Scribe is a second profile.
+Default device is the **SuperNote Nomad** (A6 X2). Kindle Scribe and a 158×210 leftie profile are also shipped.
 
 ## Install
 
@@ -21,16 +21,19 @@ uv sync
 
 ```shell
 # SuperNote Nomad 2026 (default profile) → ./out/index.pdf
-uv run lyp generate configs/supernote-nomad.yaml
+uv run lyp generate configs/supernote-nomad.kdl
+
+# 158×210 leftie → ./out/leftie/index.pdf
+uv run lyp generate configs/158x210-leftie.kdl -w out/leftie
 
 # Kindle Scribe → ./out/scribe/index.pdf
-uv run lyp generate configs/kindle-scribe.yaml -w out/scribe
+uv run lyp generate configs/kindle-scribe.kdl -w out/scribe
 ```
 
 `eink-planner` is an alias for `lyp`:
 
 ```shell
-uv run eink-planner generate configs/supernote-nomad.yaml --locale en
+uv run eink-planner generate configs/supernote-nomad.kdl --locale en
 ```
 
 Flags:
@@ -40,6 +43,9 @@ Flags:
 | `-w` / `--workdir` | `./out` | Where `index.typst` and `index.pdf` are written |
 | `-l` / `--locale` | `en` | Locale code (`locales/<code>.yaml`) |
 | `-g` / `--with-ghostscript` | off | Optional PDF shrink via `gs` |
+| `--debug` | off | Draw MOS debug strokes (not a config key) |
+
+A `section` node in KDL is enabled by being present. Comment the node out to disable it. There is no `enabled=#true` flag, and `debug` does not belong in the profile — use `lyp generate --debug`.
 
 ## Device profiles
 
@@ -47,12 +53,15 @@ Sizes are 1:1 on glass at 300 PPI.
 
 | Device | Pixels | Page (pt) | Page (mm) | Config |
 | --- | --- | --- | --- | --- |
-| SuperNote Nomad (A6 X2) | 1404×1872 | 336.96×449.28 | 118.87×158.5 | `configs/supernote-nomad.yaml` |
-| Kindle Scribe | 1860×2480 | 446.4×595.2 | 157.48×209.97 | `configs/kindle-scribe.yaml` |
+| SuperNote Nomad (A6 X2) | 1404×1872 | 336.96×449.28 | 118.87×158.5 | `configs/supernote-nomad.kdl` |
+| 158×210 leftie | — | 447.87×595.28 | 158×210 | `configs/158x210-leftie.kdl` |
+| Kindle Scribe | 1860×2480 | 446.4×595.2 | 157.48×209.97 | `configs/kindle-scribe.kdl` |
 
-Presets also live in `eink_planner.devices`. The Nomad YAML scales strokes, type, and gutters down slightly from the original 158×210 leftie gist so the MOS layout still fits the smaller page.
+Presets also live in `eink_planner.devices`. The Nomad profile scales strokes, type, and gutters down slightly from the original 158×210 leftie gist so the MOS layout still fits the smaller page.
 
-Both configs keep the gist MOS layout: side menu on the left, reversed months/quarters, Monday week start, daily schedule 8–20, 5 top priorities, 2 extra daily note pages, dotted scratch pad.
+All three configs keep the gist MOS layout: side menu on the left, reversed months/quarters, Monday week start, daily schedule 8–20, 5 top priorities, 2 extra daily note pages, dotted scratch pad.
+
+YAML profiles remain for now; prefer `.kdl`.
 
 ## Tests
 

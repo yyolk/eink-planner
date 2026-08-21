@@ -9,6 +9,7 @@ authors = [
   { name = "PDF Planner Project" }
 ]
 dependencies = [
+  "ckdl>=1.0",
   "pyyaml>=6.0",
 ]
 
