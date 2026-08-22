@@ -87,20 +87,14 @@ class Monthly:
     def _day_cell(self, day: Day | None) -> str:
         if day is None:
             return "[]"
-        number = day.month_day
-        if self.manifest.source(day.id):
-            text = f"padded_link(<{day.id}>)[{number}]"
-        else:
-            text = f"[{number}]"
+        text = self.manifest.link_or_content(day.id, str(day.month_day))
         return f"box(stroke: regular_stroke, inset: 3pt)[#{text}]"
 
     def _week_label_cell(self, week: list[Day | None]) -> str:
         current_week = self._first_present_day(week).week()
-        label_text = f'{self.i18n.t("week_name_full")} {current_week.number}'
-        if self.manifest.source(current_week.id):
-            label = f"padded_link(<{current_week.id}>)[{label_text}]"
-        else:
-            label = f"[{label_text}]"
+        label = self.manifest.link_or_content(
+            current_week.id, f'{self.i18n.t("week_name_full")} {current_week.number}'
+        )
         rotation = self.month_params.get("week_label_rotation", "90deg")
         return f"align(center + horizon, rotate({rotation}, reflow: true)[#{label}])"
 

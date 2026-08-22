@@ -35,9 +35,7 @@ class MonthsMenu:
         return ",\n".join(self._format(month) for month in self.range)
 
     def _format(self, month: Month) -> str:
-        text = self.i18n.t(f"months.short.{month.name}")
-        if self.manifest.source(month.id):
-            text = f"#padded_link(<{month.id}>)[{text}]"
+        label = self.manifest.link_or_content(month.id, self.i18n.t(f"months.short.{month.name}"))
         if month in self.highlighted:
-            return f"table.cell(fill: black, text(white)[{text}])"
-        return f"table.cell([{text}])"
+            return f"table.cell(fill: black, text(white)[#{label}])"
+        return f"table.cell([#{label}])"
