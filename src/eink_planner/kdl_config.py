@@ -48,7 +48,7 @@ _LAYOUT_NODES = frozenset(
     }
 )
 _SECTION_TYPES = frozenset(
-    {"cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily-notes"}
+    {"cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily-notes", "colophon"}
 )
 _LITTLE_CAL_NODES = frozenset({"show-month-name", "week-placement", "inset"})
 _COVER_NODES = frozenset({"title", "font-size"})
@@ -62,6 +62,7 @@ _DAILY_RIGHT = frozenset({"top-priorities", "notes"})
 _SCHEDULE_NODES = frozenset({"time-format", "trailing-half-hour"})
 _NOTES_NODES = frozenset({"pattern", "title-height", "height"})
 _DAILY_NOTES_NODES = frozenset({"pages", "pattern"})
+_COLOPHON_NODES = frozenset({"title"})
 _DEVICE_NODES = frozenset({"page-size", "ppi"})
 
 _SECTION_CLASS = {
@@ -72,6 +73,7 @@ _SECTION_CLASS = {
     "weekly": "weekly",
     "daily": "daily",
     "daily-notes": "daily_notes",
+    "colophon": "colophon",
 }
 
 _SECTION_NAME = {
@@ -82,6 +84,7 @@ _SECTION_NAME = {
     "weekly": "weekly",
     "daily": "daily",
     "daily-notes": "daily_notes",
+    "colophon": "colophon",
 }
 
 # Bare tokens that ckdl 1.0 cannot parse: units, fr tracks, hour ranges,
@@ -341,6 +344,7 @@ def _parse_sections(nodes: list[ckdl.Node]) -> tuple[list[dict[str, Any]], dict[
             "weekly": _section_weekly,
             "daily": lambda n: _section_daily(n, extras),
             "daily-notes": lambda n: _section_daily_notes(n, extras),
+            "colophon": _section_colophon,
         }[kind]
         params = builder(node)
         sections.append(
@@ -487,6 +491,14 @@ def _component_schedule(node: ckdl.Node) -> dict[str, Any]:
     else:
         params["trailing_30_minutes"] = True
     return {"name": "schedule", "class": "schedule", "enabled": True, "params": params}
+
+
+def _section_colophon(node: ckdl.Node) -> dict[str, Any]:
+    _reject_unknown(node.children, _COLOPHON_NODES, "section.colophon")
+    params: dict[str, Any] = {}
+    if (title := _first(node.children, "title")) is not None:
+        params["title"] = _plain(_arg0(title, "section.colophon.title"))
+    return params
 
 
 def _section_daily_notes(node: ckdl.Node, extras: dict[str, Any]) -> dict[str, Any]:
