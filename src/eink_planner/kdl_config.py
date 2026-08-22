@@ -519,6 +519,8 @@ def _hour_range(node: ckdl.Node, path: str) -> tuple[int, int]:
         except ValueError as exc:
             raise ConfigError(f"{path}: expected hour range like 8..20") from exc
     if len(args) == 2:
+        if any(isinstance(a, bool) for a in args):
+            raise ConfigError(f"{path}: expected hour range like 8..20")
         try:
             return int(args[0]), int(args[1])
         except (TypeError, ValueError) as exc:
@@ -616,12 +618,14 @@ def _str_arg(node: ckdl.Node, path: str) -> str:
 
 def _int_arg(node: ckdl.Node, path: str) -> int:
     value = _arg0(node, path)
-    if isinstance(value, bool) or not isinstance(value, int):
-        try:
-            return int(value)
-        except (TypeError, ValueError) as exc:
-            raise ConfigError(f"{path}: expected integer") from exc
-    return int(value)
+    if isinstance(value, bool):
+        raise ConfigError(f"{path}: expected integer")
+    if isinstance(value, int):
+        return value
+    try:
+        return int(value)
+    except (TypeError, ValueError) as exc:
+        raise ConfigError(f"{path}: expected integer") from exc
 
 
 def _bool_arg(node: ckdl.Node, path: str) -> bool:

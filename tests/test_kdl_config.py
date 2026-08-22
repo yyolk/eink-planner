@@ -178,3 +178,21 @@ def test_debug_cli_flag():
             gen_parser = action.choices["generate"]
     assert gen_parser is not None
     assert "--debug" in gen_parser.format_help()
+
+
+def test_bool_args_are_not_integers():
+    with pytest.raises(ConfigError, match="expected integer"):
+        parse_kdl(_minimal(sections="""section daily-notes {
+  pages #true
+}
+"""))
+    with pytest.raises(ConfigError, match="expected hour range"):
+        parse_kdl(_minimal(sections="""section daily {
+  item-spacing 1mm
+  columns 3fr 5fr
+  left {
+    schedule #true #false
+  }
+}
+"""))
+
