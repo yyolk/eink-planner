@@ -56,7 +56,7 @@ _MISSING_LABEL = re.compile(
     re.IGNORECASE,
 )
 _PADDED_LINK = re.compile(r"padded_link\(<([^>]+)>")
-_LABEL_DEF = re.compile(r"<([A-Za-z0-9._:-]+)>")
+_LABEL_DEF = re.compile(r"(?<!padded_link\()<([A-Za-z0-9._:-]+)>")
 
 
 def _section_name(line: str) -> str | None:
@@ -262,3 +262,13 @@ def test_commented_cover_still_generates():
     assert "cover" not in _enabled_names(dto)
     typst_src = _generate(dto)
     assert typst_src
+
+
+def test_label_def_ignores_padded_link_targets():
+    only_link = "padded_link(<2026-01-01>)[1]"
+    assert _LABEL_DEF.findall(only_link) == []
+    defined = "text(size: h1)[1 <2026-01-01>]"
+    assert _LABEL_DEF.findall(defined) == ["2026-01-01"]
+    mixed = "padded_link(<2026-01-01>)[1]\n" + defined
+    assert _LABEL_DEF.findall(mixed) == ["2026-01-01"]
+

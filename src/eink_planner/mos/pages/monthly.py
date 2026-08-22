@@ -87,9 +87,11 @@ class Monthly:
     def _day_cell(self, day: Day | None) -> str:
         if day is None:
             return "[]"
-        text = str(day.month_day)
+        number = day.month_day
         if self.manifest.source(day.id):
-            text = f"padded_link(<{day.id}>)[{text}]"
+            text = f"padded_link(<{day.id}>)[{number}]"
+        else:
+            text = f"[{number}]"
         return f"box(stroke: regular_stroke, inset: 3pt)[#{text}]"
 
     def _week_label_cell(self, week: list[Day | None]) -> str:
