@@ -283,3 +283,95 @@ def test_shipped_profiles_still_omit_colophon():
         dto = load(REPO / "configs" / name)
         names = [s["name"] for s in Configurator(dto).enabled_sections()]
         assert "colophon" not in names
+
+
+def _colophon_with_dump(highlight: bool | None = None, config_text: str = "year 2026\n") -> Colophon:
+    cfg = StrictDict(
+        {
+            "planner": {
+                "params": {
+                    "provenance": {
+                        "command": "lyp generate x.kdl",
+                        "config_text": config_text,
+                    }
+                }
+            }
+        }
+    )
+    kwargs = {} if highlight is None else {"highlight": highlight}
+    return Colophon(section_name="colophon", configurator=cfg, **kwargs)
+
+
+def test_colophon_highlight_false_parses():
+    dto = parse_kdl(
+        _minimal(sections="section colophon {\n  highlight #false\n}\n"),
+        source="hl-false.kdl",
+    )
+    assert dto["planner"]["sections"][0]["params"]["highlight"] is False
+
+
+def test_colophon_highlight_true_parses():
+    dto = parse_kdl(
+        _minimal(sections="section colophon {\n  highlight #true\n}\n"),
+        source="hl-true.kdl",
+    )
+    assert dto["planner"]["sections"][0]["params"]["highlight"] is True
+
+
+def test_colophon_highlight_non_bool_rejected():
+    with pytest.raises(ConfigError, match="expected #true or #false"):
+        parse_kdl(
+            _minimal(sections="section colophon {\n  highlight 1\n}\n"),
+            source="hl-int.kdl",
+        )
+    with pytest.raises(ConfigError, match="expected #true or #false"):
+        parse_kdl(
+            _minimal(sections='section colophon {\n  highlight "no"\n}\n'),
+            source="hl-str.kdl",
+        )
+
+
+def test_colophon_highlight_on_emits_kdl_syntax():
+    on = _colophon_with_dump(highlight=True).pages(None)[0].content
+    default = _colophon_with_dump().pages(None)[0].content
+    for content in (on, default):
+        assert 'lang: "kdl"' in content
+        assert "syntaxes:" in content
+        assert "theme:" in content
+        assert "#raw(block: true, lang:" in content
+
+
+def test_colophon_highlight_off_emits_plain_raw():
+    content = _colophon_with_dump(highlight=False).pages(None)[0].content
+    assert "#raw(block: true," in content
+    assert 'lang: "kdl"' not in content
+    assert "syntaxes:" not in content
+    assert "theme:" not in content
+    # Title and field raw() calls stay intact.
+    assert f'#raw("{DEFAULT_TITLE}")' in content
+    assert 'raw("lyp generate x.kdl")' in content
+
+
+def test_colophon_highlight_on_compiles(tmp_path):
+    path = tmp_path / "hl-on.kdl"
+    path.write_text(_minimal(), encoding="utf-8")
+    dto = _attach(_short_january(load(path)), path)
+    typst_src = _generate(dto)
+    assert 'lang: "kdl"' in typst_src
+    assert "syntaxes:" in typst_src
+    pdf, stderr = compile_pdf(typst_src, tmp_path / "hl-on")
+    assert pdf.is_file() and pdf.stat().st_size > 0, stderr
+
+
+def test_colophon_highlight_false_compiles(tmp_path):
+    path = tmp_path / "hl-off.kdl"
+    path.write_text(
+        _minimal(sections="section colophon {\n  highlight #false\n}\n"),
+        encoding="utf-8",
+    )
+    dto = _attach(_short_january(load(path)), path)
+    typst_src = _generate(dto)
+    assert 'lang: "kdl"' not in typst_src
+    assert "syntaxes:" not in typst_src
+    pdf, stderr = compile_pdf(typst_src, tmp_path / "hl-off")
+    assert pdf.is_file() and pdf.stat().st_size > 0, stderr

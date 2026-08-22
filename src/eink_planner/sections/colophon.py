@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from eink_planner.config import StrictDict, _to_plain
@@ -9,6 +10,28 @@ from eink_planner.mos.page_data import PageData
 
 DEFAULT_TITLE = "About this notebook"
 _UNKNOWN = "unknown"
+_ASSETS = Path(__file__).resolve().parent.parent / "assets"
+
+# Used when the vendored files are absent from a slim wheel.
+_KDL_SYNTAX_FALLBACK = '%YAML 1.2\n---\nname: KDL\nfile_extensions:\n  - kdl\nscope: source.kdl\ncontexts:\n  main:\n    - match: \'//.*\'\n      scope: comment.line.double-slash.kdl\n    - match: \'"\'\n      push: string\n    - match: \'#(?:true|false|null)\\b\'\n      scope: constant.language.kdl\n    - match: \'-?(?:\\d+\\.\\d+|\\d+)(?:mm|cm|pt|fr|deg|in|em)?\'\n      scope: constant.numeric.kdl\n    - match: \'[{}();=,]|\\.\\.\'\n      scope: punctuation.kdl\n    - match: \'[A-Za-z_][A-Za-z0-9_-]*\'\n      scope: entity.name.tag.kdl\n  string:\n    - meta_include_prototype: false\n    - meta_scope: string.quoted.double.kdl\n    - match: \'\\\\.\'\n      scope: constant.character.escape.kdl\n    - match: \'"\'\n      pop: true\n'
+_EINK_THEME_FALLBACK = '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n  <key>name</key>\n  <string>E-ink luma color</string>\n  <key>settings</key>\n  <array>\n    <dict>\n      <key>settings</key>\n      <dict>\n        <key>background</key>\n        <string>#FFFFFF</string>\n        <key>foreground</key>\n        <string>#111111</string>\n      </dict>\n    </dict>\n    <dict>\n      <key>name</key>\n      <string>Comment</string>\n      <key>scope</key>\n      <string>comment</string>\n      <key>settings</key>\n      <dict>\n        <key>foreground</key>\n        <string>#8FA3B8</string>\n      </dict>\n    </dict>\n    <dict>\n      <key>name</key>\n      <string>Identifier</string>\n      <key>scope</key>\n      <string>entity.name</string>\n      <key>settings</key>\n      <dict>\n        <key>foreground</key>\n        <string>#0B2F6B</string>\n      </dict>\n    </dict>\n    <dict>\n      <key>name</key>\n      <string>String</string>\n      <key>scope</key>\n      <string>string</string>\n      <key>settings</key>\n      <dict>\n        <key>foreground</key>\n        <string>#1F7A3A</string>\n      </dict>\n    </dict>\n    <dict>\n      <key>name</key>\n      <string>Escape</string>\n      <key>scope</key>\n      <string>constant.character.escape</string>\n      <key>settings</key>\n      <dict>\n        <key>foreground</key>\n        <string>#C45C12</string>\n      </dict>\n    </dict>\n    <dict>\n      <key>name</key>\n      <string>Number</string>\n      <key>scope</key>\n      <string>constant.numeric</string>\n      <key>settings</key>\n      <dict>\n        <key>foreground</key>\n        <string>#E07A12</string>\n      </dict>\n    </dict>\n    <dict>\n      <key>name</key>\n      <string>Language constant</string>\n      <key>scope</key>\n      <string>constant.language</string>\n      <key>settings</key>\n      <dict>\n        <key>foreground</key>\n        <string>#8A2F98</string>\n      </dict>\n    </dict>\n    <dict>\n      <key>name</key>\n      <string>Punctuation</string>\n      <key>scope</key>\n      <string>punctuation</string>\n      <key>settings</key>\n      <dict>\n        <key>foreground</key>\n        <string>#6E6E6E</string>\n      </dict>\n    </dict>\n  </array>\n  <key>uuid</key>\n  <string>a1b2c3d4-e5f6-7890-abcd-ef1234567890</string>\n</dict>\n</plist>\n'
+
+
+def _asset_text(name: str, fallback: str) -> str:
+    path = _ASSETS / name
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return fallback
+    return text if text.strip() else fallback
+
+
+def kdl_syntax_text() -> str:
+    return _asset_text("kdl.sublime-syntax", _KDL_SYNTAX_FALLBACK)
+
+
+def eink_theme_text() -> str:
+    return _asset_text("eink-luma.tmTheme", _EINK_THEME_FALLBACK)
 
 
 class Colophon:
@@ -17,11 +40,13 @@ class Colophon:
         section_name: str,
         title: str | None = None,
         configurator: Any = None,
+        highlight: bool = True,
         **_rest: Any,
     ) -> None:
         self.section_name = section_name
         self.title = title or DEFAULT_TITLE
         self.configurator = configurator
+        self.highlight = highlight
 
     def register(self, _manifest) -> None:
         return None
@@ -54,8 +79,21 @@ class Colophon:
         config_text = prov.get("config_text")
         if config_text:
             parts.append("#v(1em)")
-            parts.append(f"#raw(block: true, {typst_string(str(config_text))})")
+            parts.append(self._config_raw(str(config_text)))
         return "\n".join(parts)
+
+    def _config_raw(self, config_text: str) -> str:
+        quoted = typst_string(config_text)
+        if not self.highlight:
+            return f"#raw(block: true, {quoted})"
+        syntax = typst_string(kdl_syntax_text())
+        theme = typst_string(eink_theme_text())
+        return (
+            '#raw(block: true, lang: "kdl", '
+            f"syntaxes: bytes({syntax}), "
+            f"theme: bytes({theme}), "
+            f"{quoted})"
+        )
 
     def _provenance(self) -> dict[str, Any]:
         cfg = self.configurator

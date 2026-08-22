@@ -62,7 +62,7 @@ _DAILY_RIGHT = frozenset({"top-priorities", "notes"})
 _SCHEDULE_NODES = frozenset({"time-format", "trailing-half-hour"})
 _NOTES_NODES = frozenset({"pattern", "title-height", "height"})
 _DAILY_NOTES_NODES = frozenset({"pages", "pattern"})
-_COLOPHON_NODES = frozenset({"title"})
+_COLOPHON_NODES = frozenset({"title", "highlight"})
 _DEVICE_NODES = frozenset({"page-size", "ppi"})
 
 _SECTION_CLASS = {
@@ -498,6 +498,8 @@ def _section_colophon(node: ckdl.Node) -> dict[str, Any]:
     params: dict[str, Any] = {}
     if (title := _first(node.children, "title")) is not None:
         params["title"] = _plain(_arg0(title, "section.colophon.title"))
+    if (highlight := _first(node.children, "highlight")) is not None:
+        params["highlight"] = _bool_arg(highlight, "section.colophon.highlight")
     return params
 
 
