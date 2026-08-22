@@ -94,9 +94,11 @@ class Monthly:
 
     def _week_label_cell(self, week: list[Day | None]) -> str:
         current_week = self._first_present_day(week).week()
-        label = f'{self.i18n.t("week_name_full")} {current_week.number}'
+        label_text = f'{self.i18n.t("week_name_full")} {current_week.number}'
         if self.manifest.source(current_week.id):
-            label = f"padded_link(<{current_week.id}>)[{label}]"
+            label = f"padded_link(<{current_week.id}>)[{label_text}]"
+        else:
+            label = f"[{label_text}]"
         rotation = self.month_params.get("week_label_rotation", "90deg")
         return f"align(center + horizon, rotate({rotation}, reflow: true)[#{label}])"
 

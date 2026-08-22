@@ -43,9 +43,11 @@ class Daily:
         self.debug = debug
 
     def title(self) -> str:
-        week = f'{self.i18n.t("week_name_full")} {self.day.week().number}'
+        week_label = f'{self.i18n.t("week_name_full")} {self.day.week().number}'
         if self.manifest.source(self.day.week().id):
-            week = f"padded_link(<{self.day.week().id}>)[{week}]"
+            week = f"padded_link(<{self.day.week().id}>)[{week_label}]"
+        else:
+            week = f"[{week_label}]"
         debug_stroke = "stroke: regular_stroke,\n" if self.debug else ""
         weekday = self.i18n.t(f"weekday.full.{self.day.weekday_name}")
         return f"""grid(

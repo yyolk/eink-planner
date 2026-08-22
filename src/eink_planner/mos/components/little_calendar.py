@@ -83,19 +83,21 @@ class LittleCalendar:
     def _day_cell(self, day: Day | None) -> str:
         if day is None:
             return "[]"
-        text = str(day.month_day)
+        number = day.month_day
+        # Bare integers are not Typst content; wrap so omitting daily still compiles.
+        text = f"[{number}]"
         if self.manifest.source(day.id):
-            text = f"padded_link(<{day.id}>)[{text}]"
+            text = f"padded_link(<{day.id}>)[{number}]"
         if self.today == day:
             text = f"grid.cell(fill: black, text(white, {text}))"
         return text
 
     def _week_label_cell(self, week: list[Day | None]) -> str:
         current_week = self._first_present_day(week).week()
-        label: str | int = current_week.number
+        number = current_week.number
         if self.manifest.source(current_week.id):
-            label = f"padded_link(<{current_week.id}>)[{label}]"
-        return str(label)
+            return f"padded_link(<{current_week.id}>)[{number}]"
+        return f"[{number}]"
 
     def _first_present_day(self, week: list[Day | None]) -> Day:
         for day in week:

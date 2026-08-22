@@ -45,7 +45,7 @@ Flags:
 | `-g` / `--with-ghostscript` | off | Optional PDF shrink via `gs` |
 | `--debug` | off | Draw MOS debug strokes (not a config key) |
 
-A `section` node in KDL is enabled by being present. Comment the node out to disable it. There is no `enabled=#true` flag, and `debug` does not belong in the profile — use `lyp generate --debug`.
+A `section` node in KDL is enabled by being present. Comment the node out to disable it. There is no `enabled=#true` flag, and `debug` does not belong in the profile — use `lyp generate --debug`. At least one `section` must remain.
 
 ## Device profiles
 
@@ -83,7 +83,7 @@ Enabled MOS (Months on the Side) sections, in order:
 6. Daily (schedule + little calendar + priorities + notes)
 7. Daily notes (extra dotted pages)
 
-Internal PDF links use Typst `#padded_link` / `<label>` the same way LYP does.
+Internal PDF links use Typst `#padded_link` / `<label>` the same way LYP does. A link is only emitted when the target page exists; otherwise the cell stays plain text.
 
 ## License
 
