@@ -1,5 +1,5 @@
 // 158×210 leftie
-// Original LYP gist MOS layout at 158 × 210 mm
+// Original LYP gist MOS (Months on the Side) layout at 158 × 210 mm
 
 device "158x210-leftie" {
   page-size 158mm 210mm
@@ -30,6 +30,7 @@ style {
   }
 }
 
+// layout "mos" → Months on the Side (vertical side menu navigation)
 layout "mos" {
   side-menu left 10mm
   reverse-months-quarters #true

@@ -59,7 +59,9 @@ Sizes are 1:1 on glass at 300 PPI.
 
 Presets also live in `eink_planner.devices`. The Nomad profile scales strokes, type, and gutters down slightly from the original 158×210 leftie gist so the MOS layout still fits the smaller page.
 
-All three configs keep the gist MOS layout: side menu on the left, reversed months/quarters, Monday week start, daily schedule 8–20, 5 top priorities, 2 extra daily note pages, dotted scratch pad.
+**MOS** is Months on the Side — the navigation style that places a vertical month menu on the side of the page (as opposed to a top breadcrumb trail).
+
+All three configs keep the original **MOS** (Months on the Side) layout: side menu on the left, reversed months/quarters, Monday week start, daily schedule 8–20, 5 top priorities, 2 extra daily note pages, dotted scratch pad.
 
 YAML profiles remain for now; prefer `.kdl`.
 
@@ -71,7 +73,7 @@ uv run pytest
 
 ## Layout of a generated planner
 
-Enabled MOS sections, in order:
+Enabled MOS (Months on the Side) sections, in order:
 
 1. Cover
 2. Annual (12 little calendars)

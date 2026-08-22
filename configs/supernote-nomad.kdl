@@ -30,6 +30,7 @@ style {
   }
 }
 
+// layout "mos" → Months on the Side (vertical side menu navigation)
 layout "mos" {
   side-menu left 8mm
   reverse-months-quarters #true
