@@ -37,7 +37,6 @@ style {
 layout "mos" {
   side-menu right 10mm
   reverse-months-quarters #true
-  reverse-months-quarters-items #true
   menu-rotate 270deg
   column-gutter 2mm
   row-gutter 2mm
