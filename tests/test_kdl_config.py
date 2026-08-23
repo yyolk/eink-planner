@@ -13,6 +13,7 @@ CONFIGS = REPO / "configs"
 
 NOMAD = CONFIGS / "supernote-nomad.kdl"
 LEFTIE = CONFIGS / "158x210-leftie.kdl"
+RIGHTIE = CONFIGS / "158x210-rightie.kdl"
 SCRIBE = CONFIGS / "kindle-scribe.kdl"
 
 
@@ -59,7 +60,7 @@ def _minimal(**extra: str) -> str:
     return "\n\n".join(parts.values()) + "\n"
 
 
-@pytest.mark.parametrize("path", [NOMAD, LEFTIE, SCRIBE])
+@pytest.mark.parametrize("path", [NOMAD, LEFTIE, RIGHTIE, SCRIBE])
 def test_parse_shipped_kdl_profiles(path: Path):
     dto = load(path)
     assert dto["template"] == "mos"

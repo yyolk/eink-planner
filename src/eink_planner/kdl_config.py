@@ -57,8 +57,7 @@ _QUARTERLY_NODES = frozenset({"months-column", "little-calendar"})
 _MONTHLY_NODES = frozenset({"week-placement", "week-label-rotation", "daily-cell-height"})
 _WEEKLY_NODES = frozenset({"column-gutter"})
 _DAILY_NODES = frozenset({"columns", "item-spacing", "left", "right"})
-_DAILY_LEFT = frozenset({"schedule", "little-calendar"})
-_DAILY_RIGHT = frozenset({"top-priorities", "notes"})
+_DAILY_COLUMN = frozenset({"schedule", "little-calendar", "top-priorities", "notes"})
 _SCHEDULE_NODES = frozenset({"time-format", "trailing-half-hour"})
 _NOTES_NODES = frozenset({"pattern", "title-height", "height"})
 _DAILY_NOTES_NODES = frozenset({"pages", "pattern"})
@@ -310,9 +309,12 @@ def _parse_layout(node: ckdl.Node) -> tuple[str, dict[str, Any]]:
     side_args = [_plain(a) for a in side.args]
     if len(side_args) != 2:
         raise ConfigError("layout.side-menu: expected position width")
+    position = str(side_args[0]).lower()
+    if position not in {"left", "right"}:
+        raise ConfigError("layout.side-menu: expected left or right")
     reverse = _bool_arg(_require(node.children, "reverse-months-quarters", "layout"), "layout.reverse-months-quarters")
     mos: dict[str, Any] = {
-        "side_menu_position": str(side_args[0]),
+        "side_menu_position": position,
         "side_menu_width": _token(side_args[1]),
         "column_gutter": _token(_child_arg(node, "column-gutter", "layout")),
         "row_gutter": _token(_child_arg(node, "row-gutter", "layout")),
@@ -412,21 +414,20 @@ def _section_daily(node: ckdl.Node, extras: dict[str, Any]) -> dict[str, Any]:
         "right_column": [],
     }
     if (left := _first(node.children, "left")) is not None:
-        _reject_unknown(left.children, _DAILY_LEFT, "section.daily.left")
-        params["left_column"] = _daily_left(left, extras)
+        params["left_column"] = _daily_column(left, extras, "section.daily.left")
     if (right := _first(node.children, "right")) is not None:
-        _reject_unknown(right.children, _DAILY_RIGHT, "section.daily.right")
-        params["right_column"] = _daily_right(right, extras)
+        params["right_column"] = _daily_column(right, extras, "section.daily.right")
     return params
 
 
-def _daily_left(node: ckdl.Node, extras: dict[str, Any]) -> list[dict[str, Any]]:
+def _daily_column(node: ckdl.Node, extras: dict[str, Any], path: str) -> list[dict[str, Any]]:
+    _reject_unknown(node.children, _DAILY_COLUMN, path)
     comps: list[dict[str, Any]] = []
     for child in node.children:
         if child.name == "schedule":
-            comps.append(_component_schedule(child))
+            comps.append(_component_schedule(child, f"{path}.schedule"))
         elif child.name == "little-calendar":
-            lc = _parse_little_calendar(child, "section.daily.left.little-calendar")
+            lc = _parse_little_calendar(child, f"{path}.little-calendar")
             extras["daily_little_calendar"] = lc
             comps.append(
                 {
@@ -436,36 +437,28 @@ def _daily_left(node: ckdl.Node, extras: dict[str, Any]) -> list[dict[str, Any]]
                     "params": lc,
                 }
             )
-        else:
-            raise ConfigError(f"unknown node: section.daily.left.{child.name}")
-    return comps
-
-
-def _daily_right(node: ckdl.Node, extras: dict[str, Any]) -> list[dict[str, Any]]:
-    comps: list[dict[str, Any]] = []
-    for child in node.children:
-        if child.name == "top-priorities":
+        elif child.name == "top-priorities":
             comps.append(
                 {
                     "name": "top priorities",
                     "class": "top_priorities",
                     "enabled": True,
-                    "params": {"number": _int_arg(child, "section.daily.right.top-priorities")},
+                    "params": {"number": _int_arg(child, f"{path}.top-priorities")},
                 }
             )
         elif child.name == "notes":
-            _reject_unknown(child.children, _NOTES_NODES, "section.daily.right.notes")
+            _reject_unknown(child.children, _NOTES_NODES, f"{path}.notes")
             pattern_node = _first(child.children, "pattern")
-            title = _token(_child_arg(child, "title-height", "section.daily.right.notes"))
+            title = _token(_child_arg(child, "title-height", f"{path}.notes"))
             height_node = _first(child.children, "height")
             notes = {
                 "title_height": title,
-                "notes_height": _token(_arg0(height_node, "section.daily.right.notes.height"))
+                "notes_height": _token(_arg0(height_node, f"{path}.notes.height"))
                 if height_node is not None
                 else "1fr",
             }
             if pattern_node is not None:
-                notes["pattern"] = _plain(_arg0(pattern_node, "section.daily.right.notes.pattern"))
+                notes["pattern"] = _plain(_arg0(pattern_node, f"{path}.notes.pattern"))
                 extras.setdefault("scratch_pad", notes["pattern"])
             comps.append(
                 {
@@ -476,18 +469,18 @@ def _daily_right(node: ckdl.Node, extras: dict[str, Any]) -> list[dict[str, Any]
                 }
             )
         else:
-            raise ConfigError(f"unknown node: section.daily.right.{child.name}")
+            raise ConfigError(f"unknown node: {path}.{child.name}")
     return comps
 
 
-def _component_schedule(node: ckdl.Node) -> dict[str, Any]:
-    _reject_unknown(node.children, _SCHEDULE_NODES, "section.daily.left.schedule")
-    start, end = _hour_range(node, "section.daily.left.schedule")
+def _component_schedule(node: ckdl.Node, path: str) -> dict[str, Any]:
+    _reject_unknown(node.children, _SCHEDULE_NODES, path)
+    start, end = _hour_range(node, path)
     params: dict[str, Any] = {"from": start, "to": end}
     if (fmt := _first(node.children, "time-format")) is not None:
-        params["time_format"] = _plain(_arg0(fmt, "section.daily.left.schedule.time-format"))
+        params["time_format"] = _plain(_arg0(fmt, f"{path}.time-format"))
     if (trail := _first(node.children, "trailing-half-hour")) is not None:
-        params["trailing_30_minutes"] = _bool_arg(trail, "section.daily.left.schedule.trailing-half-hour")
+        params["trailing_30_minutes"] = _bool_arg(trail, f"{path}.trailing-half-hour")
     else:
         params["trailing_30_minutes"] = True
     return {"name": "schedule", "class": "schedule", "enabled": True, "params": params}
