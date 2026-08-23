@@ -158,6 +158,8 @@ def test_daily_notes_left_schedule_right_dto_and_typst():
     marker = "columns: (3fr, 5fr)"
     body = typst_src[typst_src.index(marker) :]
     assert body.index("[Notes") < body.index("[Schedule]")
+    # Daily leftover height under the last column item (little calendar / notes).
+    assert "rows: (auto, 1fr)" in typst_src
 
 
 def test_unknown_daily_child_still_rejected():

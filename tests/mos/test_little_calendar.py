@@ -35,6 +35,7 @@ def test_february_2021_monday_start_no_padding():
         inset="5pt",
     )
     typst = component.generate()
+    assert "rows: 1fr" in typst
     assert "columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in typst
     assert "if x == 1" in typst
     assert "[W], [M], [T], [W], [T], [F], [S], [S]" in typst

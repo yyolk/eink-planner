@@ -42,11 +42,16 @@ class Quarterly:
 )"""
 
     def _months_stack(self) -> str:
-        return f"""stack(
-  dir: ttb,
-  spacing: 1fr,
+        months = self._months()
+        # Bound each month to an equal 1fr row. A stack + LittleCalendar
+        # rows: 1fr lets the first month consume the whole column.
+        rows = ", ".join(["1fr"] * len(months))
+        return f"""grid(
+  columns: 1fr,
+  rows: ({rows}),
+  row-gutter: regular_column_gutter,
 
-  {", ".join(self._months())}
+  {", ".join(months)}
 )"""
 
     def _months(self) -> list[str]:
