@@ -97,3 +97,8 @@ section daily-notes {
   pages 2
   pattern dotted
 }
+
+section projects {
+  pages 20
+  card-rows 8
+}
