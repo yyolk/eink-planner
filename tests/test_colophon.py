@@ -59,7 +59,6 @@ def _minimal(**extra: str) -> str:
   }
   gutter {
     column 8pt
-    row 1.5mm
   }
 }""",
         "layout": """layout "mos" {
