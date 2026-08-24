@@ -36,7 +36,7 @@ def test_omit_pages_defaults_to_twenty():
         assert f"<project-{i}>" in typst
     assert "<project-21>" not in typst
     assert typst.count("#pagebreak()") == 20
-    assert "rows: (" + ", ".join(["auto"] * 20) + ")" in typst
+    assert "rows: (" + ", ".join(["2.5 * regular_height"] * 20) + ")" in typst
     assert "rows: (" + ", ".join(["1fr"] * 20) + ")" not in typst
     card = "grid.cell(stroke: regular_stroke, inset: 0pt, rect_pattern(dotted))"
     assert typst.count(card) == Projects.CARDS * 3 * 20
@@ -140,14 +140,14 @@ def test_pages_are_raw_typst_without_mos_chrome():
     assert "<project-1>" in typst
 
 
-def test_index_rows_are_auto_and_boards_use_eight_even_cards():
+def test_index_rows_are_fixed_line_height_and_boards_use_eight_even_cards():
     assert Projects.CARDS == 8
     dto = parse_kdl(
         _minimal(sections="section projects {\n  pages 3\n}\n"),
         source="layout.kdl",
     )
     typst = _generate(dto)
-    assert "rows: (auto, auto, auto)" in typst
+    assert "rows: (2.5 * regular_height, 2.5 * regular_height, 2.5 * regular_height)" in typst
     assert "rows: (1fr, 1fr, 1fr)" not in typst
     assert "rows: (" + ", ".join(["1fr"] * 8) + ")" in typst
     card = "grid.cell(stroke: regular_stroke, inset: 0pt, rect_pattern(dotted))"

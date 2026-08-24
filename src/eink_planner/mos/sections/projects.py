@@ -72,7 +72,7 @@ class Projects:
                 rows.append(f"  {number}, [], {arrow}")
             body = f"""grid(
   columns: (auto, 1fr, auto),
-  rows: ({", ".join(["auto"] * n)}),
+  rows: ({", ".join(["2.5 * regular_height"] * n)}),
   align: horizon,
   stroke: (bottom: regular_stroke),
   inset: (x: 4pt, y: 2pt),
