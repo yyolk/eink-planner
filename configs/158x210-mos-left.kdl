@@ -1,9 +1,10 @@
-// 158×210 rightie
+// 158×210 MOS-left
 // Original LYP gist MOS (Months on the Side) layout at 158 × 210 mm
-// side-menu left|right is the physical side of the MOS strip
-// Mirrors config/158x210-rightie.yaml from kudrykv/latex-yearly-planner
+// Name is the physical MOS strip side (nav left), not which hand you write with.
+// MOS-left is the right-handed writing layout (nav opposite the writing hand).
+// Upstream LYP called this leftie for the same strip-side meaning; we dropped that jargon.
 
-device "158x210-rightie" {
+device "158x210-mos-left" {
   page-size 158mm 210mm
   ppi 300
 }
@@ -23,8 +24,8 @@ style {
   margin {
     top    10mm
     bottom 0mm
-    left   5mm
-    right  0mm
+    left   0mm
+    right  5mm
   }
   gutter {
     column 10pt
@@ -34,7 +35,7 @@ style {
 // layout "mos" → Months on the Side (vertical side menu navigation)
 // side-menu left|right is the physical side of the MOS strip
 layout "mos" {
-  side-menu right 10mm
+  side-menu left 10mm
   reverse-months-quarters #true
   menu-rotate 270deg
   column-gutter 2mm
@@ -54,14 +55,14 @@ section annual {
 }
 
 section quarterly {
-  months-column right
+  months-column left
   little-calendar {
     show-month-name #true
   }
 }
 
 section monthly {
-  week-placement right
+  week-placement left
   week-label-rotation 90deg
   daily-cell-height 2.5cm
 }
@@ -75,21 +76,21 @@ section daily {
   item-spacing 5mm
 
   left {
-    top-priorities 5
-    notes {
-      pattern dotted
-      title-height 5mm
-    }
-  }
-
-  right {
     schedule 8..20 {
       time-format "%k"
       trailing-half-hour #true
     }
     little-calendar {
-      week-placement right
+      week-placement left
       inset 5pt
+    }
+  }
+
+  right {
+    top-priorities 5
+    notes {
+      pattern dotted
+      title-height 5mm
     }
   }
 }

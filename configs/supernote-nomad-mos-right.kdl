@@ -1,7 +1,7 @@
 // SuperNote Nomad (A6 X2) MOS-right
 // 1404×1872 @ 300 PPI → 118.87 × 158.5 mm
 // MOS strip on the physical right; this is the left-handed writing layout
-// (nav opposite the writing hand); not named *-rightie.
+// (nav opposite the writing hand).
 
 device "supernote-nomad-mos-right" {
   page-size 118.87mm 158.5mm

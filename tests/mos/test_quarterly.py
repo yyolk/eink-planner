@@ -17,8 +17,8 @@ from tests.test_kdl_omit_sections import compile_pdf, omit_kdl_sections
 
 REPO = Path(__file__).resolve().parents[2]
 CONFIGS = REPO / "configs"
-LEFTIE = CONFIGS / "158x210-leftie.kdl"
-RIGHTIE = CONFIGS / "158x210-rightie.kdl"
+MOS_LEFT = CONFIGS / "158x210-mos-left.kdl"
+MOS_RIGHT = CONFIGS / "158x210-mos-right.kdl"
 NOMAD = CONFIGS / "supernote-nomad.kdl"
 NOMAD_MOS_RIGHT = CONFIGS / "supernote-nomad-mos-right.kdl"
 
@@ -92,7 +92,7 @@ def test_months_column_right_keeps_three_month_grid():
         assert f"[{name}]" in content
 
 
-@pytest.mark.parametrize("path", [LEFTIE, RIGHTIE, NOMAD, NOMAD_MOS_RIGHT])
+@pytest.mark.parametrize("path", [MOS_LEFT, MOS_RIGHT, NOMAD, NOMAD_MOS_RIGHT])
 def test_full_year_quarter_pages_include_all_three_months(path: Path):
     typst_src = _generate(_full_year_quarters(path))
     pages = _quarter_pages(typst_src)
@@ -112,9 +112,9 @@ def test_full_year_quarter_pages_include_all_three_months(path: Path):
         assert page.count("colspan:") == 3
 
 
-def test_leftie_and_rightie_q3_compile_with_three_months(tmp_path):
+def test_mos_left_and_mos_right_q3_compile_with_three_months(tmp_path):
     """Compile a real 2026 Q1-Q4 set so a July-only Q3 cannot slip through."""
-    for name, config in (("leftie", LEFTIE), ("rightie", RIGHTIE), ("nomad-mos-right", NOMAD_MOS_RIGHT)):
+    for name, config in (("mos-left", MOS_LEFT), ("mos-right", MOS_RIGHT), ("nomad-mos-right", NOMAD_MOS_RIGHT)):
         typst_src = _generate(_full_year_quarters(config))
         q3 = _quarter_pages(typst_src)[3]
         for month in Q3_MONTHS:

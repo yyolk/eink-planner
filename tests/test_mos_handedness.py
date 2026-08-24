@@ -18,8 +18,8 @@ REPO = Path(__file__).resolve().parents[1]
 CONFIGS = REPO / "configs"
 NOMAD = CONFIGS / "supernote-nomad.kdl"
 NOMAD_MOS_RIGHT = CONFIGS / "supernote-nomad-mos-right.kdl"
-LEFTIE = CONFIGS / "158x210-leftie.kdl"
-RIGHTIE = CONFIGS / "158x210-rightie.kdl"
+MOS_LEFT = CONFIGS / "158x210-mos-left.kdl"
+MOS_RIGHT = CONFIGS / "158x210-mos-right.kdl"
 
 
 def _minimal(**extra: str) -> str:
@@ -194,8 +194,8 @@ def test_unknown_daily_child_still_rejected():
         )
 
 
-@pytest.mark.parametrize("path", [NOMAD, LEFTIE])
-def test_existing_leftie_and_nomad_daily_still_parse(path: Path):
+@pytest.mark.parametrize("path", [NOMAD, MOS_LEFT])
+def test_existing_mos_left_and_nomad_daily_still_parse(path: Path):
     dto = load(path)
     params = _daily_section(dto)["params"]
     assert [c["class"] for c in params["left_column"]] == ["schedule", "little_calendar"]
@@ -203,8 +203,8 @@ def test_existing_leftie_and_nomad_daily_still_parse(path: Path):
     assert dto["planner"]["params"]["mos_layout"]["side_menu_position"] == "left"
 
 
-def test_rightie_generate_compiles_with_mos_on_the_right(tmp_path):
-    dto = _short_january(load(RIGHTIE))
+def test_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
+    dto = _short_january(load(MOS_RIGHT))
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["side_menu_position"] == "right"
     assert mos["side_menu_width"] == "10mm"
@@ -218,12 +218,12 @@ def test_rightie_generate_compiles_with_mos_on_the_right(tmp_path):
     typst_src = _generate(dto)
     assert "columns: (1fr, 10mm)" in typst_src
     assert "columns: (10mm, 1fr)" not in typst_src
-    pdf, stderr = compile_pdf(typst_src, tmp_path / "rightie")
+    pdf, stderr = compile_pdf(typst_src, tmp_path / "mos-right")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
 
 
-def test_shipped_rightie_omits_colophon():
-    dto = load(RIGHTIE)
+def test_shipped_mos_right_omits_colophon():
+    dto = load(MOS_RIGHT)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert "colophon" not in names
     assert names == ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
