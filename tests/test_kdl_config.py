@@ -4,7 +4,7 @@ import pytest
 
 from eink_planner import ConfigError
 from eink_planner.cli import build_parser
-from eink_planner.config import load, load_yaml
+from eink_planner.config import load
 from eink_planner.kdl_config import apply_debug, apply_year, parse_kdl
 from eink_planner.mos.configurator import Configurator
 
@@ -71,16 +71,13 @@ def test_parse_shipped_kdl_profiles(path: Path):
     assert names == ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
 
 
-def test_kdl_matches_yaml_for_nomad_and_scribe():
-    for yaml_name, kdl_name in (
-        ("supernote-nomad.yaml", "supernote-nomad.kdl"),
-        ("kindle-scribe.yaml", "kindle-scribe.kdl"),
-    ):
-        yaml_dto = load_yaml(CONFIGS / yaml_name).to_plain()
-        kdl_dto = load(CONFIGS / kdl_name).to_plain()
-        yaml_dto.pop("version", None)
-        yaml_dto.pop("debug", None)
-        assert kdl_dto == yaml_dto
+def test_load_rejects_yaml_device_profiles():
+    with pytest.raises(ConfigError, match="KDL"):
+        load("foo.yaml")
+    with pytest.raises(ConfigError, match="KDL"):
+        load("foo.yml")
+    with pytest.raises(ConfigError, match="KDL"):
+        load(CONFIGS / "supernote-nomad.yaml")
 
 
 def test_commented_section_is_disabled():
@@ -248,13 +245,6 @@ def test_apply_year_rejects_out_of_range():
     ok = apply_year(dto, 2027)
     assert ok["planner"]["params"]["start_date"] == "2027-01-01"
     assert ok["planner"]["params"]["end_date"] == "2027-12-31"
-
-
-def test_apply_year_yaml_overlay():
-    dto = apply_year(load(CONFIGS / "supernote-nomad.yaml"), 2027)
-    params = dto["planner"]["params"]
-    assert params["start_date"] == "2027-01-01"
-    assert params["end_date"] == "2027-12-31"
 
 
 def test_apply_year_rewrites_cover_title_year():
