@@ -69,8 +69,8 @@ class LittleCalendar:
     def _heading(self) -> str:
         weeks = self._month_in_weeks()
         sample = weeks[1] if len(weeks) > 1 else weeks[0]
-        heading = [f"[{self.i18n.t(f'weekday.one_letter.{day.weekday_name}')}]" for day in sample]
-        week_label = f"[{self.i18n.t('weekday.one_letter.week')}]"
+        heading = [f"[{self.i18n.t(f'weekday.letter.{day.weekday_name}')}]" for day in sample]
+        week_label = f"[{self.i18n.t('weekday.letter.week')}]"
         return ", ".join(self._with_week_column(heading, week_label))
 
     def _day_cells(self) -> str:

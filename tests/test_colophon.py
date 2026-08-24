@@ -265,7 +265,6 @@ def test_generate_cmd_attaches_provenance(tmp_path, monkeypatch):
             "config": str(path),
             "workdir": str(tmp_path / "out"),
             "locale": "en",
-            "i18n_path": None,
             "with_ghostscript": False,
             "debug": False,
             "year": None,

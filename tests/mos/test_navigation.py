@@ -10,7 +10,7 @@ def _i18n() -> I18n:
     return I18n(
         {
             "en": {
-                "quarters": {"short": "Q"},
+                "quarter": {"short": "Q"},
                 "months": {
                     "short": {
                         "january": "Jan",

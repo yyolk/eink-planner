@@ -116,7 +116,7 @@ def load(path: str | Path) -> StrictDict:
     suffix = source.suffix.lower()
     if suffix in {".yaml", ".yml"}:
         raise ConfigError(
-            f"{source}: device profiles are KDL now, locales still YAML"
+            f"{source}: device profiles must be KDL (locales too)"
         )
     if suffix == ".kdl":
         from eink_planner.kdl_config import load_kdl

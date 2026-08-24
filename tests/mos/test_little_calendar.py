@@ -6,7 +6,7 @@ from tests.helpers import make_day, make_month
 TRANSLATIONS = {
     "en": {
         "weekday": {
-            "one_letter": {
+            "letter": {
                 "monday": "M",
                 "tuesday": "T",
                 "wednesday": "W",

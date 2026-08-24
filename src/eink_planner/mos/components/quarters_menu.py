@@ -36,7 +36,7 @@ class QuartersMenu:
 
     def _format(self, quarter: Quarter) -> str:
         label = self.manifest.link_or_content(
-            quarter.id, f"{self.i18n.t('quarters.short')}{quarter.number}"
+            quarter.id, f"{self.i18n.t('quarter.short')}{quarter.number}"
         )
         if quarter in self.highlighted:
             return f"table.cell(fill: black, text(white)[#{label}])"

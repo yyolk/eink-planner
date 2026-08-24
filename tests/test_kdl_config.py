@@ -205,6 +205,18 @@ def test_year_cli_flag():
     assert "--year" in _generate_parser().format_help()
 
 
+def test_generate_help_has_locale_not_i18n_path():
+    help_text = _generate_parser().format_help()
+    assert "--locale" in help_text
+    assert "-l" in help_text
+    assert "--i18n-path" not in help_text
+    assert "i18n-path" not in help_text
+    parser = build_parser()
+    args = parser.parse_args(["generate", str(NOMAD), "--locale", "en"])
+    assert args.locale == "en"
+    assert not hasattr(args, "i18n_path")
+
+
 def test_year_cli_rejects_non_ints():
     parser = build_parser()
     with pytest.raises(SystemExit):

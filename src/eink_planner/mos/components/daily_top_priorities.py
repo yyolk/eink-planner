@@ -18,7 +18,7 @@ class DailyTopPriorities:
   inset: 0mm,
   stroke: (_, _) => (bottom: regular_stroke),
 
-  grid.cell(stroke: (bottom: thick_stroke), box(height: regular_height, align(horizon, [{self.i18n.t("top_priorities")}]))),
+  grid.cell(stroke: (bottom: thick_stroke), box(height: regular_height, align(horizon, [{self.i18n.t("top-priorities")}]))),
   {self._lines()}
 )"""
 
