@@ -18,19 +18,21 @@ class Quarterly:
         quarter: Quarter,
         months_column: str,
         little_calendar: dict[str, Any],
+        pattern: str = "dotted",
     ) -> None:
         self.i18n = i18n
         self.manifest = manifest
         self.quarter = quarter
         self.months_column = str(months_column).lstrip(":").lower()
         self.little_calendar = little_calendar
+        self.pattern = pattern
 
     def title(self) -> str:
         return f'text(size: h1)[{self.i18n.t("quarters.long")} {self.quarter.number} <{self.quarter.id}>]'
 
     def content(self) -> str:
         cols = ["2fr", "3fr"]
-        columns = [self._months_grid(), "scratch_pad"]
+        columns = [self._months_grid(), f"rect_pattern({self.pattern})"]
         if self.months_column == "right":
             cols.reverse()
             columns.reverse()

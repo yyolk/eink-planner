@@ -9,11 +9,19 @@ from eink_planner.mos.manifest import Manifest
 
 
 class Weekly:
-    def __init__(self, i18n: I18n, manifest: Manifest, week: Week, column_gutter: str) -> None:
+    def __init__(
+        self,
+        i18n: I18n,
+        manifest: Manifest,
+        week: Week,
+        column_gutter: str,
+        pattern: str = "dotted",
+    ) -> None:
         self.i18n = i18n
         self.manifest = manifest
         self.week = week
         self.column_gutter = column_gutter
+        self.pattern = pattern
 
     def title(self) -> str:
         return f'text(size: h1)[{self.i18n.t("week_name_full")} {self.week.number} <{self.week.id}>]'
@@ -26,11 +34,11 @@ class Weekly:
   column-gutter: {self.column_gutter},
 
   {self._format_days(days[0:3])},
-  grid.cell(colspan: 3, scratch_pad),
+  grid.cell(colspan: 3, rect_pattern({self.pattern})),
   {self._format_days(days[3:6])},
-  grid.cell(colspan: 3, scratch_pad),
+  grid.cell(colspan: 3, rect_pattern({self.pattern})),
   {self._format_day(days[6])}, grid.cell(colspan: 2, stroke: (bottom: thick_stroke), [{self.i18n.t("notes")}]),
-  grid.cell(colspan: 3, scratch_pad)
+  grid.cell(colspan: 3, rect_pattern({self.pattern}))
 )"""
 
     def _format_days(self, days: list[Day]) -> str:

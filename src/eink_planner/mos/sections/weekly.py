@@ -20,6 +20,7 @@ class Weekly:
         i18n: I18n,
         configurator: Configurator,
         column_gutter: str,
+        pattern: str = "dotted",
         **_rest: Any,
     ) -> None:
         self.section_name = section_name
@@ -29,6 +30,7 @@ class Weekly:
         self.first_week_day = configurator.start_date().beginning_of_month().beginning_of_week()
         self.last_week_day = configurator.end_date().end_of_month().end_of_week()
         self.column_gutter = column_gutter
+        self.pattern = pattern
 
     def register(self, manifest: Manifest) -> None:
         for week in self._weeks():
@@ -42,6 +44,7 @@ class Weekly:
                 manifest=manifest,
                 week=week,
                 column_gutter=self.column_gutter,
+                pattern=self.pattern,
             )
             out.append(
                 PageData(

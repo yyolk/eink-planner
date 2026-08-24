@@ -18,6 +18,7 @@ class DailyNotes:
         day: Day,
         title_height: str,
         notes_height: str,
+        pattern: str = "dotted",
         **_rest: Any,
     ) -> None:
         self.i18n = i18n
@@ -25,6 +26,7 @@ class DailyNotes:
         self.day = day
         self.title_height = title_height
         self.notes_height = notes_height
+        self.pattern = pattern
 
     def generate(self) -> str:
         daily_note_id = DatedNote(weekday_start=self.day.weekday_start, day=self.day).id
@@ -35,5 +37,5 @@ class DailyNotes:
   columns: 1fr,
   rows: ({self.title_height}, {self.notes_height}),
   grid.cell(align:horizon, stroke: (bottom: thick_stroke), [{self.i18n.t("daily_notes")}{more}]),
-  scratch_pad
+  rect_pattern({self.pattern})
 )"""
