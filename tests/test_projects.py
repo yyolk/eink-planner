@@ -291,7 +291,12 @@ def test_kanban_centered_dots_leave_notes_global_dotted():
     assert "center + horizon" in typst
     assert "#let rect_pattern_centered(pattern) = box(" in typst
     assert "layout(size =>" in typst
-    assert "calc.rem(" in typst
+    assert "calc.floor(size.width.pt() / cell.pt())" in typst
+    assert "calc.floor(size.height.pt() / cell.pt())" in typst
+    assert "let nw = cols * cell" in typst
+    assert "let nh = rows * cell" in typst
+    assert "calc.rem(" not in typst
+    assert "clip: true" not in typst
     card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern_centered(dotted_centered))"
     assert typst.count(card) == Projects.CARDS * 3
     assert "inset: 0pt, rect_pattern(dotted)" not in typst

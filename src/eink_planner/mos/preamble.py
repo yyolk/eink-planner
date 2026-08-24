@@ -93,22 +93,25 @@ class Preamble:
   height: 100%,
   layout(size => {{
     let cell = regular_height.to-absolute()
-    let dx = calc.rem(size.width.pt(), cell.pt()) / 2 * 1pt
-    let dy = calc.rem(size.height.pt(), cell.pt()) / 2 * 1pt
-    box(
-      width: size.width,
-      height: size.height,
-      clip: true,
+    let cols = calc.floor(size.width.pt() / cell.pt())
+    let rows = calc.floor(size.height.pt() / cell.pt())
+    if cols == 0 or rows == 0 {{
+      box()
+    }} else {{
+      let nw = cols * cell
+      let nh = rows * cell
+      let dx = (size.width - nw) / 2
+      let dy = (size.height - nh) / 2
       place(
         dx: dx,
         dy: dy,
         rect(
-          width: size.width,
-          height: size.height,
+          width: nw,
+          height: nh,
           fill: pattern
         )
       )
-    )
+    }}
   }})
 )
 
