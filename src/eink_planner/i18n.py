@@ -74,8 +74,6 @@ def _load_validated(path: Path) -> dict[str, Any]:
         model = load_locale(path)
     except OSError as exc:
         raise ConfigError(f"{path}: {exc}") from exc
-    except UnicodeDecodeError as exc:
-        raise ConfigError(f"{path}: {exc}") from exc
     except tomllib.TOMLDecodeError as exc:
         raise ConfigError(f"{path}: {exc}") from exc
     except ValidationError as exc:

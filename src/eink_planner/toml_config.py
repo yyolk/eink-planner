@@ -65,13 +65,16 @@ def load_toml(path: str | Path) -> StrictDict:
         profile = load_device_profile(source)
     except OSError as exc:
         raise ConfigError(f"{source}: {exc}") from exc
-    except UnicodeDecodeError as exc:
-        raise ConfigError(f"{source}: {exc}") from exc
     except tomllib.TOMLDecodeError as exc:
         raise ConfigError(f"{source}: {exc}") from exc
     except ValidationError as exc:
         raise ConfigError(f"{source}: {format_validation_error(exc)}") from exc
-    return StrictDict(device_profile_to_dto(profile))
+    try:
+        return StrictDict(device_profile_to_dto(profile))
+    except ConfigError as exc:
+        if str(exc).startswith(str(source)):
+            raise
+        raise ConfigError(f"{source}: {exc}") from exc
 
 
 def parse_toml(text: str, source: str = "<toml>") -> StrictDict:
@@ -83,7 +86,12 @@ def parse_toml(text: str, source: str = "<toml>") -> StrictDict:
         profile = DeviceProfile.model_validate(data)
     except ValidationError as exc:
         raise ConfigError(f"{source}: {format_validation_error(exc)}") from exc
-    return StrictDict(device_profile_to_dto(profile))
+    try:
+        return StrictDict(device_profile_to_dto(profile))
+    except ConfigError as exc:
+        if str(exc).startswith(str(source)):
+            raise
+        raise ConfigError(f"{source}: {exc}") from exc
 
 
 def device_profile_to_dto(profile: DeviceProfile) -> dict[str, Any]:

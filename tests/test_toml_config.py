@@ -144,7 +144,7 @@ right = "4mm"
 
 [style.gutter]
 column = "8pt"
-row = "1.5mm"
+row = "9mm"
 """
     dto = parse_toml(_minimal(style=style))
     assert dto["planner"]["params"]["regular_column_gutter"] == "8pt"
