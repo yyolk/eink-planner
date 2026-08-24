@@ -17,6 +17,7 @@ from tests.test_kdl_omit_sections import _short_january, compile_pdf
 REPO = Path(__file__).resolve().parents[1]
 CONFIGS = REPO / "configs"
 NOMAD = CONFIGS / "supernote-nomad.kdl"
+NOMAD_MOS_RIGHT = CONFIGS / "supernote-nomad-mos-right.kdl"
 LEFTIE = CONFIGS / "158x210-leftie.kdl"
 RIGHTIE = CONFIGS / "158x210-rightie.kdl"
 
@@ -223,6 +224,51 @@ def test_rightie_generate_compiles_with_mos_on_the_right(tmp_path):
 
 def test_shipped_rightie_omits_colophon():
     dto = load(RIGHTIE)
+    names = [s["name"] for s in Configurator(dto).enabled_sections()]
+    assert "colophon" not in names
+    assert names == ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
+
+
+def test_nomad_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
+    dto = _short_january(load(NOMAD_MOS_RIGHT))
+    mos = dto["planner"]["params"]["mos_layout"]
+    assert mos["side_menu_position"] == "right"
+    assert mos["side_menu_width"] == "8mm"
+    assert mos["menu_rotate"] == "270deg"
+    assert mos["reverse_months_quarters_items"] is True
+    daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
+    assert daily["columns_width"] == "(3fr, 5fr)"
+    assert daily["items_spacing"] == "4mm"
+    assert [c["class"] for c in daily["left_column"]] == ["top_priorities", "notes"]
+    assert [c["class"] for c in daily["right_column"]] == ["schedule", "little_calendar"]
+    notes = daily["left_column"][1]["params"]
+    assert notes["notes_height"] == "1fr"
+    assert notes["title_height"] == "4mm"
+    schedule = daily["right_column"][0]["params"]
+    assert schedule["from"] == 8
+    assert schedule["to"] == 20
+    assert schedule["time_format"] == "%k"
+    assert schedule["trailing_30_minutes"] is True
+    quarterly = next(s for s in dto["planner"]["sections"] if s["name"] == "quarterly")["params"]
+    assert quarterly["months_column"] == "right"
+    monthly = next(s for s in dto["planner"]["sections"] if s["name"] == "monthly")["params"]["month_params"]
+    assert monthly["week_placement"] == "right"
+    assert monthly["daily_cell_height"] == "16mm"
+    assert monthly["week_label_rotation"] == "90deg"
+    names = [s["name"] for s in Configurator(dto).enabled_sections()]
+    assert "colophon" not in names
+    typst_src = _generate(dto)
+    assert "columns: (1fr, 8mm)" in typst_src
+    assert "columns: (8mm, 1fr)" not in typst_src
+    # Daily leftover height: page body is 1fr; last column item gets (auto, 1fr).
+    assert "rows: 1fr" in typst_src
+    assert "rows: (auto, 1fr)" in typst_src
+    pdf, stderr = compile_pdf(typst_src, tmp_path / "nomad-mos-right")
+    assert pdf.is_file() and pdf.stat().st_size > 0, stderr
+
+
+def test_shipped_nomad_mos_right_omits_colophon():
+    dto = load(NOMAD_MOS_RIGHT)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert "colophon" not in names
     assert names == ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]

@@ -4,7 +4,7 @@ Python port of [Vitaliy Kudryk's LYP (latex-yearly-planner)](https://github.com/
 
 LYP generates a yearly planner by emitting **Typst**, then compiling that to **PDF**. This package keeps that architecture: Python reads a **KDL 2.0** device profile (YAML still accepted), walks calendar entities, and writes `index.typst` + `index.pdf`. It does **not** draw PDFs with reportlab/fpdf.
 
-Default device is the **SuperNote Nomad** (A6 X2). Kindle Scribe and 158×210 leftie/rightie profiles are also shipped.
+Default device is the **SuperNote Nomad** (A6 X2), MOS strip on the left. A Nomad MOS-right sibling, Kindle Scribe, and 158×210 leftie/rightie profiles are also shipped.
 
 ## Install
 
@@ -20,8 +20,11 @@ uv sync
 ## Generate
 
 ```shell
-# SuperNote Nomad 2026 (default profile) → ./out/index.pdf
+# SuperNote Nomad 2026 (default profile, MOS-left) → ./out/index.pdf
 uv run lyp generate configs/supernote-nomad.kdl
+
+# SuperNote Nomad MOS-right → ./out/nomad-mos-right/index.pdf
+uv run lyp generate configs/supernote-nomad-mos-right.kdl -w out/nomad-mos-right
 
 # 158×210 leftie → ./out/leftie/index.pdf
 uv run lyp generate configs/158x210-leftie.kdl -w out/leftie
@@ -57,6 +60,7 @@ Sizes are 1:1 on glass at 300 PPI.
 | Device | Pixels | Page (pt) | Page (mm) | Config |
 | --- | --- | --- | --- | --- |
 | SuperNote Nomad (A6 X2) | 1404×1872 | 336.96×449.28 | 118.87×158.5 | `configs/supernote-nomad.kdl` |
+| SuperNote Nomad MOS-right | 1404×1872 | 336.96×449.28 | 118.87×158.5 | `configs/supernote-nomad-mos-right.kdl` |
 | 158×210 leftie | — | 447.87×595.28 | 158×210 | `configs/158x210-leftie.kdl` |
 | 158×210 rightie | — | 447.87×595.28 | 158×210 | `configs/158x210-rightie.kdl` |
 | Kindle Scribe | 1860×2480 | 446.4×595.2 | 157.48×209.97 | `configs/kindle-scribe.kdl` |
@@ -65,7 +69,7 @@ Presets also live in `eink_planner.devices`. The Nomad profile scales strokes, t
 
 **MOS** is Months on the Side — the navigation style that places a vertical month menu on the side of the page (as opposed to a top breadcrumb trail).
 
-Shipped configs keep the **MOS** (Months on the Side) layout: side menu on the physical left except the 158×210 rightie (physical right), reversed months/quarters, Monday week start, daily schedule 8–20, 5 top priorities, 2 extra daily note pages, dotted scratch pad.
+Shipped configs keep the **MOS** (Months on the Side) layout: side menu on the physical left except 158×210 rightie and SuperNote Nomad MOS-right (physical right), reversed months/quarters, Monday week start, daily schedule 8–20, 5 top priorities, 2 extra daily note pages, dotted scratch pad. 158×210 leftie/rightie are LYP's names for which side the MOS strip sits on (leftie = strip left, rightie = strip right), not which hand you write with. The Nomad MOS-right file is named for the strip side without that leftie/rightie jargon; it is the left-handed writing layout (nav opposite the writing hand).
 
 YAML profiles remain for now; prefer `.kdl`.
 

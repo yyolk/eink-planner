@@ -1,8 +1,9 @@
-// SuperNote Nomad (A6 X2)
+// SuperNote Nomad (A6 X2) MOS-right
 // 1404×1872 @ 300 PPI → 118.87 × 158.5 mm
-// MOS-left default; MOS-right sibling: configs/supernote-nomad-mos-right.kdl
+// MOS strip on the physical right; this is the left-handed writing layout
+// (nav opposite the writing hand); not named *-rightie.
 
-device "supernote-nomad" {
+device "supernote-nomad-mos-right" {
   page-size 118.87mm 158.5mm
   ppi 300
 }
@@ -22,18 +23,19 @@ style {
   margin {
     top    8mm
     bottom 0mm
-    left   0mm
-    right  4mm
+    left   4mm
+    right  0mm
   }
   gutter {
     column 8pt
+    row    1.5mm
   }
 }
 
 // layout "mos" → Months on the Side (vertical side menu navigation)
 // side-menu left|right is the physical side of the MOS strip
 layout "mos" {
-  side-menu left 8mm
+  side-menu right 8mm
   reverse-months-quarters #true
   menu-rotate 270deg
   column-gutter 1.5mm
@@ -53,14 +55,14 @@ section annual {
 }
 
 section quarterly {
-  months-column left
+  months-column right
   little-calendar {
     show-month-name #true
   }
 }
 
 section monthly {
-  week-placement left
+  week-placement right
   week-label-rotation 90deg
   daily-cell-height 16mm
 }
@@ -74,21 +76,21 @@ section daily {
   item-spacing 4mm
 
   left {
+    top-priorities 5
+    notes {
+      pattern dotted
+      title-height 4mm
+    }
+  }
+
+  right {
     schedule 8..20 {
       time-format "%k"
       trailing-half-hour #true
     }
     little-calendar {
-      week-placement left
+      week-placement right
       inset 3pt
-    }
-  }
-
-  right {
-    top-priorities 5
-    notes {
-      pattern dotted
-      title-height 4mm
     }
   }
 }

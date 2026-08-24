@@ -20,6 +20,7 @@ CONFIGS = REPO / "configs"
 LEFTIE = CONFIGS / "158x210-leftie.kdl"
 RIGHTIE = CONFIGS / "158x210-rightie.kdl"
 NOMAD = CONFIGS / "supernote-nomad.kdl"
+NOMAD_MOS_RIGHT = CONFIGS / "supernote-nomad-mos-right.kdl"
 
 Q1_MONTHS = ("January", "February", "March")
 Q3_MONTHS = ("July", "August", "September")
@@ -91,7 +92,7 @@ def test_months_column_right_keeps_three_month_grid():
         assert f"[{name}]" in content
 
 
-@pytest.mark.parametrize("path", [LEFTIE, RIGHTIE, NOMAD])
+@pytest.mark.parametrize("path", [LEFTIE, RIGHTIE, NOMAD, NOMAD_MOS_RIGHT])
 def test_full_year_quarter_pages_include_all_three_months(path: Path):
     typst_src = _generate(_full_year_quarters(path))
     pages = _quarter_pages(typst_src)
@@ -113,7 +114,7 @@ def test_full_year_quarter_pages_include_all_three_months(path: Path):
 
 def test_leftie_and_rightie_q3_compile_with_three_months(tmp_path):
     """Compile a real 2026 Q1-Q4 set so a July-only Q3 cannot slip through."""
-    for name, config in (("leftie", LEFTIE), ("rightie", RIGHTIE)):
+    for name, config in (("leftie", LEFTIE), ("rightie", RIGHTIE), ("nomad-mos-right", NOMAD_MOS_RIGHT)):
         typst_src = _generate(_full_year_quarters(config))
         q3 = _quarter_pages(typst_src)[3]
         for month in Q3_MONTHS:

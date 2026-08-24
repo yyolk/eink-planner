@@ -278,7 +278,7 @@ def test_generate_cmd_attaches_provenance(tmp_path, monkeypatch):
 
 
 def test_shipped_profiles_still_omit_colophon():
-    for name in ("supernote-nomad.kdl", "kindle-scribe.kdl", "158x210-leftie.kdl", "158x210-rightie.kdl"):
+    for name in ("supernote-nomad.kdl", "supernote-nomad-mos-right.kdl", "kindle-scribe.kdl", "158x210-leftie.kdl", "158x210-rightie.kdl"):
         dto = load(REPO / "configs" / name)
         names = [s["name"] for s in Configurator(dto).enabled_sections()]
         assert "colophon" not in names
