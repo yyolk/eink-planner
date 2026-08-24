@@ -7,7 +7,7 @@ from eink_planner import ConfigError
 from eink_planner.cli import build_parser
 from eink_planner.config import load
 from eink_planner.mos.configurator import Configurator
-from eink_planner.toml_config import apply_debug, apply_year, parse_toml
+from eink_planner.toml_config import apply_debug, apply_year, load_toml, parse_toml
 from tests.toml_fixtures import _minimal, omit_toml_sections
 
 REPO = Path(__file__).resolve().parents[1]
@@ -50,6 +50,14 @@ def test_load_rejects_yaml_and_kdl_device_profiles():
         load(CONFIGS / "supernote-nomad.kdl")
     with pytest.raises(ConfigError, match="TOML"):
         load(CONFIGS / "supernote-nomad.yaml")
+
+
+def test_load_toml_invalid_utf8_is_config_error(tmp_path):
+    path = tmp_path / "bad.toml"
+    path.write_bytes(b"\xff\xfe")
+    with pytest.raises(ConfigError) as exc:
+        load_toml(path)
+    assert str(path) in str(exc.value)
 
 
 def test_commented_section_is_disabled():

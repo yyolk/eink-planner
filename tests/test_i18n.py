@@ -86,3 +86,11 @@ def test_path_like_locale_code_is_config_error():
 def test_load_explicit_toml_file_still_works():
     i18n = I18n.load(REPO / "locales" / "en.toml")
     assert i18n.t("week_name") == "Week"
+
+
+def test_load_invalid_utf8_is_config_error(tmp_path):
+    path = tmp_path / "bad.toml"
+    path.write_bytes(b"\xff\xfe")
+    with pytest.raises(ConfigError) as exc:
+        I18n.load(path, locale="en")
+    assert str(path) in str(exc.value)

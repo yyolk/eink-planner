@@ -65,6 +65,8 @@ def load_toml(path: str | Path) -> StrictDict:
         profile = load_device_profile(source)
     except OSError as exc:
         raise ConfigError(f"{source}: {exc}") from exc
+    except UnicodeDecodeError as exc:
+        raise ConfigError(f"{source}: {exc}") from exc
     except tomllib.TOMLDecodeError as exc:
         raise ConfigError(f"{source}: {exc}") from exc
     except ValidationError as exc:
