@@ -23,6 +23,9 @@ uv sync
 # SuperNote Nomad 2026 (default profile, MOS-left) → ./out/index.pdf
 uv run lyp generate configs/supernote-nomad.kdl
 
+# SuperNote Nomad 2027 from the shipped 2026 profile (CLI overlay)
+uv run lyp generate configs/supernote-nomad.kdl --year 2027
+
 # SuperNote Nomad MOS-right → ./out/nomad-mos-right/index.pdf
 uv run lyp generate configs/supernote-nomad-mos-right.kdl -w out/nomad-mos-right
 
@@ -50,6 +53,9 @@ Flags:
 | `-l` / `--locale` | `en` | Locale code (`locales/<code>.yaml`) |
 | `-g` / `--with-ghostscript` | off | Optional PDF shrink via `gs` |
 | `--debug` | off | Draw MOS debug strokes (not a config key) |
+| `--year` | file year | Overlay planner year (dates and cover title; not a config key) |
+
+`--year` also rewrites the cover title year when the old year is in the title.
 
 A `section` node in KDL is enabled by being present. Comment the node out to disable it. There is no `enabled=#true` flag, and `debug` does not belong in the profile — use `lyp generate --debug`. At least one `section` must remain.
 

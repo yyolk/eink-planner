@@ -9,7 +9,7 @@ from pathlib import Path
 from eink_planner import ConfigError, __version__
 from eink_planner.config import load
 from eink_planner.i18n import I18n
-from eink_planner.kdl_config import apply_debug
+from eink_planner.kdl_config import apply_debug, apply_year
 from eink_planner.provenance import apply_provenance, collect_provenance
 from eink_planner.services.compile import Compile, CompileError
 from eink_planner.services.generate import Generate
@@ -58,6 +58,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Draw MOS debug strokes (not a config key)",
     )
+    gen.add_argument(
+        "--year",
+        type=int,
+        default=None,
+        help="Overlay planner year (dates and cover title; not a config key)",
+    )
     return parser
 
 
@@ -67,6 +73,7 @@ def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
     i18n = I18n.load(locale_path, locale=args.locale) if locale_path.is_file() else I18n.load_default(repo, args.locale)
 
     dto = apply_debug(load(args.config), debug=bool(args.debug))
+    dto = apply_year(dto, args.year)
     dto = apply_provenance(
         dto,
         collect_provenance(

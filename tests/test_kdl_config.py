@@ -5,7 +5,7 @@ import pytest
 from eink_planner import ConfigError
 from eink_planner.cli import build_parser
 from eink_planner.config import load, load_yaml
-from eink_planner.kdl_config import apply_debug, parse_kdl
+from eink_planner.kdl_config import apply_debug, apply_year, parse_kdl
 from eink_planner.mos.configurator import Configurator
 
 REPO = Path(__file__).resolve().parents[1]
@@ -188,6 +188,92 @@ def test_debug_cli_flag():
             gen_parser = action.choices["generate"]
     assert gen_parser is not None
     assert "--debug" in gen_parser.format_help()
+
+
+def _generate_parser():
+    parser = build_parser()
+    for action in parser._actions:
+        if getattr(action, "dest", None) == "command":
+            return action.choices["generate"]
+    raise AssertionError("generate subparser missing")
+
+
+def test_year_cli_flag():
+    parser = build_parser()
+    args = parser.parse_args(["generate", str(NOMAD), "--year", "2027"])
+    assert args.year == 2027
+    off = parser.parse_args(["generate", str(NOMAD)])
+    assert off.year is None
+    assert "--year" in _generate_parser().format_help()
+
+
+def test_year_cli_rejects_non_ints():
+    parser = build_parser()
+    with pytest.raises(SystemExit):
+        parser.parse_args(["generate", str(NOMAD), "--year", "true"])
+    with pytest.raises(SystemExit):
+        parser.parse_args(["generate", str(NOMAD), "--year", "nope"])
+
+
+def test_apply_year_overlays_start_and_end_dates():
+    dto = apply_year(load(NOMAD), 2027)
+    params = dto["planner"]["params"]
+    assert params["start_date"] == "2027-01-01"
+    assert params["end_date"] == "2027-12-31"
+    leap = apply_year(load(NOMAD), 2028)
+    assert leap["planner"]["params"]["start_date"] == "2028-01-01"
+    assert leap["planner"]["params"]["end_date"] == "2028-12-31"
+
+
+def test_apply_year_none_leaves_file_year():
+    dto = apply_year(load(NOMAD), None)
+    params = dto["planner"]["params"]
+    assert params["start_date"] == "2026-01-01"
+    assert params["end_date"] == "2026-12-31"
+
+
+def test_apply_year_rejects_bools_and_non_ints():
+    with pytest.raises(ConfigError, match="expected integer"):
+        apply_year(load(NOMAD), True)
+    with pytest.raises(ConfigError, match="expected integer"):
+        apply_year(load(NOMAD), "nope")
+
+
+def test_apply_year_rejects_out_of_range():
+    dto = load(NOMAD)
+    with pytest.raises(ConfigError, match="out of range"):
+        apply_year(dto, 0)
+    with pytest.raises(ConfigError, match="out of range"):
+        apply_year(dto, 10000)
+    ok = apply_year(dto, 2027)
+    assert ok["planner"]["params"]["start_date"] == "2027-01-01"
+    assert ok["planner"]["params"]["end_date"] == "2027-12-31"
+
+
+def test_apply_year_yaml_overlay():
+    dto = apply_year(load(CONFIGS / "supernote-nomad.yaml"), 2027)
+    params = dto["planner"]["params"]
+    assert params["start_date"] == "2027-01-01"
+    assert params["end_date"] == "2027-12-31"
+
+
+def test_apply_year_rewrites_cover_title_year():
+    dto = apply_year(load(NOMAD), 2027)
+    cover = next(s for s in dto["planner"]["sections"] if s["name"] == "cover")
+    assert cover["params"]["name"] == "2027\n\nPlanner"
+
+
+def test_apply_year_typst_uses_overlay_year():
+    from eink_planner.i18n import I18n
+    from eink_planner.services.generate import Generate
+
+    dto = apply_year(load(NOMAD), 2027)
+    data = dto.to_plain()
+    data["planner"]["params"]["end_date"] = "2027-01-07"
+    typst = Generate(i18n=I18n.load_default(REPO, "en")).generate(data)
+    assert "2027-01-01" in typst
+    assert "<2026-01-01>" not in typst
+    assert "2027" in typst
 
 
 def test_bool_args_are_not_integers():
