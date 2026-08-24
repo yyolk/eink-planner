@@ -38,6 +38,7 @@ def _projects(dto, pages: int | None = None) -> Projects:
         i18n=I18n.load_default(REPO, "en"),
         configurator=Configurator(dto),
         pages=params.get("pages", Projects.DEFAULT_PAGES),
+        card_rows=params.get("card_rows", Projects.CARDS),
     )
 
 
@@ -53,7 +54,9 @@ def test_omit_pages_defaults_to_twenty():
     assert section["name"] == "projects"
     assert section["class"] == "projects"
     assert section["params"]["pages"] == 20
+    assert section["params"]["card_rows"] == 8
     projects = _projects(dto)
+    assert projects.card_rows == Projects.CARDS == 8
     rpp = projects.rows_per_index_page()
     n_index = projects.index_page_count()
     assert rpp >= 1
@@ -72,7 +75,7 @@ def test_omit_pages_defaults_to_twenty():
         assert "<projects-2>" in typst
     assert "rows: (" + ", ".join(["1fr"] * 20) + ")" not in typst
     card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern_centered(dotted_centered))"
-    assert typst.count(card) == Projects.CARDS * 3 * 20
+    assert typst.count(card) == projects.card_rows * 3 * 20
 
 
 def test_pages_three_emits_index_and_three_boards():
@@ -165,6 +168,19 @@ def test_pages_bool_and_float_rejected():
         )
 
 
+def test_card_rows_bool_and_float_rejected():
+    with pytest.raises(ConfigError, match="expected integer"):
+        parse_kdl(
+            _minimal(sections="section projects {\n  card-rows #true\n}\n"),
+            source="card-rows-bool.kdl",
+        )
+    with pytest.raises(ConfigError, match="expected integer"):
+        parse_kdl(
+            _minimal(sections="section projects {\n  card-rows 5.5\n}\n"),
+            source="card-rows-float.kdl",
+        )
+
+
 def test_pages_are_raw_typst_without_mos_chrome():
     dto = parse_kdl(
         _minimal(sections="section projects {\n  pages 1\n}\n"),
@@ -189,6 +205,24 @@ def test_index_rows_are_fixed_line_height_and_boards_use_eight_even_cards():
     assert "rows: (" + ", ".join(["1fr"] * 8) + ")" in typst
     card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern_centered(dotted_centered))"
     assert typst.count(card) == 8 * 3 * 3
+
+
+def test_card_rows_five_emits_five_one_fr_rows_per_column():
+    dto = parse_kdl(
+        _minimal(sections="section projects {\n  pages 1\n  card-rows 5\n}\n"),
+        source="card-rows-5.kdl",
+    )
+    params = dto["planner"]["sections"][0]["params"]
+    assert params["pages"] == 1
+    assert params["card_rows"] == 5
+    projects = _projects(dto)
+    assert projects.card_rows == 5
+    assert Projects.CARDS == 8
+    typst = _generate(dto)
+    assert "rows: (" + ", ".join(["1fr"] * 5) + ")" in typst
+    assert "rows: (" + ", ".join(["1fr"] * 8) + ")" not in typst
+    card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern_centered(dotted_centered))"
+    assert typst.count(card) == projects.card_rows * 3 * 1
 
 
 def test_index_paginates_and_late_board_links_to_its_index_page():
@@ -237,6 +271,7 @@ def test_nomad_parses_and_compiles(tmp_path):
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert names[-1] == "projects"
     assert dto["planner"]["sections"][-1]["params"]["pages"] == 20
+    assert dto["planner"]["sections"][-1]["params"]["card_rows"] == 8
     typst = _generate(_short_january(dto))
     assert "<projects>" in typst
     assert "<projects-2>" in typst
@@ -298,7 +333,7 @@ def test_kanban_centered_dots_leave_notes_global_dotted():
     assert "calc.rem(" not in typst
     assert "clip: true" not in typst
     card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern_centered(dotted_centered))"
-    assert typst.count(card) == Projects.CARDS * 3
+    assert typst.count(card) == _projects(dto).card_rows * 3
     assert "inset: 0pt, rect_pattern(dotted)" not in typst
     assert "#let scratch_pad = rect_pattern(dotted)" in typst
     pages = typst.split("#pagebreak()")

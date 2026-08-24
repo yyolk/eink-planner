@@ -100,4 +100,5 @@ section daily-notes {
 
 section projects {
   pages 20
+  card-rows 8
 }

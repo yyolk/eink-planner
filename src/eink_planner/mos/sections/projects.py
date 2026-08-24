@@ -47,12 +47,14 @@ class Projects:
         i18n: I18n,
         configurator: Configurator,
         pages: int = DEFAULT_PAGES,
+        card_rows: int = CARDS,
         **_rest: Any,
     ) -> None:
         self.section_name = section_name
         self.i18n = i18n
         self.configurator = configurator
         self.pages_num = int(pages)
+        self.card_rows = int(card_rows)
 
     def register(self, manifest: Manifest) -> None:
         for page in range(1, self.index_page_count() + 1):
@@ -181,10 +183,10 @@ class Projects:
   [{index}/{n} <{bid}>]
 )"""
         card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern_centered(dotted_centered))"
-        cards = ",\n    ".join([card] * self.CARDS)
+        cards = ",\n    ".join([card] * self.card_rows)
         column = f"""grid(
   columns: 1fr,
-  rows: ({", ".join(["1fr"] * self.CARDS)}),
+  rows: ({", ".join(["1fr"] * self.card_rows)}),
   row-gutter: 2mm,
     {cards}
 )"""

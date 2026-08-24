@@ -62,7 +62,7 @@ _SCHEDULE_NODES = frozenset({"time-format", "trailing-half-hour"})
 _NOTES_NODES = frozenset({"pattern", "title-height", "height"})
 _DAILY_NOTES_NODES = frozenset({"pages", "pattern"})
 _COLOPHON_NODES = frozenset({"title", "highlight"})
-_PROJECTS_NODES = frozenset({"pages"})
+_PROJECTS_NODES = frozenset({"pages", "card-rows"})
 _DEVICE_NODES = frozenset({"page-size", "ppi"})
 
 _SECTION_CLASS = {
@@ -578,9 +578,11 @@ def _section_daily_notes(node: ckdl.Node) -> dict[str, Any]:
 def _section_projects(node: ckdl.Node) -> dict[str, Any]:
     _reject_unknown(node.children, _PROJECTS_NODES, "section.projects")
     pages_node = _first(node.children, "pages")
-    if pages_node is None:
-        return {"pages": 20}
-    return {"pages": _int_arg(pages_node, "section.projects.pages")}
+    rows_node = _first(node.children, "card-rows")
+    return {
+        "pages": 20 if pages_node is None else _int_arg(pages_node, "section.projects.pages"),
+        "card_rows": 8 if rows_node is None else _int_arg(rows_node, "section.projects.card-rows"),
+    }
 
 
 def _parse_little_calendar(node: ckdl.Node, path: str) -> dict[str, Any]:
