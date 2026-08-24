@@ -351,11 +351,17 @@ def _parse_sections(order: Any, tables: Any) -> tuple[list[dict[str, Any]], dict
         tables = {}
     if not isinstance(tables, dict):
         raise ConfigError("section: expected a table")
+    _reject_unknown(tables, _SECTION_TYPES, "section")
 
     colophon_queue: list[dict[str, Any]] | None = None
     raw_colo = tables.get("colophon")
     if isinstance(raw_colo, list):
-        colophon_queue = [c if isinstance(c, dict) else None for c in raw_colo]  # type: ignore[misc]
+        queue: list[dict[str, Any]] = []
+        for entry in raw_colo:
+            if not isinstance(entry, dict):
+                raise ConfigError("section.colophon: expected a table")
+            queue.append(entry)
+        colophon_queue = queue
 
     sections: list[dict[str, Any]] = []
     for item in order:

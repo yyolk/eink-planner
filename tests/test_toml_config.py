@@ -152,7 +152,52 @@ row = "1.5mm"
 
 def test_unknown_section_raises():
     with pytest.raises(ConfigError, match="unknown section"):
-        parse_toml(_minimal(enable=["mystery"], sections="[section.mystery]\npages = 1\n"))
+        parse_toml(_minimal(enable=["mystery"], sections=""))
+
+
+def test_unknown_section_table_key_raises():
+    with pytest.raises(ConfigError, match="unknown key: section.proejcts"):
+        parse_toml(
+            _minimal(
+                enable=["cover", "projects"],
+                sections="""[section.cover]
+title = "Hi"
+font-size = "12pt"
+
+[section.proejcts]
+pages = 20
+""",
+            )
+        )
+
+
+def test_dangling_known_section_table_is_ok():
+    dto = parse_toml(
+        _minimal(
+            enable=["cover"],
+            sections="""[section.cover]
+title = "Hi"
+font-size = "12pt"
+
+[section.projects]
+pages = 20
+""",
+        )
+    )
+    names = [s["name"] for s in dto["planner"]["sections"]]
+    assert names == ["cover"]
+
+
+def test_colophon_array_entry_must_be_table():
+    with pytest.raises(ConfigError, match="section.colophon: expected a table"):
+        parse_toml(
+            _minimal(
+                enable=["colophon"],
+                sections="""[section]
+colophon = ["not-a-table"]
+""",
+            )
+        )
 
 
 def test_missing_required_keys_raise():
