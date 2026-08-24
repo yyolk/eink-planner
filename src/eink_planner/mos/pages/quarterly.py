@@ -30,7 +30,7 @@ class Quarterly:
 
     def content(self) -> str:
         cols = ["2fr", "3fr"]
-        columns = [self._months_stack(), "scratch_pad"]
+        columns = [self._months_grid(), "scratch_pad"]
         if self.months_column == "right":
             cols.reverse()
             columns.reverse()
@@ -41,7 +41,7 @@ class Quarterly:
   {", ".join(columns)}
 )"""
 
-    def _months_stack(self) -> str:
+    def _months_grid(self) -> str:
         months = self._months()
         # Bound each month to an equal 1fr row. A stack + LittleCalendar
         # rows: 1fr lets the first month consume the whole column.
