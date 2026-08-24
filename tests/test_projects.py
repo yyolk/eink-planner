@@ -71,7 +71,7 @@ def test_omit_pages_defaults_to_twenty():
         assert "rows: (" + ", ".join(["2 * regular_height"] * leftover) + ")" in typst
         assert "<projects-2>" in typst
     assert "rows: (" + ", ".join(["1fr"] * 20) + ")" not in typst
-    card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern(dotted))"
+    card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern_centered(dotted_centered))"
     assert typst.count(card) == Projects.CARDS * 3 * 20
 
 
@@ -136,7 +136,7 @@ def test_locale_strings_appear():
     typst = _generate(dto)
     for label in ("TITLE", "DATE", "TODO", "DOING", "DONE", "Projects"):
         assert label in typst
-    assert "rect_pattern(dotted)" in typst
+    assert "rect_pattern_centered(dotted_centered)" in typst
 
 
 def test_unknown_node_on_section_projects_raises():
@@ -187,7 +187,7 @@ def test_index_rows_are_fixed_line_height_and_boards_use_eight_even_cards():
     assert "rows: (2 * regular_height, 2 * regular_height, 2 * regular_height)" in typst
     assert "rows: (1fr, 1fr, 1fr)" not in typst
     assert "rows: (" + ", ".join(["1fr"] * 8) + ")" in typst
-    card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern(dotted))"
+    card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern_centered(dotted_centered))"
     assert typst.count(card) == 8 * 3 * 3
 
 
@@ -261,3 +261,49 @@ def test_tiny_cover_annual_projects_compiles(tmp_path):
     typst = _generate(dto)
     pdf, stderr = compile_pdf(typst, tmp_path / "tiny-projects")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
+
+
+def test_kanban_centered_dots_leave_notes_global_dotted():
+    dto = parse_kdl(
+        _minimal(
+            sections=(
+                "section daily {\n"
+                "  columns (3fr 5fr)\n"
+                "  item-spacing 4mm\n"
+                "  right {\n"
+                "    notes {\n"
+                "      pattern dotted\n"
+                "      title-height 4mm\n"
+                "    }\n"
+                "  }\n"
+                "}\n"
+                "section daily-notes {\n  pages 1\n  pattern dotted\n}\n"
+                "section projects {\n  pages 1\n}\n"
+            )
+        ),
+        source="centered-vs-notes.kdl",
+    )
+    typst = _generate(dto)
+    assert "#let dotted =" in typst
+    assert "dx: 0.5pt" in typst
+    assert "dy: regular_height - 0.3mm" in typst
+    assert "#let dotted_centered = tiling(" in typst
+    assert "center + horizon" in typst
+    assert "#let rect_pattern_centered(pattern) = box(" in typst
+    assert "layout(size =>" in typst
+    assert "calc.rem(" in typst
+    card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern_centered(dotted_centered))"
+    assert typst.count(card) == Projects.CARDS * 3
+    assert "inset: 0pt, rect_pattern(dotted)" not in typst
+    assert "#let scratch_pad = rect_pattern(dotted)" in typst
+    pages = typst.split("#pagebreak()")
+    board_pages = [page for page in pages if "1/1 <project-1>" in page]
+    assert board_pages
+    assert all("rect_pattern_centered(dotted_centered)" in page for page in board_pages)
+    assert all("rect_pattern(dotted)" not in page for page in board_pages)
+    notes_body_pages = [
+        page
+        for page in pages
+        if "rect_pattern(dotted)" in page and "rect_pattern_centered" not in page
+    ]
+    assert notes_body_pages, "notes pages must still call rect_pattern(dotted)"

@@ -70,6 +70,48 @@ class Preamble:
   fill: pattern
 )
 
+#let dotted_centered = tiling(
+  size: (regular_height, regular_height),
+  // place(center + horizon) does not resolve against a tiling cell
+  // (circles sit on the origin and clip to quarters). Size the cell
+  // first so align can actually center the 0.141mm circle.
+  block(
+    width: regular_height,
+    height: regular_height,
+    align(
+      center + horizon,
+      circle(
+        radius: 0.141mm,
+        fill: black
+      )
+    )
+  ),
+)
+
+#let rect_pattern_centered(pattern) = box(
+  width: 100%,
+  height: 100%,
+  layout(size => {{
+    let cell = regular_height.to-absolute()
+    let dx = calc.rem(size.width.pt(), cell.pt()) / 2 * 1pt
+    let dy = calc.rem(size.height.pt(), cell.pt()) / 2 * 1pt
+    box(
+      width: size.width,
+      height: size.height,
+      clip: true,
+      place(
+        dx: dx,
+        dy: dy,
+        rect(
+          width: size.width,
+          height: size.height,
+          fill: pattern
+        )
+      )
+    )
+  }})
+)
+
 #let scratch_pad = rect_pattern({_v(p, 'scratch_pad')})
 
 #let padded_link(padding: {_v(p, 'link_padding')}, target, content) = box(
