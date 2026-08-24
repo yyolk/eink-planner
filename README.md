@@ -79,6 +79,8 @@ YAML profiles remain for now; prefer `.kdl`.
 uv run pytest
 ```
 
+CI runs pytest and a Nomad `lyp generate`.
+
 ## Layout of a generated planner
 
 Enabled MOS (Months on the Side) sections, in order:

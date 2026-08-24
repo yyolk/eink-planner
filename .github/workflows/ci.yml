@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install poppler-utils
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - run: uv sync --group dev
+      - run: uv run pytest
+      - name: Generate Nomad PDF
+        run: |
+          uv run lyp generate configs/supernote-nomad.kdl -w out/nomad
+          test -s out/nomad/index.pdf
