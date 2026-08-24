@@ -10,15 +10,15 @@ import pytest
 from eink_planner import ConfigError
 from eink_planner.config import load
 from eink_planner.i18n import I18n
-from eink_planner.kdl_config import parse_kdl
 from eink_planner.mos.configurator import Configurator
 from eink_planner.mos.sections.projects import Projects, _length_mm
 from eink_planner.services.generate import Generate
-from tests.test_kdl_config import _minimal
-from tests.test_kdl_omit_sections import _LABEL_DEF, _PADDED_LINK, _short_january, compile_pdf
+from eink_planner.toml_config import parse_toml
+from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf
+from tests.toml_fixtures import _minimal, short_january
 
 REPO = Path(__file__).resolve().parents[1]
-NOMAD = REPO / "configs/supernote-nomad.kdl"
+NOMAD = REPO / "configs/supernote-nomad.toml"
 
 
 def _generate(dto) -> str:
@@ -49,7 +49,7 @@ def test_length_mm_parses_mm_cm_pt():
 
 
 def test_omit_pages_defaults_to_twenty():
-    dto = parse_kdl(_minimal(sections="section projects { }\n"), source="default-pages.kdl")
+    dto = parse_toml(_minimal(enable=["projects"], sections=""), source="default-pages.toml")
     section = dto["planner"]["sections"][0]
     assert section["name"] == "projects"
     assert section["class"] == "projects"
@@ -79,9 +79,9 @@ def test_omit_pages_defaults_to_twenty():
 
 
 def test_pages_three_emits_index_and_three_boards():
-    dto = parse_kdl(
-        _minimal(sections="section projects {\n  pages 3\n}\n"),
-        source="pages-3.kdl",
+    dto = parse_toml(
+        _minimal(enable=["projects"], sections="[section.projects]\npages = 3\n"),
+        source="pages-3.toml",
     )
     assert dto["planner"]["sections"][0]["params"]["pages"] == 3
     projects = _projects(dto)
@@ -98,14 +98,17 @@ def test_pages_three_emits_index_and_three_boards():
 
 
 def test_index_links_to_boards_and_board_links_back():
-    dto = parse_kdl(
+    dto = parse_toml(
         _minimal(
-            sections=(
-                "section annual {\n  little-calendar {\n    show-month-name #true\n  }\n}\n"
-                "section projects {\n  pages 3\n}\n"
-            )
+            enable=["annual", "projects"],
+            sections="""[section.annual]
+show-month-name = true
+
+[section.projects]
+pages = 3
+""",
         ),
-        source="links.kdl",
+        source="links.toml",
     )
     typst = _generate(dto)
     assert "padded_link(<project-1>)" in typst
@@ -120,9 +123,9 @@ def test_index_links_to_boards_and_board_links_back():
 
 
 def test_year_is_plain_when_annual_omitted():
-    dto = parse_kdl(
-        _minimal(sections="section projects {\n  pages 2\n}\n"),
-        source="no-annual.kdl",
+    dto = parse_toml(
+        _minimal(enable=["projects"], sections="[section.projects]\npages = 2\n"),
+        source="no-annual.toml",
     )
     typst = _generate(dto)
     assert "padded_link(<annual>)" not in typst
@@ -132,9 +135,9 @@ def test_year_is_plain_when_annual_omitted():
 
 
 def test_locale_strings_appear():
-    dto = parse_kdl(
-        _minimal(sections="section projects {\n  pages 1\n}\n"),
-        source="strings.kdl",
+    dto = parse_toml(
+        _minimal(enable=["projects"], sections="[section.projects]\npages = 1\n"),
+        source="strings.toml",
     )
     typst = _generate(dto)
     for label in ("TITLE", "DATE", "TODO", "DOING", "DONE", "Projects"):
@@ -142,49 +145,49 @@ def test_locale_strings_appear():
     assert "rect_pattern_centered(dotted_centered)" in typst
 
 
-def test_unknown_node_on_section_projects_raises():
-    with pytest.raises(ConfigError, match="unknown node: section.projects.pattern"):
-        parse_kdl(
-            _minimal(sections="section projects {\n  pages 3\n  pattern dotted\n}\n"),
-            source="extra.kdl",
+def test_unknown_key_on_section_projects_raises():
+    with pytest.raises(ConfigError, match="unknown key: section.projects.pattern"):
+        parse_toml(
+            _minimal(enable=["projects"], sections="[section.projects]\npages = 3\npattern = \"dotted\"\n"),
+            source="extra.toml",
         )
-    with pytest.raises(ConfigError, match="unknown node: section.projects.foo"):
-        parse_kdl(
-            _minimal(sections="section projects {\n  foo 1\n}\n"),
-            source="foo.kdl",
+    with pytest.raises(ConfigError, match="unknown key: section.projects.foo"):
+        parse_toml(
+            _minimal(enable=["projects"], sections="[section.projects]\nfoo = 1\n"),
+            source="foo.toml",
         )
 
 
 def test_pages_bool_and_float_rejected():
     with pytest.raises(ConfigError, match="expected integer"):
-        parse_kdl(
-            _minimal(sections="section projects {\n  pages #true\n}\n"),
-            source="bool.kdl",
+        parse_toml(
+            _minimal(enable=["projects"], sections="[section.projects]\npages = true\n"),
+            source="bool.toml",
         )
     with pytest.raises(ConfigError, match="expected integer"):
-        parse_kdl(
-            _minimal(sections="section projects {\n  pages 3.5\n}\n"),
-            source="float.kdl",
+        parse_toml(
+            _minimal(enable=["projects"], sections="[section.projects]\npages = 3.5\n"),
+            source="float.toml",
         )
 
 
 def test_card_rows_bool_and_float_rejected():
     with pytest.raises(ConfigError, match="expected integer"):
-        parse_kdl(
-            _minimal(sections="section projects {\n  card-rows #true\n}\n"),
-            source="card-rows-bool.kdl",
+        parse_toml(
+            _minimal(enable=["projects"], sections="[section.projects]\ncard-rows = true\n"),
+            source="card-rows-bool.toml",
         )
     with pytest.raises(ConfigError, match="expected integer"):
-        parse_kdl(
-            _minimal(sections="section projects {\n  card-rows 5.5\n}\n"),
-            source="card-rows-float.kdl",
+        parse_toml(
+            _minimal(enable=["projects"], sections="[section.projects]\ncard-rows = 5.5\n"),
+            source="card-rows-float.toml",
         )
 
 
 def test_pages_are_raw_typst_without_mos_chrome():
-    dto = parse_kdl(
-        _minimal(sections="section projects {\n  pages 1\n}\n"),
-        source="raw.kdl",
+    dto = parse_toml(
+        _minimal(enable=["projects"], sections="[section.projects]\npages = 1\n"),
+        source="raw.toml",
     )
     typst = _generate(dto)
     assert "side_menu" not in typst
@@ -195,9 +198,9 @@ def test_pages_are_raw_typst_without_mos_chrome():
 
 def test_index_rows_are_fixed_line_height_and_boards_use_eight_even_cards():
     assert Projects.CARDS == 8
-    dto = parse_kdl(
-        _minimal(sections="section projects {\n  pages 3\n}\n"),
-        source="layout.kdl",
+    dto = parse_toml(
+        _minimal(enable=["projects"], sections="[section.projects]\npages = 3\n"),
+        source="layout.toml",
     )
     typst = _generate(dto)
     assert "rows: (2 * regular_height, 2 * regular_height, 2 * regular_height)" in typst
@@ -208,9 +211,9 @@ def test_index_rows_are_fixed_line_height_and_boards_use_eight_even_cards():
 
 
 def test_card_rows_five_emits_five_one_fr_rows_per_column():
-    dto = parse_kdl(
-        _minimal(sections="section projects {\n  pages 1\n  card-rows 5\n}\n"),
-        source="card-rows-5.kdl",
+    dto = parse_toml(
+        _minimal(enable=["projects"], sections="[section.projects]\npages = 1\ncard-rows = 5\n"),
+        source="card-rows-5.toml",
     )
     params = dto["planner"]["sections"][0]["params"]
     assert params["pages"] == 1
@@ -229,21 +232,24 @@ def test_index_paginates_and_late_board_links_to_its_index_page():
     dto = load(NOMAD)
     projects = _projects(dto)
     rpp = projects.rows_per_index_page()
-    # Nomad: 158.5 − 8 − 0 − 8 − 4 − 3 = 135.5; 135.5 / (2×4) → 16
     assert rpp == 16
     n = rpp + 1
-    slim = parse_kdl(
+    slim = parse_toml(
         _minimal(
-            device="""device "supernote-nomad" {
-  page-size 118.87mm 158.5mm
-  ppi 300
-}""",
-            sections=(
-                "section annual {\n  little-calendar {\n    show-month-name #true\n  }\n}\n"
-                f"section projects {{\n  pages {n}\n}}\n"
-            ),
+            device="""[device]
+name = "supernote-nomad"
+width = "118.87mm"
+height = "158.5mm"
+ppi = 300""",
+            enable=["annual", "projects"],
+            sections=f"""[section.annual]
+show-month-name = true
+
+[section.projects]
+pages = {n}
+""",
         ),
-        source="paged-index.kdl",
+        source="paged-index.toml",
     )
     slim_projects = _projects(slim)
     assert slim_projects.rows_per_index_page() == rpp
@@ -252,7 +258,6 @@ def test_index_paginates_and_late_board_links_to_its_index_page():
     labels = set(_LABEL_DEF.findall(typst))
     assert {"projects", "projects-2", f"project-{n}", "annual"} <= labels
     pages = typst.split("#pagebreak()")
-    # annual, index 1, index 2, boards 1..n
     assert len(pages) == 3 + n
     board_first = pages[3]
     board_late = pages[3 + rpp]
@@ -272,7 +277,7 @@ def test_nomad_parses_and_compiles(tmp_path):
     assert names[-1] == "projects"
     assert dto["planner"]["sections"][-1]["params"]["pages"] == 20
     assert dto["planner"]["sections"][-1]["params"]["card_rows"] == 8
-    typst = _generate(_short_january(dto))
+    typst = _generate(short_january(dto))
     assert "<projects>" in typst
     assert "<projects-2>" in typst
     assert "<project-1>" in typst
@@ -283,15 +288,21 @@ def test_nomad_parses_and_compiles(tmp_path):
 
 
 def test_tiny_cover_annual_projects_compiles(tmp_path):
-    dto = parse_kdl(
+    dto = parse_toml(
         _minimal(
-            sections=(
-                'section cover {\n  title "Hi"\n  font-size 12pt\n}\n'
-                "section annual {\n  little-calendar {\n    show-month-name #true\n  }\n}\n"
-                "section projects {\n  pages 3\n}\n"
-            )
+            enable=["cover", "annual", "projects"],
+            sections="""[section.cover]
+title = "Hi"
+font-size = "12pt"
+
+[section.annual]
+show-month-name = true
+
+[section.projects]
+pages = 3
+""",
         ),
-        source="tiny.kdl",
+        source="tiny.toml",
     )
     typst = _generate(dto)
     pdf, stderr = compile_pdf(typst, tmp_path / "tiny-projects")
@@ -299,24 +310,26 @@ def test_tiny_cover_annual_projects_compiles(tmp_path):
 
 
 def test_kanban_centered_dots_leave_notes_global_dotted():
-    dto = parse_kdl(
+    dto = parse_toml(
         _minimal(
-            sections=(
-                "section daily {\n"
-                "  columns (3fr 5fr)\n"
-                "  item-spacing 4mm\n"
-                "  right {\n"
-                "    notes {\n"
-                "      pattern dotted\n"
-                "      title-height 4mm\n"
-                "    }\n"
-                "  }\n"
-                "}\n"
-                "section daily-notes {\n  pages 1\n  pattern dotted\n}\n"
-                "section projects {\n  pages 1\n}\n"
-            )
+            enable=["daily", "daily-notes", "projects"],
+            sections="""[section.daily]
+columns = ["3fr", "5fr"]
+item-spacing = "4mm"
+
+[section.daily.right.notes]
+pattern = "dotted"
+title-height = "4mm"
+
+[section.daily-notes]
+pages = 1
+pattern = "dotted"
+
+[section.projects]
+pages = 1
+""",
         ),
-        source="centered-vs-notes.kdl",
+        source="centered-vs-notes.toml",
     )
     typst = _generate(dto)
     assert "#let dotted =" in typst

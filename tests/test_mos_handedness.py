@@ -9,60 +9,18 @@ import pytest
 from eink_planner import ConfigError
 from eink_planner.config import load
 from eink_planner.i18n import I18n
-from eink_planner.kdl_config import parse_kdl
 from eink_planner.mos.configurator import Configurator
 from eink_planner.services.generate import Generate
-from tests.test_kdl_omit_sections import _short_january, compile_pdf
+from eink_planner.toml_config import parse_toml
+from tests.test_toml_omit_sections import compile_pdf
+from tests.toml_fixtures import _minimal, short_january
 
 REPO = Path(__file__).resolve().parents[1]
 CONFIGS = REPO / "configs"
-NOMAD = CONFIGS / "supernote-nomad.kdl"
-NOMAD_MOS_RIGHT = CONFIGS / "supernote-nomad-mos-right.kdl"
-MOS_LEFT = CONFIGS / "158x210-mos-left.kdl"
-MOS_RIGHT = CONFIGS / "158x210-mos-right.kdl"
-
-
-def _minimal(**extra: str) -> str:
-    parts = {
-        "device": """device "x" {
-  page-size 100mm 120mm
-  ppi 300
-}""",
-        "year": "year 2026",
-        "week": "week-starts Monday",
-        "style": """style {
-  stroke {
-    regular 0.3pt
-    thick 0.6pt
-  }
-  type {
-    body 8pt
-    h1 8mm
-  }
-  margin {
-    top 8mm
-    bottom 0mm
-    left 0mm
-    right 4mm
-  }
-  gutter {
-    column 8pt
-  }
-}""",
-        "layout": """layout "mos" {
-  side-menu left 8mm
-  reverse-months-quarters #true
-  menu-rotate 270deg
-  column-gutter 1.5mm
-  row-gutter 1.5mm
-}""",
-        "sections": """section cover {
-  title "Hi"
-  font-size 12pt
-}""",
-    }
-    parts.update(extra)
-    return "\n\n".join(parts.values()) + "\n"
+NOMAD = CONFIGS / "supernote-nomad.toml"
+NOMAD_MOS_RIGHT = CONFIGS / "supernote-nomad-mos-right.toml"
+MOS_LEFT = CONFIGS / "158x210-mos-left.toml"
+MOS_RIGHT = CONFIGS / "158x210-mos-right.toml"
 
 
 def _generate(dto) -> str:
@@ -74,17 +32,19 @@ def _daily_section(dto):
 
 
 def test_side_menu_right_parses():
-    dto = parse_kdl(
+    dto = parse_toml(
         _minimal(
-            layout="""layout "mos" {
-  side-menu right 10mm
-  reverse-months-quarters #true
-  menu-rotate 270deg
-  column-gutter 1.5mm
-  row-gutter 1.5mm
-}"""
+            layout="""[layout]
+name = "mos"
+side-menu = "right"
+side-menu-width = "10mm"
+reverse-months-quarters = true
+menu-rotate = "270deg"
+column-gutter = "1.5mm"
+row-gutter = "1.5mm"
+"""
         ),
-        source="side-right.kdl",
+        source="side-right.toml",
     )
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["side_menu_position"] == "right"
@@ -92,105 +52,106 @@ def test_side_menu_right_parses():
 
 
 def test_side_menu_position_is_case_insensitive():
-    dto = parse_kdl(
+    dto = parse_toml(
         _minimal(
-            layout="""layout "mos" {
-  side-menu RIGHT 10mm
-  reverse-months-quarters #true
-  menu-rotate 270deg
-  column-gutter 1.5mm
-  row-gutter 1.5mm
-}"""
+            layout="""[layout]
+name = "mos"
+side-menu = "RIGHT"
+side-menu-width = "10mm"
+reverse-months-quarters = true
+menu-rotate = "270deg"
+column-gutter = "1.5mm"
+row-gutter = "1.5mm"
+"""
         ),
-        source="side-RIGHT.kdl",
+        source="side-RIGHT.toml",
     )
     assert dto["planner"]["params"]["mos_layout"]["side_menu_position"] == "right"
 
 
 def test_side_menu_rejects_non_left_right():
     with pytest.raises(ConfigError, match=r"layout\.side-menu: expected left or right"):
-        parse_kdl(
+        parse_toml(
             _minimal(
-                layout="""layout "mos" {
-  side-menu top 10mm
-  reverse-months-quarters #true
-  menu-rotate 270deg
-  column-gutter 1.5mm
-  row-gutter 1.5mm
-}"""
+                layout="""[layout]
+name = "mos"
+side-menu = "top"
+side-menu-width = "10mm"
+reverse-months-quarters = true
+menu-rotate = "270deg"
+column-gutter = "1.5mm"
+row-gutter = "1.5mm"
+"""
             ),
-            source="side-top.kdl",
+            source="side-top.toml",
         )
 
 
 def test_daily_notes_left_schedule_right_dto_and_typst():
     text = _minimal(
-        sections="""section daily {
-  columns (3fr 5fr)
-  item-spacing 5mm
+        enable=["daily"],
+        sections="""[section.daily]
+columns = ["3fr", "5fr"]
+item-spacing = "5mm"
 
-  left {
-    notes {
-      pattern dotted
-      title-height 5mm
-    }
-    little-calendar {
-      week-placement right
-      inset 5pt
-    }
-  }
+[section.daily.left.notes]
+pattern = "dotted"
+title-height = "5mm"
 
-  right {
-    schedule 8..20 {
-      time-format "%k"
-    }
-    top-priorities 5
-  }
-}
-"""
+[section.daily.left.little-calendar]
+week-placement = "right"
+inset = "5pt"
+
+[section.daily.right.schedule]
+from = 8
+to = 20
+time-format = "%k"
+
+[section.daily.right.priorities]
+count = 5
+""",
     )
-    dto = parse_kdl(text, source="swapped-daily.kdl")
+    dto = parse_toml(text, source="swapped-daily.toml")
     params = _daily_section(dto)["params"]
     assert [c["class"] for c in params["left_column"]] == ["notes", "little_calendar"]
     assert [c["class"] for c in params["right_column"]] == ["schedule", "top_priorities"]
     assert dto["planner"]["params"]["little_calendar"]["week_placement"] == "right"
 
-    typst_src = _generate(_short_january(dto))
+    typst_src = _generate(short_january(dto))
     marker = "columns: (3fr, 5fr)"
     body = typst_src[typst_src.index(marker) :]
     assert body.index("[Notes") < body.index("[Schedule]")
-    # Daily leftover height under the last column item (little calendar / notes).
     assert "rows: (auto, 1fr)" in typst_src
 
 
 def test_unknown_daily_child_still_rejected():
-    with pytest.raises(ConfigError, match=r"unknown node: section\.daily\.left\.banana"):
-        parse_kdl(
+    with pytest.raises(ConfigError, match=r"unknown key: section\.daily\.left\.banana"):
+        parse_toml(
             _minimal(
-                sections="""section daily {
-  columns (3fr 5fr)
-  item-spacing 5mm
-  left {
-    banana 1
-  }
-}
-"""
+                enable=["daily"],
+                sections="""[section.daily]
+columns = ["3fr", "5fr"]
+item-spacing = "5mm"
+
+[section.daily.left]
+banana = 1
+""",
             ),
-            source="unknown-left.kdl",
+            source="unknown-left.toml",
         )
-    with pytest.raises(ConfigError, match=r"unknown node: section\.daily\.right\.banana"):
-        parse_kdl(
+    with pytest.raises(ConfigError, match=r"unknown key: section\.daily\.right\.banana"):
+        parse_toml(
             _minimal(
-                sections="""section daily {
-  columns (3fr 5fr)
-  item-spacing 5mm
-  right {
-    banana 1
-  }
-}
-"""
+                enable=["daily"],
+                sections="""[section.daily]
+columns = ["3fr", "5fr"]
+item-spacing = "5mm"
+
+[section.daily.right]
+banana = 1
+""",
             ),
-            source="unknown-right.kdl",
+            source="unknown-right.toml",
         )
 
 
@@ -204,7 +165,7 @@ def test_existing_mos_left_and_nomad_daily_still_parse(path: Path):
 
 
 def test_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
-    dto = _short_january(load(MOS_RIGHT))
+    dto = short_january(load(MOS_RIGHT))
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["side_menu_position"] == "right"
     assert mos["side_menu_width"] == "10mm"
@@ -230,7 +191,7 @@ def test_shipped_mos_right_omits_colophon():
 
 
 def test_nomad_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
-    dto = _short_january(load(NOMAD_MOS_RIGHT))
+    dto = short_january(load(NOMAD_MOS_RIGHT))
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["side_menu_position"] == "right"
     assert mos["side_menu_width"] == "8mm"
@@ -260,7 +221,6 @@ def test_nomad_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
     typst_src = _generate(dto)
     assert "columns: (1fr, 8mm)" in typst_src
     assert "columns: (8mm, 1fr)" not in typst_src
-    # Daily leftover height: page body is 1fr; last column item gets (auto, 1fr).
     assert "rows: 1fr" in typst_src
     assert "rows: (auto, 1fr)" in typst_src
     pdf, stderr = compile_pdf(typst_src, tmp_path / "nomad-mos-right")

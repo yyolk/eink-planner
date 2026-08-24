@@ -1,4 +1,4 @@
-"""Config loading (KDL only for device profiles) and strict nested-dict access."""
+"""Config loading (TOML device profiles) and strict nested-dict access."""
 
 from __future__ import annotations
 
@@ -111,15 +111,15 @@ def _to_plain(value: Any) -> Any:
 
 
 def load(path: str | Path) -> StrictDict:
-    """Load a planner device profile. Only ``.kdl`` is accepted."""
+    """Load a planner device profile. Only ``.toml`` is accepted."""
     source = Path(path)
     suffix = source.suffix.lower()
-    if suffix in {".yaml", ".yml"}:
+    if suffix in {".yaml", ".yml", ".kdl"}:
         raise ConfigError(
-            f"{source}: device profiles must be KDL (locales too)"
+            f"{source}: leftover {suffix} is not accepted; device profiles must be TOML (locales too)"
         )
-    if suffix == ".kdl":
-        from eink_planner.kdl_config import load_kdl
+    if suffix == ".toml":
+        from eink_planner.toml_config import load_toml
 
-        return load_kdl(source)
-    raise ConfigError(f"{source}: unsupported config suffix {suffix!r} (use .kdl)")
+        return load_toml(source)
+    raise ConfigError(f"{source}: unsupported config suffix {suffix!r} (use .toml)")

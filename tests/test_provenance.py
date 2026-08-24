@@ -22,17 +22,17 @@ REPO = Path(__file__).resolve().parents[1]
 
 
 def test_config_sha256_matches_hashlib(tmp_path):
-    path = tmp_path / "cfg.kdl"
+    path = tmp_path / "cfg.toml"
     data = b'section colophon { }\n#true `ticks` "quotes"\n'
     path.write_bytes(data)
     assert config_sha256(path) == hashlib.sha256(data).hexdigest()
 
 
 def test_format_command_joins_argv():
-    assert format_command(["lyp", "generate", "foo.kdl"]) == "lyp generate foo.kdl"
-    joined = format_command(["lyp", "generate", "file with space.kdl"])
+    assert format_command(["lyp", "generate", "foo.toml"]) == "lyp generate foo.toml"
+    joined = format_command(["lyp", "generate", "file with space.toml"])
     assert "lyp generate" in joined
-    assert "file with space.kdl" in joined
+    assert "file with space.toml" in joined
 
 
 def test_git_head_this_repo():
@@ -99,7 +99,7 @@ def test_git_head_worktree_gitdir_file(tmp_path, monkeypatch):
 
 def test_collect_provenance_keys(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    path = tmp_path / "x.kdl"
+    path = tmp_path / "x.toml"
     path.write_text("year 2026\n", encoding="utf-8")
     prov = collect_provenance(
         config_path=path,
@@ -124,6 +124,6 @@ def test_collect_provenance_keys(tmp_path, monkeypatch):
 
 def test_apply_provenance_attaches_to_planner_params():
     dto = StrictDict({"planner": {"params": {}, "sections": []}})
-    out = apply_provenance(dto, {"command": "lyp generate x.kdl", "git_sha": None})
-    assert out["planner"]["params"]["provenance"]["command"] == "lyp generate x.kdl"
+    out = apply_provenance(dto, {"command": "lyp generate x.toml", "git_sha": None})
+    assert out["planner"]["params"]["provenance"]["command"] == "lyp generate x.toml"
     assert "provenance" not in dto["planner"]["params"]
