@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 import subprocess
 
 import pytest
@@ -112,15 +113,20 @@ def test_full_year_quarter_pages_include_all_three_months(path: Path):
         assert page.count("colspan:") == 3
 
 
-def test_mos_left_and_mos_right_q3_compile_with_three_months(tmp_path):
-    """Compile a real 2026 Q1-Q4 set so a July-only Q3 cannot slip through."""
-    for name, config in (("mos-left", MOS_LEFT), ("mos-right", MOS_RIGHT), ("nomad-mos-right", NOMAD_MOS_RIGHT)):
+def test_shipped_profiles_q3_compile_with_three_months(tmp_path):
+    """Compile a real 2026 Q1-Q4 set for all shipped MOS profiles so a July-only Q3 cannot slip through."""
+    pdfs = []
+    for name, config in (("mos-left", MOS_LEFT), ("mos-right", MOS_RIGHT), ("nomad", NOMAD), ("nomad-mos-right", NOMAD_MOS_RIGHT)):
         typst_src = _generate(_full_year_quarters(config))
         q3 = _quarter_pages(typst_src)[3]
         for month in Q3_MONTHS:
             assert f"[{month}]" in q3
         pdf, stderr = compile_pdf(typst_src, tmp_path / name)
         assert pdf.is_file() and pdf.stat().st_size > 0, stderr
+        pdfs.append((name, pdf))
+    if shutil.which("pdftotext") is None:
+        pytest.skip("pdftotext not on PATH")
+    for name, pdf in pdfs:
         extracted = subprocess.run(
             ["pdftotext", "-layout", str(pdf), "-"],
             check=True,
