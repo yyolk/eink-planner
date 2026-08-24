@@ -65,6 +65,13 @@ def test_daily_listed_but_table_missing_is_validation_error():
         DeviceProfile.model_validate(data)
 
 
+@pytest.mark.parametrize("kind", ["quarterly", "monthly", "weekly"])
+def test_calendar_section_listed_but_table_missing_is_validation_error(kind):
+    data = tomllib.loads(_minimal(enable=[kind], sections=""))
+    with pytest.raises(ValidationError, match=f"{kind} is listed in sections but"):
+        DeviceProfile.model_validate(data)
+
+
 def test_schedule_hour_from_not_less_than_hour_to():
     text = _minimal(
         enable=["daily"],

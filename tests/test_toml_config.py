@@ -157,6 +157,12 @@ def test_unknown_section_raises():
         parse_toml(_minimal(enable=["mystery"], sections=""))
 
 
+@pytest.mark.parametrize("kind", ["quarterly", "monthly", "weekly"])
+def test_listed_calendar_section_without_table_raises(kind):
+    with pytest.raises(ConfigError, match=f"{kind} is listed in sections but"):
+        parse_toml(_minimal(enable=[kind], sections=""))
+
+
 def test_unknown_section_table_key_raises():
     with pytest.raises(ConfigError, match="unknown key: section.proejcts"):
         parse_toml(

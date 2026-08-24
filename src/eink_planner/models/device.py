@@ -346,6 +346,12 @@ class DeviceProfile(StrictModel):
         tables = self.section
         if "cover" in names and tables.cover is None:
             raise ValueError("cover is listed in sections but [section.cover] is missing")
+        if "quarterly" in names and tables.quarterly is None:
+            raise ValueError("quarterly is listed in sections but [section.quarterly] is missing")
+        if "monthly" in names and tables.monthly is None:
+            raise ValueError("monthly is listed in sections but [section.monthly] is missing")
+        if "weekly" in names and tables.weekly is None:
+            raise ValueError("weekly is listed in sections but [section.weekly] is missing")
         if "daily_notes" in names and tables.daily_notes is None:
             raise ValueError("daily_notes is listed in sections but [section.daily_notes] is missing")
         if "daily" in names:
