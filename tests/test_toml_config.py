@@ -357,6 +357,14 @@ count = 1
         )
 
 
+def test_string_field_rejects_integer():
+    with pytest.raises(ConfigError, match="expected string"):
+        parse_toml(_minimal(calendar="""[calendar]
+year = 2026
+week_starts = 1
+"""))
+
+
 def test_hour_range_rejects_float_args():
     with pytest.raises(ConfigError, match="expected integer"):
         parse_toml(

@@ -6,9 +6,9 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 
 class StrictModel(BaseModel):
-    """Reject unknown keys. TOML keys must match field names (underscores)."""
+    """Reject unknown keys and type coercion. TOML keys match field names (underscores)."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", strict=True)
 
 
 def format_validation_error(exc: ValidationError) -> str:
@@ -28,6 +28,8 @@ def format_validation_error(exc: ValidationError) -> str:
         return f"{loc}: expected integer" if loc else "expected integer"
     if typ in {"bool_type", "bool_parsing"} or "boolean" in msg.lower():
         return f"{loc}: expected boolean" if loc else "expected boolean"
+    if typ == "string_type":
+        return f"{loc}: expected string" if loc else "expected string"
     if loc:
         return f"{loc}: {msg}"
     return msg

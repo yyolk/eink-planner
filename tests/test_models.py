@@ -114,3 +114,10 @@ def test_device_profile_json_schema_is_dict():
     schema = DeviceProfile.model_json_schema()
     assert isinstance(schema, dict)
     assert "properties" in schema
+
+
+def test_string_field_rejects_integer():
+    data = tomllib.loads(_minimal())
+    data["calendar"]["week_starts"] = 1
+    with pytest.raises(ValidationError):
+        DeviceProfile.model_validate(data)
