@@ -41,7 +41,6 @@ def _minimal(**extra: str) -> str:
   }
   gutter {
     column 8pt
-    row 1.5mm
   }
 }""",
         "layout": """layout "mos" {
@@ -139,6 +138,15 @@ def test_unknown_node_raises():
         parse_kdl(_minimal() + "\nfoo 1\n")
 
 
+def test_style_gutter_row_is_unknown():
+    text = _minimal().replace(
+        "gutter {\n    column 8pt\n  }",
+        "gutter {\n    column 8pt\n    row 1.5mm\n  }",
+    )
+    with pytest.raises(ConfigError, match="unknown node: style.gutter.row"):
+        parse_kdl(text)
+
+
 def test_unknown_section_raises():
     with pytest.raises(ConfigError, match="unknown section"):
         parse_kdl(_minimal(sections='section mystery {\n  pages 1\n}\n'))
@@ -193,6 +201,42 @@ def test_bool_args_are_not_integers():
   left {
     schedule #true #false
   }
+}
+"""))
+
+
+def test_hour_range_rejects_float_args():
+    with pytest.raises(ConfigError, match="expected hour range"):
+        parse_kdl(_minimal(sections="""section daily {
+  item-spacing 1mm
+  columns 3fr 5fr
+  left {
+    schedule 8.5 20
+  }
+}
+"""))
+
+
+def test_arg0_requires_exactly_one_argument():
+    with pytest.raises(ConfigError, match="expected one argument"):
+        parse_kdl(_minimal(sections="""section cover {
+  title "A" "B"
+  font-size 12pt
+}
+"""))
+    with pytest.raises(ConfigError, match="expected one argument"):
+        parse_kdl(_minimal(sections="""section cover {
+  title "Hi"
+  font-size 12pt 99pt
+}
+"""))
+
+
+def test_section_requires_exactly_one_argument():
+    with pytest.raises(ConfigError, match="expected one type argument"):
+        parse_kdl(_minimal(sections="""section daily extra {
+  item-spacing 1mm
+  columns 3fr 5fr
 }
 """))
 

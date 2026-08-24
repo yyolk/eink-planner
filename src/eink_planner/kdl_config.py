@@ -35,7 +35,7 @@ _STYLE_NODES = frozenset(
 _STROKE_NODES = frozenset({"regular", "thick"})
 _TYPE_NODES = frozenset({"body", "h1"})
 _MARGIN_NODES = frozenset({"top", "bottom", "left", "right"})
-_GUTTER_NODES = frozenset({"column", "row"})
+_GUTTER_NODES = frozenset({"column"})
 _HEADING_NODES = frozenset({"height", "align"})
 _LAYOUT_NODES = frozenset(
     {
@@ -279,9 +279,6 @@ def _parse_style(node: ckdl.Node) -> dict[str, Any]:
         },
         "column_gutter": _token(_child_arg(gutter, "column", "style.gutter")),
     }
-    row = _first(gutter.children, "row")
-    if row is not None:
-        out["row_gutter"] = _token(_arg0(row, "style.gutter.row"))
 
     if (rh := _first(node.children, "regular-height")) is not None:
         out["regular_height"] = _token(_arg0(rh, "style.regular-height"))
@@ -331,6 +328,8 @@ def _parse_sections(nodes: list[ckdl.Node]) -> tuple[list[dict[str, Any]], dict[
     for node in nodes:
         if not node.args:
             raise ConfigError("section: missing type argument")
+        if len(node.args) != 1:
+            raise ConfigError("section: expected one type argument")
         kind = str(_plain(node.args[0]))
         if kind not in _SECTION_TYPES:
             raise ConfigError(f"unknown section: {kind}")
@@ -519,12 +518,9 @@ def _hour_range(node: ckdl.Node, path: str) -> tuple[int, int]:
         except ValueError as exc:
             raise ConfigError(f"{path}: expected hour range like 8..20") from exc
     if len(args) == 2:
-        if any(isinstance(a, bool) for a in args):
+        if any(isinstance(a, bool) or not isinstance(a, int) for a in args):
             raise ConfigError(f"{path}: expected hour range like 8..20")
-        try:
-            return int(args[0]), int(args[1])
-        except (TypeError, ValueError) as exc:
-            raise ConfigError(f"{path}: expected hour range like 8..20") from exc
+        return args[0], args[1]
     raise ConfigError(f"{path}: expected hour range like 8..20")
 
 
@@ -609,6 +605,8 @@ def _child_arg(parent: ckdl.Node, name: str, path: str) -> Any:
 def _arg0(node: ckdl.Node, path: str) -> Any:
     if not node.args:
         raise ConfigError(f"{path}: missing argument")
+    if len(node.args) != 1:
+        raise ConfigError(f"{path}: expected one argument")
     return _plain(node.args[0])
 
 
