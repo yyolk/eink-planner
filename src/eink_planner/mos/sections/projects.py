@@ -108,7 +108,7 @@ class Projects:
   grid.cell(stroke: (bottom: regular_stroke), []),
   [{index}/{n} <{bid}>]
 )"""
-        card = "grid.cell(stroke: regular_stroke, inset: 0pt, rect_pattern(dotted))"
+        card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern(dotted))"
         cards = ",\n    ".join([card] * self.CARDS)
         column = f"""grid(
   columns: 1fr,
