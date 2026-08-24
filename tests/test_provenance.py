@@ -6,6 +6,8 @@ import hashlib
 import re
 from pathlib import Path
 
+import pytest
+
 from eink_planner import __version__
 from eink_planner.config import StrictDict
 from eink_planner.provenance import (
@@ -35,7 +37,8 @@ def test_format_command_joins_argv():
 
 def test_git_head_this_repo():
     sha = git_head(REPO)
-    assert sha is not None
+    if sha is None:
+        pytest.skip("sdist/wheel / no .git")
     assert re.fullmatch(r"[0-9a-f]{40}", sha.lower()), sha
 
 

@@ -1,4 +1,4 @@
-"""Generic provenance / about page. Layout-agnostic raw Typst (no MOS chrome)."""
+"""Raw Typst about / provenance page (no MOS chrome). Wired through the MOS coordinator via PageData."""
 
 from __future__ import annotations
 
