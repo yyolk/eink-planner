@@ -73,7 +73,7 @@ section weekly {
 }
 
 section daily {
-  // columns tracks are left-to-right, so notes stay 5fr and schedule stays 3fr
+  // column tracks are left-to-right, so notes stay 5fr and schedule stays 3fr
   columns (5fr 3fr)
   item-spacing 5mm
 
