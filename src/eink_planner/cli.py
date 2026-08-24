@@ -45,7 +45,7 @@ def build_parser() -> argparse.ArgumentParser:
         "-i",
         "--i18n-path",
         default=None,
-        help="Path to a locale YAML file or locales/ directory",
+        help="Path to a locale KDL or YAML file, or a locales/ directory (.kdl preferred)",
     )
     gen.add_argument(
         "-g",
@@ -70,7 +70,7 @@ def build_parser() -> argparse.ArgumentParser:
 def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
     repo = _repo_root()
     locale_path = Path(args.i18n_path) if args.i18n_path else repo / "locales"
-    i18n = I18n.load(locale_path, locale=args.locale) if locale_path.is_file() else I18n.load_default(repo, args.locale)
+    i18n = I18n.load(locale_path, locale=args.locale)
 
     dto = apply_debug(load(args.config), debug=bool(args.debug))
     dto = apply_year(dto, args.year)

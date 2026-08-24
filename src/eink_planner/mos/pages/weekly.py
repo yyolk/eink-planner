@@ -24,7 +24,7 @@ class Weekly:
         self.pattern = pattern
 
     def title(self) -> str:
-        return f'text(size: h1)[{self.i18n.t("week_name_full")} {self.week.number} <{self.week.id}>]'
+        return f'text(size: h1)[{self.i18n.t("week-name")} {self.week.number} <{self.week.id}>]'
 
     def content(self) -> str:
         days = self.week.days()

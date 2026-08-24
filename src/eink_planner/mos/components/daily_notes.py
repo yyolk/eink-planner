@@ -32,10 +32,10 @@ class DailyNotes:
         daily_note_id = DatedNote(weekday_start=self.day.weekday_start, day=self.day).id
         more = ""
         if self.manifest.source(daily_note_id):
-            more = f' #padded_link(<{daily_note_id}>)[| {self.i18n.t("more_daily_notes")}]'
+            more = f' #padded_link(<{daily_note_id}>)[| {self.i18n.t("more-daily-notes")}]'
         return f"""grid(
   columns: 1fr,
   rows: ({self.title_height}, {self.notes_height}),
-  grid.cell(align:horizon, stroke: (bottom: thick_stroke), [{self.i18n.t("daily_notes")}{more}]),
+  grid.cell(align:horizon, stroke: (bottom: thick_stroke), [{self.i18n.t("daily-notes")}{more}]),
   rect_pattern({self.pattern})
 )"""

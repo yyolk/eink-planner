@@ -28,7 +28,7 @@ class Quarterly:
         self.pattern = pattern
 
     def title(self) -> str:
-        return f'text(size: h1)[{self.i18n.t("quarters.long")} {self.quarter.number} <{self.quarter.id}>]'
+        return f'text(size: h1)[{self.i18n.t("quarter.long")} {self.quarter.number} <{self.quarter.id}>]'
 
     def content(self) -> str:
         cols = ["2fr", "3fr"]

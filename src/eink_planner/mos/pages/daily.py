@@ -44,7 +44,7 @@ class Daily:
 
     def title(self) -> str:
         week = self.manifest.link_or_content(
-            self.day.week().id, f'{self.i18n.t("week_name_full")} {self.day.week().number}'
+            self.day.week().id, f'{self.i18n.t("week-name")} {self.day.week().number}'
         )
         debug_stroke = "stroke: regular_stroke,\n" if self.debug else ""
         weekday = self.i18n.t(f"weekday.full.{self.day.weekday_name}")

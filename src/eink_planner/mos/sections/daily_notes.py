@@ -48,7 +48,7 @@ class DailyNotes:
     def _title(self, manifest: Manifest, daily_note: DatedNote) -> str:
         week = manifest.link_or_content(
             daily_note.day.week().id,
-            f'{self.i18n.t("week_name_full")} {daily_note.day.week().number}',
+            f'{self.i18n.t("week-name")} {daily_note.day.week().number}',
         )
         day = f"text(size: h1)[{daily_note.day.month_day} <{daily_note.id}>]"
         if manifest.source(daily_note.day.id):
