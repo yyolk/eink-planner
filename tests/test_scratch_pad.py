@@ -17,6 +17,7 @@ CONFIGS = REPO / "configs"
 NOMAD = CONFIGS / "supernote-nomad.kdl"
 NOMAD_MOS_RIGHT = CONFIGS / "supernote-nomad-mos-right.kdl"
 MOS_LEFT = CONFIGS / "158x210-mos-left.kdl"
+MOS_LEFT_LINED = CONFIGS / "158x210-mos-left-lined.kdl"
 MOS_RIGHT = CONFIGS / "158x210-mos-right.kdl"
 SCRIBE = CONFIGS / "kindle-scribe.kdl"
 
@@ -162,6 +163,25 @@ def test_shipped_profiles_keep_dotted_scratch_areas(path: Path):
     assert "rect_pattern(dotted)" in typst
     assert "grid.cell(colspan: 3, scratch_pad)" not in typst
     assert "#let scratch_pad = rect_pattern(dotted)" in typst
+
+
+def test_mos_left_lined_sibling_keeps_daily_notes_dotted():
+    dto = load(MOS_LEFT_LINED)
+    assert dto["planner"]["params"]["scratch_pad"] == "lined"
+    assert _notes_pattern(dto) == "dotted"
+    for name in ("daily_notes", "quarterly", "monthly", "weekly"):
+        assert _section(dto, name)["params"]["pattern"] == "lined"
+    typst = _generate(_short_january(dto))
+    assert "rect_pattern(dotted)" in typst
+    assert "rect_pattern(lined)" in typst
+    pages = typst.split("#pagebreak()")
+    daily_pages = [page for page in pages if " <2026-01-01>" in page]
+    extra_pages = [page for page in pages if " <daily-note-" in page]
+    assert daily_pages
+    assert extra_pages
+    assert any("rect_pattern(dotted)" in page for page in daily_pages)
+    assert any("rect_pattern(lined)" in page for page in extra_pages)
+    assert all("rect_pattern(dotted)" not in page for page in extra_pages)
 
 
 def test_week_month_quarter_accept_pattern_lined():

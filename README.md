@@ -32,6 +32,9 @@ uv run lyp generate configs/supernote-nomad-mos-right.kdl -w out/nomad-mos-right
 # 158×210 MOS-left → ./out/mos-left/index.pdf
 uv run lyp generate configs/158x210-mos-left.kdl -w out/mos-left
 
+# 158×210 MOS-left lined → ./out/mos-left-lined/index.pdf
+uv run lyp generate configs/158x210-mos-left-lined.kdl -w out/mos-left-lined
+
 # 158×210 MOS-right → ./out/mos-right/index.pdf
 uv run lyp generate configs/158x210-mos-right.kdl -w out/mos-right
 
@@ -68,6 +71,7 @@ Sizes are 1:1 on glass at 300 PPI.
 | SuperNote Nomad (A6 X2) | 1404×1872 | 336.96×449.28 | 118.87×158.5 | `configs/supernote-nomad.kdl` |
 | SuperNote Nomad MOS-right | 1404×1872 | 336.96×449.28 | 118.87×158.5 | `configs/supernote-nomad-mos-right.kdl` |
 | 158×210 MOS-left | — | 447.87×595.28 | 158×210 | `configs/158x210-mos-left.kdl` |
+| 158×210 MOS-left lined | — | 447.87×595.28 | 158×210 | `configs/158x210-mos-left-lined.kdl` |
 | 158×210 MOS-right | — | 447.87×595.28 | 158×210 | `configs/158x210-mos-right.kdl` |
 | Kindle Scribe | 1860×2480 | 446.4×595.2 | 157.48×209.97 | `configs/kindle-scribe.kdl` |
 
@@ -75,7 +79,7 @@ Presets also live in `eink_planner.devices`. The Nomad profile scales strokes, t
 
 **MOS** is Months on the Side — the navigation style that places a vertical month menu on the side of the page (as opposed to a top breadcrumb trail).
 
-Shipped configs keep the **MOS** (Months on the Side) layout: side menu on the physical left except 158×210 MOS-right and SuperNote Nomad MOS-right (physical right), reversed months/quarters, Monday week start, daily schedule 8–20, 5 top priorities, 2 extra daily note pages, dotted scratch pad. `pattern` is per notes area (dotted default; `lined` is the other option). MOS-left/MOS-right names are the physical MOS strip side (nav left / nav right), not which hand you write with. MOS-left is the right-handed writing layout (nav opposite the writing hand); MOS-right is the left-handed writing layout. Upstream LYP called these leftie/rightie for the same strip-side meaning; the shipped `.kdl` files drop that jargon.
+Shipped configs keep the **MOS** (Months on the Side) layout: side menu on the physical left except 158×210 MOS-right and SuperNote Nomad MOS-right (physical right), reversed months/quarters, Monday week start, daily schedule 8–20, 5 top priorities, 2 extra daily note pages, dotted scratch pad on most shipped configs (the 158×210 MOS-left lined sibling uses `style.scratch-pad lined` with daily notes still dotted). `pattern` is per notes area (dotted default; `lined` is the other option). MOS-left/MOS-right names are the physical MOS strip side (nav left / nav right), not which hand you write with. MOS-left is the right-handed writing layout (nav opposite the writing hand); MOS-right is the left-handed writing layout. Upstream LYP called these leftie/rightie for the same strip-side meaning; the shipped `.kdl` files drop that jargon.
 
 Device profiles are KDL; locale files stay YAML.
 
