@@ -593,6 +593,66 @@ def apply_debug(dto: StrictDict, debug: bool) -> StrictDict:
     return StrictDict(data)
 
 
+def apply_year(dto: StrictDict, year: int | None) -> StrictDict:
+    """CLI overlay: rewrite start/end dates. Year stays in the profile."""
+    if year is None:
+        return dto
+    year = _coerce_year(year)
+    data = dto.to_plain()
+    planner = data.setdefault("planner", {})
+    if not isinstance(planner, dict):
+        planner = {}
+        data["planner"] = planner
+    params = planner.setdefault("params", {})
+    if not isinstance(params, dict):
+        params = {}
+        planner["params"] = params
+    old_year = _year_from_start(params.get("start_date"))
+    last_day = calendar.monthrange(year, 12)[1]
+    params["start_date"] = f"{year:04d}-01-01"
+    params["end_date"] = f"{year:04d}-12-{last_day:02d}"
+    if old_year is not None and old_year != year:
+        _rewrite_cover_year(planner, old_year, year)
+    return StrictDict(data)
+
+
+def _coerce_year(year: Any) -> int:
+    if isinstance(year, bool):
+        raise ConfigError("year: expected integer")
+    if isinstance(year, int):
+        return year
+    try:
+        return int(year)
+    except (TypeError, ValueError) as exc:
+        raise ConfigError("year: expected integer") from exc
+
+
+def _year_from_start(raw: Any) -> int | None:
+    if raw is None:
+        return None
+    try:
+        return int(str(raw)[:4])
+    except (TypeError, ValueError):
+        return None
+
+
+def _rewrite_cover_year(planner: dict[str, Any], old_year: int, year: int) -> None:
+    sections = planner.get("sections") or []
+    old = f"{old_year:04d}"
+    new = f"{year:04d}"
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        if section.get("name") != "cover" and section.get("class") != "cover_plain":
+            continue
+        params = section.get("params")
+        if not isinstance(params, dict):
+            continue
+        name = params.get("name")
+        if isinstance(name, str) and old in name:
+            params["name"] = name.replace(old, new)
+
+
 def _reject_unknown(nodes: Iterable[ckdl.Node], allowed: frozenset[str], path: str) -> None:
     for node in nodes:
         if node.name not in allowed:

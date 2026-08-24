@@ -268,6 +268,7 @@ def test_generate_cmd_attaches_provenance(tmp_path, monkeypatch):
             "i18n_path": None,
             "with_ghostscript": False,
             "debug": False,
+            "year": None,
         },
     )()
     assert generate_cmd(ns, argv=["lyp", "generate", str(path)]) == 0
