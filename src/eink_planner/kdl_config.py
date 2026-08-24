@@ -48,7 +48,7 @@ _LAYOUT_NODES = frozenset(
     }
 )
 _SECTION_TYPES = frozenset(
-    {"cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily-notes", "colophon"}
+    {"cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily-notes", "projects", "colophon"}
 )
 _LITTLE_CAL_NODES = frozenset({"show-month-name", "week-placement", "inset"})
 _COVER_NODES = frozenset({"title", "font-size"})
@@ -62,6 +62,7 @@ _SCHEDULE_NODES = frozenset({"time-format", "trailing-half-hour"})
 _NOTES_NODES = frozenset({"pattern", "title-height", "height"})
 _DAILY_NOTES_NODES = frozenset({"pages", "pattern"})
 _COLOPHON_NODES = frozenset({"title", "highlight"})
+_PROJECTS_NODES = frozenset({"pages"})
 _DEVICE_NODES = frozenset({"page-size", "ppi"})
 
 _SECTION_CLASS = {
@@ -72,6 +73,7 @@ _SECTION_CLASS = {
     "weekly": "weekly",
     "daily": "daily",
     "daily-notes": "daily_notes",
+    "projects": "projects",
     "colophon": "colophon",
 }
 
@@ -83,6 +85,7 @@ _SECTION_NAME = {
     "weekly": "weekly",
     "daily": "daily",
     "daily-notes": "daily_notes",
+    "projects": "projects",
     "colophon": "colophon",
 }
 
@@ -410,6 +413,7 @@ def _parse_sections(nodes: list[ckdl.Node]) -> tuple[list[dict[str, Any]], dict[
             "weekly": _section_weekly,
             "daily": lambda n: _section_daily(n, extras),
             "daily-notes": _section_daily_notes,
+            "projects": _section_projects,
             "colophon": _section_colophon,
         }[kind]
         params = builder(node)
@@ -569,6 +573,14 @@ def _section_daily_notes(node: ckdl.Node) -> dict[str, Any]:
     params: dict[str, Any] = {"pages": _int_arg(_require(node.children, "pages", "section.daily-notes"), "section.daily-notes.pages")}
     _set_optional_pattern(node, params, "section.daily-notes.pattern")
     return params
+
+
+def _section_projects(node: ckdl.Node) -> dict[str, Any]:
+    _reject_unknown(node.children, _PROJECTS_NODES, "section.projects")
+    pages_node = _first(node.children, "pages")
+    if pages_node is None:
+        return {"pages": 20}
+    return {"pages": _int_arg(pages_node, "section.projects.pages")}
 
 
 def _parse_little_calendar(node: ckdl.Node, path: str) -> dict[str, Any]:
@@ -757,7 +769,7 @@ def _str_arg(node: ckdl.Node, path: str) -> str:
 
 def _int_arg(node: ckdl.Node, path: str) -> int:
     value = _arg0(node, path)
-    if isinstance(value, bool):
+    if isinstance(value, bool) or isinstance(value, float):
         raise ConfigError(f"{path}: expected integer")
     if isinstance(value, int):
         return value

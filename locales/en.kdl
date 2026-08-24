@@ -9,6 +9,12 @@ monthly-notes "Notes"
 daily-notes "Notes"
 more-daily-notes "More"
 notes "Notes"
+projects "Projects"
+todo "TODO"
+doing "DOING"
+done "DONE"
+title "TITLE"
+date "DATE"
 
 quarter {
   short "Q"

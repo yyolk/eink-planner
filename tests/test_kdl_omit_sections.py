@@ -48,6 +48,7 @@ SECTIONS = (
     "weekly",
     "daily",
     "daily-notes",
+    "projects",
 )
 
 # Typst 0.15: "label `<foo>` does not exist in the document"
@@ -191,18 +192,18 @@ def test_omit_one_section_compiles_pdf(kind, tmp_path):
 @pytest.mark.parametrize(
     "omit,remain",
     [
-        (("annual", "quarterly"), ("cover", "monthly", "weekly", "daily", "daily_notes")),
-        (("weekly",), ("cover", "annual", "quarterly", "monthly", "daily", "daily_notes")),
-        (("monthly",), ("cover", "annual", "quarterly", "weekly", "daily", "daily_notes")),
-        (("daily",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes")),
-        (("daily-notes",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily")),
+        (("annual", "quarterly"), ("cover", "monthly", "weekly", "daily", "daily_notes", "projects")),
+        (("weekly",), ("cover", "annual", "quarterly", "monthly", "daily", "daily_notes", "projects")),
+        (("monthly",), ("cover", "annual", "quarterly", "weekly", "daily", "daily_notes", "projects")),
+        (("daily",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes", "projects")),
+        (("daily-notes",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily", "projects")),
         (
             ("cover", "annual", "quarterly", "monthly", "weekly", "daily-notes"),
-            ("daily",),
+            ("daily", "projects"),
         ),
         (
             ("annual", "quarterly", "monthly", "weekly", "daily", "daily-notes"),
-            ("cover",),
+            ("cover", "projects"),
         ),
     ],
     ids=[

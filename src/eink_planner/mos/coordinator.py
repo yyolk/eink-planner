@@ -16,6 +16,7 @@ from eink_planner.mos.sections.daily import Daily
 from eink_planner.mos.sections.daily_notes import DailyNotes
 from eink_planner.mos.sections.monthly import Monthly
 from eink_planner.mos.sections.quarterly import Quarterly
+from eink_planner.mos.sections.projects import Projects
 from eink_planner.mos.sections.weekly import Weekly
 from eink_planner.sections.colophon import Colophon
 
@@ -28,6 +29,7 @@ COMPONENTS = {
     "weekly": Weekly,
     "daily": Daily,
     "daily_notes": DailyNotes,
+    "projects": Projects,
     "colophon": Colophon,
 }
 

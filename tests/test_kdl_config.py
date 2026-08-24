@@ -69,7 +69,10 @@ def test_parse_shipped_kdl_profiles(path: Path):
     assert "debug" not in dto
     cfg = Configurator(dto)
     names = [section["name"] if not hasattr(section, "to_plain") else section["name"] for section in cfg.enabled_sections()]
-    assert names == ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
+    expected = ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
+    if path == NOMAD:
+        expected = expected + ["projects"]
+    assert names == expected
 
 
 def test_load_rejects_yaml_device_profiles():

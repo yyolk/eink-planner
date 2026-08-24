@@ -102,6 +102,9 @@ Enabled MOS (Months on the Side) sections, in order:
 5. Weekly
 6. Daily (schedule + little calendar + priorities + notes)
 7. Daily notes (extra dotted pages)
+8. Projects (index of write-in names + one kanban board per project)
+
+`section projects` takes optional `pages` (default 20).
 
 Internal PDF links use Typst `#padded_link` / `<label>` the same way LYP does. A link is only emitted when the target page exists; otherwise the cell stays plain text.
 
