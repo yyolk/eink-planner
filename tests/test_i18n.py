@@ -70,3 +70,16 @@ def test_generate_english_strings_match_previous_meanings():
         assert label in typst
     assert "Q1" in typst
     assert "[W], [M], [T], [W], [T], [F], [S], [S]" in typst
+
+
+def test_path_like_locale_code_is_config_error():
+    locale = "../configs/supernote-nomad"
+    with pytest.raises(ConfigError, match="locale: expected a code like en") as exc:
+        I18n.load_default(REPO, locale)
+    assert repr(locale) in str(exc.value)
+
+
+def test_load_explicit_kdl_file_still_works():
+    i18n = I18n.load(REPO / "locales" / "en.kdl")
+    assert i18n.t("week-name") == "Week"
+

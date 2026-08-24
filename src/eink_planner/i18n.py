@@ -56,6 +56,14 @@ class I18n:
 
 
 def _resolve_locale_file(directory: Path, locale: str) -> Path:
+    if (
+        not locale
+        or locale in {".", ".."}
+        or "/" in locale
+        or "\\" in locale
+        or Path(locale).name != locale
+    ):
+        raise ConfigError(f"locale: expected a code like en, not {locale!r}")
     return directory / f"{locale}.kdl"
 
 
