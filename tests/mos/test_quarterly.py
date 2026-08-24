@@ -9,19 +9,20 @@ import subprocess
 import pytest
 
 from eink_planner.i18n import I18n
-from eink_planner.kdl_config import parse_kdl
+from eink_planner.toml_config import parse_toml
 from eink_planner.mos.manifest import Manifest
 from eink_planner.mos.pages.quarterly import Quarterly
 from eink_planner.services.generate import Generate
 from tests.helpers import make_quarter
-from tests.test_kdl_omit_sections import compile_pdf, omit_kdl_sections
+from tests.test_toml_omit_sections import compile_pdf
+from tests.toml_fixtures import omit_toml_sections
 
 REPO = Path(__file__).resolve().parents[2]
 CONFIGS = REPO / "configs"
-MOS_LEFT = CONFIGS / "158x210-mos-left.kdl"
-MOS_RIGHT = CONFIGS / "158x210-mos-right.kdl"
-NOMAD = CONFIGS / "supernote-nomad.kdl"
-NOMAD_MOS_RIGHT = CONFIGS / "supernote-nomad-mos-right.kdl"
+MOS_LEFT = CONFIGS / "158x210-mos-left.toml"
+MOS_RIGHT = CONFIGS / "158x210-mos-right.toml"
+NOMAD = CONFIGS / "supernote-nomad.toml"
+NOMAD_MOS_RIGHT = CONFIGS / "supernote-nomad-mos-right.toml"
 
 Q1_MONTHS = ("January", "February", "March")
 Q3_MONTHS = ("July", "August", "September")
@@ -48,8 +49,8 @@ def _page(date_str: str, months_column: str = "left") -> Quarterly:
 
 
 def _full_year_quarters(config_path: Path):
-    text = omit_kdl_sections(config_path.read_text(encoding="utf-8"), _BULKY)
-    return parse_kdl(text, source=f"{config_path.name}-quarters.kdl")
+    text = omit_toml_sections(config_path.read_text(encoding="utf-8"), _BULKY)
+    return parse_toml(text, source=f"{config_path.name}-quarters.toml")
 
 
 def _generate(dto) -> str:

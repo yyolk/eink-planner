@@ -1,15 +1,14 @@
-"""Locale loader: KDL only.
+"""Locale loader: TOML only.
 
-Lookup keys follow the KDL shape (``week-name``, ``quarter.short``,
-``weekday.letter.monday``), not the old YAML snake_case names.
+Lookup keys follow the locale table shape (``week-name``, ``quarter.short``,
+``weekday.letter.monday``), not snake_case aliases.
 """
 
 from __future__ import annotations
 
+import tomllib
 from pathlib import Path
 from typing import Any
-
-import ckdl
 
 from eink_planner import ConfigError
 
@@ -41,11 +40,11 @@ class I18n:
         if not path.exists():
             raise ConfigError(f"locale file not found: {path}")
         suffix = path.suffix.lower()
-        if suffix in {".yaml", ".yml"}:
-            raise ConfigError(f"{path}: locales must be KDL (device profiles too)")
-        if suffix == ".kdl":
-            return cls(_load_kdl(path), locale=locale)
-        raise ConfigError(f"{path}: unsupported locale suffix {suffix!r} (use .kdl)")
+        if suffix in {".yaml", ".yml", ".kdl"}:
+            raise ConfigError(f"{path}: locales must be TOML (device profiles too)")
+        if suffix == ".toml":
+            return cls(_load_toml(path), locale=locale)
+        raise ConfigError(f"{path}: unsupported locale suffix {suffix!r} (use .toml)")
 
     @classmethod
     def load_default(cls, package_root: Path | None = None, locale: str = "en") -> I18n:
@@ -64,46 +63,22 @@ def _resolve_locale_file(directory: Path, locale: str) -> Path:
         or Path(locale).name != locale
     ):
         raise ConfigError(f"locale: expected a code like en, not {locale!r}")
-    return directory / f"{locale}.kdl"
+    return directory / f"{locale}.toml"
 
 
-def _plain(value: Any) -> Any:
-    if isinstance(value, ckdl.Value):
-        if value.type_annotation:
-            return f"{value.value}{value.type_annotation}"
-        return value.value
-    return value
-
-
-def _load_kdl(path: Path) -> dict[str, Any]:
+def _load_toml(path: Path) -> dict[str, Any]:
     try:
-        text = path.read_text(encoding="utf-8")
+        raw = path.read_bytes()
     except OSError as exc:
         raise ConfigError(f"{path}: {exc}") from exc
     try:
-        doc = ckdl.parse(text, version=2)
-    except ckdl.ParseError as exc:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
         raise ConfigError(f"{path}: {exc}") from exc
-    tree = _kdl_nodes_to_tree(list(doc.nodes), source=str(path))
-    if "language" not in tree:
+    try:
+        data = tomllib.loads(text)
+    except tomllib.TOMLDecodeError as exc:
+        raise ConfigError(f"{path}: {exc}") from exc
+    if "language" not in data:
         raise ConfigError(f"{path}: missing language")
-    return tree
-
-
-def _kdl_nodes_to_tree(nodes: list[Any], source: str, path: str = "") -> dict[str, Any]:
-    tree: dict[str, Any] = {}
-    for node in nodes:
-        loc = f"{path}.{node.name}" if path else node.name
-        if node.name in tree:
-            raise ConfigError(f"{source}: duplicate node: {loc}")
-        if node.children:
-            if node.args:
-                raise ConfigError(f"{source}: {loc}: expected children or a string, not both")
-            tree[node.name] = _kdl_nodes_to_tree(list(node.children), source, loc)
-            continue
-        if not node.args:
-            raise ConfigError(f"{source}: {loc}: missing argument")
-        if len(node.args) != 1:
-            raise ConfigError(f"{source}: {loc}: expected one argument")
-        tree[node.name] = _plain(node.args[0])
-    return tree
+    return data

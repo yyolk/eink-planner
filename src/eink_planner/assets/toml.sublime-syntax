@@ -1,0 +1,50 @@
+%YAML 1.2
+---
+name: TOML
+file_extensions:
+  - toml
+scope: source.toml
+contexts:
+  main:
+    - match: '#.*'
+      scope: comment.line.number-sign.toml
+    - match: '"""'
+      push: multiline_basic
+    - match: "'''"
+      push: multiline_literal
+    - match: '"'
+      push: string
+    - match: "'"
+      push: literal
+    - match: '\b(?:true|false)\b'
+      scope: constant.language.toml
+    - match: '-?(?:0x[0-9A-Fa-f_]+|0o[0-7_]+|0b[01_]+|\d(?:_?\d)*(?:\.\d(?:_?\d)*)?(?:[eE][+-]?\d+)?)'
+      scope: constant.numeric.toml
+    - match: '[\[\]{}.=,]'
+      scope: punctuation.toml
+    - match: '[A-Za-z_][A-Za-z0-9_-]*'
+      scope: entity.name.tag.toml
+  string:
+    - meta_include_prototype: false
+    - meta_scope: string.quoted.double.toml
+    - match: '\\.'
+      scope: constant.character.escape.toml
+    - match: '"'
+      pop: true
+  literal:
+    - meta_include_prototype: false
+    - meta_scope: string.quoted.single.toml
+    - match: "'"
+      pop: true
+  multiline_basic:
+    - meta_include_prototype: false
+    - meta_scope: string.quoted.double.toml
+    - match: '\\.'
+      scope: constant.character.escape.toml
+    - match: '"""'
+      pop: true
+  multiline_literal:
+    - meta_include_prototype: false
+    - meta_scope: string.quoted.single.toml
+    - match: "'''"
+      pop: true

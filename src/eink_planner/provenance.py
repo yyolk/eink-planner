@@ -1,4 +1,4 @@
-"""Build-time provenance for the colophon. Not part of the KDL schema."""
+"""Build-time provenance for the colophon. Not part of the TOML schema."""
 
 from __future__ import annotations
 
@@ -76,7 +76,7 @@ def collect_provenance(
 
 
 def apply_provenance(dto: StrictDict, provenance: dict[str, Any]) -> StrictDict:
-    """Attach runtime provenance onto the loaded DTO (not a KDL key)."""
+    """Attach runtime provenance onto the loaded DTO (not a config key)."""
     data = dto.to_plain()
     planner = data.setdefault("planner", {})
     if not isinstance(planner, dict):

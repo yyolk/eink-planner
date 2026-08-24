@@ -17,5 +17,5 @@ jobs:
       - run: uv run pytest
       - name: Generate Nomad PDF
         run: |
-          uv run lyp generate configs/supernote-nomad.kdl -w out/nomad
+          uv run lyp generate configs/supernote-nomad.toml -w out/nomad
           test -s out/nomad/index.pdf

@@ -9,7 +9,7 @@ from pathlib import Path
 from eink_planner import ConfigError, __version__
 from eink_planner.config import load
 from eink_planner.i18n import I18n
-from eink_planner.kdl_config import apply_debug, apply_year
+from eink_planner.toml_config import apply_debug, apply_year
 from eink_planner.provenance import apply_provenance, collect_provenance
 from eink_planner.services.compile import Compile, CompileError
 from eink_planner.services.generate import Generate
@@ -22,13 +22,13 @@ def _repo_root() -> Path:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="lyp",
-        description="Generate a yearly e-ink planner PDF from a KDL config.",
+        description="Generate a yearly e-ink planner PDF from a TOML config.",
     )
     parser.add_argument("--version", action="version", version=f"eink-planner {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    gen = sub.add_parser("generate", help="Generate Typst + PDF from a KDL config")
-    gen.add_argument("config", help="Path to planner KDL config")
+    gen = sub.add_parser("generate", help="Generate Typst + PDF from a TOML config")
+    gen.add_argument("config", help="Path to planner TOML config")
     gen.add_argument(
         "-w",
         "--workdir",
