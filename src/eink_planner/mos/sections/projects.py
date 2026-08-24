@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+import re
 from typing import Any
 
 from eink_planner.i18n import I18n
@@ -9,6 +11,29 @@ from eink_planner.mos.configurator import Configurator
 from eink_planner.mos.manifest import Manifest
 from eink_planner.mos.page_data import PageData
 from eink_planner.mos.sections.annual import Annual
+
+# Match the index page chrome in `_index` so row capacity tracks the layout.
+_INDEX_LEFT_INSET = "4mm"
+_INDEX_BOTTOM_INSET = "4mm"
+_INDEX_ROW_GUTTER = "3mm"
+_ROW_HEIGHT = "2 * regular_height"
+_ROW_HEIGHT_MULT = 2
+_LENGTH = re.compile(r"^([+-]?(?:\d+(?:\.\d*)?|\.\d+))(mm|cm|pt)$")
+
+
+def _length_mm(token: str) -> float:
+    """Parse a Typst length token (`mm` / `cm` / `pt`) into millimetres."""
+    text = str(token).strip()
+    match = _LENGTH.fullmatch(text)
+    if match is None:
+        raise ValueError(f"unrecognized length token: {token!r}")
+    value = float(match.group(1))
+    unit = match.group(2)
+    if unit == "mm":
+        return value
+    if unit == "cm":
+        return value * 10.0
+    return value * 25.4 / 72.0
 
 
 class Projects:
@@ -30,7 +55,8 @@ class Projects:
         self.pages_num = int(pages)
 
     def register(self, manifest: Manifest) -> None:
-        manifest.register_source(self.ID)
+        for page in range(1, self.index_page_count() + 1):
+            manifest.register_source(self.index_page_id(page))
         for index in range(1, self.pages_num + 1):
             manifest.register_source(self.board_id(index))
 
@@ -38,8 +64,48 @@ class Projects:
     def board_id(index: int) -> str:
         return f"project-{index}"
 
+    @staticmethod
+    def index_page_id(page: int) -> str:
+        return Projects.ID if page <= 1 else f"{Projects.ID}-{page}"
+
+    def rows_per_index_page(self) -> int:
+        """How many 2×-regular_height rows fit on one index page."""
+        page_h = _length_mm(self.configurator.dig_bang("document", "layout", "dimensions", "height"))
+        top = _length_mm(self.configurator.dig_bang("document", "layout", "margin", "top"))
+        bottom = _length_mm(self.configurator.dig_bang("document", "layout", "margin", "bottom"))
+        breadcrumb = _length_mm(self.configurator.dig_bang("document", "text", "h1"))
+        available = (
+            page_h
+            - top
+            - bottom
+            - breadcrumb
+            - _length_mm(_INDEX_BOTTOM_INSET)
+            - _length_mm(_INDEX_ROW_GUTTER)
+        )
+        row = _ROW_HEIGHT_MULT * _length_mm(
+            self.configurator.dig_bang("planner", "params", "regular_height")
+        )
+        if row <= 0:
+            return 1
+        return max(1, math.floor(available / row))
+
+    def index_page_count(self) -> int:
+        if self.pages_num <= 0:
+            return 1
+        rpp = self.rows_per_index_page()
+        return math.ceil(self.pages_num / rpp)
+
+    def board_index_id(self, index: int) -> str:
+        page = (index - 1) // self.rows_per_index_page() + 1
+        return self.index_page_id(page)
+
     def pages(self, manifest: Manifest) -> list[PageData]:
-        out = [PageData(raw_typst=True, content=self._index(manifest))]
+        rpp = self.rows_per_index_page()
+        out: list[PageData] = []
+        for page in range(1, self.index_page_count() + 1):
+            start = (page - 1) * rpp + 1
+            end = min(page * rpp, self.pages_num)
+            out.append(PageData(raw_typst=True, content=self._index(manifest, page, start, end)))
         for index in range(1, self.pages_num + 1):
             out.append(PageData(raw_typst=True, content=self._board(manifest, index)))
         return out
@@ -60,19 +126,25 @@ class Projects:
   text(size: h1, {projects_cell})
 )"""
 
-    def _index(self, manifest: Manifest) -> str:
+    def _index_projects_cell(self, manifest: Manifest, page: int) -> str:
         label = self.i18n.t("projects")
-        n = self.pages_num
+        page_id = self.index_page_id(page)
+        if page <= 1:
+            return f"[{label} <{page_id}>]"
+        return f"[#{manifest.link_or_content(self.ID, label)} <{page_id}>]"
+
+    def _index(self, manifest: Manifest, page: int, start: int, end: int) -> str:
+        n = max(0, end - start + 1)
         if n:
             rows = []
-            for index in range(1, n + 1):
+            for index in range(start, end + 1):
                 bid = self.board_id(index)
                 number = manifest.link_or_content(bid, str(index))
                 arrow = manifest.link_or_content(bid, "→")
                 rows.append(f"  {number}, [], {arrow}")
             body = f"""grid(
   columns: (auto, 1fr, auto),
-  rows: ({", ".join(["2.5 * regular_height"] * n)}),
+  rows: ({", ".join([_ROW_HEIGHT] * n)}),
   align: horizon,
   stroke: (bottom: regular_stroke),
   inset: (x: 4pt, y: 2pt),
@@ -83,9 +155,9 @@ class Projects:
         return f"""#grid(
   columns: 1fr,
   rows: (auto, 1fr),
-  row-gutter: 3mm,
-  inset: (left: 4mm, bottom: 4mm),
-  {self._breadcrumb(manifest, f"[{label} <{self.ID}>]")},
+  row-gutter: {_INDEX_ROW_GUTTER},
+  inset: (left: {_INDEX_LEFT_INSET}, bottom: {_INDEX_BOTTOM_INSET}),
+  {self._breadcrumb(manifest, self._index_projects_cell(manifest, page))},
   {body}
 )"""
 
@@ -133,7 +205,7 @@ class Projects:
   rows: (auto, auto, 1fr),
   row-gutter: 2.5mm,
   inset: (left: 4mm, bottom: 4mm),
-  {self._breadcrumb(manifest, manifest.link_or_content(self.ID, projects))},
+  {self._breadcrumb(manifest, manifest.link_or_content(self.board_index_id(index), projects))},
   {header},
   {kanban}
 )"""
