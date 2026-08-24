@@ -1,0 +1,98 @@
+// Kindle Scribe
+// 1860×2480 @ 300 PPI → 157.48 × 209.97 mm
+
+device "kindle-scribe" {
+  page-size 157.48mm 209.97mm
+  ppi 300
+}
+
+year 2026
+week-starts Monday
+
+style {
+  stroke {
+    regular 0.4pt
+    thick   0.8pt
+  }
+  type {
+    body 10pt
+    h1   10mm
+  }
+  margin {
+    top    10mm
+    bottom 0mm
+    left   0mm
+    right  5mm
+  }
+  gutter {
+    column 10pt
+  }
+}
+
+// layout "mos" → Months on the Side (vertical side menu navigation)
+// side-menu left|right is the physical side of the MOS strip
+layout "mos" {
+  side-menu left 10mm
+  reverse-months-quarters #true
+  menu-rotate 270deg
+  column-gutter 2mm
+  row-gutter 2mm
+}
+
+section cover {
+  title "2026\n\nPlanner"
+  font-size 48pt
+}
+
+section annual {
+  little-calendar {
+    show-month-name #true
+  }
+  row-gutter 5pt
+}
+
+section quarterly {
+  months-column left
+  little-calendar {
+    show-month-name #true
+  }
+}
+
+section monthly {
+  week-placement left
+  week-label-rotation 90deg
+  daily-cell-height 2.5cm
+}
+
+section weekly {
+  column-gutter 5pt
+}
+
+section daily {
+  columns (3fr 5fr)
+  item-spacing 5mm
+
+  left {
+    schedule 8..20 {
+      time-format "%k"
+      trailing-half-hour #true
+    }
+    little-calendar {
+      week-placement left
+      inset 5pt
+    }
+  }
+
+  right {
+    top-priorities 5
+    notes {
+      pattern dotted
+      title-height 5mm
+    }
+  }
+}
+
+section daily-notes {
+  pages 2
+  pattern dotted
+}

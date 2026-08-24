@@ -1,4 +1,4 @@
-"""MOS planner (Months / Overview / Schedule) — port of LYP::Planners::MOS."""
+"""MOS planner (Months on the Side) — port of LYP::Planners::MOS."""
 
 from eink_planner.mos.builder import Builder
 from eink_planner.mos.configurator import Configurator

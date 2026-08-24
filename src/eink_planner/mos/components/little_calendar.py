@@ -83,19 +83,14 @@ class LittleCalendar:
     def _day_cell(self, day: Day | None) -> str:
         if day is None:
             return "[]"
-        text = str(day.month_day)
-        if self.manifest.source(day.id):
-            text = f"padded_link(<{day.id}>)[{text}]"
+        text = self.manifest.link_or_content(day.id, str(day.month_day))
         if self.today == day:
             text = f"grid.cell(fill: black, text(white, {text}))"
         return text
 
     def _week_label_cell(self, week: list[Day | None]) -> str:
         current_week = self._first_present_day(week).week()
-        label: str | int = current_week.number
-        if self.manifest.source(current_week.id):
-            label = f"padded_link(<{current_week.id}>)[{label}]"
-        return str(label)
+        return self.manifest.link_or_content(current_week.id, str(current_week.number))
 
     def _first_present_day(self, week: list[Day | None]) -> Day:
         for day in week:

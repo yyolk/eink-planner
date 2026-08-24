@@ -35,11 +35,12 @@ def test_february_2021_monday_start_no_padding():
         inset="5pt",
     )
     typst = component.generate()
+    assert "rows: 1fr" in typst
     assert "columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in typst
     assert "if x == 1" in typst
     assert "[W], [M], [T], [W], [T], [F], [S], [S]" in typst
-    assert "5, 1, 2, 3, 4, 5, 6, 7" in typst
-    assert "8, 22, 23, 24, 25, 26, 27, 28" in typst
+    assert "[5], [1], [2], [3], [4], [5], [6], [7]" in typst
+    assert "[8], [22], [23], [24], [25], [26], [27], [28]" in typst
 
 
 def test_january_2026_nil_padded_outside_days():
@@ -51,8 +52,8 @@ def test_january_2026_nil_padded_outside_days():
         inset="5pt",
     )
     typst = component.generate()
-    assert "1, [], [], [], 1, 2, 3, 4" in typst
-    assert "5, 26, 27, 28, 29, 30, 31, []" in typst
+    assert "[1], [], [], [], [1], [2], [3], [4]" in typst
+    assert "[5], [26], [27], [28], [29], [30], [31], []" in typst
 
 
 def test_links_and_highlight():
@@ -70,7 +71,7 @@ def test_links_and_highlight():
     typst = component.generate()
     assert "padded_link(<2021W05>)[5]" in typst
     assert "padded_link(<2021-02-01>)[1]" in typst
-    assert "grid.cell(fill: black, text(white, 15))" in typst
+    assert "grid.cell(fill: black, text(white, [15]))" in typst
 
 
 def test_week_placement_right_and_none():

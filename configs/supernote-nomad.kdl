@@ -1,0 +1,99 @@
+// SuperNote Nomad (A6 X2)
+// 1404×1872 @ 300 PPI → 118.87 × 158.5 mm
+// MOS-left default; MOS-right sibling: configs/supernote-nomad-mos-right.kdl
+
+device "supernote-nomad" {
+  page-size 118.87mm 158.5mm
+  ppi 300
+}
+
+year 2026
+week-starts Monday
+
+style {
+  stroke {
+    regular 0.3pt
+    thick   0.6pt
+  }
+  type {
+    body 8pt
+    h1   8mm
+  }
+  margin {
+    top    8mm
+    bottom 0mm
+    left   0mm
+    right  4mm
+  }
+  gutter {
+    column 8pt
+  }
+}
+
+// layout "mos" → Months on the Side (vertical side menu navigation)
+// side-menu left|right is the physical side of the MOS strip
+layout "mos" {
+  side-menu left 8mm
+  reverse-months-quarters #true
+  menu-rotate 270deg
+  column-gutter 1.5mm
+  row-gutter 1.5mm
+}
+
+section cover {
+  title "2026\n\nPlanner"
+  font-size 36pt
+}
+
+section annual {
+  little-calendar {
+    show-month-name #true
+  }
+  row-gutter 4pt
+}
+
+section quarterly {
+  months-column left
+  little-calendar {
+    show-month-name #true
+  }
+}
+
+section monthly {
+  week-placement left
+  week-label-rotation 90deg
+  daily-cell-height 16mm
+}
+
+section weekly {
+  column-gutter 4pt
+}
+
+section daily {
+  columns (3fr 5fr)
+  item-spacing 4mm
+
+  left {
+    schedule 8..20 {
+      time-format "%k"
+      trailing-half-hour #true
+    }
+    little-calendar {
+      week-placement left
+      inset 3pt
+    }
+  }
+
+  right {
+    top-priorities 5
+    notes {
+      pattern dotted
+      title-height 4mm
+    }
+  }
+}
+
+section daily-notes {
+  pages 2
+  pattern dotted
+}

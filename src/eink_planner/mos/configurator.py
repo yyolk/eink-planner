@@ -28,6 +28,8 @@ class Configurator:
             flag = section.get("enabled") if isinstance(section, StrictDict) else section.get("enabled")
             if flag:
                 enabled.append(section)
+        if not enabled:
+            raise ConfigError("No enabled planner sections")
         return enabled
 
     def weekday_start(self) -> str:

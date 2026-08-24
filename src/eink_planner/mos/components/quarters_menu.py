@@ -35,9 +35,9 @@ class QuartersMenu:
         return ",\n".join(self._format(quarter) for quarter in self.range)
 
     def _format(self, quarter: Quarter) -> str:
-        text = f"{self.i18n.t('quarters.short')}{quarter.number}"
-        if self.manifest.source(quarter.id):
-            text = f"#padded_link(<{quarter.id}>)[{text}]"
+        label = self.manifest.link_or_content(
+            quarter.id, f"{self.i18n.t('quarters.short')}{quarter.number}"
+        )
         if quarter in self.highlighted:
-            return f"table.cell(fill: black, text(white)[{text}])"
-        return f"table.cell([{text}])"
+            return f"table.cell(fill: black, text(white)[#{label}])"
+        return f"table.cell([#{label}])"

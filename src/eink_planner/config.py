@@ -1,4 +1,4 @@
-"""YAML loading and strict nested-dict access."""
+"""Config loading (KDL preferred, YAML still accepted) and strict nested-dict access."""
 
 from __future__ import annotations
 
@@ -118,3 +118,16 @@ def load_yaml(path: str | Path) -> StrictDict:
     if not isinstance(data, dict):
         raise ConfigError(f"{path}: root must be a mapping")
     return StrictDict(data)
+
+
+def load(path: str | Path) -> StrictDict:
+    """Load a planner config. Prefer ``.kdl``; ``.yaml`` / ``.yml`` still work."""
+    source = Path(path)
+    suffix = source.suffix.lower()
+    if suffix == ".kdl":
+        from eink_planner.kdl_config import load_kdl
+
+        return load_kdl(source)
+    if suffix in {".yaml", ".yml"}:
+        return load_yaml(source)
+    raise ConfigError(f"{source}: unsupported config suffix {suffix!r} (use .kdl or .yaml)")

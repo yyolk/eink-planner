@@ -38,7 +38,5 @@ class Weekly:
 
     def _format_day(self, day: Day) -> str:
         # Ruby Date#strftime("%A, %e") — full weekday + space-padded day
-        label = f"[{day.strftime('%A, %e')}]"
-        if self.manifest.source(day.id):
-            label = f"padded_link(<{day.id}>, {label})"
+        label = self.manifest.link_or_content(day.id, day.strftime("%A, %e"))
         return f"grid.cell(stroke: (bottom: thick_stroke), {label})"

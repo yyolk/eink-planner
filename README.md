@@ -2,9 +2,9 @@
 
 Python port of [Vitaliy Kudryk's LYP (latex-yearly-planner)](https://github.com/kudrykv/latex-yearly-planner/tree/alpha) ([fork point commit](https://github.com/kudrykv/latex-yearly-planner/commit/a59229770cfbf4a05b68a656dd70c02913a7df49), MIT, 2026).
 
-LYP generates a yearly planner by emitting **Typst**, then compiling that to **PDF**. This package keeps that architecture: Python reads a YAML config, walks calendar entities, and writes `index.typst` + `index.pdf`. It does **not** draw PDFs with reportlab/fpdf.
+LYP generates a yearly planner by emitting **Typst**, then compiling that to **PDF**. This package keeps that architecture: Python reads a **KDL 2.0** device profile (YAML still accepted), walks calendar entities, and writes `index.typst` + `index.pdf`. It does **not** draw PDFs with reportlab/fpdf.
 
-Default device is the **SuperNote Nomad** (A6 X2). Kindle Scribe is a second profile.
+Default device is the **SuperNote Nomad** (A6 X2), MOS strip on the left. A Nomad MOS-right sibling, Kindle Scribe, and 158×210 MOS-left/MOS-right profiles are also shipped.
 
 ## Install
 
@@ -20,17 +20,26 @@ uv sync
 ## Generate
 
 ```shell
-# SuperNote Nomad 2026 (default profile) → ./out/index.pdf
-uv run lyp generate configs/supernote-nomad.yaml
+# SuperNote Nomad 2026 (default profile, MOS-left) → ./out/index.pdf
+uv run lyp generate configs/supernote-nomad.kdl
+
+# SuperNote Nomad MOS-right → ./out/nomad-mos-right/index.pdf
+uv run lyp generate configs/supernote-nomad-mos-right.kdl -w out/nomad-mos-right
+
+# 158×210 MOS-left → ./out/mos-left/index.pdf
+uv run lyp generate configs/158x210-mos-left.kdl -w out/mos-left
+
+# 158×210 MOS-right → ./out/mos-right/index.pdf
+uv run lyp generate configs/158x210-mos-right.kdl -w out/mos-right
 
 # Kindle Scribe → ./out/scribe/index.pdf
-uv run lyp generate configs/kindle-scribe.yaml -w out/scribe
+uv run lyp generate configs/kindle-scribe.kdl -w out/scribe
 ```
 
 `eink-planner` is an alias for `lyp`:
 
 ```shell
-uv run eink-planner generate configs/supernote-nomad.yaml --locale en
+uv run eink-planner generate configs/supernote-nomad.kdl --locale en
 ```
 
 Flags:
@@ -40,6 +49,9 @@ Flags:
 | `-w` / `--workdir` | `./out` | Where `index.typst` and `index.pdf` are written |
 | `-l` / `--locale` | `en` | Locale code (`locales/<code>.yaml`) |
 | `-g` / `--with-ghostscript` | off | Optional PDF shrink via `gs` |
+| `--debug` | off | Draw MOS debug strokes (not a config key) |
+
+A `section` node in KDL is enabled by being present. Comment the node out to disable it. There is no `enabled=#true` flag, and `debug` does not belong in the profile — use `lyp generate --debug`. At least one `section` must remain.
 
 ## Device profiles
 
@@ -47,12 +59,19 @@ Sizes are 1:1 on glass at 300 PPI.
 
 | Device | Pixels | Page (pt) | Page (mm) | Config |
 | --- | --- | --- | --- | --- |
-| SuperNote Nomad (A6 X2) | 1404×1872 | 336.96×449.28 | 118.87×158.5 | `configs/supernote-nomad.yaml` |
-| Kindle Scribe | 1860×2480 | 446.4×595.2 | 157.48×209.97 | `configs/kindle-scribe.yaml` |
+| SuperNote Nomad (A6 X2) | 1404×1872 | 336.96×449.28 | 118.87×158.5 | `configs/supernote-nomad.kdl` |
+| SuperNote Nomad MOS-right | 1404×1872 | 336.96×449.28 | 118.87×158.5 | `configs/supernote-nomad-mos-right.kdl` |
+| 158×210 MOS-left | — | 447.87×595.28 | 158×210 | `configs/158x210-mos-left.kdl` |
+| 158×210 MOS-right | — | 447.87×595.28 | 158×210 | `configs/158x210-mos-right.kdl` |
+| Kindle Scribe | 1860×2480 | 446.4×595.2 | 157.48×209.97 | `configs/kindle-scribe.kdl` |
 
-Presets also live in `eink_planner.devices`. The Nomad YAML scales strokes, type, and gutters down slightly from the original 158×210 leftie gist so the MOS layout still fits the smaller page.
+Presets also live in `eink_planner.devices`. The Nomad profile scales strokes, type, and gutters down slightly from the original 158×210 MOS-left gist so the MOS layout still fits the smaller page.
 
-Both configs keep the gist MOS layout: side menu on the left, reversed months/quarters, Monday week start, daily schedule 8–20, 5 top priorities, 2 extra daily note pages, dotted scratch pad.
+**MOS** is Months on the Side — the navigation style that places a vertical month menu on the side of the page (as opposed to a top breadcrumb trail).
+
+Shipped configs keep the **MOS** (Months on the Side) layout: side menu on the physical left except 158×210 MOS-right and SuperNote Nomad MOS-right (physical right), reversed months/quarters, Monday week start, daily schedule 8–20, 5 top priorities, 2 extra daily note pages, dotted scratch pad. MOS-left/MOS-right names are the physical MOS strip side (nav left / nav right), not which hand you write with. MOS-left is the right-handed writing layout (nav opposite the writing hand); MOS-right is the left-handed writing layout. Upstream LYP called these leftie/rightie for the same strip-side meaning; the shipped `.kdl` files drop that jargon.
+
+YAML profiles remain for now; prefer `.kdl`.
 
 ## Tests
 
@@ -62,7 +81,7 @@ uv run pytest
 
 ## Layout of a generated planner
 
-Enabled MOS sections, in order:
+Enabled MOS (Months on the Side) sections, in order:
 
 1. Cover
 2. Annual (12 little calendars)
@@ -72,7 +91,7 @@ Enabled MOS sections, in order:
 6. Daily (schedule + little calendar + priorities + notes)
 7. Daily notes (extra dotted pages)
 
-Internal PDF links use Typst `#padded_link` / `<label>` the same way LYP does.
+Internal PDF links use Typst `#padded_link` / `<label>` the same way LYP does. A link is only emitted when the target page exists; otherwise the cell stays plain text.
 
 ## License
 
