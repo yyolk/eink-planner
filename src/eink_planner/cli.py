@@ -22,13 +22,13 @@ def _repo_root() -> Path:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="lyp",
-        description="Generate a yearly e-ink planner PDF from a KDL config (YAML still accepted).",
+        description="Generate a yearly e-ink planner PDF from a KDL config.",
     )
     parser.add_argument("--version", action="version", version=f"eink-planner {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    gen = sub.add_parser("generate", help="Generate Typst + PDF from a KDL (or YAML) config")
-    gen.add_argument("config", help="Path to planner KDL or YAML config")
+    gen = sub.add_parser("generate", help="Generate Typst + PDF from a KDL config")
+    gen.add_argument("config", help="Path to planner KDL config")
     gen.add_argument(
         "-w",
         "--workdir",

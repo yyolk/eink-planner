@@ -1,11 +1,9 @@
-"""Config loading (KDL preferred, YAML still accepted) and strict nested-dict access."""
+"""Config loading (KDL only for device profiles) and strict nested-dict access."""
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
-
-import yaml
 
 from eink_planner import ConfigError
 
@@ -112,22 +110,16 @@ def _to_plain(value: Any) -> Any:
     return value
 
 
-def load_yaml(path: str | Path) -> StrictDict:
-    raw = Path(path).read_text(encoding="utf-8")
-    data = yaml.safe_load(raw)
-    if not isinstance(data, dict):
-        raise ConfigError(f"{path}: root must be a mapping")
-    return StrictDict(data)
-
-
 def load(path: str | Path) -> StrictDict:
-    """Load a planner config. Prefer ``.kdl``; ``.yaml`` / ``.yml`` still work."""
+    """Load a planner device profile. Only ``.kdl`` is accepted."""
     source = Path(path)
     suffix = source.suffix.lower()
+    if suffix in {".yaml", ".yml"}:
+        raise ConfigError(
+            f"{source}: device profiles are KDL now, locales still YAML"
+        )
     if suffix == ".kdl":
         from eink_planner.kdl_config import load_kdl
 
         return load_kdl(source)
-    if suffix in {".yaml", ".yml"}:
-        return load_yaml(source)
-    raise ConfigError(f"{source}: unsupported config suffix {suffix!r} (use .kdl or .yaml)")
+    raise ConfigError(f"{source}: unsupported config suffix {suffix!r} (use .kdl)")

@@ -2,7 +2,7 @@
 
 Python port of [Vitaliy Kudryk's LYP (latex-yearly-planner)](https://github.com/kudrykv/latex-yearly-planner/tree/alpha) ([fork point commit](https://github.com/kudrykv/latex-yearly-planner/commit/a59229770cfbf4a05b68a656dd70c02913a7df49), MIT, 2026).
 
-LYP generates a yearly planner by emitting **Typst**, then compiling that to **PDF**. This package keeps that architecture: Python reads a **KDL 2.0** device profile (YAML still accepted), walks calendar entities, and writes `index.typst` + `index.pdf`. It does **not** draw PDFs with reportlab/fpdf.
+LYP generates a yearly planner by emitting **Typst**, then compiling that to **PDF**. This package keeps that architecture: Python reads a **KDL 2.0** device profile, walks calendar entities, and writes `index.typst` + `index.pdf`. It does **not** draw PDFs with reportlab/fpdf.
 
 Default device is the **SuperNote Nomad** (A6 X2), MOS strip on the left. A Nomad MOS-right sibling, Kindle Scribe, and 158×210 MOS-left/MOS-right profiles are also shipped.
 
@@ -77,7 +77,7 @@ Presets also live in `eink_planner.devices`. The Nomad profile scales strokes, t
 
 Shipped configs keep the **MOS** (Months on the Side) layout: side menu on the physical left except 158×210 MOS-right and SuperNote Nomad MOS-right (physical right), reversed months/quarters, Monday week start, daily schedule 8–20, 5 top priorities, 2 extra daily note pages, dotted scratch pad. MOS-left/MOS-right names are the physical MOS strip side (nav left / nav right), not which hand you write with. MOS-left is the right-handed writing layout (nav opposite the writing hand); MOS-right is the left-handed writing layout. Upstream LYP called these leftie/rightie for the same strip-side meaning; the shipped `.kdl` files drop that jargon.
 
-YAML profiles remain for now; prefer `.kdl`.
+Device profiles are KDL; locale files stay YAML.
 
 ## Tests
 
