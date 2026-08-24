@@ -237,7 +237,7 @@ def test_nomad_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert mos["menu_rotate"] == "270deg"
     assert mos["reverse_months_quarters_items"] is True
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
-    assert daily["columns_width"] == "(3fr, 5fr)"
+    assert daily["columns_width"] == "(5fr, 3fr)"
     assert daily["items_spacing"] == "4mm"
     assert [c["class"] for c in daily["left_column"]] == ["top_priorities", "notes"]
     assert [c["class"] for c in daily["right_column"]] == ["schedule", "little_calendar"]
@@ -272,3 +272,17 @@ def test_shipped_nomad_mos_right_omits_colophon():
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert "colophon" not in names
     assert names == ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
+
+
+def test_shipped_mos_daily_schedule_track_stays_3fr_on_both_handedness():
+    """Schedule is 3fr on MOS-left and MOS-right; notes stay 5fr either side."""
+    left = _daily_section(load(MOS_LEFT))["params"]
+    assert left["columns_width"] == "(3fr, 5fr)"
+    assert [c["class"] for c in left["left_column"]] == ["schedule", "little_calendar"]
+    assert [c["class"] for c in left["right_column"]] == ["top_priorities", "notes"]
+
+    for path in (MOS_RIGHT, NOMAD_MOS_RIGHT):
+        right = _daily_section(load(path))["params"]
+        assert right["columns_width"] == "(5fr, 3fr)", path.name
+        assert [c["class"] for c in right["left_column"]] == ["top_priorities", "notes"]
+        assert [c["class"] for c in right["right_column"]] == ["schedule", "little_calendar"]
