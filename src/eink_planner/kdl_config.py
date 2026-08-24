@@ -53,9 +53,9 @@ _SECTION_TYPES = frozenset(
 _LITTLE_CAL_NODES = frozenset({"show-month-name", "week-placement", "inset"})
 _COVER_NODES = frozenset({"title", "font-size"})
 _ANNUAL_NODES = frozenset({"little-calendar", "row-gutter"})
-_QUARTERLY_NODES = frozenset({"months-column", "little-calendar"})
-_MONTHLY_NODES = frozenset({"week-placement", "week-label-rotation", "daily-cell-height"})
-_WEEKLY_NODES = frozenset({"column-gutter"})
+_QUARTERLY_NODES = frozenset({"months-column", "little-calendar", "pattern"})
+_MONTHLY_NODES = frozenset({"week-placement", "week-label-rotation", "daily-cell-height", "pattern"})
+_WEEKLY_NODES = frozenset({"column-gutter", "pattern"})
 _DAILY_NODES = frozenset({"columns", "item-spacing", "left", "right"})
 _DAILY_COLUMN = frozenset({"schedule", "little-calendar", "top-priorities", "notes"})
 _SCHEDULE_NODES = frozenset({"time-format", "trailing-half-hour"})
@@ -172,6 +172,57 @@ def _consume_quoted(text: str, start: int) -> tuple[str, int]:
     return text[start:], n
 
 
+_SCRATCH_PATTERNS = frozenset({"dotted", "lined"})
+
+
+def _require_pattern(name: Any, path: str) -> str:
+    text = str(name)
+    if text not in _SCRATCH_PATTERNS:
+        raise ConfigError(f"{path}: unknown {text!r}")
+    return text
+
+
+def _house_scratch_pad(style: dict[str, Any]) -> str:
+    raw = style.get("scratch_pad")
+    if raw is None or raw == "":
+        return "dotted"
+    return _require_pattern(raw, "style.scratch-pad")
+
+
+def _resolve_pattern(explicit: Any | None, house: str, path: str) -> str:
+    if explicit is None:
+        return house
+    return _require_pattern(explicit, path)
+
+
+def _set_optional_pattern(node: ckdl.Node, params: dict[str, Any], path: str) -> None:
+    if (pattern := _first(node.children, "pattern")) is not None:
+        params["pattern"] = _plain(_arg0(pattern, path))
+
+
+def _apply_section_patterns(sections: list[dict[str, Any]], house: str) -> None:
+    for section in sections:
+        name = section["name"]
+        params = section["params"]
+        if name == "daily":
+            for col_name in ("left_column", "right_column"):
+                for comp in params.get(col_name) or []:
+                    if comp.get("class") != "notes":
+                        continue
+                    comp_params = comp.setdefault("params", {})
+                    comp_params["pattern"] = _resolve_pattern(
+                        comp_params.get("pattern"), house, "section.daily.notes.pattern"
+                    )
+        elif name in {"daily_notes", "quarterly", "monthly", "weekly"}:
+            path = {
+                "daily_notes": "section.daily-notes.pattern",
+                "quarterly": "section.quarterly.pattern",
+                "monthly": "section.monthly.pattern",
+                "weekly": "section.weekly.pattern",
+            }[name]
+            params["pattern"] = _resolve_pattern(params.get("pattern"), house, path)
+
+
 def kdl_document_to_dto(doc: ckdl.Document) -> dict[str, Any]:
     nodes = list(doc.nodes)
     if _first(nodes, "debug") is not None:
@@ -215,7 +266,8 @@ def kdl_document_to_dto(doc: ckdl.Document) -> dict[str, Any]:
                 merged.setdefault("inset", "3pt")
                 comp["params"] = merged
 
-    scratch = style.get("scratch_pad") or extras.get("scratch_pad") or "dotted"
+    scratch = _house_scratch_pad(style)
+    _apply_section_patterns(sections, scratch)
     regular_height = style.get("regular_height") or _default_regular_height(style["body"])
     link_padding = style.get("link_padding") or _default_link_padding(style["body"])
 
@@ -357,7 +409,7 @@ def _parse_sections(nodes: list[ckdl.Node]) -> tuple[list[dict[str, Any]], dict[
             "monthly": _section_monthly,
             "weekly": _section_weekly,
             "daily": lambda n: _section_daily(n, extras),
-            "daily-notes": lambda n: _section_daily_notes(n, extras),
+            "daily-notes": _section_daily_notes,
             "colophon": _section_colophon,
         }[kind]
         params = builder(node)
@@ -397,23 +449,28 @@ def _section_quarterly(node: ckdl.Node) -> dict[str, Any]:
     }
     if (lc := _first(node.children, "little-calendar")) is not None:
         params["little_calendar"] = _parse_little_calendar(lc, "section.quarterly.little-calendar")
+    _set_optional_pattern(node, params, "section.quarterly.pattern")
     return params
 
 
 def _section_monthly(node: ckdl.Node) -> dict[str, Any]:
     _reject_unknown(node.children, _MONTHLY_NODES, "section.monthly")
-    return {
+    params: dict[str, Any] = {
         "month_params": {
             "week_placement": _plain(_child_arg(node, "week-placement", "section.monthly")),
             "week_label_rotation": _token(_child_arg(node, "week-label-rotation", "section.monthly")),
             "daily_cell_height": _token(_child_arg(node, "daily-cell-height", "section.monthly")),
         }
     }
+    _set_optional_pattern(node, params, "section.monthly.pattern")
+    return params
 
 
 def _section_weekly(node: ckdl.Node) -> dict[str, Any]:
     _reject_unknown(node.children, _WEEKLY_NODES, "section.weekly")
-    return {"column_gutter": _token(_child_arg(node, "column-gutter", "section.weekly"))}
+    params: dict[str, Any] = {"column_gutter": _token(_child_arg(node, "column-gutter", "section.weekly"))}
+    _set_optional_pattern(node, params, "section.weekly.pattern")
+    return params
 
 
 def _section_daily(node: ckdl.Node, extras: dict[str, Any]) -> dict[str, Any]:
@@ -471,7 +528,6 @@ def _daily_column(node: ckdl.Node, extras: dict[str, Any], path: str) -> list[di
             }
             if pattern_node is not None:
                 notes["pattern"] = _plain(_arg0(pattern_node, f"{path}.notes.pattern"))
-                extras.setdefault("scratch_pad", notes["pattern"])
             comps.append(
                 {
                     "name": "notes",
@@ -508,11 +564,10 @@ def _section_colophon(node: ckdl.Node) -> dict[str, Any]:
     return params
 
 
-def _section_daily_notes(node: ckdl.Node, extras: dict[str, Any]) -> dict[str, Any]:
+def _section_daily_notes(node: ckdl.Node) -> dict[str, Any]:
     _reject_unknown(node.children, _DAILY_NOTES_NODES, "section.daily-notes")
     params: dict[str, Any] = {"pages": _int_arg(_require(node.children, "pages", "section.daily-notes"), "section.daily-notes.pages")}
-    if (pattern := _first(node.children, "pattern")) is not None:
-        extras.setdefault("scratch_pad", _plain(_arg0(pattern, "section.daily-notes.pattern")))
+    _set_optional_pattern(node, params, "section.daily-notes.pattern")
     return params
 
 

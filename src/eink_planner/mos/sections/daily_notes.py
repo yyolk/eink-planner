@@ -19,12 +19,14 @@ class DailyNotes:
         i18n: I18n,
         configurator: Configurator,
         pages: int,
+        pattern: str = "dotted",
         **_rest: Any,
     ) -> None:
         self.section_name = section_name
         self.i18n = i18n
         self.configurator = configurator
         self.pages_num = int(pages)
+        self.pattern = pattern
 
     def register(self, manifest: Manifest) -> None:
         for note in self._range():
@@ -36,7 +38,7 @@ class DailyNotes:
             out.append(
                 PageData(
                     title=self._title(manifest, note),
-                    content="scratch_pad",
+                    content=f"rect_pattern({self.pattern})",
                     highlight_months=[note.day.month()],
                     highlight_quarters=[note.day.quarter()],
                 )

@@ -20,6 +20,7 @@ class Monthly:
         i18n: I18n,
         configurator: Configurator,
         month_params: dict[str, Any],
+        pattern: str = "dotted",
         **_rest: Any,
     ) -> None:
         self.section_name = section_name
@@ -28,6 +29,7 @@ class Monthly:
         if isinstance(month_params, StrictDict):
             month_params = month_params.to_plain()
         self.month_params = _to_plain(month_params)
+        self.pattern = pattern
 
     def register(self, manifest: Manifest) -> None:
         for month in self._range():
@@ -41,6 +43,7 @@ class Monthly:
                 manifest=manifest,
                 month=month,
                 month_params=self.month_params,
+                pattern=self.pattern,
             )
             out.append(
                 PageData(

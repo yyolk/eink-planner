@@ -20,11 +20,13 @@ class Monthly:
         manifest: Manifest,
         month: Month,
         month_params: dict[str, Any],
+        pattern: str = "dotted",
     ) -> None:
         self.i18n = i18n
         self.manifest = manifest
         self.month = month
         self.month_params = month_params
+        self.pattern = pattern
         self.week_placement = str(month_params.get("week_placement", "left")).lower()
         if self.week_placement not in WEEK_PLACEMENTS:
             raise ConfigError(f"week_placement: allowed: {list(WEEK_PLACEMENTS)}")
@@ -55,7 +57,7 @@ class Monthly:
       stroke: (bottom: thick_stroke),
       box(height: regular_height, align(horizon, [{self.i18n.t("monthly_notes")}]))
     ),
-    scratch_pad
+    rect_pattern({self.pattern})
   )
 )"""
 

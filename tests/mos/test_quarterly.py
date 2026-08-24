@@ -87,7 +87,7 @@ def test_q3_emits_july_august_september():
 
 def test_months_column_right_keeps_three_month_grid():
     content = _page("2026-07-01", months_column="right").content()
-    assert content.index("scratch_pad") < content.index("rows: (1fr, 1fr, 1fr)")
+    assert content.index("rect_pattern(dotted)") < content.index("rows: (1fr, 1fr, 1fr)")
     assert "columns: (3fr,2fr)" in content
     for name in Q3_MONTHS:
         assert f"[{name}]" in content
