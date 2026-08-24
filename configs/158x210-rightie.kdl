@@ -28,7 +28,6 @@ style {
   }
   gutter {
     column 10pt
-    row    2mm
   }
 }
 
