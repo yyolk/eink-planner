@@ -11,6 +11,7 @@ from eink_planner.config import load
 from eink_planner.i18n import I18n
 from eink_planner.kdl_config import parse_kdl
 from eink_planner.mos.configurator import Configurator
+from eink_planner.mos.sections.projects import Projects
 from eink_planner.services.generate import Generate
 from tests.test_kdl_config import _minimal
 from tests.test_kdl_omit_sections import _LABEL_DEF, _PADDED_LINK, _short_january, compile_pdf
@@ -35,6 +36,10 @@ def test_omit_pages_defaults_to_twenty():
         assert f"<project-{i}>" in typst
     assert "<project-21>" not in typst
     assert typst.count("#pagebreak()") == 20
+    assert "rows: (" + ", ".join(["auto"] * 20) + ")" in typst
+    assert "rows: (" + ", ".join(["1fr"] * 20) + ")" not in typst
+    card = "grid.cell(stroke: regular_stroke, inset: 0pt, rect_pattern(dotted))"
+    assert typst.count(card) == Projects.CARDS * 3 * 20
 
 
 def test_pages_three_emits_index_and_three_boards():
@@ -133,6 +138,20 @@ def test_pages_are_raw_typst_without_mos_chrome():
     assert "rotate(" not in typst
     assert "<projects>" in typst
     assert "<project-1>" in typst
+
+
+def test_index_rows_are_auto_and_boards_use_eight_even_cards():
+    assert Projects.CARDS == 8
+    dto = parse_kdl(
+        _minimal(sections="section projects {\n  pages 3\n}\n"),
+        source="layout.kdl",
+    )
+    typst = _generate(dto)
+    assert "rows: (auto, auto, auto)" in typst
+    assert "rows: (1fr, 1fr, 1fr)" not in typst
+    assert "rows: (" + ", ".join(["1fr"] * 8) + ")" in typst
+    card = "grid.cell(stroke: regular_stroke, inset: 0pt, rect_pattern(dotted))"
+    assert typst.count(card) == 8 * 3 * 3
 
 
 def test_nomad_parses_and_compiles(tmp_path):

@@ -14,7 +14,7 @@ from eink_planner.mos.sections.annual import Annual
 class Projects:
     ID = "projects"
     DEFAULT_PAGES = 20
-    CARDS = 10
+    CARDS = 8
 
     def __init__(
         self,
@@ -72,7 +72,7 @@ class Projects:
                 rows.append(f"  {number}, [], {arrow}")
             body = f"""grid(
   columns: (auto, 1fr, auto),
-  rows: ({", ".join(["1fr"] * n)}),
+  rows: ({", ".join(["auto"] * n)}),
   align: horizon,
   stroke: (bottom: regular_stroke),
   inset: (x: 4pt, y: 2pt),
