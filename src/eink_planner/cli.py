@@ -62,7 +62,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--year",
         type=int,
         default=None,
-        help="Overlay planner year as start/end dates (not a config key)",
+        help="Overlay planner year (dates and cover title; not a config key)",
     )
     return parser
 

@@ -239,6 +239,17 @@ def test_apply_year_rejects_bools_and_non_ints():
         apply_year(load(NOMAD), "nope")
 
 
+def test_apply_year_rejects_out_of_range():
+    dto = load(NOMAD)
+    with pytest.raises(ConfigError, match="out of range"):
+        apply_year(dto, 0)
+    with pytest.raises(ConfigError, match="out of range"):
+        apply_year(dto, 10000)
+    ok = apply_year(dto, 2027)
+    assert ok["planner"]["params"]["start_date"] == "2027-01-01"
+    assert ok["planner"]["params"]["end_date"] == "2027-12-31"
+
+
 def test_apply_year_yaml_overlay():
     dto = apply_year(load(CONFIGS / "supernote-nomad.yaml"), 2027)
     params = dto["planner"]["params"]

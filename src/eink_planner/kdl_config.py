@@ -608,7 +608,10 @@ def apply_year(dto: StrictDict, year: int | None) -> StrictDict:
         params = {}
         planner["params"] = params
     old_year = _year_from_start(params.get("start_date"))
-    last_day = calendar.monthrange(year, 12)[1]
+    try:
+        last_day = calendar.monthrange(year, 12)[1]
+    except ValueError as exc:
+        raise ConfigError("year: out of range") from exc
     params["start_date"] = f"{year:04d}-01-01"
     params["end_date"] = f"{year:04d}-12-{last_day:02d}"
     if old_year is not None and old_year != year:
@@ -620,11 +623,15 @@ def _coerce_year(year: Any) -> int:
     if isinstance(year, bool):
         raise ConfigError("year: expected integer")
     if isinstance(year, int):
-        return year
-    try:
-        return int(year)
-    except (TypeError, ValueError) as exc:
-        raise ConfigError("year: expected integer") from exc
+        value = year
+    else:
+        try:
+            value = int(year)
+        except (TypeError, ValueError) as exc:
+            raise ConfigError("year: expected integer") from exc
+    if value < 1 or value > 9999:
+        raise ConfigError("year: out of range")
+    return value
 
 
 def _year_from_start(raw: Any) -> int | None:

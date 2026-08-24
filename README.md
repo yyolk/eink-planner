@@ -53,7 +53,9 @@ Flags:
 | `-l` / `--locale` | `en` | Locale code (`locales/<code>.yaml`) |
 | `-g` / `--with-ghostscript` | off | Optional PDF shrink via `gs` |
 | `--debug` | off | Draw MOS debug strokes (not a config key) |
-| `--year` | file year | Overlay planner year as start/end dates (not a config key) |
+| `--year` | file year | Overlay planner year (dates and cover title; not a config key) |
+
+`--year` also rewrites the cover title year when the old year is in the title.
 
 A `section` node in KDL is enabled by being present. Comment the node out to disable it. There is no `enabled=#true` flag, and `debug` does not belong in the profile — use `lyp generate --debug`. At least one `section` must remain.
 
