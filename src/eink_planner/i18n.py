@@ -1,4 +1,4 @@
-"""Locale loader: KDL preferred, YAML as a fallback for a custom file or dir.
+"""Locale loader: KDL only.
 
 Lookup keys follow the KDL shape (``week-name``, ``quarter.short``,
 ``weekday.letter.monday``), not the old YAML snake_case names.
@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any
 
 import ckdl
-import yaml
 
 from eink_planner import ConfigError
 
@@ -42,11 +41,11 @@ class I18n:
         if not path.exists():
             raise ConfigError(f"locale file not found: {path}")
         suffix = path.suffix.lower()
+        if suffix in {".yaml", ".yml"}:
+            raise ConfigError(f"{path}: locales must be KDL (device profiles too)")
         if suffix == ".kdl":
             return cls(_load_kdl(path), locale=locale)
-        if suffix in {".yaml", ".yml"}:
-            return cls(_load_yaml(path), locale=locale)
-        raise ConfigError(f"{path}: unsupported locale suffix {suffix!r} (use .kdl or .yaml)")
+        raise ConfigError(f"{path}: unsupported locale suffix {suffix!r} (use .kdl)")
 
     @classmethod
     def load_default(cls, package_root: Path | None = None, locale: str = "en") -> I18n:
@@ -57,10 +56,6 @@ class I18n:
 
 
 def _resolve_locale_file(directory: Path, locale: str) -> Path:
-    for suffix in (".kdl", ".yaml", ".yml"):
-        candidate = directory / f"{locale}{suffix}"
-        if candidate.exists():
-            return candidate
     return directory / f"{locale}.kdl"
 
 
@@ -104,10 +99,3 @@ def _kdl_nodes_to_tree(nodes: list[Any], source: str, path: str = "") -> dict[st
             raise ConfigError(f"{source}: {loc}: expected one argument")
         tree[node.name] = _plain(node.args[0])
     return tree
-
-
-def _load_yaml(path: Path) -> dict[str, Any]:
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    if not isinstance(data, dict):
-        raise ConfigError(f"{path}: locale root must be a mapping")
-    return data

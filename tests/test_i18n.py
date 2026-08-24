@@ -34,26 +34,22 @@ def test_missing_key_is_config_error():
         i18n.t("no.such.key")
 
 
-def test_directory_prefers_kdl_when_both_exist(tmp_path):
-    (tmp_path / "en.yaml").write_text("en:\n  week-name: YAML-Week\n", encoding="utf-8")
-    (tmp_path / "en.kdl").write_text(
-        "language en\nweek-name \"KDL-Week\"\n",
-        encoding="utf-8",
-    )
-    i18n = I18n.load(tmp_path, locale="en")
-    assert i18n.t("week-name") == "KDL-Week"
-
-
-def test_yaml_fallback_file_path(tmp_path):
-    path = tmp_path / "custom.yaml"
+@pytest.mark.parametrize("name", ["custom.yaml", "custom.yml"])
+def test_yaml_file_path_is_config_error(tmp_path, name):
+    path = tmp_path / name
     path.write_text(
-        "en:\n  week-name: Week\n  top-priorities: Top priorities\n  quarter:\n    short: Q\n",
+        "en:\n  week-name: Week\n  top-priorities: Top priorities\n",
         encoding="utf-8",
     )
-    i18n = I18n.load(path, locale="en")
-    assert i18n.t("week-name") == "Week"
-    assert i18n.t("top-priorities") == "Top priorities"
-    assert i18n.t("quarter.short") == "Q"
+    with pytest.raises(ConfigError, match="(?i)locale") as exc:
+        I18n.load(path, locale="en")
+    assert "KDL" in str(exc.value)
+
+
+def test_directory_yaml_only_is_config_error(tmp_path):
+    (tmp_path / "en.yaml").write_text("en:\n  week-name: YAML-Week\n", encoding="utf-8")
+    with pytest.raises(ConfigError, match=r"locale file not found: .*en\.kdl"):
+        I18n.load(tmp_path, locale="en")
 
 
 def test_generate_english_strings_match_previous_meanings():

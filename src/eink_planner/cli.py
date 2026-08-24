@@ -45,7 +45,7 @@ def build_parser() -> argparse.ArgumentParser:
         "-i",
         "--i18n-path",
         default=None,
-        help="Path to a locale KDL or YAML file, or a locales/ directory (.kdl preferred)",
+        help="Path to a locale KDL file, or a locales/ directory",
     )
     gen.add_argument(
         "-g",
