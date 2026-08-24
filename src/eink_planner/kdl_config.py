@@ -196,12 +196,24 @@ def kdl_document_to_dto(doc: ckdl.Document) -> dict[str, Any]:
     heading_height = heading.get("height") or style["h1"]
     heading_align = heading.get("align") or "horizon"
 
-    little = dict(style.get("little_calendar") or {})
+    style_little = dict(style.get("little_calendar") or {})
+    little = dict(style_little)
     if extras.get("daily_little_calendar"):
-        for key, value in extras["daily_little_calendar"].items():
-            little.setdefault(key, value)
+        little.update(extras["daily_little_calendar"])
     little.setdefault("week_placement", "left")
     little.setdefault("inset", "3pt")
+
+    for section in sections:
+        if section["name"] != "daily":
+            continue
+        for col_name in ("left_column", "right_column"):
+            for comp in section["params"].get(col_name) or []:
+                if comp.get("class") != "little_calendar":
+                    continue
+                merged = {**style_little, **(comp.get("params") or {})}
+                merged.setdefault("week_placement", "left")
+                merged.setdefault("inset", "3pt")
+                comp["params"] = merged
 
     scratch = style.get("scratch_pad") or extras.get("scratch_pad") or "dotted"
     regular_height = style.get("regular_height") or _default_regular_height(style["body"])

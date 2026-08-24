@@ -1,4 +1,4 @@
-"""Quarter pages stack all three months in a bounded column."""
+"""Quarter pages render all three months in a bounded column grid."""
 
 from __future__ import annotations
 

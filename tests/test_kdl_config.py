@@ -242,3 +242,91 @@ def test_section_requires_exactly_one_argument():
 }
 """))
 
+
+def _daily_little_calendar(dto):
+    daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")
+    for col in ("left_column", "right_column"):
+        for comp in daily["params"].get(col) or []:
+            if comp["class"] == "little_calendar":
+                return comp["params"]
+    raise AssertionError("daily little calendar component missing")
+
+
+def test_daily_little_calendar_inherits_style_week_placement_and_inset():
+    style = """style {
+  stroke {
+    regular 0.3pt
+    thick 0.6pt
+  }
+  type {
+    body 8pt
+    h1 8mm
+  }
+  margin {
+    top 8mm
+    bottom 0mm
+    left 0mm
+    right 4mm
+  }
+  gutter {
+    column 8pt
+  }
+  little-calendar {
+    week-placement left
+    inset 3pt
+  }
+}"""
+    sections = """section daily {
+  columns 3fr 5fr
+  item-spacing 1mm
+  left {
+    little-calendar {
+      show-month-name #true
+    }
+  }
+}
+"""
+    dto = parse_kdl(_minimal(style=style, sections=sections))
+    params = _daily_little_calendar(dto)
+    assert params["week_placement"] == "left"
+    assert params["inset"] == "3pt"
+    assert params["show_month_name"] is True
+
+
+def test_daily_little_calendar_section_wins_over_style():
+    style = """style {
+  stroke {
+    regular 0.3pt
+    thick 0.6pt
+  }
+  type {
+    body 8pt
+    h1 8mm
+  }
+  margin {
+    top 8mm
+    bottom 0mm
+    left 0mm
+    right 4mm
+  }
+  gutter {
+    column 8pt
+  }
+  little-calendar {
+    inset 3pt
+  }
+}"""
+    sections = """section daily {
+  columns 3fr 5fr
+  item-spacing 1mm
+  left {
+    little-calendar {
+      inset 5pt
+    }
+  }
+}
+"""
+    dto = parse_kdl(_minimal(style=style, sections=sections))
+    params = _daily_little_calendar(dto)
+    assert params["inset"] == "5pt"
+    assert dto["planner"]["params"]["little_calendar"]["inset"] == "5pt"
