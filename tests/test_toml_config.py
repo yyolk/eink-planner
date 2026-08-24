@@ -127,7 +127,7 @@ def test_unknown_key_raises():
         parse_toml("foo = 1\n" + _minimal())
 
 
-def test_style_gutter_row_is_unknown():
+def test_style_gutter_row_is_optional_and_ignored():
     style = """[style.stroke]
 regular = "0.3pt"
 thick = "0.6pt"
@@ -146,8 +146,10 @@ right = "4mm"
 column = "8pt"
 row = "1.5mm"
 """
-    with pytest.raises(ConfigError, match="unknown key: style.gutter.row"):
-        parse_toml(_minimal(style=style))
+    dto = parse_toml(_minimal(style=style))
+    assert dto["planner"]["params"]["regular_column_gutter"] == "8pt"
+    # style.gutter.row is accepted on the model and ignored by the adapter
+    assert dto["planner"]["params"]["mos_layout"]["row_gutter"] == "1.5mm"
 
 
 def test_unknown_section_raises():
@@ -162,7 +164,7 @@ def test_unknown_section_table_key_raises():
                 enable=["cover", "projects"],
                 sections="""[section.cover]
 title = "Hi"
-font-size = "12pt"
+font_size = "12pt"
 
 [section.proejcts]
 pages = 20
@@ -177,7 +179,7 @@ def test_dangling_known_section_table_is_ok():
             enable=["cover"],
             sections="""[section.cover]
 title = "Hi"
-font-size = "12pt"
+font_size = "12pt"
 
 [section.projects]
 pages = 20
@@ -329,18 +331,21 @@ def test_apply_year_typst_uses_overlay_year():
 
 def test_bool_values_are_not_integers():
     with pytest.raises(ConfigError, match="expected integer"):
-        parse_toml(_minimal(enable=["daily-notes"], sections="[section.daily-notes]\npages = true\n"))
+        parse_toml(_minimal(enable=["daily_notes"], sections="[section.daily_notes]\npages = true\n"))
     with pytest.raises(ConfigError, match="expected integer"):
         parse_toml(
             _minimal(
                 enable=["daily"],
                 sections="""[section.daily]
-item-spacing = "1mm"
+item_spacing = "1mm"
 columns = ["3fr", "5fr"]
 
 [section.daily.left.schedule]
-from = true
-to = false
+hour_from = true
+hour_to = false
+
+[section.daily.right.priorities]
+count = 1
 """,
             )
         )
@@ -352,12 +357,15 @@ def test_hour_range_rejects_float_args():
             _minimal(
                 enable=["daily"],
                 sections="""[section.daily]
-item-spacing = "1mm"
+item_spacing = "1mm"
 columns = ["3fr", "5fr"]
 
 [section.daily.left.schedule]
-from = 8.5
-to = 20
+hour_from = 8.5
+hour_to = 20
+
+[section.daily.right.priorities]
+count = 1
 """,
             )
         )
@@ -390,16 +398,19 @@ right = "4mm"
 [style.gutter]
 column = "8pt"
 
-[style.little-calendar]
-week-placement = "left"
+[style.little_calendar]
+week_placement = "left"
 inset = "3pt"
 """
     sections = """[section.daily]
 columns = ["3fr", "5fr"]
-item-spacing = "1mm"
+item_spacing = "1mm"
 
-[section.daily.left.little-calendar]
-show-month-name = true
+[section.daily.left.little_calendar]
+show_month_name = true
+
+[section.daily.right.priorities]
+count = 1
 """
     dto = parse_toml(_minimal(enable=["daily"], style=style, sections=sections))
     params = _daily_little_calendar(dto)
@@ -426,15 +437,18 @@ right = "4mm"
 [style.gutter]
 column = "8pt"
 
-[style.little-calendar]
+[style.little_calendar]
 inset = "3pt"
 """
     sections = """[section.daily]
 columns = ["3fr", "5fr"]
-item-spacing = "1mm"
+item_spacing = "1mm"
 
-[section.daily.left.little-calendar]
+[section.daily.left.little_calendar]
 inset = "5pt"
+
+[section.daily.right.priorities]
+count = 1
 """
     dto = parse_toml(_minimal(enable=["daily"], style=style, sections=sections))
     params = _daily_little_calendar(dto)

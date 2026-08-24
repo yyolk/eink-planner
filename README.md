@@ -79,9 +79,9 @@ Presets also live in `eink_planner.devices`. The Nomad profile scales strokes, t
 
 **MOS** is Months on the Side — the navigation style that places a vertical month menu on the side of the page (as opposed to a top breadcrumb trail).
 
-Shipped configs keep the **MOS** (Months on the Side) layout: side menu on the physical left except 158×210 MOS-right and SuperNote Nomad MOS-right (physical right), reversed months/quarters, Monday week start, daily schedule 8–20, 5 top priorities, 2 extra daily note pages, dotted scratch pad on most shipped configs (the 158×210 MOS-left lined sibling uses `scratch-pad = "lined"` under `[style]` with daily on-page notes still dotted). `pattern` is per notes area (dotted default; `lined` is the other option). MOS-left/MOS-right names are the physical MOS strip side (nav left / nav right), not which hand you write with. MOS-left is the right-handed writing layout (nav opposite the writing hand); MOS-right is the left-handed writing layout.
+Shipped configs keep the **MOS** (Months on the Side) layout: side menu on the physical left except 158×210 MOS-right and SuperNote Nomad MOS-right (physical right), reversed months/quarters, Monday week start, daily schedule 8–20, 5 top priorities, 2 extra daily note pages, dotted scratch pad on most shipped configs (the 158×210 MOS-left lined sibling uses `scratch_pad = "lined"` under `[style]` with daily on-page notes still dotted). `pattern` is per notes area (dotted default; `lined` is the other option). MOS-left/MOS-right names are the physical MOS strip side (nav left / nav right), not which hand you write with. MOS-left is the right-handed writing layout (nav opposite the writing hand); MOS-right is the left-handed writing layout.
 
-Device profiles and locale files are TOML.
+Device profiles and locale files are TOML. Config keys use underscores (`week_starts`, `side_menu`, `daily_notes`); filenames may still use hyphens (`supernote-nomad.toml`).
 
 ## Tests
 
@@ -104,7 +104,7 @@ Enabled MOS (Months on the Side) sections, in order:
 7. Daily notes (extra dotted pages)
 8. Projects (index of write-in names + one kanban board per project)
 
-`[section.projects]` takes optional `pages` (default 20) and `card-rows` (default 8). Only Nomad ships projects enabled.
+`[section.projects]` takes optional `pages` (default 20) and `card_rows` (default 8). Only Nomad ships projects enabled.
 
 Internal PDF links use Typst `#padded_link` / `<label>` the same way LYP does. A link is only emitted when the target page exists; otherwise the cell stays plain text.
 

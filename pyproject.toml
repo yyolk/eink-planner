@@ -8,7 +8,9 @@ requires-python = ">=3.12"
 authors = [
   { name = "PDF Planner Project" }
 ]
-dependencies = []
+dependencies = [
+    "pydantic>=2.13.4",
+]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]

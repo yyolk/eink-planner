@@ -1,7 +1,7 @@
 """Locale loader: TOML only.
 
-Lookup keys follow the locale table shape (``week-name``, ``quarter.short``,
-``weekday.letter.monday``), not snake_case aliases.
+Lookup keys follow the locale table shape (``week_name``, ``quarter.short``,
+``weekday.letter.monday``). Nested lookups stay dotted.
 """
 
 from __future__ import annotations
@@ -10,7 +10,10 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
+from pydantic import ValidationError
+
 from eink_planner import ConfigError
+from eink_planner.models import format_validation_error, load_locale
 
 
 class I18n:
@@ -43,7 +46,7 @@ class I18n:
         if suffix in {".yaml", ".yml", ".kdl"}:
             raise ConfigError(f"{path}: locales must be TOML (device profiles too)")
         if suffix == ".toml":
-            return cls(_load_toml(path), locale=locale)
+            return cls(_load_validated(path), locale=locale)
         raise ConfigError(f"{path}: unsupported locale suffix {suffix!r} (use .toml)")
 
     @classmethod
@@ -66,19 +69,15 @@ def _resolve_locale_file(directory: Path, locale: str) -> Path:
     return directory / f"{locale}.toml"
 
 
-def _load_toml(path: Path) -> dict[str, Any]:
+def _load_validated(path: Path) -> dict[str, Any]:
     try:
-        raw = path.read_bytes()
+        model = load_locale(path)
     except OSError as exc:
         raise ConfigError(f"{path}: {exc}") from exc
-    try:
-        text = raw.decode("utf-8")
     except UnicodeDecodeError as exc:
         raise ConfigError(f"{path}: {exc}") from exc
-    try:
-        data = tomllib.loads(text)
     except tomllib.TOMLDecodeError as exc:
         raise ConfigError(f"{path}: {exc}") from exc
-    if "language" not in data:
-        raise ConfigError(f"{path}: missing language")
-    return data
+    except ValidationError as exc:
+        raise ConfigError(f"{path}: {format_validation_error(exc)}") from exc
+    return model.model_dump()

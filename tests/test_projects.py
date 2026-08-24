@@ -102,7 +102,7 @@ def test_index_links_to_boards_and_board_links_back():
         _minimal(
             enable=["annual", "projects"],
             sections="""[section.annual]
-show-month-name = true
+show_month_name = true
 
 [section.projects]
 pages = 3
@@ -174,13 +174,13 @@ def test_pages_bool_and_float_rejected():
 def test_card_rows_bool_and_float_rejected():
     with pytest.raises(ConfigError, match="expected integer"):
         parse_toml(
-            _minimal(enable=["projects"], sections="[section.projects]\ncard-rows = true\n"),
-            source="card-rows-bool.toml",
+            _minimal(enable=["projects"], sections="[section.projects]\ncard_rows = true\n"),
+            source="card_rows-bool.toml",
         )
     with pytest.raises(ConfigError, match="expected integer"):
         parse_toml(
-            _minimal(enable=["projects"], sections="[section.projects]\ncard-rows = 5.5\n"),
-            source="card-rows-float.toml",
+            _minimal(enable=["projects"], sections="[section.projects]\ncard_rows = 5.5\n"),
+            source="card_rows-float.toml",
         )
 
 
@@ -212,8 +212,8 @@ def test_index_rows_are_fixed_line_height_and_boards_use_eight_even_cards():
 
 def test_card_rows_five_emits_five_one_fr_rows_per_column():
     dto = parse_toml(
-        _minimal(enable=["projects"], sections="[section.projects]\npages = 1\ncard-rows = 5\n"),
-        source="card-rows-5.toml",
+        _minimal(enable=["projects"], sections="[section.projects]\npages = 1\ncard_rows = 5\n"),
+        source="card_rows-5.toml",
     )
     params = dto["planner"]["sections"][0]["params"]
     assert params["pages"] == 1
@@ -243,7 +243,7 @@ height = "158.5mm"
 ppi = 300""",
             enable=["annual", "projects"],
             sections=f"""[section.annual]
-show-month-name = true
+show_month_name = true
 
 [section.projects]
 pages = {n}
@@ -293,10 +293,10 @@ def test_tiny_cover_annual_projects_compiles(tmp_path):
             enable=["cover", "annual", "projects"],
             sections="""[section.cover]
 title = "Hi"
-font-size = "12pt"
+font_size = "12pt"
 
 [section.annual]
-show-month-name = true
+show_month_name = true
 
 [section.projects]
 pages = 3
@@ -312,16 +312,20 @@ pages = 3
 def test_kanban_centered_dots_leave_notes_global_dotted():
     dto = parse_toml(
         _minimal(
-            enable=["daily", "daily-notes", "projects"],
+            enable=["daily", "daily_notes", "projects"],
             sections="""[section.daily]
 columns = ["3fr", "5fr"]
-item-spacing = "4mm"
+item_spacing = "4mm"
+
+[section.daily.left.schedule]
+hour_from = 8
+hour_to = 20
 
 [section.daily.right.notes]
 pattern = "dotted"
-title-height = "4mm"
+title_height = "4mm"
 
-[section.daily-notes]
+[section.daily_notes]
 pages = 1
 pattern = "dotted"
 

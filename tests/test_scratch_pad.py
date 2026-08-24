@@ -1,4 +1,4 @@
-"""Per-section scratch-pad pattern (dotted / lined)."""
+"""Per-section scratch_pad pattern (dotted / lined)."""
 
 from pathlib import Path
 
@@ -21,7 +21,7 @@ MOS_RIGHT = CONFIGS / "158x210-mos-right.toml"
 SCRIBE = CONFIGS / "kindle-scribe.toml"
 
 _STYLE_LINED = """[style]
-scratch-pad = "lined"
+scratch_pad = "lined"
 
 [style.stroke]
 regular = "0.3pt"
@@ -64,15 +64,19 @@ def _mixed_sections(daily_pattern: str | None, extra_pattern: str | None, revers
     notes_pages = f'pattern = "{extra_pattern}"\n' if extra_pattern else ""
     daily = f"""[section.daily]
 columns = ["3fr", "5fr"]
-item-spacing = "1mm"
+item_spacing = "1mm"
+
+[section.daily.left.schedule]
+hour_from = 8
+hour_to = 20
 
 [section.daily.right.notes]
-{notes_body}title-height = "4mm"
+{notes_body}title_height = "4mm"
 """
-    extra = f"""[section.daily-notes]
+    extra = f"""[section.daily_notes]
 pages = 1
 {notes_pages}"""
-    names = ["daily-notes", "daily"] if reverse else ["daily", "daily-notes"]
+    names = ["daily_notes", "daily"] if reverse else ["daily", "daily_notes"]
     return _minimal(enable=names, sections="\n".join((extra, daily) if reverse else (daily, extra)))
 
 
@@ -101,16 +105,20 @@ def test_style_scratch_pad_is_house_default_under_explicit_section():
     text = _mixed_sections(None, "dotted")
     # rebuild with lined house style
     dto = parse_toml(_minimal(
-        enable=["daily", "daily-notes"],
+        enable=["daily", "daily_notes"],
         style=_STYLE_LINED,
         sections="""[section.daily]
 columns = ["3fr", "5fr"]
-item-spacing = "1mm"
+item_spacing = "1mm"
+
+[section.daily.left.schedule]
+hour_from = 8
+hour_to = 20
 
 [section.daily.right.notes]
-title-height = "4mm"
+title_height = "4mm"
 
-[section.daily-notes]
+[section.daily_notes]
 pages = 1
 pattern = "dotted"
 """,
@@ -123,17 +131,21 @@ pattern = "dotted"
 
 def test_explicit_dotted_wins_over_style_lined():
     dto = parse_toml(_minimal(
-        enable=["daily", "daily-notes"],
+        enable=["daily", "daily_notes"],
         style=_STYLE_LINED,
         sections="""[section.daily]
 columns = ["3fr", "5fr"]
-item-spacing = "1mm"
+item_spacing = "1mm"
+
+[section.daily.left.schedule]
+hour_from = 8
+hour_to = 20
 
 [section.daily.right.notes]
 pattern = "dotted"
-title-height = "4mm"
+title_height = "4mm"
 
-[section.daily-notes]
+[section.daily_notes]
 pages = 1
 """,
     ))
@@ -147,16 +159,20 @@ def test_unknown_pattern_raises():
         parse_toml(_mixed_sections("grid", None))
     with pytest.raises(ConfigError, match="unknown"):
         parse_toml(_minimal(
-            enable=["daily", "daily-notes"],
-            style=_STYLE_LINED.replace('scratch-pad = "lined"', 'scratch-pad = "mesh"'),
+            enable=["daily", "daily_notes"],
+            style=_STYLE_LINED.replace('scratch_pad = "lined"', 'scratch_pad = "mesh"'),
             sections="""[section.daily]
 columns = ["3fr", "5fr"]
-item-spacing = "1mm"
+item_spacing = "1mm"
+
+[section.daily.left.schedule]
+hour_from = 8
+hour_to = 20
 
 [section.daily.right.notes]
-title-height = "4mm"
+title_height = "4mm"
 
-[section.daily-notes]
+[section.daily_notes]
 pages = 1
 """,
         ))
@@ -164,7 +180,7 @@ pages = 1
         parse_toml(_minimal(
             enable=["weekly"],
             sections="""[section.weekly]
-column-gutter = "4pt"
+column_gutter = "4pt"
 pattern = "graph"
 """,
         ))
@@ -218,17 +234,17 @@ def test_mos_left_lined_sibling_keeps_daily_notes_dotted():
 
 def test_week_month_quarter_accept_pattern_lined():
     sections = """[section.quarterly]
-months-column = "left"
+months_column = "left"
 pattern = "lined"
 
 [section.monthly]
-week-placement = "left"
-week-label-rotation = "90deg"
-daily-cell-height = "16mm"
+week_placement = "left"
+week_label_rotation = "90deg"
+daily_cell_height = "16mm"
 pattern = "lined"
 
 [section.weekly]
-column-gutter = "4pt"
+column_gutter = "4pt"
 pattern = "lined"
 """
     dto = parse_toml(_minimal(enable=["quarterly", "monthly", "weekly"], sections=sections))

@@ -36,12 +36,12 @@ def test_side_menu_right_parses():
         _minimal(
             layout="""[layout]
 name = "mos"
-side-menu = "right"
-side-menu-width = "10mm"
-reverse-months-quarters = true
-menu-rotate = "270deg"
-column-gutter = "1.5mm"
-row-gutter = "1.5mm"
+side_menu = "right"
+side_menu_width = "10mm"
+reverse_months_quarters = true
+menu_rotate = "270deg"
+column_gutter = "1.5mm"
+row_gutter = "1.5mm"
 """
         ),
         source="side-right.toml",
@@ -56,12 +56,12 @@ def test_side_menu_position_is_case_insensitive():
         _minimal(
             layout="""[layout]
 name = "mos"
-side-menu = "RIGHT"
-side-menu-width = "10mm"
-reverse-months-quarters = true
-menu-rotate = "270deg"
-column-gutter = "1.5mm"
-row-gutter = "1.5mm"
+side_menu = "RIGHT"
+side_menu_width = "10mm"
+reverse_months_quarters = true
+menu_rotate = "270deg"
+column_gutter = "1.5mm"
+row_gutter = "1.5mm"
 """
         ),
         source="side-RIGHT.toml",
@@ -70,17 +70,17 @@ row-gutter = "1.5mm"
 
 
 def test_side_menu_rejects_non_left_right():
-    with pytest.raises(ConfigError, match=r"layout\.side-menu: expected left or right"):
+    with pytest.raises(ConfigError, match=r"layout\.side_menu: expected left or right"):
         parse_toml(
             _minimal(
                 layout="""[layout]
 name = "mos"
-side-menu = "top"
-side-menu-width = "10mm"
-reverse-months-quarters = true
-menu-rotate = "270deg"
-column-gutter = "1.5mm"
-row-gutter = "1.5mm"
+side_menu = "top"
+side_menu_width = "10mm"
+reverse_months_quarters = true
+menu_rotate = "270deg"
+column_gutter = "1.5mm"
+row_gutter = "1.5mm"
 """
             ),
             source="side-top.toml",
@@ -92,20 +92,20 @@ def test_daily_notes_left_schedule_right_dto_and_typst():
         enable=["daily"],
         sections="""[section.daily]
 columns = ["3fr", "5fr"]
-item-spacing = "5mm"
+item_spacing = "5mm"
 
 [section.daily.left.notes]
 pattern = "dotted"
-title-height = "5mm"
+title_height = "5mm"
 
-[section.daily.left.little-calendar]
-week-placement = "right"
+[section.daily.left.little_calendar]
+week_placement = "right"
 inset = "5pt"
 
 [section.daily.right.schedule]
-from = 8
-to = 20
-time-format = "%k"
+hour_from = 8
+hour_to = 20
+time_format = "%k"
 
 [section.daily.right.priorities]
 count = 5
@@ -131,7 +131,10 @@ def test_unknown_daily_child_still_rejected():
                 enable=["daily"],
                 sections="""[section.daily]
 columns = ["3fr", "5fr"]
-item-spacing = "5mm"
+item_spacing = "5mm"
+
+[section.daily.right.priorities]
+count = 1
 
 [section.daily.left]
 banana = 1
@@ -145,7 +148,10 @@ banana = 1
                 enable=["daily"],
                 sections="""[section.daily]
 columns = ["3fr", "5fr"]
-item-spacing = "5mm"
+item_spacing = "5mm"
+
+[section.daily.left.priorities]
+count = 1
 
 [section.daily.right]
 banana = 1
