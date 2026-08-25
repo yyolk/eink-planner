@@ -14,7 +14,6 @@ from eink_planner.mos.manifest import Manifest
 from eink_planner.mos.page_data import PageData
 from eink_planner.mos.sections.annual import Annual
 
-_WEEKEND = frozenset({"saturday", "sunday"})
 _INDEX_LEFT_INSET = "4mm"
 _INDEX_BOTTOM_INSET = "4mm"
 _INDEX_ROW_GUTTER = "3mm"
@@ -29,7 +28,8 @@ _HABIT_HEADER = """grid.cell(
   )
 )"""
 _BOX = "grid.cell(stroke: regular_stroke, [])"
-_FRIDAY_HLINE = "grid.hline(stroke: thick_stroke)"
+_BOX_FRIDAY = "grid.cell(stroke: (rest: regular_stroke, bottom: thick_stroke), [])"
+_FRIDAY_STROKE = "(rest: regular_stroke, bottom: thick_stroke)"
 
 
 class Habits:
@@ -159,11 +159,14 @@ class Habits:
         headers = ["[]"] + [_habit_header(name) for name in padded]
         cells = [", ".join(headers)]
         for day in days:
-            row = [self._date_label(manifest, day)]
-            row.extend([_BOX] * n_habits)
-            cells.append(", ".join(row))
+            label = self._date_label(manifest, day)
             if day.weekday_name == "friday":
-                cells.append(_FRIDAY_HLINE)
+                row = [f"grid.cell(stroke: {_FRIDAY_STROKE}, {label})"]
+                row.extend([_BOX_FRIDAY] * n_habits)
+            else:
+                row = [label]
+                row.extend([_BOX] * n_habits)
+            cells.append(", ".join(row))
         return f"""grid(
   columns: ({cols}),
   rows: ({rows}),
@@ -177,9 +180,7 @@ class Habits:
     def _date_label(self, manifest: Manifest, day: Day) -> str:
         short = self.i18n.t(f"weekday.short.{day.weekday_name}")
         linked = manifest.link_or_content(day.id, f"{short} {day.month_day}")
-        if day.weekday_name in _WEEKEND:
-            return f"align(horizon + right, [#{linked}])"
-        return f'align(horizon + right, text(weight: "bold")[#{linked}])'
+        return f"align(horizon + right, [#{linked}])"
 
 
 def is_current_index_month(month: Month, today: date | None = None) -> bool:

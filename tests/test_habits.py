@@ -102,7 +102,7 @@ show_month_name = true
     pages = typst.split("#pagebreak()")
     index = next(page for page in pages if "<habits>" in page and "rotate(" not in page)
     assert "padded_link(<annual>)" in index
-    month = next(page for page in pages if "<habits-january>" in page and "rotate(" in page)
+    month = next(page for page in pages if "January<habits-january>" in page and "rotate(" in page)
     assert "padded_link(<habits>)" in month
     labels = set(_LABEL_DEF.findall(typst))
     links = set(_PADDED_LINK.findall(typst))
@@ -135,7 +135,7 @@ daily_cell_height = "16mm"
     )
     typst = _generate(dto)
     pages = typst.split("#pagebreak()")
-    habit_jan = next(page for page in pages if "<habits-january>" in page and "rotate(" in page)
+    habit_jan = next(page for page in pages if "January<habits-january>" in page and "rotate(" in page)
     assert "padded_link(<habits-january>)" in habit_jan
     assert "padded_link(<habits-february>)" in habit_jan
     assert "padded_link(<month-2026-01-01>)" not in habit_jan
@@ -157,7 +157,7 @@ def test_habit_month_mos_is_months_only():
     dto = parse_toml(_minimal(enable=["habits"], sections=""), source="months-only.toml")
     typst = _generate(dto)
     pages = typst.split("#pagebreak()")
-    habit_jan = next(page for page in pages if "<habits-january>" in page and "rotate(" in page)
+    habit_jan = next(page for page in pages if "January<habits-january>" in page and "rotate(" in page)
     for name in MONTHS:
         assert f"padded_link(<habits-{name}>)" in habit_jan
     assert "Q1" not in habit_jan
@@ -184,7 +184,7 @@ daily_cell_height = "16mm"
     )
     typst = _generate(dto)
     pages = typst.split("#pagebreak()")
-    habit_jan = next(page for page in pages if "<habits-january>" in page and "rotate(" in page)
+    habit_jan = next(page for page in pages if "January<habits-january>" in page and "rotate(" in page)
     assert "padded_link(<month-2026-01-01>, [Calendar])" not in habit_jan
     assert "grid.cell(fill: black, text(white)[#padded_link(<habits-january>, [Habits])])" not in habit_jan
 
@@ -196,7 +196,9 @@ def test_grid_uses_stroke_boxes_writein_slash_and_friday_rule():
     assert "line(start: (0%, 100%), end: (100%, 0%), stroke: regular_stroke)" in typst
     assert "luma(140)" not in typst
     assert "luma(180)" not in typst
-    assert "grid.hline(stroke: thick_stroke)" in typst
+    assert _BOX_FRIDAY in typst
+    assert "grid.hline" not in typst
+    assert 'text(weight: "bold")' not in typst
     assert "columns: (auto, 0.8mm" not in typst
     assert "Mon 1" in typst
     assert "Sat" in typst
@@ -223,7 +225,7 @@ count = 1
     )
     typst = _generate(short_january(dto))
     pages = typst.split("#pagebreak()")
-    habit_jan = next(page for page in pages if "<habits-january>" in page and "rotate(" in page)
+    habit_jan = next(page for page in pages if "January<habits-january>" in page and "rotate(" in page)
     assert "padded_link(<2026-01-01>)" in habit_jan
     assert "padded_link(<2026-01-14>)" in habit_jan
 
@@ -237,7 +239,8 @@ def test_habit_columns_is_configurable():
     habits = _habits(dto)
     assert habits.habit_columns == 8
     typst = _generate(short_january(dto))
-    assert typst.count("grid.cell(stroke: regular_stroke, [])") == 31 * 8
+    assert typst.count(_BOX) == (_JAN_DAYS - _JAN_FRIDAYS) * 8
+    assert typst.count(_BOX_FRIDAY) == _JAN_FRIDAYS * 8
 
 
 def test_unknown_key_on_section_habits_raises():
@@ -266,7 +269,7 @@ def test_index_is_raw_typst_month_pages_use_mos():
     typst = _generate(short_january(dto))
     pages = typst.split("#pagebreak()")
     index = next(page for page in pages if "<habits>" in page and "rotate(" not in page)
-    month = next(page for page in pages if "<habits-january>" in page and "rotate(" in page)
+    month = next(page for page in pages if "January<habits-january>" in page and "rotate(" in page)
     assert "rotate(" in month
     assert "JAN" in index
     assert "→" not in index
@@ -311,6 +314,10 @@ def test_short_january_nomad_compiles(tmp_path):
 
 _HEADER_LINE = "line(start: (0%, 100%), end: (100%, 0%), stroke: regular_stroke)"
 _NAMED_MARK = "align(center + horizon, text["
+_BOX = "grid.cell(stroke: regular_stroke, [])"
+_BOX_FRIDAY = "grid.cell(stroke: (rest: regular_stroke, bottom: thick_stroke), [])"
+_JAN_DAYS = 31
+_JAN_FRIDAYS = 5
 
 
 def test_default_names_are_empty_and_headers_are_line_only():
@@ -321,7 +328,8 @@ def test_default_names_are_empty_and_headers_are_line_only():
     typst = _generate(short_january(dto))
     assert _NAMED_MARK not in typst
     assert typst.count(_HEADER_LINE) == 6
-    assert typst.count("grid.cell(stroke: regular_stroke, [])") == 31 * 6
+    assert typst.count(_BOX) == (_JAN_DAYS - _JAN_FRIDAYS) * 6
+    assert typst.count(_BOX_FRIDAY) == _JAN_FRIDAYS * 6
 
 
 def test_two_names_typeset_and_pad_to_six_columns():
@@ -342,7 +350,8 @@ def test_two_names_typeset_and_pad_to_six_columns():
     assert "Move" in typst
     assert typst.count(_NAMED_MARK) == 2
     assert typst.count(_HEADER_LINE) == 4
-    assert typst.count("grid.cell(stroke: regular_stroke, [])") == 31 * 6
+    assert typst.count(_BOX) == (_JAN_DAYS - _JAN_FRIDAYS) * 6
+    assert typst.count(_BOX_FRIDAY) == _JAN_FRIDAYS * 6
     assert "rotate(" not in _habit_header_src("Sleep")
     assert _HEADER_LINE not in _habit_header_src("Sleep")
     assert _HEADER_LINE in _habit_header_src("")
@@ -576,14 +585,36 @@ week_starts = "Monday"
 
 def test_january_has_friday_rules_and_no_weekend_bar():
     dto = parse_toml(_minimal(enable=["habits"], sections=""), source="friday.toml")
-    typst = _generate(short_january(dto))
-    month = next(
-        page
-        for page in typst.split("#pagebreak()")
-        if "<habits-january>" in page and "rotate(" in page
+    typst = _generate(dto)
+    pages = typst.split("#pagebreak()")
+    january = next(
+        page for page in pages if "January<habits-january>" in page and "rotate(" in page
     )
-    assert month.count("grid.hline(stroke: thick_stroke)") == 5
-    assert "columns: (auto, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in month
-    assert "0.8mm" not in month
-    assert "luma(140)" not in month
-    assert "luma(180)" not in month
+    december = next(
+        page for page in pages if "December<habits-december>" in page and "rotate(" in page
+    )
+    assert january.count(_BOX_FRIDAY) == _JAN_FRIDAYS * 6
+    assert january.count(_BOX) == (_JAN_DAYS - _JAN_FRIDAYS) * 6
+    assert december.count(_BOX_FRIDAY) == 4 * 6
+    assert december.count(_BOX) == (31 - 4) * 6
+    for page in (january, december):
+        assert "grid.hline" not in page
+        assert 'text(weight: "bold")' not in page
+        assert page.count("align(horizon + right,") == 31
+    for day in (2, 9, 16, 23, 30):
+        assert (
+            f"grid.cell(stroke: (rest: regular_stroke, bottom: thick_stroke), "
+            f"align(horizon + right, [#[Fri {day}]]))"
+        ) in january
+    for day in (4, 11, 18, 25):
+        assert (
+            f"grid.cell(stroke: (rest: regular_stroke, bottom: thick_stroke), "
+            f"align(horizon + right, [#[Fri {day}]]))"
+        ) in december
+    assert "align(horizon + right, [#[Sat 3]])" in january
+    assert "align(horizon + right, [#[Sun 4]])" in january
+    assert "align(horizon + right, [#[Mon 5]])" in january
+    assert "columns: (auto, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in january
+    assert "0.8mm" not in january
+    assert "luma(140)" not in january
+    assert "luma(180)" not in january
