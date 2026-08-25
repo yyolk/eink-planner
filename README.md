@@ -89,7 +89,7 @@ Device profiles and locale files are TOML. Config keys use underscores (`week_st
 uv run pytest
 ```
 
-CI runs pytest and a Nomad `lyp generate`.
+CI runs pytest and a Nomad `lyp generate`. Visual design checks live in `tests/visual.py` and can be dropped with the tests that import them.
 
 ## Layout of a generated planner
 
