@@ -41,12 +41,14 @@ class Habits:
         i18n: I18n,
         configurator: Configurator,
         habit_columns: int = DEFAULT_COLUMNS,
+        names: list[str] | None = None,
         **_rest: Any,
     ) -> None:
         self.section_name = section_name
         self.i18n = i18n
         self.configurator = configurator
         self.habit_columns = int(habit_columns)
+        self.names = list(names) if names else []
 
     def register(self, manifest: Manifest) -> None:
         manifest.register_source(self.ID)
@@ -146,7 +148,8 @@ class Habits:
         n_days = len(days)
         cols = ", ".join(["auto", _BAR_WIDTH] + ["1fr"] * n_habits)
         rows = ", ".join([_HEADER_ROW] + ["1fr"] * n_days)
-        headers = ["[]", "[]"] + [_HABIT_HEADER] * n_habits
+        padded = (list(self.names) + [""] * n_habits)[:n_habits]
+        headers = ["[]", "[]"] + [_habit_header(name) for name in padded]
         cells = [", ".join(headers)]
         spans = _weekend_bar_spans(days)
         for day, span in zip(days, spans, strict=True):
@@ -171,6 +174,47 @@ class Habits:
         if day.weekday_name in _WEEKEND:
             return f'align(horizon + right, text(fill: luma(140))[#{linked}])'
         return f'align(horizon + right, text(weight: "bold")[#{linked}])'
+
+
+def _escape_typst(text: str) -> str:
+    """Escape Typst specials so a habit name cannot break the document."""
+    return (
+        text.replace("\\", "\\\\")
+        .replace("#", "\\#")
+        .replace("[", "\\[")
+        .replace("]", "\\]")
+    )
+
+
+def _habit_header(name: str) -> str:
+    if not name:
+        return _HABIT_HEADER
+    label = _escape_typst(name)
+    return (
+        "grid.cell(\n"
+        "  inset: 0pt,\n"
+        "  stroke: regular_stroke,\n"
+        "  box(\n"
+        "    width: 100%,\n"
+        "    height: 100%,\n"
+        "    clip: true,\n"
+        "    layout(size => {\n"
+        "      let angle = -calc.atan(size.height / size.width)\n"
+        "      place(line(start: (0%, 100%), end: (100%, 0%), stroke: regular_stroke))\n"
+        "      place(\n"
+        "        center + horizon,\n"
+        "        rotate(\n"
+        "          angle,\n"
+        "          origin: center,\n"
+        "          text(tracking: -0.06em)["
+        + label
+        + "]\n"
+        "        )\n"
+        "      )\n"
+        "    })\n"
+        "  )\n"
+        ")"
+    )
 
 
 def _weekend_bar_spans(days: list[Day]) -> list[int | None]:

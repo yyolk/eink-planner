@@ -236,6 +236,15 @@ class ProjectsSection(StrictModel):
 
 class HabitsSection(StrictModel):
     habit_columns: StrictInt = 12
+    names: list[str] = []
+
+    @model_validator(mode="after")
+    def _names_fit_columns(self) -> HabitsSection:
+        if len(self.names) > self.habit_columns:
+            raise ValueError(
+                f"names has {len(self.names)} entries but habit_columns is {self.habit_columns}"
+            )
+        return self
 
 
 class ColophonSection(StrictModel):

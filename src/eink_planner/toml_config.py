@@ -364,8 +364,8 @@ def _section_projects(table: ProjectsSection | None) -> dict[str, Any]:
 
 def _section_habits(table: HabitsSection | None) -> dict[str, Any]:
     if table is None:
-        return {"habit_columns": 12}
-    return {"habit_columns": table.habit_columns}
+        return {"habit_columns": 12, "names": []}
+    return {"habit_columns": table.habit_columns, "names": list(table.names)}
 
 
 def _little_cal_dict(raw: LittleCalendar | None) -> dict[str, Any]:

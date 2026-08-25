@@ -158,3 +158,15 @@ def test_unknown_grid_pattern_on_notes_is_validation_error():
     with pytest.raises(ValidationError):
         Notes(pattern="grid", title_height="4mm")
 
+
+def test_habits_section_defaults_and_names_length():
+    from eink_planner.models.device import HabitsSection
+
+    section = HabitsSection()
+    assert section.habit_columns == 12
+    assert section.names == []
+    ok = HabitsSection(habit_columns=2, names=["A", "B"])
+    assert ok.names == ["A", "B"]
+    with pytest.raises(ValidationError, match="habit_columns"):
+        HabitsSection(habit_columns=2, names=["A", "B", "C"])
+

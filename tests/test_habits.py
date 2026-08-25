@@ -49,6 +49,7 @@ def _habits(dto) -> Habits:
         i18n=I18n.load_default(REPO, "en"),
         configurator=Configurator(dto),
         habit_columns=params.get("habit_columns", Habits.DEFAULT_COLUMNS),
+        names=params.get("names"),
     )
 
 
@@ -58,8 +59,10 @@ def test_listed_without_table_defaults_columns_and_pages():
     assert section["name"] == "habits"
     assert section["class"] == "habits"
     assert section["params"]["habit_columns"] == 12
+    assert section["params"]["names"] == []
     habits = _habits(dto)
     assert habits.habit_columns == Habits.DEFAULT_COLUMNS == 12
+    assert habits.names == []
     typst = _generate(dto)
     assert "<habits>" in typst
     for name in MONTHS:
@@ -268,6 +271,7 @@ def test_nomad_full_year_is_thirteen_pages_of_habits():
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert names[-1] == "habits"
     assert dto["planner"]["sections"][-1]["params"]["habit_columns"] == 12
+    assert dto["planner"]["sections"][-1]["params"]["names"] == []
     typst = _generate(dto)
     assert "<habits>" in typst
     for name in MONTHS:
@@ -296,4 +300,116 @@ def test_short_january_nomad_compiles(tmp_path):
     assert "<habits-january>" in typst
     assert "<habits-february>" not in typst
     pdf, stderr = compile_pdf(typst, tmp_path / "nomad-habits")
+    assert pdf.is_file() and pdf.stat().st_size > 0, stderr
+
+_HEADER_LINE = "line(start: (0%, 100%), end: (100%, 0%), stroke: regular_stroke)"
+_NAMED_MARK = "text(tracking: -0.06em)"
+
+
+def test_default_names_are_empty_and_headers_are_line_only():
+    dto = parse_toml(_minimal(enable=["habits"], sections=""), source="no-names.toml")
+    assert dto["planner"]["sections"][0]["params"]["names"] == []
+    habits = _habits(dto)
+    assert habits.names == []
+    typst = _generate(short_january(dto))
+    assert _NAMED_MARK not in typst
+    assert typst.count(_HEADER_LINE) == 12
+    assert typst.count("grid.cell(stroke: regular_stroke, [])") == 31 * 12
+
+
+def test_two_names_typeset_and_pad_to_twelve_columns():
+    dto = parse_toml(
+        _minimal(
+            enable=["habits"],
+            sections="[section.habits]\nhabit_columns = 12\nnames = [\"Sleep\", \"Move\"]\n",
+        ),
+        source="two-names.toml",
+    )
+    params = dto["planner"]["sections"][0]["params"]
+    assert params["habit_columns"] == 12
+    assert params["names"] == ["Sleep", "Move"]
+    habits = _habits(dto)
+    assert habits.names == ["Sleep", "Move"]
+    typst = _generate(short_january(dto))
+    assert "Sleep" in typst
+    assert "Move" in typst
+    assert typst.count(_NAMED_MARK) == 2
+    assert typst.count(_HEADER_LINE) == 12
+    assert typst.count("grid.cell(stroke: regular_stroke, [])") == 31 * 12
+
+
+def test_more_names_than_columns_is_config_error():
+    with pytest.raises(ConfigError, match="names has 3 entries but habit_columns is 2"):
+        parse_toml(
+            _minimal(
+                enable=["habits"],
+                sections="[section.habits]\nhabit_columns = 2\nnames = [\"A\", \"B\", \"C\"]\n",
+            ),
+            source="too-many.toml",
+        )
+
+
+def test_empty_string_name_stays_line_only():
+    dto = parse_toml(
+        _minimal(
+            enable=["habits"],
+            sections="[section.habits]\nnames = [\"Sleep\", \"\", \"Water\"]\n",
+        ),
+        source="blank-slot.toml",
+    )
+    assert dto["planner"]["sections"][0]["params"]["names"] == ["Sleep", "", "Water"]
+    typst = _generate(short_january(dto))
+    assert "Sleep" in typst
+    assert "Water" in typst
+    assert typst.count(_NAMED_MARK) == 2
+    assert typst.count(_HEADER_LINE) == 12
+    # the blank slot must not emit an empty typeset word
+    assert "text(tracking: -0.06em)[]" not in typst
+
+
+def test_same_names_on_every_month_page():
+    dto = parse_toml(
+        _minimal(
+            enable=["habits"],
+            sections="[section.habits]\nnames = [\"Sleep\", \"Move\"]\n",
+        ),
+        source="every-month.toml",
+    )
+    typst = _generate(dto)
+    pages = typst.split("#pagebreak()")
+    named = [page for page in pages if "text(tracking: -0.06em)[Sleep]" in page]
+    assert len(named) == 12
+    for page in named:
+        assert "text(tracking: -0.06em)[Move]" in page
+        assert page.count(_HEADER_LINE) == 12
+
+
+def test_names_escape_typst_specials():
+    dto = parse_toml(
+        _minimal(
+            enable=["habits"],
+            sections="""[section.habits]
+names = ["Caffeine#1", "A[B]", "C\\\\D"]
+""",
+        ),
+        source="escape.toml",
+    )
+    assert dto["planner"]["sections"][0]["params"]["names"] == ["Caffeine#1", "A[B]", r"C\D"]
+    typst = _generate(short_january(dto))
+    assert r"Caffeine\#1" in typst
+    assert r"A\[B\]" in typst
+    assert r"C\\D" in typst
+    assert "text(tracking: -0.06em)[Caffeine#1]" not in typst
+
+
+def test_named_headers_compile(tmp_path):
+    dto = parse_toml(
+        _minimal(
+            enable=["habits"],
+            sections="[section.habits]\nnames = [\"Sleep\", \"Move\", \"Water\"]\n",
+        ),
+        source="named-compile.toml",
+    )
+    typst = _generate(short_january(dto))
+    pdf, stderr = compile_pdf(typst, tmp_path / "named-habits")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
