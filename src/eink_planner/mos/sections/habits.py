@@ -150,20 +150,21 @@ class Habits:
     def _month_grid(self, manifest: Manifest, month: Month) -> str:
         days = list(walk(month.day, month.day.end_of_month()))
         n_habits = self.habit_columns
-        n_days = len(days)
         cols = ", ".join(["auto"] + ["1fr"] * n_habits)
-        rows = ", ".join([_HEADER_ROW] + ["1fr"] * n_days)
+        row_sizes = [_HEADER_ROW]
         padded = (list(self.names) + [""] * n_habits)[:n_habits]
         headers = ["[]"] + [_habit_header(name) for name in padded]
         cells = [", ".join(headers)]
-        friday_hlines: list[str] = []
-        for i, day in enumerate(days):
+        rule = f"grid.cell(colspan: {1 + n_habits}, inset: 0pt, fill: black, [])"
+        for day in days:
             row = [self._date_label(manifest, day)]
             row.extend([_BOX] * n_habits)
             cells.append(", ".join(row))
+            row_sizes.append("1fr")
             if day.weekday_name == "friday":
-                # Header is row 0; Friday is row 1+i; draw under Friday (top of next row).
-                friday_hlines.append(f"grid.hline(y: {1 + i + 1}, stroke: thick_stroke)")
+                cells.append(rule)
+                row_sizes.append("0.4mm")
+        rows = ", ".join(row_sizes)
         return f"""grid(
   columns: ({cols}),
   rows: ({rows}),
@@ -171,7 +172,7 @@ class Habits:
   inset: 0pt,
   column-gutter: 0pt,
   row-gutter: 0pt,
-  {",\n  ".join(cells + friday_hlines)}
+  {",\n  ".join(cells)}
 )"""
 
     def _date_label(self, manifest: Manifest, day: Day) -> str:
