@@ -196,8 +196,8 @@ def test_grid_uses_stroke_boxes_writein_slash_and_friday_rule():
     assert "line(start: (0%, 100%), end: (100%, 0%), stroke: regular_stroke)" in typst
     assert "luma(140)" not in typst
     assert "luma(180)" not in typst
-    assert _BOX_FRIDAY in typst
-    assert "grid.hline" not in typst
+    assert "grid.hline(y:" in typst
+    assert "grid.cell(stroke: (rest: regular_stroke, bottom: thick_stroke)" not in typst
     assert 'text(weight: "bold")' not in typst
     assert "columns: (auto, 0.8mm" not in typst
     assert "Mon 1" in typst
@@ -239,8 +239,8 @@ def test_habit_columns_is_configurable():
     habits = _habits(dto)
     assert habits.habit_columns == 8
     typst = _generate(short_january(dto))
-    assert typst.count(_BOX) == (_JAN_DAYS - _JAN_FRIDAYS) * 8
-    assert typst.count(_BOX_FRIDAY) == _JAN_FRIDAYS * 8
+    assert typst.count(_BOX) == _JAN_DAYS * 8
+    assert _BOX_FRIDAY not in typst
 
 
 def test_unknown_key_on_section_habits_raises():
@@ -328,8 +328,8 @@ def test_default_names_are_empty_and_headers_are_line_only():
     typst = _generate(short_january(dto))
     assert _NAMED_MARK not in typst
     assert typst.count(_HEADER_LINE) == 6
-    assert typst.count(_BOX) == (_JAN_DAYS - _JAN_FRIDAYS) * 6
-    assert typst.count(_BOX_FRIDAY) == _JAN_FRIDAYS * 6
+    assert typst.count(_BOX) == _JAN_DAYS * 6
+    assert _BOX_FRIDAY not in typst
 
 
 def test_two_names_typeset_and_pad_to_six_columns():
@@ -350,8 +350,8 @@ def test_two_names_typeset_and_pad_to_six_columns():
     assert "Move" in typst
     assert typst.count(_NAMED_MARK) == 2
     assert typst.count(_HEADER_LINE) == 4
-    assert typst.count(_BOX) == (_JAN_DAYS - _JAN_FRIDAYS) * 6
-    assert typst.count(_BOX_FRIDAY) == _JAN_FRIDAYS * 6
+    assert typst.count(_BOX) == _JAN_DAYS * 6
+    assert _BOX_FRIDAY not in typst
     assert "rotate(" not in _habit_header_src("Sleep")
     assert _HEADER_LINE not in _habit_header_src("Sleep")
     assert _HEADER_LINE in _habit_header_src("")
@@ -593,24 +593,34 @@ def test_january_has_friday_rules_and_no_weekend_bar():
     december = next(
         page for page in pages if "December<habits-december>" in page and "rotate(" in page
     )
-    assert january.count(_BOX_FRIDAY) == _JAN_FRIDAYS * 6
-    assert january.count(_BOX) == (_JAN_DAYS - _JAN_FRIDAYS) * 6
-    assert december.count(_BOX_FRIDAY) == 4 * 6
-    assert december.count(_BOX) == (31 - 4) * 6
+    assert january.count(_BOX) == _JAN_DAYS * 6
+    assert december.count(_BOX) == 31 * 6
+    assert january.count("grid.hline(y:") == _JAN_FRIDAYS
+    assert december.count("grid.hline(y:") == 4
+    for y in (3, 10, 17, 24, 31):
+        assert f"grid.hline(y: {y}, stroke: thick_stroke)" in january
+    for y in (5, 12, 19, 26):
+        assert f"grid.hline(y: {y}, stroke: thick_stroke)" in december
     for page in (january, december):
-        assert "grid.hline" not in page
+        assert _BOX_FRIDAY not in page
+        assert "bottom: thick_stroke" not in page
         assert 'text(weight: "bold")' not in page
         assert page.count("align(horizon + right,") == 31
+        last_box = page.rfind(_BOX)
+        first_hline = page.find("grid.hline(y:")
+        assert last_box != -1 and first_hline != -1 and last_box < first_hline
     for day in (2, 9, 16, 23, 30):
+        assert f"align(horizon + right, [#[Fri {day}]])" in january
         assert (
             f"grid.cell(stroke: (rest: regular_stroke, bottom: thick_stroke), "
             f"align(horizon + right, [#[Fri {day}]]))"
-        ) in january
+        ) not in january
     for day in (4, 11, 18, 25):
+        assert f"align(horizon + right, [#[Fri {day}]])" in december
         assert (
             f"grid.cell(stroke: (rest: regular_stroke, bottom: thick_stroke), "
             f"align(horizon + right, [#[Fri {day}]]))"
-        ) in december
+        ) not in december
     assert "align(horizon + right, [#[Sat 3]])" in january
     assert "align(horizon + right, [#[Sun 4]])" in january
     assert "align(horizon + right, [#[Mon 5]])" in january

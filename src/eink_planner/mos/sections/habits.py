@@ -28,8 +28,6 @@ _HABIT_HEADER = """grid.cell(
   )
 )"""
 _BOX = "grid.cell(stroke: regular_stroke, [])"
-_BOX_FRIDAY = "grid.cell(stroke: (rest: regular_stroke, bottom: thick_stroke), [])"
-_FRIDAY_STROKE = "(rest: regular_stroke, bottom: thick_stroke)"
 
 
 class Habits:
@@ -158,15 +156,14 @@ class Habits:
         padded = (list(self.names) + [""] * n_habits)[:n_habits]
         headers = ["[]"] + [_habit_header(name) for name in padded]
         cells = [", ".join(headers)]
-        for day in days:
-            label = self._date_label(manifest, day)
-            if day.weekday_name == "friday":
-                row = [f"grid.cell(stroke: {_FRIDAY_STROKE}, {label})"]
-                row.extend([_BOX_FRIDAY] * n_habits)
-            else:
-                row = [label]
-                row.extend([_BOX] * n_habits)
+        friday_hlines: list[str] = []
+        for i, day in enumerate(days):
+            row = [self._date_label(manifest, day)]
+            row.extend([_BOX] * n_habits)
             cells.append(", ".join(row))
+            if day.weekday_name == "friday":
+                # Header is row 0; Friday is row 1+i; draw under Friday (top of next row).
+                friday_hlines.append(f"grid.hline(y: {1 + i + 1}, stroke: thick_stroke)")
         return f"""grid(
   columns: ({cols}),
   rows: ({rows}),
@@ -174,7 +171,7 @@ class Habits:
   inset: 0pt,
   column-gutter: 0pt,
   row-gutter: 0pt,
-  {",\n  ".join(cells)}
+  {",\n  ".join(cells + friday_hlines)}
 )"""
 
     def _date_label(self, manifest: Manifest, day: Day) -> str:
