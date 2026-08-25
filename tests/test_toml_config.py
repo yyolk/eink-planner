@@ -490,3 +490,43 @@ def test_golden_typst_hash(name: str):
     golden = REPO / "out" / "toml-goldens" / f"{name}.typst"
     if golden.is_file():
         assert typst == golden.read_text(encoding="utf-8")
+
+
+def test_device_ppi_may_be_omitted():
+    dto = parse_toml(
+        _minimal(
+            device="""[device]
+name = "x"
+width = "100mm"
+height = "120mm"
+""",
+        )
+    )
+    assert dto["device"] == "x"
+    assert dto["document"]["layout"]["dimensions"]["width"] == "100mm"
+    assert dto["document"]["layout"]["dimensions"]["height"] == "120mm"
+
+
+def test_empty_style_scratch_pad_is_dotted():
+    style = """[style]
+scratch_pad = ""
+
+[style.stroke]
+regular = "0.3pt"
+thick = "0.6pt"
+
+[style.type]
+body = "8pt"
+h1 = "8mm"
+
+[style.margin]
+top = "8mm"
+bottom = "0mm"
+left = "0mm"
+right = "4mm"
+
+[style.gutter]
+column = "8pt"
+"""
+    dto = parse_toml(_minimal(style=style))
+    assert dto["planner"]["params"]["scratch_pad"] == "dotted"

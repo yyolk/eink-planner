@@ -121,3 +121,16 @@ def test_string_field_rejects_integer():
     data["calendar"]["week_starts"] = 1
     with pytest.raises(ValidationError):
         DeviceProfile.model_validate(data)
+
+
+def test_device_ppi_is_optional():
+    text = _minimal(
+        device="""[device]
+name = "x"
+width = "100mm"
+height = "120mm"
+""",
+    )
+    assert "ppi" not in text
+    profile = DeviceProfile.model_validate(tomllib.loads(text))
+    assert profile.device.ppi is None

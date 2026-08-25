@@ -49,7 +49,7 @@ class Device(StrictModel):
     name: str
     width: str
     height: str
-    ppi: StrictInt
+    ppi: StrictInt | None = None
 
 
 class Calendar(StrictModel):
@@ -104,8 +104,8 @@ class Style(StrictModel):
     @field_validator("scratch_pad")
     @classmethod
     def _scratch_pad(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
+        if value is None or not str(value).strip():
+            return None
         return _require_pattern(value)
 
 
