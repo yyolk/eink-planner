@@ -43,6 +43,8 @@ def test_happy_path_locale():
     locale = load_locale(LOCALE)
     assert locale.week_name == "Week"
     assert locale.projects == "Projects"
+    assert locale.habits == "Habits"
+    assert locale.weekday.short.monday == "Mon"
     assert locale.quarter.short == "Q"
 
 
@@ -140,7 +142,7 @@ def test_known_sections_match_section_tables():
     from eink_planner.models import KNOWN_SECTIONS
     from eink_planner.models.device import SectionTables
     assert KNOWN_SECTIONS == frozenset(SectionTables.model_fields)
-    assert {"cover", "daily", "daily_notes", "projects", "colophon"} <= KNOWN_SECTIONS
+    assert {"cover", "daily", "daily_notes", "projects", "habits", "colophon"} <= KNOWN_SECTIONS
 
 
 def test_daily_components_match_daily_track_fields():

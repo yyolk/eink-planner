@@ -13,6 +13,7 @@ sections = [
   "weekly",
   "daily",
   "daily_notes",
+  "habits",
 ]
 
 [device]
@@ -98,3 +99,6 @@ inset = "3pt"
 [section.daily_notes]
 pages = 2
 pattern = "dotted"
+
+[section.habits]
+habit_columns = 12

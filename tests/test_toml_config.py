@@ -21,7 +21,7 @@ MOS_RIGHT = CONFIGS / "158x210-mos-right.toml"
 SCRIBE = CONFIGS / "kindle-scribe.toml"
 
 GOLDEN_SHA256 = {
-    "supernote-nomad": "47ff85bf498eaaa6919eb68a4e674a3abde124c3bac58552d0127754896928b0",
+    "supernote-nomad": "0ba212575a93122287754f51ecd769e4e3d41bf9f46e66f747bb2604885f7a13",
     "158x210-mos-left": "43f733d39303de4d1e732a135c278f50b922d427b28fe4ec131bbf5c08449cbf",
 }
 
@@ -36,6 +36,8 @@ def test_parse_shipped_toml_profiles(path: Path):
     expected = ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
     if path == NOMAD:
         expected = expected + ["projects"]
+    if path in {NOMAD, NOMAD_MOS_RIGHT}:
+        expected = expected + ["habits"]
     assert names == expected
 
 
@@ -117,7 +119,8 @@ def test_nomad_projects_pages_and_card_rows():
     assert projects["params"]["pages"] == 20
     assert projects["params"]["card_rows"] == 8
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
-    assert names[-1] == "projects"
+    assert "projects" in names
+    assert names[-1] == "habits"
 
 
 def test_lined_scratch_pad():

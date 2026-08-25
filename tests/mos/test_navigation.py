@@ -84,3 +84,51 @@ def test_heading_menu_highlights_annual_page():
     assert other is not None
     assert "padded_link(<annual>, [Calendar])" in other
     assert "fill: black" not in other
+
+
+def test_heading_menu_uses_page_nav_links():
+    nav = _nav()
+    nav.manifest.register_source("habits-january")
+    nav.manifest.register_source("month-2026-01-01")
+    grid = nav.heading_menu_grid(
+        page_id="habits-january",
+        nav_links=[("habits-january", "Habits"), ("month-2026-01-01", "Calendar")],
+    )
+    assert grid is not None
+    assert "grid.cell(fill: black, text(white)[#padded_link(<habits-january>, [Habits])])" in grid
+    assert "padded_link(<month-2026-01-01>, [Calendar])" in grid
+    assert "padded_link(<annual>" not in grid
+
+
+def test_side_menu_months_only_omits_quarters_and_two_column_table():
+    typst = _nav().side_menu_cell(
+        highlight_months=[],
+        highlight_quarters=[],
+        show_quarters=False,
+    )
+    assert "rotate(" in typst
+    assert "270deg" in typst
+    assert "columns: (1fr, 3fr)" not in typst
+    assert "columns: (3fr, 1fr)" not in typst
+    assert "Q1" not in typst
+    assert "Q2" not in typst
+    assert "Q3" not in typst
+    assert "Q4" not in typst
+    assert "Jan" in typst
+    assert "Dec" in typst
+
+
+def test_months_menu_can_retarget_month_ids():
+    nav = _nav()
+    nav.manifest.register_source("habits-january")
+    nav.manifest.register_source("month-2026-01-01")
+    default = nav.side_menu_cell(highlight_months=[], highlight_quarters=[])
+    assert "padded_link(<month-2026-01-01>)" in default
+    assert "padded_link(<habits-january>)" not in default
+    retargeted = nav.side_menu_cell(
+        highlight_months=[],
+        highlight_quarters=[],
+        month_link_id=lambda month: f"habits-{month.name}",
+    )
+    assert "padded_link(<habits-january>)" in retargeted
+    assert "padded_link(<month-2026-01-01>)" not in retargeted

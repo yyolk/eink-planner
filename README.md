@@ -103,8 +103,10 @@ Enabled MOS (Months on the Side) sections, in order:
 6. Daily (schedule + little calendar + priorities + notes)
 7. Daily notes (extra dotted pages)
 8. Projects (index of write-in names + one kanban board per project)
+9. Habits (index of 12 months + one habit-tracker grid per month)
 
 `[section.projects]` takes optional `pages` (default 20) and `card_rows` (default 8). Only Nomad ships projects enabled.
+`[section.habits]` takes optional `habit_columns` (default 12). Enabled on both Nomad profiles.
 
 Internal PDF links use Typst `#padded_link` / `<label>` the same way LYP does. A link is only emitted when the target page exists; otherwise the cell stays plain text.
 

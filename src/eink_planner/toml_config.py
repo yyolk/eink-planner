@@ -28,6 +28,7 @@ from eink_planner.models.device import (
     MonthlySection,
     Notes,
     Priorities,
+    HabitsSection,
     ProjectsSection,
     QuarterlySection,
     Schedule,
@@ -43,6 +44,7 @@ _SECTION_CLASS = {
     "daily": "daily",
     "daily_notes": "daily_notes",
     "projects": "projects",
+    "habits": "habits",
     "colophon": "colophon",
 }
 
@@ -55,6 +57,7 @@ _SECTION_NAME = {
     "daily": "daily",
     "daily_notes": "daily_notes",
     "projects": "projects",
+    "habits": "habits",
     "colophon": "colophon",
 }
 
@@ -220,6 +223,8 @@ def _build_section_params(kind: str, raw: Any, extras: dict[str, Any]) -> dict[s
         return _section_daily_notes(raw)
     if kind == "projects":
         return _section_projects(raw)
+    if kind == "habits":
+        return _section_habits(raw)
     if kind == "colophon":
         return _section_colophon(raw) if raw is not None else {}
     return {}
@@ -355,6 +360,12 @@ def _section_projects(table: ProjectsSection | None) -> dict[str, Any]:
     if table is None:
         return {"pages": 20, "card_rows": 8}
     return {"pages": table.pages, "card_rows": table.card_rows}
+
+
+def _section_habits(table: HabitsSection | None) -> dict[str, Any]:
+    if table is None:
+        return {"habit_columns": 12}
+    return {"habit_columns": table.habit_columns}
 
 
 def _little_cal_dict(raw: LittleCalendar | None) -> dict[str, Any]:

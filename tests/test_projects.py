@@ -274,9 +274,10 @@ pages = {n}
 def test_nomad_parses_and_compiles(tmp_path):
     dto = load(NOMAD)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
-    assert names[-1] == "projects"
-    assert dto["planner"]["sections"][-1]["params"]["pages"] == 20
-    assert dto["planner"]["sections"][-1]["params"]["card_rows"] == 8
+    assert "projects" in names
+    projects = next(s for s in dto["planner"]["sections"] if s["name"] == "projects")
+    assert projects["params"]["pages"] == 20
+    assert projects["params"]["card_rows"] == 8
     typst = _generate(short_january(dto))
     assert "<projects>" in typst
     assert "<projects-2>" in typst

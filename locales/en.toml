@@ -10,6 +10,7 @@ daily_notes = "Notes"
 more_daily_notes = "More"
 notes = "Notes"
 projects = "Projects"
+habits = "Habits"
 todo = "TODO"
 doing = "DOING"
 done = "DONE"
@@ -58,6 +59,15 @@ thursday = "T"
 friday = "F"
 saturday = "S"
 sunday = "S"
+
+[weekday.short]
+monday = "Mon"
+tuesday = "Tue"
+wednesday = "Wed"
+thursday = "Thu"
+friday = "Fri"
+saturday = "Sat"
+sunday = "Sun"
 
 [weekday.full]
 monday = "Monday"
