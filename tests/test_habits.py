@@ -413,3 +413,89 @@ def test_named_headers_compile(tmp_path):
     typst = _generate(short_january(dto))
     pdf, stderr = compile_pdf(typst, tmp_path / "named-habits")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
+
+
+_RIGHT_LAYOUT = """[layout]
+name = "mos"
+side_menu = "right"
+side_menu_width = "10mm"
+reverse_months_quarters = true
+menu_rotate = "270deg"
+column_gutter = "1.5mm"
+row_gutter = "1.5mm"
+"""
+
+
+def _mos_page(typst: str, *needles: str, exclude: str | None = None) -> str:
+    for page in typst.split("#pagebreak()"):
+        if all(needle in page for needle in needles) and (
+            exclude is None or exclude not in page
+        ):
+            return page
+    raise AssertionError(f"no page matching {needles!r}")
+
+
+def test_habit_month_follows_side_menu_dates_stay_left():
+    """MOS-right moves the months strip; habit dates stay left of the grid."""
+    right = parse_toml(
+        _minimal(enable=["habits"], layout=_RIGHT_LAYOUT, sections=""),
+        source="habits-mos-right.toml",
+    )
+    right_typst = _generate(right)
+    right_jan = _mos_page(right_typst, "January<habits-january>", "rotate(")
+    assert "columns: (1fr, 10mm)" in right_jan
+    assert "columns: (10mm, 1fr)" not in right_jan
+    assert "columns: (8mm, 1fr)" not in right_jan
+    right_grid = right_jan[right_jan.index("columns: (auto, 0.8mm, 1fr") :]
+    assert "Thu 1" in right_grid
+    assert "Mon 5" in right_grid
+    assert right_grid.index("Thu 1") < right_grid.index(
+        "grid.cell(stroke: regular_stroke, [])"
+    )
+    right_june = _mos_page(right_typst, "June<habits-june>", "rotate(")
+    june_grid = right_june[right_june.index("columns: (auto, 0.8mm, 1fr") :]
+    assert "Mon 1" in june_grid
+    assert june_grid.index("Mon 1") < june_grid.index(
+        "grid.cell(stroke: regular_stroke, [])"
+    )
+
+    left = parse_toml(_minimal(enable=["habits"], sections=""), source="habits-mos-left.toml")
+    left_jan = _mos_page(_generate(left), "January<habits-january>", "rotate(")
+    assert "columns: (8mm, 1fr)" in left_jan
+    assert "columns: (1fr, 8mm)" not in left_jan
+    left_grid = left_jan[left_jan.index("columns: (auto, 0.8mm, 1fr") :]
+    assert "Thu 1" in left_grid
+    assert left_grid.index("Thu 1") < left_grid.index(
+        "grid.cell(stroke: regular_stroke, [])"
+    )
+
+    monthly = """[section.monthly]
+week_placement = "left"
+week_label_rotation = "90deg"
+daily_cell_height = "16mm"
+"""
+    both_right = parse_toml(
+        _minimal(enable=["monthly", "habits"], layout=_RIGHT_LAYOUT, sections=monthly),
+        source="monthly-habits-right.toml",
+    )
+    monthly_only = parse_toml(
+        _minimal(enable=["monthly"], layout=_RIGHT_LAYOUT, sections=monthly),
+        source="monthly-right.toml",
+    )
+    cal_both = _mos_page(
+        _generate(both_right),
+        "<month-2026-01-01>",
+        "rotate(",
+        exclude="<habits-january>",
+    )
+    cal_only = _mos_page(_generate(monthly_only), "<month-2026-01-01>", "rotate(")
+    assert "columns: (1fr, 10mm)" in cal_both
+    assert "columns: (10mm, 1fr)" not in cal_both
+    assert "Q1" in cal_both
+    assert "padded_link(<month-2026-02-01>)" in cal_both
+    assert "padded_link(<habits-february>)" not in cal_both
+    assert "columns: (auto, 0.8mm, 1fr" not in cal_both
+    assert "columns: (1fr, 10mm)" in cal_only
+    assert "Q1" in cal_only
+    assert "padded_link(<month-2026-02-01>)" in cal_only
+
