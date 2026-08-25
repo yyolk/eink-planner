@@ -10,7 +10,7 @@ from eink_planner import ConfigError
 from eink_planner.config import load
 from eink_planner.i18n import I18n
 from eink_planner.mos.configurator import Configurator
-from eink_planner.mos.sections.habits import Habits, _habit_header, is_current_index_month
+from eink_planner.mos.sections.habits import Habits, _habit_header
 from eink_planner.services.generate import Generate
 from eink_planner.toml_config import parse_toml
 from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf
@@ -275,9 +275,14 @@ def test_index_is_raw_typst_month_pages_use_mos():
     index = next(page for page in pages if "<habits>" in page and "rotate(" not in page)
     month = next(page for page in pages if "January<habits-january>" in page and "rotate(" in page)
     assert "rotate(" in month
-    assert "JAN" in index
+    assert "January" in index
+    assert "JAN" not in index
     assert "→" not in index
     assert "columns: (auto, 1fr)" in index
+    assert "grid.cell(fill: black" not in index
+    assert "align: horizon + left" in index
+    assert "align(horizon + left" in index
+    assert "box(width: 100%, height: 100%" in index
 
 
 def test_nomad_full_year_is_thirteen_pages_of_habits():
@@ -552,35 +557,56 @@ def test_named_header_is_upright_blank_keeps_slash():
     assert "Sleep" not in blank
 
 
-def test_index_inverts_current_month_in_planner_year():
-    from datetime import date
-
-    from eink_planner.calendar.day import Day
-    from eink_planner.calendar.month import Month
-
-    aug = Month(weekday_start="monday", day=Day("monday", date(2026, 8, 1)))
-    jan = Month(weekday_start="monday", day=Day("monday", date(2026, 1, 1)))
-    assert is_current_index_month(aug, today=date(2026, 8, 25))
-    assert not is_current_index_month(jan, today=date(2026, 8, 25))
-    assert not is_current_index_month(aug, today=date(2025, 8, 25))
-    assert is_current_index_month(aug) is (date.today().year == 2026 and date.today().month == 8)
-
-    dto = parse_toml(_minimal(enable=["habits"], sections=""), source="invert.toml")
+def test_index_is_a_frozen_toc_with_full_names():
+    """Yearly PDF: full month names, no current-month invert, labels centered in the band."""
+    dto = parse_toml(_minimal(enable=["habits"], sections=""), source="index-toc.toml")
     typst = _generate(dto)
     index = next(
         page for page in typst.split("#pagebreak()") if "<habits>" in page and "rotate(" not in page
     )
-    assert "→" not in index
-    if date.today() == date(2026, 8, 25) or (
-        date.today().year == 2026 and date.today().month == 8
+    full = (
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    )
+    for name in full:
+        assert f"padded_link(<habits-{name.lower()}>)[{name}]" in index
+    for abbr in (
+        "JAN",
+        "FEB",
+        "MAR",
+        "APR",
+        "MAY",
+        "JUN",
+        "JUL",
+        "AUG",
+        "SEP",
+        "OCT",
+        "NOV",
+        "DEC",
     ):
-        assert "grid.cell(fill: black, text(white)[#padded_link(<habits-august>)[AUG]])" in index
-        assert "grid.cell(fill: black, text(white)[#padded_link(<habits-january>)[JAN]])" not in index
+        assert abbr not in index
+    assert "grid.cell(fill: black" not in index
+    assert "text(white)" not in index
+    assert "→" not in index
+    assert "1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr" in index
+    assert "align: horizon + left" in index
+    assert "align(horizon + left" in index
+    assert "box(width: 100%, height: 100%" in index
+    assert "inset: (x: 4pt, y: 0pt)" in index
+    assert "align: bottom" not in index
 
 
-def test_index_inverts_none_when_today_is_outside_planner_year():
-    from datetime import date
-
+def test_index_has_no_current_month_even_in_another_planner_year():
     dto = parse_toml(
         _minimal(
             enable=["habits"],
@@ -590,14 +616,17 @@ week_starts = "Monday"
 """,
             sections="",
         ),
-        source="invert-2025.toml",
+        source="index-2025.toml",
     )
     typst = _generate(dto)
     index = next(
         page for page in typst.split("#pagebreak()") if "<habits>" in page and "rotate(" not in page
     )
-    if date.today().year != 2025:
-        assert "grid.cell(fill: black" not in index
+    assert "grid.cell(fill: black" not in index
+    assert "text(white)" not in index
+    assert "padded_link(<habits-january>)[January]" in index
+    assert "JAN" not in index
+    assert "AUG" not in index
 
 
 def test_january_has_friday_rules_and_no_weekend_bar():

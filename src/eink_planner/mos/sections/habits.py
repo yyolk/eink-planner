@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import date
 from typing import Any
 
 from eink_planner.calendar import walk
@@ -88,27 +87,29 @@ class Habits:
 
     def _index(self, manifest: Manifest, months: list[Month]) -> str:
         n = len(months)
-        today = date.today()
         if n:
             rows = []
             for month in months:
                 hid = self.month_id(month)
-                name = self.i18n.t(f"months.short.{month.name}").upper()
+                name = self.i18n.t(f"months.full.{month.name}")
                 label = manifest.link_or_content(hid, name)
-                if is_current_index_month(month, today):
-                    rows.append(
-                        f"  grid.cell(fill: black, text(white)[#{label}]), "
-                        "grid.cell(fill: black, [])"
-                    )
-                else:
-                    rows.append(f"  {label}, []")
-            body = f"""grid(
-  columns: (auto, 1fr),
-  rows: ({", ".join(["1fr"] * n)}),
-  align: horizon,
-  stroke: (bottom: regular_stroke),
-  inset: (x: 4pt, y: 2pt),
+                rows.append(
+                    "  grid.cell(\n"
+                    "    align: horizon + left,\n"
+                    f"    box(width: 100%, height: 100%, align(horizon + left, [#{label}]))\n"
+                    "  ), []"
+                )
+            body = f"""box(
+  width: 100%,
+  height: 100%,
+  grid(
+    columns: (auto, 1fr),
+    rows: ({", ".join(["1fr"] * n)}),
+    align: horizon + left,
+    stroke: (bottom: regular_stroke),
+    inset: (x: 4pt, y: 0pt),
 {",\n".join(rows)}
+  )
 )"""
         else:
             body = "[]"
@@ -179,13 +180,6 @@ class Habits:
         short = self.i18n.t(f"weekday.short.{day.weekday_name}")
         linked = manifest.link_or_content(day.id, f"{short} {day.month_day}")
         return f"align(horizon + right, [#{linked}])"
-
-
-def is_current_index_month(month: Month, today: date | None = None) -> bool:
-    """True when *today* falls in this planner month (year + month)."""
-    current = date.today() if today is None else today
-    stamp = month.day.day
-    return current.year == stamp.year and current.month == stamp.month
 
 
 def _escape_typst(text: str) -> str:
