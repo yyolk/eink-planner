@@ -79,7 +79,7 @@ def test_multiple_colophon_nodes_parse_in_order():
             enable=["cover", "colophon", "colophon"],
             sections="""[section.cover]
 title = "Hi"
-font-size = "12pt"
+font_size = "12pt"
 
 [[section.colophon]]
 
@@ -147,7 +147,7 @@ def test_colophon_last_dumps_config_and_compiles(tmp_path):
     assert "supernote-nomad" in typst_src
     assert "[section.colophon]" in typst_src
     assert hashlib.sha256(path.read_bytes()).hexdigest() in typst_src
-    for snippet in ("year = 2026", "week-starts", "Monday", "reverse-months-quarters"):
+    for snippet in ("year = 2026", "week_starts", "Monday", "reverse_months_quarters"):
         assert snippet in dump
         assert snippet in typst_src
     pdf, stderr = compile_pdf(typst_src, tmp_path / "last")

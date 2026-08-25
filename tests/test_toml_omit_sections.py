@@ -32,7 +32,7 @@ SECTIONS = (
     "monthly",
     "weekly",
     "daily",
-    "daily-notes",
+    "daily_notes",
     "projects",
 )
 
@@ -68,7 +68,7 @@ def classify_label(label: str) -> str:
     if re.fullmatch(r"\d{4}W\d{2}", label):
         return "weekly"
     if label.startswith("daily-note-"):
-        return "daily-notes"
+        return "daily_notes"
     if re.fullmatch(r"\d{4}-\d{2}-\d{2}", label):
         return "daily"
     return "other"
@@ -138,13 +138,13 @@ def test_omit_one_section_compiles_pdf(kind, tmp_path):
         (("weekly",), ("cover", "annual", "quarterly", "monthly", "daily", "daily_notes", "projects")),
         (("monthly",), ("cover", "annual", "quarterly", "weekly", "daily", "daily_notes", "projects")),
         (("daily",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes", "projects")),
-        (("daily-notes",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily", "projects")),
+        (("daily_notes",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily", "projects")),
         (
-            ("cover", "annual", "quarterly", "monthly", "weekly", "daily-notes"),
+            ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes"),
             ("daily", "projects"),
         ),
         (
-            ("annual", "quarterly", "monthly", "weekly", "daily", "daily-notes"),
+            ("annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"),
             ("cover", "projects"),
         ),
     ],
@@ -153,7 +153,7 @@ def test_omit_one_section_compiles_pdf(kind, tmp_path):
         "no-weekly",
         "no-monthly",
         "notes-without-daily",
-        "no-daily-notes",
+        "no-daily_notes",
         "daily-only",
         "cover-only",
     ],
@@ -171,10 +171,8 @@ def test_omit_combinations_compile_pdf(omit, remain, tmp_path):
 
 def test_empty_sections_raises_config_error():
     text = omit_toml_sections(NOMAD.read_text(encoding="utf-8"), SECTIONS)
-    dto = parse_toml(text, source="empty.toml")
-    assert dto["planner"]["sections"] == []
-    with pytest.raises(ConfigError, match=r"planner\.sections"):
-        Configurator(dto).enabled_sections()
+    with pytest.raises(ConfigError, match="sections"):
+        parse_toml(text, source="empty.toml")
 
 
 def test_all_disabled_sections_raises_config_error():

@@ -55,7 +55,7 @@ class Monthly:
     [],
     grid.cell(
       stroke: (bottom: thick_stroke),
-      box(height: regular_height, align(horizon, [{self.i18n.t("monthly-notes")}]))
+      box(height: regular_height, align(horizon, [{self.i18n.t("monthly_notes")}]))
     ),
     rect_pattern({self.pattern})
   )
@@ -95,7 +95,7 @@ class Monthly:
     def _week_label_cell(self, week: list[Day | None]) -> str:
         current_week = self._first_present_day(week).week()
         label = self.manifest.link_or_content(
-            current_week.id, f'{self.i18n.t("week-name")} {current_week.number}'
+            current_week.id, f'{self.i18n.t("week_name")} {current_week.number}'
         )
         rotation = self.month_params.get("week_label_rotation", "90deg")
         return f"align(center + horizon, rotate({rotation}, reflow: true)[#{label}])"

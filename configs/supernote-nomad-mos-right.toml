@@ -12,7 +12,7 @@ sections = [
   "monthly",
   "weekly",
   "daily",
-  "daily-notes",
+  "daily_notes",
 ]
 
 [device]
@@ -23,7 +23,7 @@ ppi = 300
 
 [calendar]
 year = 2026
-week-starts = "Monday"
+week_starts = "Monday"
 
 [style.stroke]
 regular = "0.3pt"
@@ -43,58 +43,58 @@ right = "0mm"
 column = "8pt"
 
 # layout.name = "mos" → Months on the Side (vertical side menu navigation)
-# side-menu left|right is the physical side of the MOS strip
+# side_menu left|right is the physical side of the MOS strip
 [layout]
 name = "mos"
-side-menu = "right"
-side-menu-width = "8mm"
-reverse-months-quarters = true
-menu-rotate = "270deg"
-column-gutter = "1.5mm"
-row-gutter = "1.5mm"
+side_menu = "right"
+side_menu_width = "8mm"
+reverse_months_quarters = true
+menu_rotate = "270deg"
+column_gutter = "1.5mm"
+row_gutter = "1.5mm"
 
 [section.cover]
 title = "2026\n\nPlanner"
-font-size = "36pt"
+font_size = "36pt"
 
 [section.annual]
-show-month-name = true
-row-gutter = "4pt"
+show_month_name = true
+row_gutter = "4pt"
 
 [section.quarterly]
-months-column = "right"
-show-month-name = true
+months_column = "right"
+show_month_name = true
 
 [section.monthly]
-week-placement = "right"
-week-label-rotation = "90deg"
-daily-cell-height = "16mm"
+week_placement = "right"
+week_label_rotation = "90deg"
+daily_cell_height = "16mm"
 
 [section.weekly]
-column-gutter = "4pt"
+column_gutter = "4pt"
 
 [section.daily]
 # column tracks are left-to-right, so notes stay 5fr and schedule stays 3fr
 columns = ["5fr", "3fr"]
-item-spacing = "4mm"
+item_spacing = "4mm"
 
 [section.daily.left.priorities]
 count = 5
 
 [section.daily.left.notes]
 pattern = "dotted"
-title-height = "4mm"
+title_height = "4mm"
 
 [section.daily.right.schedule]
-from = 8
-to = 20
-time-format = "%k"
-trailing-half-hour = true
+hour_from = 8
+hour_to = 20
+time_format = "%k"
+trailing_half_hour = true
 
-[section.daily.right.little-calendar]
-week-placement = "right"
+[section.daily.right.little_calendar]
+week_placement = "right"
 inset = "3pt"
 
-[section.daily-notes]
+[section.daily_notes]
 pages = 2
 pattern = "dotted"

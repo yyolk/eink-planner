@@ -27,7 +27,7 @@ NOMAD_MOS_RIGHT = CONFIGS / "supernote-nomad-mos-right.toml"
 Q1_MONTHS = ("January", "February", "March")
 Q3_MONTHS = ("July", "August", "September")
 
-_BULKY = ("annual", "monthly", "weekly", "daily", "daily-notes", "colophon")
+_BULKY = ("annual", "monthly", "weekly", "daily", "daily_notes", "colophon")
 
 
 def _i18n() -> I18n:

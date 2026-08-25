@@ -20,7 +20,7 @@ height = "120mm"
 ppi = 300""",
         "calendar": """[calendar]
 year = 2026
-week-starts = "Monday\"""",
+week_starts = "Monday\"""",
         "style": """[style.stroke]
 regular = "0.3pt"
 thick = "0.6pt"
@@ -39,18 +39,18 @@ right = "4mm"
 column = "8pt\"""",
         "layout": """[layout]
 name = "mos"
-side-menu = "left"
-side-menu-width = "8mm"
-reverse-months-quarters = true
-menu-rotate = "270deg"
-column-gutter = "1.5mm"
-row-gutter = "1.5mm\"""",
+side_menu = "left"
+side_menu_width = "8mm"
+reverse_months_quarters = true
+menu_rotate = "270deg"
+column_gutter = "1.5mm"
+row_gutter = "1.5mm\"""",
     }
     if "sections" not in extra:
         extra = dict(extra)
         extra["sections"] = """[section.cover]
 title = "Hi"
-font-size = "12pt\""""
+font_size = "12pt\""""
         if names is None:
             names = ["cover"]
     if "sections_list" not in extra:
