@@ -278,11 +278,14 @@ def test_index_is_raw_typst_month_pages_use_mos():
     assert "January" in index
     assert "JAN" not in index
     assert "→" not in index
-    assert "columns: (auto, 1fr)" in index
+    assert "columns: 1fr" in index
+    assert "columns: (auto, 1fr)" not in index
     assert "grid.cell(fill: black" not in index
     assert "align: horizon + left" in index
     assert "align(horizon + left" in index
     assert "box(width: 100%, height: 100%" in index
+    assert "padded_link(<habits-january>, box(width: 100%, height: 100%" in index
+    assert "padded_link(<habits-january>)[January]" not in index
 
 
 def test_nomad_full_year_is_thirteen_pages_of_habits():
@@ -579,7 +582,12 @@ def test_index_is_a_frozen_toc_with_full_names():
         "December",
     )
     for name in full:
-        assert f"padded_link(<habits-{name.lower()}>)[{name}]" in index
+        wrapped = (
+            f"padded_link(<habits-{name.lower()}>, "
+            f"box(width: 100%, height: 100%, align(horizon + left, [{name}])))"
+        )
+        assert wrapped in index
+        assert f"padded_link(<habits-{name.lower()}>)[{name}]" not in index
     for abbr in (
         "JAN",
         "FEB",
@@ -624,7 +632,12 @@ week_starts = "Monday"
     )
     assert "grid.cell(fill: black" not in index
     assert "text(white)" not in index
-    assert "padded_link(<habits-january>)[January]" in index
+    assert (
+        "padded_link(<habits-january>, "
+        "box(width: 100%, height: 100%, align(horizon + left, [January])))"
+        in index
+    )
+    assert "padded_link(<habits-january>)[January]" not in index
     assert "JAN" not in index
     assert "AUG" not in index
 

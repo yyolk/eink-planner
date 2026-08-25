@@ -92,18 +92,25 @@ class Habits:
             for month in months:
                 hid = self.month_id(month)
                 name = self.i18n.t(f"months.full.{month.name}")
-                label = manifest.link_or_content(hid, name)
+                band = (
+                    "box(width: 100%, height: 100%, "
+                    f"align(horizon + left, [{name}]))"
+                )
+                if manifest.source(hid):
+                    # Link wraps the full-size box so the PDF annotation
+                    # is the 1fr cell, not the padded month word.
+                    band = f"padded_link(<{hid}>, {band})"
                 rows.append(
                     "  grid.cell(\n"
                     "    align: horizon + left,\n"
-                    f"    box(width: 100%, height: 100%, align(horizon + left, [#{label}]))\n"
-                    "  ), []"
+                    f"    {band}\n"
+                    "  )"
                 )
             body = f"""box(
   width: 100%,
   height: 100%,
   grid(
-    columns: (auto, 1fr),
+    columns: 1fr,
     rows: ({", ".join(["1fr"] * n)}),
     align: horizon + left,
     stroke: (bottom: regular_stroke),
