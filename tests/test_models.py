@@ -141,3 +141,18 @@ def test_known_sections_match_section_tables():
     from eink_planner.models.device import SectionTables
     assert KNOWN_SECTIONS == frozenset(SectionTables.model_fields)
     assert {"cover", "daily", "daily_notes", "projects", "colophon"} <= KNOWN_SECTIONS
+
+
+def test_daily_components_match_daily_track_fields():
+    from eink_planner.models.device import DailyTrack, _DAILY_COMPONENTS
+    assert tuple(DailyTrack.model_fields) == _DAILY_COMPONENTS
+    assert set(_DAILY_COMPONENTS) == {"schedule", "little_calendar", "priorities", "notes"}
+
+
+def test_unknown_grid_pattern_on_notes_is_validation_error():
+    from eink_planner.models.device import DailyNotesSection, Notes
+    with pytest.raises(ValidationError):
+        DailyNotesSection(pages=1, pattern="grid")
+    with pytest.raises(ValidationError):
+        Notes(pattern="grid", title_height="4mm")
+

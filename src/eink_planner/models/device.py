@@ -7,9 +7,10 @@ from __future__ import annotations
 
 import tomllib
 from pathlib import Path
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import (
+    AfterValidator,
     Field,
     PrivateAttr,
     StrictBool,
@@ -21,7 +22,6 @@ from pydantic import (
 from eink_planner.models.base import StrictModel
 
 _PATTERNS = frozenset({"dotted", "lined"})
-_DAILY_COMPONENTS = ("schedule", "little_calendar", "priorities", "notes")
 
 
 def _require_pattern(value: Any) -> str:
@@ -29,6 +29,22 @@ def _require_pattern(value: Any) -> str:
     if text not in _PATTERNS:
         raise ValueError(f"unknown {text!r}")
     return text
+
+
+def _optional_pattern(value: str | None) -> str | None:
+    if value is None:
+        return None
+    return _require_pattern(value)
+
+
+def _scratch_pad_value(value: str | None) -> str | None:
+    if value is None or not str(value).strip():
+        return None
+    return _require_pattern(value)
+
+
+OptionalPattern = Annotated[str | None, AfterValidator(_optional_pattern)]
+ScratchPad = Annotated[str | None, AfterValidator(_scratch_pad_value)]
 
 
 class Device(StrictModel):
@@ -83,16 +99,9 @@ class Style(StrictModel):
     gutter: Gutter
     regular_height: str | None = None
     link_padding: str | None = None
-    scratch_pad: str | None = None
+    scratch_pad: ScratchPad = None
     heading: Heading | None = None
     little_calendar: LittleCalendar | None = None
-
-    @field_validator("scratch_pad")
-    @classmethod
-    def _scratch_pad(cls, value: str | None) -> str | None:
-        if value is None or not str(value).strip():
-            return None
-        return _require_pattern(value)
 
 
 class Layout(StrictModel):
@@ -128,42 +137,21 @@ class AnnualSection(StrictModel):
 
 class QuarterlySection(StrictModel):
     months_column: str
-    pattern: str | None = None
+    pattern: OptionalPattern = None
     show_month_name: StrictBool | None = None
     little_calendar: LittleCalendar | None = None
-
-    @field_validator("pattern")
-    @classmethod
-    def _pattern(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
-        return _require_pattern(value)
 
 
 class MonthlySection(StrictModel):
     week_placement: str
     week_label_rotation: str
     daily_cell_height: str
-    pattern: str | None = None
-
-    @field_validator("pattern")
-    @classmethod
-    def _pattern(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
-        return _require_pattern(value)
+    pattern: OptionalPattern = None
 
 
 class WeeklySection(StrictModel):
     column_gutter: str
-    pattern: str | None = None
-
-    @field_validator("pattern")
-    @classmethod
-    def _pattern(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
-        return _require_pattern(value)
+    pattern: OptionalPattern = None
 
 
 class Schedule(StrictModel):
@@ -184,16 +172,9 @@ class Priorities(StrictModel):
 
 
 class Notes(StrictModel):
-    pattern: str | None = None
+    pattern: OptionalPattern = None
     title_height: str
     height: str | None = None
-
-    @field_validator("pattern")
-    @classmethod
-    def _pattern(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
-        return _require_pattern(value)
 
 
 class DailyTrack(StrictModel):
@@ -216,7 +197,7 @@ class DailyTrack(StrictModel):
 
     @model_validator(mode="after")
     def _at_least_one(self) -> DailyTrack:
-        if not any((self.schedule, self.little_calendar, self.priorities, self.notes)):
+        if not any(getattr(self, key) is not None for key in DailyTrack.model_fields):
             raise ValueError("each of left / right must have at least one component")
         return self
 
@@ -224,6 +205,9 @@ class DailyTrack(StrictModel):
         if self._component_order:
             return list(self._component_order)
         return [key for key in _DAILY_COMPONENTS if getattr(self, key) is not None]
+
+
+_DAILY_COMPONENTS = tuple(DailyTrack.model_fields)
 
 
 class DailySection(StrictModel):
@@ -242,14 +226,7 @@ class DailySection(StrictModel):
 
 class DailyNotesSection(StrictModel):
     pages: StrictInt
-    pattern: str | None = None
-
-    @field_validator("pattern")
-    @classmethod
-    def _pattern(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
-        return _require_pattern(value)
+    pattern: OptionalPattern = None
 
 
 class ProjectsSection(StrictModel):
