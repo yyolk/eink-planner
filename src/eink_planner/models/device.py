@@ -20,20 +20,6 @@ from pydantic import (
 
 from eink_planner.models.base import StrictModel
 
-KNOWN_SECTIONS = frozenset(
-    {
-        "cover",
-        "annual",
-        "quarterly",
-        "monthly",
-        "weekly",
-        "daily",
-        "daily_notes",
-        "projects",
-        "colophon",
-    }
-)
-
 _PATTERNS = frozenset({"dotted", "lined"})
 _DAILY_COMPONENTS = ("schedule", "little_calendar", "priorities", "notes")
 
@@ -300,6 +286,9 @@ class SectionTables(StrictModel):
         if not isinstance(value, dict):
             raise ValueError("expected a table")
         return value
+
+
+KNOWN_SECTIONS = frozenset(SectionTables.model_fields)
 
 
 class DeviceProfile(StrictModel):

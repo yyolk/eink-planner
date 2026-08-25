@@ -134,3 +134,10 @@ height = "120mm"
     assert "ppi" not in text
     profile = DeviceProfile.model_validate(tomllib.loads(text))
     assert profile.device.ppi is None
+
+
+def test_known_sections_match_section_tables():
+    from eink_planner.models import KNOWN_SECTIONS
+    from eink_planner.models.device import SectionTables
+    assert KNOWN_SECTIONS == frozenset(SectionTables.model_fields)
+    assert {"cover", "daily", "daily_notes", "projects", "colophon"} <= KNOWN_SECTIONS
