@@ -235,7 +235,7 @@ class ProjectsSection(StrictModel):
 
 
 class HabitsSection(StrictModel):
-    habit_columns: StrictInt = 12
+    habit_columns: StrictInt = 6
     names: list[str] = []
 
     @model_validator(mode="after")

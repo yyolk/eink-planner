@@ -101,4 +101,4 @@ pages = 2
 pattern = "dotted"
 
 [section.habits]
-habit_columns = 12
+habit_columns = 6

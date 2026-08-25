@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import date
 from typing import Any
 
 from eink_planner.calendar import walk
@@ -18,7 +19,6 @@ _INDEX_LEFT_INSET = "4mm"
 _INDEX_BOTTOM_INSET = "4mm"
 _INDEX_ROW_GUTTER = "3mm"
 _HEADER_ROW = "16mm"
-_BAR_WIDTH = "0.8mm"
 _HABIT_HEADER = """grid.cell(
   inset: 0pt,
   stroke: regular_stroke,
@@ -29,11 +29,12 @@ _HABIT_HEADER = """grid.cell(
   )
 )"""
 _BOX = "grid.cell(stroke: regular_stroke, [])"
+_FRIDAY_HLINE = "grid.hline(stroke: thick_stroke)"
 
 
 class Habits:
     ID = "habits"
-    DEFAULT_COLUMNS = 12
+    DEFAULT_COLUMNS = 6
 
     def __init__(
         self,
@@ -89,16 +90,22 @@ class Habits:
 
     def _index(self, manifest: Manifest, months: list[Month]) -> str:
         n = len(months)
+        today = date.today()
         if n:
             rows = []
             for month in months:
                 hid = self.month_id(month)
                 name = self.i18n.t(f"months.short.{month.name}").upper()
                 label = manifest.link_or_content(hid, name)
-                arrow = manifest.link_or_content(hid, "→")
-                rows.append(f"  {label}, [], {arrow}")
+                if is_current_index_month(month, today):
+                    rows.append(
+                        f"  grid.cell(fill: black, text(white)[#{label}]), "
+                        "grid.cell(fill: black, [])"
+                    )
+                else:
+                    rows.append(f"  {label}, []")
             body = f"""grid(
-  columns: (auto, 1fr, auto),
+  columns: (auto, 1fr),
   rows: ({", ".join(["1fr"] * n)}),
   align: horizon,
   stroke: (bottom: regular_stroke),
@@ -146,18 +153,17 @@ class Habits:
         days = list(walk(month.day, month.day.end_of_month()))
         n_habits = self.habit_columns
         n_days = len(days)
-        cols = ", ".join(["auto", _BAR_WIDTH] + ["1fr"] * n_habits)
+        cols = ", ".join(["auto"] + ["1fr"] * n_habits)
         rows = ", ".join([_HEADER_ROW] + ["1fr"] * n_days)
         padded = (list(self.names) + [""] * n_habits)[:n_habits]
-        headers = ["[]", "[]"] + [_habit_header(name) for name in padded]
+        headers = ["[]"] + [_habit_header(name) for name in padded]
         cells = [", ".join(headers)]
-        spans = _weekend_bar_spans(days)
-        for day, span in zip(days, spans, strict=True):
+        for day in days:
             row = [self._date_label(manifest, day)]
-            if span != 0:
-                row.append(_weekend_bar_cell(span) if span else "[]")
             row.extend([_BOX] * n_habits)
             cells.append(", ".join(row))
+            if day.weekday_name == "friday":
+                cells.append(_FRIDAY_HLINE)
         return f"""grid(
   columns: ({cols}),
   rows: ({rows}),
@@ -172,8 +178,15 @@ class Habits:
         short = self.i18n.t(f"weekday.short.{day.weekday_name}")
         linked = manifest.link_or_content(day.id, f"{short} {day.month_day}")
         if day.weekday_name in _WEEKEND:
-            return f'align(horizon + right, text(fill: luma(140))[#{linked}])'
+            return f"align(horizon + right, [#{linked}])"
         return f'align(horizon + right, text(weight: "bold")[#{linked}])'
+
+
+def is_current_index_month(month: Month, today: date | None = None) -> bool:
+    """True when *today* falls in this planner month (year + month)."""
+    current = date.today() if today is None else today
+    stamp = month.day.day
+    return current.year == stamp.year and current.month == stamp.month
 
 
 def _escape_typst(text: str) -> str:
@@ -198,43 +211,9 @@ def _habit_header(name: str) -> str:
         "    width: 100%,\n"
         "    height: 100%,\n"
         "    clip: true,\n"
-        "    layout(size => {\n"
-        "      let angle = -calc.atan(size.height / size.width)\n"
-        "      place(line(start: (0%, 100%), end: (100%, 0%), stroke: regular_stroke))\n"
-        "      place(\n"
-        "        center + horizon,\n"
-        "        rotate(\n"
-        "          angle,\n"
-        "          origin: center,\n"
-        "          text(tracking: -0.06em)["
+        "    align(center + horizon, text["
         + label
-        + "]\n"
-        "        )\n"
-        "      )\n"
-        "    })\n"
+        + "])\n"
         "  )\n"
         ")"
     )
-
-
-def _weekend_bar_spans(days: list[Day]) -> list[int | None]:
-    """Bar column: None weekday, N>0 start of span, 0 covered by a prior rowspan."""
-    spans: list[int | None] = [None] * len(days)
-    i = 0
-    while i < len(days):
-        if days[i].weekday_name not in _WEEKEND:
-            i += 1
-            continue
-        j = i + 1
-        while j < len(days) and days[j].weekday_name in _WEEKEND:
-            j += 1
-        spans[i] = j - i
-        for k in range(i + 1, j):
-            spans[k] = 0
-        i = j
-    return spans
-
-
-def _weekend_bar_cell(span: int) -> str:
-    rowspan = f"rowspan: {span}, " if span > 1 else ""
-    return f"grid.cell({rowspan}inset: 0pt, fill: luma(180), [])"

@@ -10,13 +10,17 @@ from eink_planner import ConfigError
 from eink_planner.config import load
 from eink_planner.i18n import I18n
 from eink_planner.mos.configurator import Configurator
-from eink_planner.mos.sections.habits import Habits
+from eink_planner.mos.sections.habits import Habits, _habit_header, is_current_index_month
 from eink_planner.services.generate import Generate
 from eink_planner.toml_config import parse_toml
 from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf
 from tests.toml_fixtures import _minimal, short_january
 
 REPO = Path(__file__).resolve().parents[1]
+
+def _habit_header_src(name: str) -> str:
+    return _habit_header(name)
+
 NOMAD = REPO / "configs/supernote-nomad.toml"
 MONTHS = (
     "january",
@@ -58,10 +62,10 @@ def test_listed_without_table_defaults_columns_and_pages():
     section = dto["planner"]["sections"][0]
     assert section["name"] == "habits"
     assert section["class"] == "habits"
-    assert section["params"]["habit_columns"] == 12
+    assert section["params"]["habit_columns"] == 6
     assert section["params"]["names"] == []
     habits = _habits(dto)
-    assert habits.habit_columns == Habits.DEFAULT_COLUMNS == 12
+    assert habits.habit_columns == Habits.DEFAULT_COLUMNS == 6
     assert habits.names == []
     typst = _generate(dto)
     assert "<habits>" in typst
@@ -185,13 +189,15 @@ daily_cell_height = "16mm"
     assert "grid.cell(fill: black, text(white)[#padded_link(<habits-january>, [Habits])])" not in habit_jan
 
 
-def test_grid_uses_stroke_boxes_diagonal_header_and_weekend_grey():
+def test_grid_uses_stroke_boxes_writein_slash_and_friday_rule():
     dto = parse_toml(_minimal(enable=["habits"], sections=""), source="grid.toml")
     typst = _generate(dto)
     assert "grid.cell(stroke: regular_stroke, [])" in typst
     assert "line(start: (0%, 100%), end: (100%, 0%), stroke: regular_stroke)" in typst
-    assert "luma(140)" in typst
-    assert "luma(180)" in typst
+    assert "luma(140)" not in typst
+    assert "luma(180)" not in typst
+    assert "grid.hline(stroke: thick_stroke)" in typst
+    assert "columns: (auto, 0.8mm" not in typst
     assert "Mon 1" in typst
     assert "Sat" in typst
     assert "Sun" in typst
@@ -263,14 +269,15 @@ def test_index_is_raw_typst_month_pages_use_mos():
     month = next(page for page in pages if "<habits-january>" in page and "rotate(" in page)
     assert "rotate(" in month
     assert "JAN" in index
-    assert "→" in index
+    assert "→" not in index
+    assert "columns: (auto, 1fr)" in index
 
 
 def test_nomad_full_year_is_thirteen_pages_of_habits():
     dto = load(NOMAD)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert names[-1] == "habits"
-    assert dto["planner"]["sections"][-1]["params"]["habit_columns"] == 12
+    assert dto["planner"]["sections"][-1]["params"]["habit_columns"] == 6
     assert dto["planner"]["sections"][-1]["params"]["names"] == []
     typst = _generate(dto)
     assert "<habits>" in typst
@@ -303,7 +310,7 @@ def test_short_january_nomad_compiles(tmp_path):
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
 
 _HEADER_LINE = "line(start: (0%, 100%), end: (100%, 0%), stroke: regular_stroke)"
-_NAMED_MARK = "text(tracking: -0.06em)"
+_NAMED_MARK = "align(center + horizon, text["
 
 
 def test_default_names_are_empty_and_headers_are_line_only():
@@ -313,20 +320,20 @@ def test_default_names_are_empty_and_headers_are_line_only():
     assert habits.names == []
     typst = _generate(short_january(dto))
     assert _NAMED_MARK not in typst
-    assert typst.count(_HEADER_LINE) == 12
-    assert typst.count("grid.cell(stroke: regular_stroke, [])") == 31 * 12
+    assert typst.count(_HEADER_LINE) == 6
+    assert typst.count("grid.cell(stroke: regular_stroke, [])") == 31 * 6
 
 
-def test_two_names_typeset_and_pad_to_twelve_columns():
+def test_two_names_typeset_and_pad_to_six_columns():
     dto = parse_toml(
         _minimal(
             enable=["habits"],
-            sections="[section.habits]\nhabit_columns = 12\nnames = [\"Sleep\", \"Move\"]\n",
+            sections="[section.habits]\nnames = [\"Sleep\", \"Move\"]\n",
         ),
         source="two-names.toml",
     )
     params = dto["planner"]["sections"][0]["params"]
-    assert params["habit_columns"] == 12
+    assert params["habit_columns"] == 6
     assert params["names"] == ["Sleep", "Move"]
     habits = _habits(dto)
     assert habits.names == ["Sleep", "Move"]
@@ -334,8 +341,11 @@ def test_two_names_typeset_and_pad_to_twelve_columns():
     assert "Sleep" in typst
     assert "Move" in typst
     assert typst.count(_NAMED_MARK) == 2
-    assert typst.count(_HEADER_LINE) == 12
-    assert typst.count("grid.cell(stroke: regular_stroke, [])") == 31 * 12
+    assert typst.count(_HEADER_LINE) == 4
+    assert typst.count("grid.cell(stroke: regular_stroke, [])") == 31 * 6
+    assert "rotate(" not in _habit_header_src("Sleep")
+    assert _HEADER_LINE not in _habit_header_src("Sleep")
+    assert _HEADER_LINE in _habit_header_src("")
 
 
 def test_more_names_than_columns_is_config_error():
@@ -362,9 +372,9 @@ def test_empty_string_name_stays_line_only():
     assert "Sleep" in typst
     assert "Water" in typst
     assert typst.count(_NAMED_MARK) == 2
-    assert typst.count(_HEADER_LINE) == 12
+    assert typst.count(_HEADER_LINE) == 4
     # the blank slot must not emit an empty typeset word
-    assert "text(tracking: -0.06em)[]" not in typst
+    assert "align(center + horizon, text[])" not in typst
 
 
 def test_same_names_on_every_month_page():
@@ -377,11 +387,15 @@ def test_same_names_on_every_month_page():
     )
     typst = _generate(dto)
     pages = typst.split("#pagebreak()")
-    named = [page for page in pages if "text(tracking: -0.06em)[Sleep]" in page]
+    named = [page for page in pages if "align(center + horizon, text[Sleep])" in page]
     assert len(named) == 12
     for page in named:
-        assert "text(tracking: -0.06em)[Move]" in page
-        assert page.count(_HEADER_LINE) == 12
+        assert "align(center + horizon, text[Move])" in page
+        assert page.count(_HEADER_LINE) == 4
+        assert "rotate(" in page  # MOS chrome, not the habit name
+        sleep_cell = page[page.index("align(center + horizon, text[Sleep])") :]
+        sleep_cell = sleep_cell[: sleep_cell.index("grid.cell(stroke: regular_stroke, [])")]
+        assert "rotate(" not in sleep_cell
 
 
 def test_names_escape_typst_specials():
@@ -399,7 +413,7 @@ names = ["Caffeine#1", "A[B]", "C\\\\D"]
     assert r"Caffeine\#1" in typst
     assert r"A\[B\]" in typst
     assert r"C\\D" in typst
-    assert "text(tracking: -0.06em)[Caffeine#1]" not in typst
+    assert "align(center + horizon, text[Caffeine#1])" not in typst
 
 
 def test_named_headers_compile(tmp_path):
@@ -446,14 +460,14 @@ def test_habit_month_follows_side_menu_dates_stay_left():
     assert "columns: (1fr, 10mm)" in right_jan
     assert "columns: (10mm, 1fr)" not in right_jan
     assert "columns: (8mm, 1fr)" not in right_jan
-    right_grid = right_jan[right_jan.index("columns: (auto, 0.8mm, 1fr") :]
+    right_grid = right_jan[right_jan.index("columns: (auto, 1fr") :]
     assert "Thu 1" in right_grid
     assert "Mon 5" in right_grid
     assert right_grid.index("Thu 1") < right_grid.index(
         "grid.cell(stroke: regular_stroke, [])"
     )
     right_june = _mos_page(right_typst, "June<habits-june>", "rotate(")
-    june_grid = right_june[right_june.index("columns: (auto, 0.8mm, 1fr") :]
+    june_grid = right_june[right_june.index("columns: (auto, 1fr") :]
     assert "Mon 1" in june_grid
     assert june_grid.index("Mon 1") < june_grid.index(
         "grid.cell(stroke: regular_stroke, [])"
@@ -463,7 +477,7 @@ def test_habit_month_follows_side_menu_dates_stay_left():
     left_jan = _mos_page(_generate(left), "January<habits-january>", "rotate(")
     assert "columns: (8mm, 1fr)" in left_jan
     assert "columns: (1fr, 8mm)" not in left_jan
-    left_grid = left_jan[left_jan.index("columns: (auto, 0.8mm, 1fr") :]
+    left_grid = left_jan[left_jan.index("columns: (auto, 1fr") :]
     assert "Thu 1" in left_grid
     assert left_grid.index("Thu 1") < left_grid.index(
         "grid.cell(stroke: regular_stroke, [])"
@@ -494,8 +508,82 @@ daily_cell_height = "16mm"
     assert "Q1" in cal_both
     assert "padded_link(<month-2026-02-01>)" in cal_both
     assert "padded_link(<habits-february>)" not in cal_both
-    assert "columns: (auto, 0.8mm, 1fr" not in cal_both
+    assert "columns: (auto, 1fr, 1fr" not in cal_both
     assert "columns: (1fr, 10mm)" in cal_only
     assert "Q1" in cal_only
     assert "padded_link(<month-2026-02-01>)" in cal_only
 
+
+def test_named_header_is_upright_blank_keeps_slash():
+    named = _habit_header("Sleep")
+    blank = _habit_header("")
+    assert "Sleep" in named
+    assert "rotate(" not in named
+    assert "atan" not in named
+    assert _HEADER_LINE not in named
+    assert "align(center + horizon, text[Sleep])" in named
+    assert _HEADER_LINE in blank
+    assert "Sleep" not in blank
+
+
+def test_index_inverts_current_month_in_planner_year():
+    from datetime import date
+
+    from eink_planner.calendar.day import Day
+    from eink_planner.calendar.month import Month
+
+    aug = Month(weekday_start="monday", day=Day("monday", date(2026, 8, 1)))
+    jan = Month(weekday_start="monday", day=Day("monday", date(2026, 1, 1)))
+    assert is_current_index_month(aug, today=date(2026, 8, 25))
+    assert not is_current_index_month(jan, today=date(2026, 8, 25))
+    assert not is_current_index_month(aug, today=date(2025, 8, 25))
+    assert is_current_index_month(aug) is (date.today().year == 2026 and date.today().month == 8)
+
+    dto = parse_toml(_minimal(enable=["habits"], sections=""), source="invert.toml")
+    typst = _generate(dto)
+    index = next(
+        page for page in typst.split("#pagebreak()") if "<habits>" in page and "rotate(" not in page
+    )
+    assert "→" not in index
+    if date.today() == date(2026, 8, 25) or (
+        date.today().year == 2026 and date.today().month == 8
+    ):
+        assert "grid.cell(fill: black, text(white)[#padded_link(<habits-august>)[AUG]])" in index
+        assert "grid.cell(fill: black, text(white)[#padded_link(<habits-january>)[JAN]])" not in index
+
+
+def test_index_inverts_none_when_today_is_outside_planner_year():
+    from datetime import date
+
+    dto = parse_toml(
+        _minimal(
+            enable=["habits"],
+            calendar="""[calendar]
+year = 2025
+week_starts = "Monday"
+""",
+            sections="",
+        ),
+        source="invert-2025.toml",
+    )
+    typst = _generate(dto)
+    index = next(
+        page for page in typst.split("#pagebreak()") if "<habits>" in page and "rotate(" not in page
+    )
+    if date.today().year != 2025:
+        assert "grid.cell(fill: black" not in index
+
+
+def test_january_has_friday_rules_and_no_weekend_bar():
+    dto = parse_toml(_minimal(enable=["habits"], sections=""), source="friday.toml")
+    typst = _generate(short_january(dto))
+    month = next(
+        page
+        for page in typst.split("#pagebreak()")
+        if "<habits-january>" in page and "rotate(" in page
+    )
+    assert month.count("grid.hline(stroke: thick_stroke)") == 5
+    assert "columns: (auto, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in month
+    assert "0.8mm" not in month
+    assert "luma(140)" not in month
+    assert "luma(180)" not in month

@@ -102,4 +102,4 @@ pages = 20
 card_rows = 8
 
 [section.habits]
-habit_columns = 12
+habit_columns = 6

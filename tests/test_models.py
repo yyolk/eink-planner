@@ -163,7 +163,7 @@ def test_habits_section_defaults_and_names_length():
     from eink_planner.models.device import HabitsSection
 
     section = HabitsSection()
-    assert section.habit_columns == 12
+    assert section.habit_columns == 6
     assert section.names == []
     ok = HabitsSection(habit_columns=2, names=["A", "B"])
     assert ok.names == ["A", "B"]

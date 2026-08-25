@@ -364,7 +364,7 @@ def _section_projects(table: ProjectsSection | None) -> dict[str, Any]:
 
 def _section_habits(table: HabitsSection | None) -> dict[str, Any]:
     if table is None:
-        return {"habit_columns": 12, "names": []}
+        table = HabitsSection()
     return {"habit_columns": table.habit_columns, "names": list(table.names)}
 
 
