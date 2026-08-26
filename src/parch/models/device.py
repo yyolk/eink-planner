@@ -328,7 +328,7 @@ class DeviceProfile(StrictModel):
     @classmethod
     def _reject_debug(cls, data: Any) -> Any:
         if isinstance(data, dict) and "debug" in data:
-            raise ValueError("debug does not belong in the config; use `lyp generate --debug`")
+            raise ValueError("debug does not belong in the config; use `parch generate --debug`")
         return data
 
     @field_validator("sections")

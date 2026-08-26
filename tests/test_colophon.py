@@ -39,7 +39,7 @@ def _attach(dto: StrictDict, path: Path, argv: list[str] | None = None) -> Stric
         dto,
         collect_provenance(
             config_path=path,
-            argv=argv or ["lyp", "generate", str(path)],
+            argv=argv or ["parch", "generate", str(path)],
             start=REPO,
         ),
     )
@@ -80,7 +80,7 @@ def test_colophon_rejects_unknown_children():
         )
     with pytest.raises(ConfigError, match="expected boolean"):
         parse_toml(
-            _minimal(enable=["colophon"], sections="[section.colophon]\ncommand = \"lyp\"\n"),
+            _minimal(enable=["colophon"], sections="[section.colophon]\ncommand = \"parch\"\n"),
             source="command-key.toml",
         )
 
@@ -147,7 +147,7 @@ def test_no_command_config_git_or_sha_on_default_page():
     dto = short_january(parse_toml(_minimal(enable=["colophon"], sections=""), source="inject.toml"))
     data = dto.to_plain()
     data["planner"]["params"]["provenance"] = {
-        "command": "lyp generate custom.toml --debug",
+        "command": "parch generate custom.toml --debug",
         "version": "9.9.9-test",
         "git_sha": "deadbeef" * 5,
         "config_path": "/tmp/custom.toml",
@@ -155,7 +155,7 @@ def test_no_command_config_git_or_sha_on_default_page():
         "config_text": "[section.colophon]\ntrue = true\n",
     }
     typst_src = _generate(StrictDict(data))
-    assert "lyp generate custom.toml --debug" not in typst_src
+    assert "parch generate custom.toml --debug" not in typst_src
     assert "deadbeef" not in typst_src
     assert "9.9.9-test" not in typst_src
     assert "abc123def456" not in typst_src
@@ -301,10 +301,10 @@ def test_generate_cmd_attaches_provenance_but_page_stays_quiet(tmp_path, monkeyp
             "year": None,
         },
     )()
-    assert generate_cmd(ns, argv=["lyp", "generate", str(path)]) == 0
+    assert generate_cmd(ns, argv=["parch", "generate", str(path)]) == 0
     typst_src = (tmp_path / "out" / "index.typst").read_text(encoding="utf-8")
     assert hashlib.sha256(path.read_bytes()).hexdigest() not in typst_src
-    assert "lyp generate" not in typst_src
+    assert "parch generate" not in typst_src
     assert DEFAULT_TITLE in typst_src
     assert __version__ in typst_src
 
@@ -333,7 +333,7 @@ def _colophon_with_flags(
     provenance: dict | None = None,
 ) -> Colophon:
     prov = {
-        "command": "lyp generate x.toml",
+        "command": "parch generate x.toml",
         "config_text": config_text,
         "config_sha256": "abc123def456",
     }
@@ -414,7 +414,7 @@ def test_dump_true_is_plain_raw_without_syntax_theme():
     assert "year = 2026" in content
     for token in _THEME:
         assert token not in content
-    assert "lyp generate x.toml" not in content
+    assert "parch generate x.toml" not in content
     assert "[*Device*]" in content
 
 
@@ -550,7 +550,7 @@ def test_colophon_sha_non_bool_rejected():
 def test_command_true_shows_command_row():
     content = _colophon_with_flags(command=True).pages(None)[0].content
     assert "[*Command*]" in content
-    assert "lyp generate x.toml" in content
+    assert "parch generate x.toml" in content
     assert "[*SHA-256*]" not in content
     assert "#raw(block: true" not in content
     assert "colo-mono(" in content
@@ -600,7 +600,7 @@ def test_sha_true_missing_provenance_still_emits_empty_row():
 def test_command_sha_dump_together():
     content = _colophon_with_flags(command=True, sha=True, dump=True).pages(None)[0].content
     assert "[*Command*]" in content
-    assert "lyp generate x.toml" in content
+    assert "parch generate x.toml" in content
     assert "[*SHA-256*]" in content
     assert "abc123def456" in content
     assert "#raw(block: true," in content
@@ -615,7 +615,7 @@ def test_default_still_omits_command_sha_dump():
     content = _colophon_with_flags().pages(None)[0].content
     assert "[*Command*]" not in content
     assert "[*SHA-256*]" not in content
-    assert "lyp generate x.toml" not in content
+    assert "parch generate x.toml" not in content
     assert "abc123def456" not in content
     assert "#raw(block: true" not in content
     assert "colo-mono(" not in content
