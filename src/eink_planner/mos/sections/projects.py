@@ -180,19 +180,18 @@ class Projects:
 )"""
 
     def _card(self) -> str:
-        lines = ",\n      ".join(
-            ["grid.cell(stroke: (bottom: regular_stroke + black), [])"] * _CARD_BASELINES
+        # Explicit lines at 1/4, 2/4, 3/4 of the inner box. A 1fr cell
+        # bottom-stroke sits on the frame and rounds to 2px on Nomad.
+        lines = "\n    ".join(
+            f"place(dy: {frac} * size.height, line(length: size.width, stroke: 0.2pt + black))"
+            for frac in ("1/4", "2/4", "3/4")
         )
-        rows = ", ".join(["1fr"] * _CARD_BASELINES)
         return f"""grid.cell(
   stroke: regular_stroke + black,
-  inset: (x: 3pt, top: 4pt, bottom: 3.5mm),
-  grid(
-    columns: 1fr,
-    rows: ({rows}),
-    align: bottom,
+  inset: (x: 3pt, y: 4pt),
+  layout(size => {{
     {lines}
-  )
+  }})
 )"""
 
     def _board(self, manifest: Manifest, index: int) -> str:

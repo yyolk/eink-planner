@@ -22,7 +22,7 @@ REPO = Path(__file__).resolve().parents[1]
 NOMAD = REPO / "configs/supernote-nomad.toml"
 
 _CARD_STROKE = "stroke: regular_stroke + black"
-_CARD_BASELINE = "grid.cell(stroke: (bottom: regular_stroke + black), [])"
+_CARD_LINE = "line(length: size.width, stroke: 0.2pt + black)"
 _NUM_COL = "2em"
 
 
@@ -82,7 +82,7 @@ def test_omit_pages_defaults_to_sixteen():
         assert "rows: (" + ", ".join(["1fr"] * leftover) + ")" not in typst
     assert "rows: (" + ", ".join(["1fr"] * 16) + ")" not in typst
     assert typst.count(_CARD_STROKE) >= projects.card_rows * 3 * 16
-    assert typst.count(_CARD_BASELINE) == _CARD_BASELINES * projects.card_rows * 3 * 16
+    assert typst.count(_CARD_LINE) == _CARD_BASELINES * projects.card_rows * 3 * 16
     assert "rect_pattern_centered(dotted_centered)" not in typst
     assert "luma(180)" not in typst
     assert "→" not in typst
@@ -172,7 +172,7 @@ def test_locale_strings_appear():
     assert "DONE" not in typst
     assert "rect_pattern_centered(dotted_centered)" not in typst
     assert _CARD_STROKE in typst
-    assert typst.count(_CARD_BASELINE) == _CARD_BASELINES * 5 * 3
+    assert typst.count(_CARD_LINE) == _CARD_BASELINES * 5 * 3
 
 
 def test_unknown_key_on_section_projects_raises():
@@ -234,12 +234,15 @@ def test_index_rows_are_fixed_line_height_and_boards_use_five_fat_cards():
     )
     typst = _generate(dto)
     assert "rows: (2 * regular_height, 2 * regular_height, 2 * regular_height)" in typst
-    # leftover index rows stay 2× regular_height; card interiors use 3 baseline 1fr rows
-    assert "rows: (1fr, 1fr, 1fr)" in typst  # card baselines
+    # leftover index rows stay 2× regular_height; card interiors use placed 1/4–3/4 lines
+    assert "rows: (1fr, 1fr, 1fr)" not in typst  # no 1fr baseline grid
+    assert "1/4 * size.height" in typst
+    assert "2/4 * size.height" in typst
+    assert "3/4 * size.height" in typst
     assert "rows: (" + ", ".join(["1fr"] * 5) + ")" in typst
     assert "rows: (" + ", ".join(["1fr"] * 8) + ")" not in typst
     assert typst.count(_CARD_STROKE) >= 5 * 3 * 3
-    assert typst.count(_CARD_BASELINE) == _CARD_BASELINES * 5 * 3 * 3
+    assert typst.count(_CARD_LINE) == _CARD_BASELINES * 5 * 3 * 3
     assert "rect_pattern_centered(dotted_centered)" not in typst
     assert "luma(180)" not in typst
 
@@ -257,7 +260,7 @@ def test_card_rows_eight_emits_eight_one_fr_rows_per_column():
     assert Projects.CARDS == 5
     typst = _generate(dto)
     assert "rows: (" + ", ".join(["1fr"] * 8) + ")" in typst
-    assert typst.count(_CARD_BASELINE) == _CARD_BASELINES * 8 * 3 * 1
+    assert typst.count(_CARD_LINE) == _CARD_BASELINES * 8 * 3 * 1
 
 
 def test_index_paginates_and_late_board_links_to_its_index_page():
@@ -433,14 +436,14 @@ pages = 1
     assert "#let rect_pattern(pattern) = rect(" in typst
     assert "rect_pattern_centered(dotted_centered)" not in typst
     assert _CARD_STROKE in typst
-    assert typst.count(_CARD_BASELINE) == _CARD_BASELINES * _projects(dto).card_rows * 3
+    assert typst.count(_CARD_LINE) == _CARD_BASELINES * _projects(dto).card_rows * 3
     assert "#let scratch_pad = rect_pattern(dotted)" in typst
     pages = typst.split("#pagebreak()")
     board_pages = [page for page in pages if "1/1 <project-1>" in page]
     assert board_pages
     assert all("rect_pattern_centered" not in page for page in board_pages)
     assert all(_CARD_STROKE in page for page in board_pages)
-    assert all(_CARD_BASELINE in page for page in board_pages)
+    assert all(_CARD_LINE in page for page in board_pages)
     notes_body_pages = [
         page
         for page in pages
