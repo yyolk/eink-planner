@@ -8,13 +8,13 @@ import subprocess
 
 import pytest
 
-from eink_planner.i18n import I18n
-from eink_planner.toml_config import parse_toml
-from eink_planner.mos.manifest import Manifest
-from eink_planner.mos.pages.quarterly import Quarterly
-from eink_planner.mos.sections.annual import Annual
-from eink_planner.mos.sections.quarterly import Quarterly as QuarterlySection
-from eink_planner.services.generate import Generate
+from parch.i18n import I18n
+from parch.toml_config import parse_toml
+from parch.mos.manifest import Manifest
+from parch.mos.pages.quarterly import Quarterly
+from parch.mos.sections.annual import Annual
+from parch.mos.sections.quarterly import Quarterly as QuarterlySection
+from parch.services.generate import Generate
 from tests.helpers import make_configurator, make_quarter
 from tests.test_toml_omit_sections import compile_pdf
 from tests.toml_fixtures import omit_toml_sections

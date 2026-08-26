@@ -6,9 +6,9 @@ from pathlib import Path
 
 from PIL import Image
 
-from eink_planner.i18n import I18n
-from eink_planner.services.generate import Generate
-from eink_planner.toml_config import parse_toml
+from parch.i18n import I18n
+from parch.services.generate import Generate
+from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import SECTIONS, compile_pdf
 from tests.toml_fixtures import omit_toml_sections
 from tests.visual import ink_bbox, raster_page

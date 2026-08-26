@@ -3,11 +3,11 @@ from pathlib import Path
 import hashlib
 import pytest
 
-from eink_planner import ConfigError
-from eink_planner.cli import build_parser
-from eink_planner.config import load
-from eink_planner.mos.configurator import Configurator
-from eink_planner.toml_config import apply_debug, apply_year, load_toml, parse_toml
+from parch import ConfigError
+from parch.cli import build_parser
+from parch.config import load
+from parch.mos.configurator import Configurator
+from parch.toml_config import apply_debug, apply_year, load_toml, parse_toml
 from tests.toml_fixtures import _minimal, omit_toml_sections
 
 REPO = Path(__file__).resolve().parents[1]
@@ -338,8 +338,8 @@ def test_apply_year_rewrites_cover_title_year():
 
 
 def test_apply_year_typst_uses_overlay_year():
-    from eink_planner.i18n import I18n
-    from eink_planner.services.generate import Generate
+    from parch.i18n import I18n
+    from parch.services.generate import Generate
 
     dto = apply_year(load(NOMAD), 2027)
     data = dto.to_plain()
@@ -487,8 +487,8 @@ count = 1
 
 @pytest.mark.parametrize("name", list(GOLDEN_SHA256))
 def test_golden_typst_hash(name: str):
-    from eink_planner.i18n import I18n
-    from eink_planner.services.generate import Generate
+    from parch.i18n import I18n
+    from parch.services.generate import Generate
 
     dto = load(CONFIGS / f"{name}.toml")
     typst = Generate(i18n=I18n.load_default(REPO, "en")).generate(dto)

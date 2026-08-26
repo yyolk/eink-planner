@@ -4,12 +4,12 @@ from datetime import date
 
 import pytest
 
-from eink_planner.calendar.day import Day
-from eink_planner.calendar.month import Month
-from eink_planner.calendar.quarter import Quarter
-from eink_planner.calendar.week import Week
-from eink_planner.config import StrictDict
-from eink_planner.mos.configurator import Configurator
+from parch.calendar.day import Day
+from parch.calendar.month import Month
+from parch.calendar.quarter import Quarter
+from parch.calendar.week import Week
+from parch.config import StrictDict
+from parch.mos.configurator import Configurator
 
 
 def make_day(date_str: str, weekday_start: str = "monday") -> Day:

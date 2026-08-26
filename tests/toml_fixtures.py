@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from eink_planner.config import StrictDict
+from parch.config import StrictDict
 
 
 def _minimal(*, enable: list[str] | None = None, **extra: str) -> str:

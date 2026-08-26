@@ -1,8 +1,10 @@
-# eink-planner
+# parch
 
-Python port of [Vitaliy Kudryk's LYP (latex-yearly-planner)](https://github.com/kudrykv/latex-yearly-planner/tree/alpha) ([fork point commit](https://github.com/kudrykv/latex-yearly-planner/commit/a59229770cfbf4a05b68a656dd70c02913a7df49), MIT, 2026).
+**Parch** generates yearly planner PDFs for e-ink devices. Python port of Vitaliy Kudryk’s LYP: read a device profile, emit Typst, compile to PDF.
 
-LYP generates a yearly planner by emitting **Typst**, then compiling that to **PDF**. This package keeps that architecture: Python reads a **TOML** device profile, walks calendar entities, and writes `index.typst` + `index.pdf`. It does **not** draw PDFs with reportlab/fpdf.
+Formerly eink-planner.
+
+This is a port of [Vitaliy Kudryk's LYP (latex-yearly-planner)](https://github.com/kudrykv/latex-yearly-planner/tree/alpha) ([fork point commit](https://github.com/kudrykv/latex-yearly-planner/commit/a59229770cfbf4a05b68a656dd70c02913a7df49), MIT, 2026). LYP generates a yearly planner by emitting **Typst**, then compiling that to **PDF**. This package keeps that architecture: Python reads a **TOML** device profile, walks calendar entities, and writes `index.typst` + `index.pdf`. It does **not** draw PDFs with reportlab/fpdf.
 
 Default device is the **SuperNote Nomad** (A6 X2), MOS strip on the left. A Nomad MOS-right sibling, Kindle Scribe, and 158×210 MOS-left/MOS-right profiles are also shipped.
 
@@ -11,7 +13,7 @@ Default device is the **SuperNote Nomad** (A6 X2), MOS strip on the left. A Noma
 Needs [uv](https://docs.astral.sh/uv/) and Python 3.12+.
 
 ```shell
-cd eink-planner
+cd parch
 uv sync
 ```
 
@@ -21,32 +23,28 @@ uv sync
 
 ```shell
 # SuperNote Nomad 2026 (default profile, MOS-left) → ./out/index.pdf
-uv run lyp generate configs/supernote-nomad.toml
+uv run parch generate configs/supernote-nomad.toml
 
 # SuperNote Nomad 2027 from the shipped 2026 profile (CLI overlay)
-uv run lyp generate configs/supernote-nomad.toml --year 2027
+uv run parch generate configs/supernote-nomad.toml --year 2027
 
 # SuperNote Nomad MOS-right → ./out/nomad-mos-right/index.pdf
-uv run lyp generate configs/supernote-nomad-mos-right.toml -w out/nomad-mos-right
+uv run parch generate configs/supernote-nomad-mos-right.toml -w out/nomad-mos-right
 
 # 158×210 MOS-left → ./out/mos-left/index.pdf
-uv run lyp generate configs/158x210-mos-left.toml -w out/mos-left
+uv run parch generate configs/158x210-mos-left.toml -w out/mos-left
 
 # 158×210 MOS-left lined → ./out/mos-left-lined/index.pdf
-uv run lyp generate configs/158x210-mos-left-lined.toml -w out/mos-left-lined
+uv run parch generate configs/158x210-mos-left-lined.toml -w out/mos-left-lined
 
 # 158×210 MOS-right → ./out/mos-right/index.pdf
-uv run lyp generate configs/158x210-mos-right.toml -w out/mos-right
+uv run parch generate configs/158x210-mos-right.toml -w out/mos-right
 
 # Kindle Scribe → ./out/scribe/index.pdf
-uv run lyp generate configs/kindle-scribe.toml -w out/scribe
+uv run parch generate configs/kindle-scribe.toml -w out/scribe
 ```
 
-`eink-planner` is an alias for `lyp`:
-
-```shell
-uv run eink-planner generate configs/supernote-nomad.toml --locale en
-```
+`lyp` is still an alias for `parch` (LYP heritage).
 
 Flags:
 
@@ -60,14 +58,14 @@ Flags:
 
 `--year` also rewrites the cover title year when the old year is in the title.
 
-A name in the top-level `sections = ["cover", …]` list is enabled, in that order. Comment a name out of `sections` to disable it. Details live under `[section.<name>]`. There is no `enabled = true` flag, and `debug` does not belong in the profile — use `lyp generate --debug`. At least one section must remain.
+A name in the top-level `sections = ["cover", …]` list is enabled, in that order. Comment a name out of `sections` to disable it. Details live under `[section.<name>]`. There is no `enabled = true` flag, and `debug` does not belong in the profile — use `parch generate --debug`. At least one section must remain.
 
 ## Sample pages
 
 2026 from [`configs/158x210-mos-left.toml`](configs/158x210-mos-left.toml). MOS strip on the left. This profile ships cover through daily notes plus the colophon (no projects, habits, review, or meetings). Previews are Typst SVGs at half scale. Regenerate with:
 
 ```shell
-uv run lyp preview-svg configs/158x210-mos-left.toml --samples
+uv run parch preview-svg configs/158x210-mos-left.toml --samples
 ```
 
 | Section | Page |
@@ -94,7 +92,7 @@ Sizes are 1:1 on glass at 300 PPI.
 | 158×210 MOS-right | — | 447.87×595.28 | 158×210 | `configs/158x210-mos-right.toml` |
 | Kindle Scribe | 1860×2480 | 446.4×595.2 | 157.48×209.97 | `configs/kindle-scribe.toml` |
 
-Presets also live in `eink_planner.devices`. The Nomad profile scales strokes, type, and gutters down slightly from the original 158×210 MOS-left gist so the MOS layout still fits the smaller page.
+Presets also live in `parch.devices`. The Nomad profile scales strokes, type, and gutters down slightly from the original 158×210 MOS-left gist so the MOS layout still fits the smaller page.
 
 **MOS** is Months on the Side — the navigation style that places a vertical month menu on the side of the page (as opposed to a top breadcrumb trail).
 
@@ -108,7 +106,7 @@ Device profiles and locale files are TOML. Config keys use underscores (`week_st
 uv run pytest
 ```
 
-CI runs pytest and a Nomad `lyp generate`. Visual design checks live in `tests/visual.py` and can be dropped with the tests that import them.
+CI runs pytest and a Nomad `parch generate`. Visual design checks live in `tests/visual.py` and can be dropped with the tests that import them.
 
 ## Layout of a generated planner
 

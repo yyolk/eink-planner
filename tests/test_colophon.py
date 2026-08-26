@@ -8,14 +8,14 @@ from pathlib import Path
 
 import pytest
 
-from eink_planner import ConfigError, __version__
-from eink_planner.config import StrictDict, load
-from eink_planner.i18n import I18n
-from eink_planner.mos.configurator import Configurator
-from eink_planner.provenance import apply_provenance, collect_provenance
-from eink_planner.sections.colophon import DEFAULT_TITLE, Colophon, drop_empty_tables
-from eink_planner.services.generate import Generate
-from eink_planner.toml_config import parse_toml
+from parch import ConfigError, __version__
+from parch.config import StrictDict, load
+from parch.i18n import I18n
+from parch.mos.configurator import Configurator
+from parch.provenance import apply_provenance, collect_provenance
+from parch.sections.colophon import DEFAULT_TITLE, Colophon, drop_empty_tables
+from parch.services.generate import Generate
+from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import (
     _LABEL_DEF,
     _PADDED_LINK,
@@ -277,7 +277,7 @@ font_size = "12pt"
 
 
 def test_generate_cmd_attaches_provenance_but_page_stays_quiet(tmp_path, monkeypatch):
-    from eink_planner.cli import generate_cmd
+    from parch.cli import generate_cmd
 
     path = tmp_path / "cli.toml"
     path.write_text(_minimal(enable=["colophon"], sections=""), encoding="utf-8")
@@ -288,7 +288,7 @@ def test_generate_cmd_attaches_provenance_but_page_stays_quiet(tmp_path, monkeyp
             pdf.write_bytes(b"%PDF-dummy")
             return pdf
 
-    monkeypatch.setattr("eink_planner.cli.Compile", lambda: _DummyCompile())
+    monkeypatch.setattr("parch.cli.Compile", lambda: _DummyCompile())
     ns = type(
         "Args",
         (),

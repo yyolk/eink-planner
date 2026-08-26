@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pytest
 
-from eink_planner.cli import build_parser, samples_dest
-from eink_planner.services.compile import Compile, CompileError
-from eink_planner.services.preview_svg import (
+from parch.cli import build_parser, samples_dest
+from parch.services.compile import Compile, CompileError
+from parch.services.preview_svg import (
     DEFAULT_SCALE,
     crop_svg,
     format_pages,
@@ -131,7 +131,7 @@ def test_compile_svg_tiny_two_pages(tmp_path):
 
 
 def test_sample_page_numbers_from_labels():
-    from eink_planner.services.preview_svg import sample_page_numbers
+    from parch.services.preview_svg import sample_page_numbers
 
     typst = """
 cover
@@ -173,7 +173,7 @@ About this notebook
 
 
 def test_sample_page_numbers_missing_label():
-    from eink_planner.services.preview_svg import sample_page_numbers
+    from parch.services.preview_svg import sample_page_numbers
 
     with pytest.raises(ValueError, match="annual"):
         sample_page_numbers("cover only", year=2026, week_id="2026W01", jan1="2026-01-01")

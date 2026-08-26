@@ -1,9 +1,9 @@
-from eink_planner.config import StrictDict
-from eink_planner.i18n import I18n
-from eink_planner.mos.configurator import Configurator
-from eink_planner.mos.manifest import Manifest
-from eink_planner.mos.navigation import Navigation
-from eink_planner.mos.sections.annual import Annual
+from parch.config import StrictDict
+from parch.i18n import I18n
+from parch.mos.configurator import Configurator
+from parch.mos.manifest import Manifest
+from parch.mos.navigation import Navigation
+from parch.mos.sections.annual import Annual
 
 
 def _i18n() -> I18n:

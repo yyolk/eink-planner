@@ -7,13 +7,13 @@ from pathlib import Path
 
 import pytest
 
-from eink_planner import ConfigError
-from eink_planner.config import load
-from eink_planner.i18n import I18n
-from eink_planner.mos.configurator import Configurator
-from eink_planner.mos.sections.meetings import Meetings, _NUM_COL
-from eink_planner.services.generate import Generate
-from eink_planner.toml_config import parse_toml
+from parch import ConfigError
+from parch.config import load
+from parch.i18n import I18n
+from parch.mos.configurator import Configurator
+from parch.mos.sections.meetings import Meetings, _NUM_COL
+from parch.services.generate import Generate
+from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf
 from tests.toml_fixtures import _minimal, short_january
 
