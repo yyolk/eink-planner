@@ -47,18 +47,8 @@ class Monthly:
     {self._heading()},
     {self._day_cells()}
   ),
-
-  grid(
-    columns: (1fr),
-    rows: (regular_column_gutter, auto, 1fr),
-
-    [],
-    grid.cell(
-      stroke: (bottom: thick_stroke),
-      box(height: regular_height, align(horizon, [{self.i18n.t("monthly_notes")}]))
-    ),
-    rect_pattern({self.pattern})
-  )
+  grid.hline(stroke: regular_stroke + black),
+  rect_pattern({self.pattern})
 )"""
 
     def _columns(self) -> str:
@@ -90,13 +80,11 @@ class Monthly:
         if day is None:
             return "[]"
         text = self.manifest.link_or_content(day.id, str(day.month_day))
-        return f"box(stroke: regular_stroke, inset: 3pt)[#{text}]"
+        return f"grid.cell(align: top + left, inset: 3pt, [#{text}])"
 
     def _week_label_cell(self, week: list[Day | None]) -> str:
         current_week = self._first_present_day(week).week()
-        label = self.manifest.link_or_content(
-            current_week.id, f'{self.i18n.t("week_name")} {current_week.number}'
-        )
+        label = self.manifest.link_or_content(current_week.id, str(current_week.number))
         rotation = self.month_params.get("week_label_rotation", "90deg")
         return f"align(center + horizon, rotate({rotation}, reflow: true)[#{label}])"
 
