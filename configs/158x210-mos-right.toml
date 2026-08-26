@@ -54,7 +54,7 @@ column_gutter = "2mm"
 row_gutter = "2mm"
 
 [section.cover]
-title = "2026\n\nPlanner"
+title = "2026"
 font_size = "48pt"
 
 [section.annual]

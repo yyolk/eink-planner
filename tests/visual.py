@@ -140,3 +140,13 @@ def card_interior_lines(
         )
     return cards
 
+
+def ink_bbox(image: Path, *, dark: int = 64) -> tuple[int, int, int, int] | None:
+    """Inclusive (x0, y0, x1, y1) of pixels darker than *dark*, or None."""
+    with Image.open(image) as src:
+        mask = src.convert("L").point(lambda p: 255 if p <= dark else 0)
+    box = mask.getbbox()
+    if box is None:
+        return None
+    x0, y0, x1, y1 = box
+    return x0, y0, x1 - 1, y1 - 1
