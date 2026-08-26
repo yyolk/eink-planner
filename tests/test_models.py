@@ -43,8 +43,11 @@ def test_happy_path_locale():
     locale = load_locale(LOCALE)
     assert locale.week_name == "Week"
     assert locale.projects == "Projects"
+    assert locale.meetings == "Meetings"
     assert locale.habits == "Habits"
     assert locale.review == "Review"
+    assert locale.topics == "Topics"
+    assert locale.action_items == "Action items"
     assert locale.weekday.short.monday == "Mon"
     assert locale.quarter.short == "Q"
 
@@ -143,7 +146,7 @@ def test_known_sections_match_section_tables():
     from eink_planner.models import KNOWN_SECTIONS
     from eink_planner.models.device import SectionTables
     assert KNOWN_SECTIONS == frozenset(SectionTables.model_fields)
-    assert {"cover", "daily", "daily_notes", "projects", "habits", "review", "colophon"} <= KNOWN_SECTIONS
+    assert {"cover", "daily", "daily_notes", "projects", "meetings", "habits", "review", "colophon"} <= KNOWN_SECTIONS
 
 
 def test_daily_components_match_daily_track_fields():
@@ -194,3 +197,15 @@ def test_projects_section_defaults():
     assert section.pages == 16
     assert section.card_rows == 5
     assert ProjectsSection(pages=20, card_rows=8).pages == 20
+
+
+def test_meetings_section_defaults_and_index_pages():
+    from eink_planner.models.device import MeetingsSection
+
+    section = MeetingsSection()
+    assert section.index_pages == 1
+    assert MeetingsSection(index_pages=2).index_pages == 2
+    with pytest.raises(ValidationError, match="index_pages"):
+        MeetingsSection(index_pages=0)
+    with pytest.raises(ValidationError):
+        MeetingsSection(pages=16)

@@ -13,6 +13,7 @@ sections = [
   "projects",
   "habits",
   "review",
+  "meetings",
 ]
 
 [device]
@@ -104,3 +105,6 @@ card_rows = 5
 
 [section.habits]
 habit_columns = 6
+
+[section.meetings]
+index_pages = 1
