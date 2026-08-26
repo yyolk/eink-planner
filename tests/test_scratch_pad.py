@@ -4,11 +4,11 @@ from pathlib import Path
 
 import pytest
 
-from eink_planner import ConfigError
-from eink_planner.config import load
-from eink_planner.i18n import I18n
-from eink_planner.services.generate import Generate
-from eink_planner.toml_config import parse_toml
+from parch import ConfigError
+from parch.config import load
+from parch.i18n import I18n
+from parch.services.generate import Generate
+from parch.toml_config import parse_toml
 from tests.toml_fixtures import _minimal, short_january
 
 REPO = Path(__file__).resolve().parents[1]

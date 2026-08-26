@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 
-from eink_planner import __version__
-from eink_planner.config import StrictDict
-from eink_planner.provenance import (
+from parch import __version__
+from parch.config import StrictDict
+from parch.provenance import (
     apply_provenance,
     collect_provenance,
     config_sha256,

@@ -1,6 +1,6 @@
-from eink_planner.i18n import I18n
-from eink_planner.mos.manifest import Manifest
-from eink_planner.mos.sections.annual import Annual
+from parch.i18n import I18n
+from parch.mos.manifest import Manifest
+from parch.mos.sections.annual import Annual
 from tests.helpers import make_configurator
 
 MONTHS = (

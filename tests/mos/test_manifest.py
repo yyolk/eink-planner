@@ -1,4 +1,4 @@
-from eink_planner.mos.manifest import Manifest
+from parch.mos.manifest import Manifest
 
 
 def test_link_or_content_wraps_or_links():

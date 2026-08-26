@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from eink_planner.mos.sections.cover_plain import CoverPlain
+from parch.mos.sections.cover_plain import CoverPlain
 
 
 def _typst(name: str, font_size: str = "36pt") -> str:

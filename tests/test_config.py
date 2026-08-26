@@ -1,10 +1,10 @@
 import pytest
 
-from eink_planner import ConfigError
-from eink_planner.config import StrictDict
-from eink_planner.devices import KINDLE_SCRIBE, SUPERNOTE_NOMAD
-from eink_planner.mos.configurator import Configurator
-from eink_planner.mos.preamble import Preamble
+from parch import ConfigError
+from parch.config import StrictDict
+from parch.devices import KINDLE_SCRIBE, SUPERNOTE_NOMAD
+from parch.mos.configurator import Configurator
+from parch.mos.preamble import Preamble
 
 
 def test_strict_dict_dotted_path():

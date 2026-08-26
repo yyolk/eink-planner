@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from eink_planner.models import DeviceProfile, load_device_profile, load_locale
+from parch.models import DeviceProfile, load_device_profile, load_locale
 from tests.toml_fixtures import _minimal
 
 REPO = Path(__file__).resolve().parents[1]
@@ -143,20 +143,20 @@ height = "120mm"
 
 
 def test_known_sections_match_section_tables():
-    from eink_planner.models import KNOWN_SECTIONS
-    from eink_planner.models.device import SectionTables
+    from parch.models import KNOWN_SECTIONS
+    from parch.models.device import SectionTables
     assert KNOWN_SECTIONS == frozenset(SectionTables.model_fields)
     assert {"cover", "daily", "daily_notes", "projects", "meetings", "habits", "review", "colophon"} <= KNOWN_SECTIONS
 
 
 def test_daily_components_match_daily_track_fields():
-    from eink_planner.models.device import DailyTrack, _DAILY_COMPONENTS
+    from parch.models.device import DailyTrack, _DAILY_COMPONENTS
     assert tuple(DailyTrack.model_fields) == _DAILY_COMPONENTS
     assert set(_DAILY_COMPONENTS) == {"schedule", "little_calendar", "priorities", "notes"}
 
 
 def test_unknown_grid_pattern_on_notes_is_validation_error():
-    from eink_planner.models.device import DailyNotesSection, Notes
+    from parch.models.device import DailyNotesSection, Notes
     with pytest.raises(ValidationError):
         DailyNotesSection(pages=1, pattern="grid")
     with pytest.raises(ValidationError):
@@ -164,7 +164,7 @@ def test_unknown_grid_pattern_on_notes_is_validation_error():
 
 
 def test_habits_section_defaults_and_names_length():
-    from eink_planner.models.device import HabitsSection
+    from parch.models.device import HabitsSection
 
     section = HabitsSection()
     assert section.habit_columns == 6
@@ -176,7 +176,7 @@ def test_habits_section_defaults_and_names_length():
 
 
 def test_review_section_defaults_and_weeks_per_page():
-    from eink_planner.models.device import ReviewSection
+    from parch.models.device import ReviewSection
 
     section = ReviewSection()
     assert section.weeks_per_page == 13
@@ -191,7 +191,7 @@ def test_review_section_defaults_and_weeks_per_page():
 
 
 def test_projects_section_defaults():
-    from eink_planner.models.device import ProjectsSection
+    from parch.models.device import ProjectsSection
 
     section = ProjectsSection()
     assert section.pages == 16
@@ -200,7 +200,7 @@ def test_projects_section_defaults():
 
 
 def test_meetings_section_defaults_and_index_pages():
-    from eink_planner.models.device import MeetingsSection
+    from parch.models.device import MeetingsSection
 
     section = MeetingsSection()
     assert section.index_pages == 1

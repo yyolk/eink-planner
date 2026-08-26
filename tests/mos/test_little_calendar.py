@@ -1,6 +1,6 @@
-from eink_planner.i18n import I18n
-from eink_planner.mos.components.little_calendar import LittleCalendar
-from eink_planner.mos.manifest import Manifest
+from parch.i18n import I18n
+from parch.mos.components.little_calendar import LittleCalendar
+from parch.mos.manifest import Manifest
 from tests.helpers import make_day, make_month
 
 TRANSLATIONS = {

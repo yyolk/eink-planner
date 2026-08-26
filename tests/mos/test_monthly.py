@@ -6,13 +6,13 @@ from pathlib import Path
 import shutil
 import subprocess
 
-from eink_planner.i18n import I18n
-from eink_planner.mos.manifest import Manifest
-from eink_planner.mos.pages.monthly import Monthly
-from eink_planner.mos.sections.annual import Annual
-from eink_planner.mos.sections.monthly import Monthly as MonthlySection
-from eink_planner.services.generate import Generate
-from eink_planner.toml_config import parse_toml
+from parch.i18n import I18n
+from parch.mos.manifest import Manifest
+from parch.mos.pages.monthly import Monthly
+from parch.mos.sections.annual import Annual
+from parch.mos.sections.monthly import Monthly as MonthlySection
+from parch.services.generate import Generate
+from parch.toml_config import parse_toml
 from tests.helpers import make_configurator, make_month
 from tests.test_toml_omit_sections import compile_pdf
 from tests.toml_fixtures import omit_toml_sections

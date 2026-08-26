@@ -1,6 +1,6 @@
 import pytest
 
-from eink_planner.services.compile import CompileError, typst_asset_name, typst_download_url
+from parch.services.compile import CompileError, typst_asset_name, typst_download_url
 
 
 CASES = [
@@ -64,8 +64,8 @@ import shutil
 import zipfile
 from pathlib import Path
 
-import eink_planner.services.compile as compile_mod
-from eink_planner.services.compile import (
+import parch.services.compile as compile_mod
+from parch.services.compile import (
     _cached_typst_matches_pin,
     _extract_archive,
     _parse_typst_version,
