@@ -194,3 +194,39 @@ def preview_svg(svg: str, *, scale: float = DEFAULT_SCALE, crop: bool = False) -
     if scale != 1:
         out = scale_svg(out, scale)
     return out
+
+
+SAMPLE_STEMS = (
+    "cover",
+    "annual",
+    "quarterly-q1",
+    "monthly-jan",
+    "weekly-w01",
+    "daily-jan1",
+    "notes-jan1",
+    "colophon",
+)
+
+
+def _first_page(chunks: list[str], needle: str, name: str) -> int:
+    for i, chunk in enumerate(chunks, start=1):
+        if needle in chunk:
+            return i
+    raise ValueError(f"no {name} page matching {needle!r}")
+
+
+def sample_page_numbers(typst: str, *, year: int, week_id: str, jan1: str) -> dict[str, int]:
+    """1-based pages for the README 158×210 samples, from Typst labels."""
+    chunks = typst.split("#pagebreak()")
+    if not chunks:
+        raise ValueError("empty typst")
+    return {
+        "cover": 1,
+        "annual": _first_page(chunks, "<annual>", "annual"),
+        "quarterly-q1": _first_page(chunks, f"<quarter-{year}-1>", "quarterly"),
+        "monthly-jan": _first_page(chunks, f"<month-{jan1}>", "monthly"),
+        "weekly-w01": _first_page(chunks, f"<{week_id}>", "weekly"),
+        "daily-jan1": _first_page(chunks, f"text(size: h1)[1 <{jan1}>]", "daily"),
+        "notes-jan1": _first_page(chunks, f"<daily-note-{jan1}-page-1>", "daily notes"),
+        "colophon": _first_page(chunks, "About this notebook", "colophon"),
+    }

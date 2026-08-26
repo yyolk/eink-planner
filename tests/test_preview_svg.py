@@ -89,3 +89,47 @@ def test_compile_svg_tiny_two_pages(tmp_path):
         assert "<svg" in text
         assert "viewBox=" in text
         assert path.stat().st_size > 0
+
+
+def test_sample_page_numbers_from_labels():
+    from eink_planner.services.preview_svg import sample_page_numbers
+
+    typst = """
+cover
+#pagebreak()
+2026 <annual>
+#pagebreak()
+2026 / Quarter 1 <quarter-2026-1>
+#pagebreak()
+padding
+#pagebreak()
+2026 / January <month-2026-01-01>
+#pagebreak()
+2026 / Week 1 <2026W01>
+#pagebreak()
+text(size: h1)[1 <2026-01-01>]
+#pagebreak()
+1 <daily-note-2026-01-01-page-1>
+#pagebreak()
+About this notebook
+"""
+    pages = sample_page_numbers(
+        typst, year=2026, week_id="2026W01", jan1="2026-01-01"
+    )
+    assert pages == {
+        "cover": 1,
+        "annual": 2,
+        "quarterly-q1": 3,
+        "monthly-jan": 5,
+        "weekly-w01": 6,
+        "daily-jan1": 7,
+        "notes-jan1": 8,
+        "colophon": 9,
+    }
+
+
+def test_sample_page_numbers_missing_label():
+    from eink_planner.services.preview_svg import sample_page_numbers
+
+    with pytest.raises(ValueError, match="annual"):
+        sample_page_numbers("cover only", year=2026, week_id="2026W01", jan1="2026-01-01")
