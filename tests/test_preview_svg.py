@@ -136,19 +136,24 @@ def test_sample_page_numbers_from_labels():
     typst = """
 cover
 #pagebreak()
-2026 <annual>
+text(size: h1)[2026<annual>]
+padded_link(<quarter-2026-1>)
+padded_link(<month-2026-01-01>)
+padded_link(<2026W01>)
+padded_link(<quarter-2026-1>, [Q1])
 #pagebreak()
-2026 / Quarter 1 <quarter-2026-1>
+text(size: h1)[Quarter 1 <quarter-2026-1>]
 #pagebreak()
 padding
 #pagebreak()
-2026 / January <month-2026-01-01>
+text(size: h1)[January<month-2026-01-01>]
 #pagebreak()
-2026 / Week 1 <2026W01>
+text(size: h1)[Week 1 <2026W01>]
 #pagebreak()
 text(size: h1)[1 <2026-01-01>]
+padded_link(<daily-note-2026-01-01-page-1>)
 #pagebreak()
-1 <daily-note-2026-01-01-page-1>
+text(size: h1)[1 <daily-note-2026-01-01-page-1>]
 #pagebreak()
 About this notebook
 """
