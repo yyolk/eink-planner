@@ -11,6 +11,7 @@ sections = [
   "weekly",
   "daily",
   "daily_notes",
+  "colophon",
 ]
 
 [device]

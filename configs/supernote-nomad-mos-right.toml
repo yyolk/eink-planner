@@ -16,6 +16,7 @@ sections = [
   "habits",
   "review",
   "meetings",
+  "colophon",
 ]
 
 [device]

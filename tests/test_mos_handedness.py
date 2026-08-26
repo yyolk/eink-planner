@@ -181,7 +181,7 @@ def test_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert [c["class"] for c in daily["left_column"]] == ["priorities", "notes"]
     assert [c["class"] for c in daily["right_column"]] == ["schedule", "little_calendar"]
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
-    assert "colophon" not in names
+    assert names[-1] == "colophon"
     typst_src = _generate(dto)
     assert "columns: (1fr, 10mm)" in typst_src
     assert "columns: (10mm, 1fr)" not in typst_src
@@ -189,11 +189,11 @@ def test_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
 
 
-def test_shipped_mos_right_omits_colophon():
+def test_shipped_mos_right_includes_colophon():
     dto = load(MOS_RIGHT)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
-    assert "colophon" not in names
-    assert names == ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
+    assert names[-1] == "colophon"
+    assert names == ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "colophon"]
 
 
 def test_nomad_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
@@ -223,7 +223,7 @@ def test_nomad_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert monthly["daily_cell_height"] == "16mm"
     assert monthly["week_label_rotation"] == "90deg"
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
-    assert "colophon" not in names
+    assert names[-1] == "colophon"
     typst_src = _generate(dto)
     assert "columns: (1fr, 8mm)" in typst_src
     assert "columns: (8mm, 1fr)" not in typst_src
@@ -233,11 +233,11 @@ def test_nomad_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
 
 
-def test_shipped_nomad_mos_right_omits_colophon():
+def test_shipped_nomad_mos_right_includes_colophon():
     dto = load(NOMAD_MOS_RIGHT)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
-    assert "colophon" not in names
-    assert names == ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "habits", "review", "meetings"]
+    assert names[-1] == "colophon"
+    assert names == ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "habits", "review", "meetings", "colophon"]
 
 
 def test_shipped_mos_daily_schedule_track_stays_3fr_on_both_handedness():
