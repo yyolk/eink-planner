@@ -12,7 +12,7 @@ from eink_planner import ConfigError
 from eink_planner.config import load
 from eink_planner.i18n import I18n
 from eink_planner.mos.configurator import Configurator
-from eink_planner.mos.sections.projects import Projects, _CARD_BASELINES, _length_mm
+from eink_planner.mos.sections.projects import Projects, _CARD_BASELINES, _NUM_COL, _length_mm
 from eink_planner.services.generate import Generate
 from eink_planner.toml_config import parse_toml
 from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf
@@ -23,7 +23,6 @@ NOMAD = REPO / "configs/supernote-nomad.toml"
 
 _CARD_STROKE = "stroke: regular_stroke + black"
 _CARD_LINE = "line(length: size.width, stroke: 0.2pt + black)"
-_NUM_COL = "2em"
 
 
 def _generate(dto) -> str:
