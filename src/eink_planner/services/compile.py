@@ -90,6 +90,54 @@ class Compile:
                 f"typst compile failed ({result.returncode}):\n{result.stdout}\n{result.stderr}"
             )
 
+    def compile_svg(
+        self,
+        workdir: str | Path,
+        file: str = "index.typst",
+        pages: list[int] | None = None,
+        dest_pattern: str = "preview-{p}.svg",
+        tools_dir: str | Path | None = None,
+    ) -> list[Path]:
+        """Compile selected pages to SVG. Refuses a full-book dump."""
+        from eink_planner.services.preview_svg import format_pages
+
+        workdir = Path(workdir)
+        if not pages:
+            raise CompileError("SVG preview needs an explicit page list")
+        if "{p}" not in dest_pattern:
+            raise CompileError("SVG dest pattern must include {p}")
+        typst = ensure_typst(tools_dir=tools_dir)
+        src = workdir / file
+        dest = workdir / dest_pattern
+        print("Compiling SVG pages with typst...")
+        started = time.perf_counter()
+        result = subprocess.run(
+            [
+                str(typst),
+                "compile",
+                "--format",
+                "svg",
+                "--pages",
+                format_pages(pages),
+                str(src),
+                str(dest),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        print(f"Typst SVG compilation time: {time.perf_counter() - started:.2f}s")
+        if result.returncode != 0:
+            raise CompileError(
+                f"typst svg compile failed ({result.returncode}):\n{result.stdout}\n{result.stderr}"
+            )
+        written: list[Path] = []
+        for n in pages:
+            path = workdir / dest_pattern.replace("{p}", str(n))
+            if not path.is_file() or path.stat().st_size == 0:
+                raise CompileError(f"typst did not write {path}")
+            written.append(path)
+        return written
+
     def _run_ghostscript(self, workdir: Path) -> None:
         gs = shutil.which("gs")
         if not gs:
