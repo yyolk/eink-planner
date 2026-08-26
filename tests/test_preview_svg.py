@@ -3,6 +3,7 @@ import pytest
 from eink_planner.cli import build_parser
 from eink_planner.services.compile import Compile, CompileError
 from eink_planner.services.preview_svg import (
+    DEFAULT_SCALE,
     crop_svg,
     format_pages,
     parse_pages,
@@ -56,7 +57,7 @@ def test_preview_svg_cli_defaults():
         ["preview-svg", "configs/158x210-mos-left.toml", "--pages", "1,2"]
     )
     assert args.command == "preview-svg"
-    assert args.scale == 0.25
+    assert args.scale == DEFAULT_SCALE
     assert args.crop is False
     assert args.pages == "1,2"
 

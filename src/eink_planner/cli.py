@@ -13,7 +13,7 @@ from eink_planner.toml_config import apply_debug, apply_year
 from eink_planner.provenance import apply_provenance, collect_provenance
 from eink_planner.services.compile import Compile, CompileError
 from eink_planner.services.generate import Generate
-from eink_planner.services.preview_svg import parse_pages, preview_svg
+from eink_planner.services.preview_svg import DEFAULT_SCALE, parse_pages, preview_svg
 
 
 def _repo_root() -> Path:
@@ -85,8 +85,8 @@ def build_parser() -> argparse.ArgumentParser:
     prev.add_argument(
         "--scale",
         type=float,
-        default=0.25,
-        help="Linear scale for width/height (default: 0.25). 1 keeps Typst page size",
+        default=DEFAULT_SCALE,
+        help="Linear scale for width/height (default: 1/3). 1 keeps Typst page size",
     )
     prev.add_argument(
         "--crop",
