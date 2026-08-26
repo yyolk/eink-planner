@@ -30,12 +30,20 @@ class DailyNotes:
 
     def generate(self) -> str:
         daily_note_id = DatedNote(weekday_start=self.day.weekday_start, day=self.day).id
-        more = ""
+        notes = self.i18n.t("daily_notes")
+        rule = "stroke: (bottom: regular_stroke + black)"
         if self.manifest.source(daily_note_id):
-            more = f' #padded_link(<{daily_note_id}>)[| {self.i18n.t("more_daily_notes")}]'
+            more = self.manifest.link_or_content(daily_note_id, self.i18n.t("more_daily_notes"))
+            return f"""grid(
+  columns: (1fr, auto),
+  rows: ({self.title_height}, {self.notes_height}),
+  grid.cell(align: horizon, {rule}, [{notes}]),
+  grid.cell(align: horizon + right, {rule}, {more}),
+  grid.cell(colspan: 2, rect_pattern({self.pattern}))
+)"""
         return f"""grid(
   columns: 1fr,
   rows: ({self.title_height}, {self.notes_height}),
-  grid.cell(align:horizon, stroke: (bottom: thick_stroke), [{self.i18n.t("daily_notes")}{more}]),
+  grid.cell(align: horizon, {rule}, [{notes}]),
   rect_pattern({self.pattern})
 )"""

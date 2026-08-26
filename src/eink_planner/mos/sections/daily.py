@@ -10,6 +10,7 @@ from eink_planner.mos.configurator import Configurator
 from eink_planner.mos.manifest import Manifest
 from eink_planner.mos.page_data import PageData
 from eink_planner.mos.pages.daily import Daily as DailyPage
+from eink_planner.mos.sections.annual import Annual
 
 
 class Daily:
@@ -33,6 +34,7 @@ class Daily:
 
     def pages(self, manifest: Manifest) -> list[PageData]:
         out = []
+        year = str(self.configurator.start_date().year)
         for day in self._range():
             page = DailyPage(
                 i18n=self.i18n,
@@ -46,7 +48,8 @@ class Daily:
                     title=page.title(),
                     content=page.content(),
                     highlight_months=[day.month()],
-                    highlight_quarters=[day.quarter()],
+                    highlight_quarters=[],
+                    nav_links=[(Annual.ID, year)],
                 )
             )
         return out

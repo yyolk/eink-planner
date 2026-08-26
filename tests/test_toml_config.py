@@ -21,8 +21,8 @@ MOS_RIGHT = CONFIGS / "158x210-mos-right.toml"
 SCRIBE = CONFIGS / "kindle-scribe.toml"
 
 GOLDEN_SHA256 = {
-    "supernote-nomad": "c18570bc4cd3eb85763d5043f29b647bb98fa322456f4f538167e51631ae065f",
-    "158x210-mos-left": "a1c05675a23fc16acba3e26c763b6b34ad744f1643ff589ec656996311acab6e",
+    "supernote-nomad": "39affc4f69037948ef98dfb8ef4065bc030ca8189598ae0bbc36b60db0be2a3f",
+    "158x210-mos-left": "78af6dfc9aa47a5a7a669b016863feaa9695688edd691d0089fa3ef9da954bfc",
 }
 
 
@@ -38,6 +38,7 @@ def test_parse_shipped_toml_profiles(path: Path):
         expected = expected + ["projects"]
     if path in {NOMAD, NOMAD_MOS_RIGHT}:
         expected = expected + ["habits", "review", "meetings"]
+    expected = expected + ["colophon"]
     assert names == expected
 
 
@@ -89,7 +90,7 @@ def test_mos_left_daily_columns():
     params = daily["params"]
     assert params["columns_width"] == "(3fr, 5fr)"
     assert [c["class"] for c in params["left_column"]] == ["schedule", "little_calendar"]
-    assert [c["class"] for c in params["right_column"]] == ["top_priorities", "notes"]
+    assert [c["class"] for c in params["right_column"]] == ["priorities", "notes"]
     schedule = params["left_column"][0]["params"]
     assert schedule["from"] == 8
     assert schedule["to"] == 20
@@ -105,7 +106,7 @@ def test_mos_right_daily_track_flip():
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")
     params = daily["params"]
     assert params["columns_width"] == "(5fr, 3fr)"
-    assert [c["class"] for c in params["left_column"]] == ["top_priorities", "notes"]
+    assert [c["class"] for c in params["left_column"]] == ["priorities", "notes"]
     assert [c["class"] for c in params["right_column"]] == ["schedule", "little_calendar"]
     assert params["left_column"][0]["params"]["number"] == 5
     schedule = params["right_column"][0]["params"]
@@ -120,9 +121,10 @@ def test_nomad_projects_pages_and_card_rows():
     assert projects["params"]["card_rows"] == 5
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert "projects" in names
-    assert names[-1] == "meetings"
-    assert names[-2] == "review"
-    assert names[-3] == "habits"
+    assert names[-1] == "colophon"
+    assert names[-2] == "meetings"
+    assert names[-3] == "review"
+    assert names[-4] == "habits"
 
 
 def test_lined_scratch_pad():

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 from eink_planner.calendar import walk
@@ -36,31 +37,39 @@ class Annual:
         manifest.register_source(self.ID)
 
     def pages(self, manifest: Manifest) -> list[PageData]:
+        year = self.configurator.start_date().year
         return [
             PageData(
-                title=f"text(size: h1)[Calendar<{self.ID}>]",
+                title=f"text(size: h1)[{year}<{self.ID}>]",
                 content=self._content(manifest),
                 page_id=self.ID,
             )
         ]
 
     def _content(self, manifest: Manifest) -> str:
-        items = [
-            LittleCalendar(
-                i18n=self.i18n,
-                manifest=manifest,
-                month=month,
-                **self.little_calendar,
-            ).generate()
-            for month in self._range()
-        ]
+        months = list(self._range())
+        parts: list[str] = []
+        for i, month in enumerate(months):
+            parts.append(
+                LittleCalendar(
+                    i18n=self.i18n,
+                    manifest=manifest,
+                    month=month,
+                    **self.little_calendar,
+                    show_week_letter=False,
+                ).generate()
+            )
+            nxt = months[i + 1] if i + 1 < len(months) else None
+            if nxt is not None and nxt.quarter() != month.quarter():
+                parts.append("grid.hline(stroke: regular_stroke + black)")
+        rows = ", ".join(["1fr"] * math.ceil(len(months) / 3))
         return f"""grid(
   columns: (1fr, 1fr, 1fr),
-  rows: 1fr,
+  rows: ({rows}),
   column-gutter: regular_column_gutter,
   row-gutter: {self.row_gutter},
 
-  {",\n".join(items)}
+  {",\n".join(parts)}
 )"""
 
     def _range(self):

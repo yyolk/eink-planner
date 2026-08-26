@@ -292,7 +292,7 @@ def test_nomad_full_year_is_thirteen_pages_of_habits():
     dto = load(NOMAD)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert "habits" in names
-    assert names[-3] == "habits"
+    assert names[-4:] == ["habits", "review", "meetings", "colophon"]
     habits = next(s for s in dto["planner"]["sections"] if s["name"] == "habits")
     assert habits["params"]["habit_columns"] == 6
     assert habits["params"]["names"] == []

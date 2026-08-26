@@ -21,7 +21,7 @@ LOCALE = REPO / "locales" / "en.toml"
 def test_happy_path_mos_left():
     profile = load_device_profile(MOS_LEFT)
     assert profile.layout.side_menu == "left"
-    assert profile.sections[-1] == "daily_notes"
+    assert profile.sections[-1] == "colophon"
     assert profile.section.daily is not None
     assert profile.section.daily.left is not None
     assert profile.section.daily.right is not None

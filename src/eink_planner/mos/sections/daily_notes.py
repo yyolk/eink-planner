@@ -10,6 +10,7 @@ from eink_planner.i18n import I18n
 from eink_planner.mos.configurator import Configurator
 from eink_planner.mos.manifest import Manifest
 from eink_planner.mos.page_data import PageData
+from eink_planner.mos.sections.annual import Annual
 
 
 class DailyNotes:
@@ -34,13 +35,15 @@ class DailyNotes:
 
     def pages(self, manifest: Manifest) -> list[PageData]:
         out = []
+        year = str(self.configurator.start_date().year)
         for note in self._range():
             out.append(
                 PageData(
                     title=self._title(manifest, note),
                     content=f"rect_pattern({self.pattern})",
                     highlight_months=[note.day.month()],
-                    highlight_quarters=[note.day.quarter()],
+                    highlight_quarters=[],
+                    nav_links=[(Annual.ID, year)],
                 )
             )
         return out
@@ -54,6 +57,16 @@ class DailyNotes:
         if manifest.source(daily_note.day.id):
             day = f"padded_link(<{daily_note.day.id}>)[#{day}]"
         weekday = self.i18n.t(f"weekday.full.{daily_note.day.weekday_name}")
+        week_row = week
+        fraction = self._fraction(manifest, daily_note)
+        if fraction is not None:
+            week_row = f"""grid(
+  columns: (auto, auto),
+  column-gutter: regular_column_gutter,
+  align: horizon,
+  {week},
+  text(size: 0.85em, {fraction})
+)"""
         return f"""grid(
   columns: (auto, auto),
   rows: (3fr, 2fr),
@@ -69,8 +82,21 @@ class DailyNotes:
     )
   ),
   [*{weekday}*],
-  {week}
+  {week_row}
 )"""
+
+    def _fraction(self, manifest: Manifest, daily_note: DatedNote) -> str | None:
+        if self.pages_num <= 1:
+            return None
+        sibling_page = daily_note.page % self.pages_num + 1
+        sibling = DatedNote(
+            day=daily_note.day,
+            weekday_start=daily_note.weekday_start,
+            page=sibling_page,
+        )
+        return manifest.link_or_content(
+            sibling.id, f"{daily_note.page}/{self.pages_num}"
+        )
 
     def _range(self) -> list[DatedNote]:
         notes: list[DatedNote] = []

@@ -37,6 +37,7 @@ SECTIONS = (
     "habits",
     "review",
     "meetings",
+    "colophon",
 )
 
 _MISSING_LABEL = re.compile(
@@ -143,18 +144,18 @@ def test_omit_one_section_compiles_pdf(kind, tmp_path):
 @pytest.mark.parametrize(
     "omit,remain",
     [
-        (("annual", "quarterly"), ("cover", "monthly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "meetings")),
-        (("weekly",), ("cover", "annual", "quarterly", "monthly", "daily", "daily_notes", "projects", "habits", "review", "meetings")),
-        (("monthly",), ("cover", "annual", "quarterly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "meetings")),
-        (("daily",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes", "projects", "habits", "review", "meetings")),
-        (("daily_notes",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily", "projects", "habits", "review", "meetings")),
+        (("annual", "quarterly"), ("cover", "monthly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "meetings", "colophon")),
+        (("weekly",), ("cover", "annual", "quarterly", "monthly", "daily", "daily_notes", "projects", "habits", "review", "meetings", "colophon")),
+        (("monthly",), ("cover", "annual", "quarterly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "meetings", "colophon")),
+        (("daily",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes", "projects", "habits", "review", "meetings", "colophon")),
+        (("daily_notes",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily", "projects", "habits", "review", "meetings", "colophon")),
         (
             ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes"),
-            ("daily", "projects", "habits", "review", "meetings"),
+            ("daily", "projects", "habits", "review", "meetings", "colophon"),
         ),
         (
             ("annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"),
-            ("cover", "projects", "habits", "review", "meetings"),
+            ("cover", "projects", "habits", "review", "meetings", "colophon"),
         ),
     ],
     ids=[

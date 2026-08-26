@@ -267,4 +267,5 @@ pattern = "lined"
     assert "rect_pattern(lined)" in quarter
     assert "rect_pattern(lined)" in month
     assert "rect_pattern(lined)" in week
-    assert week.count("rect_pattern(lined)") == 3
+    assert week.count("rect_pattern(lined)") == 8
+    assert "grid.cell(colspan: 3, rect_pattern" not in week

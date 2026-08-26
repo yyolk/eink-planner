@@ -270,7 +270,9 @@ class HabitsSection(StrictModel):
 
 class ColophonSection(StrictModel):
     title: str | None = None
-    highlight: StrictBool | None = None
+    dump: StrictBool | None = None
+    command: StrictBool | None = None
+    sha: StrictBool | None = None
 
 
 class SectionTables(StrictModel):

@@ -11,6 +11,7 @@ from eink_planner.mos.configurator import Configurator
 from eink_planner.mos.manifest import Manifest
 from eink_planner.mos.page_data import PageData
 from eink_planner.mos.pages.quarterly import Quarterly as QuarterlyPage
+from eink_planner.mos.sections.annual import Annual
 
 
 class Quarterly:
@@ -49,12 +50,29 @@ class Quarterly:
             )
             out.append(
                 PageData(
-                    title=page.title(),
+                    title=self._title(manifest, page),
                     content=page.content(),
                     highlight_quarters=[quarter],
+                    nav_links=[],
                 )
             )
         return out
+
+    def _year(self) -> int:
+        return self.configurator.start_date().year
+
+    def _year_cell(self, manifest: Manifest) -> str:
+        return manifest.link_or_content(Annual.ID, str(self._year()))
+
+    def _title(self, manifest: Manifest, page: QuarterlyPage) -> str:
+        return f"""grid(
+  columns: (auto, auto, 1fr),
+  column-gutter: 6pt,
+  align: horizon,
+  text(size: h1, {self._year_cell(manifest)}),
+  text(size: h1)[/],
+  {page.title()}
+)"""
 
     def _range(self):
         return walk(self.configurator.start_date().quarter(), self.configurator.end_date().quarter())

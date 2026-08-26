@@ -333,8 +333,8 @@ def _component_schedule(raw: Schedule) -> dict[str, Any]:
 
 def _component_priorities(raw: Priorities) -> dict[str, Any]:
     return {
-        "name": "top priorities",
-        "class": "top_priorities",
+        "name": "priorities",
+        "class": "priorities",
         "enabled": True,
         "params": {"number": raw.count},
     }
@@ -354,8 +354,12 @@ def _section_colophon(table: ColophonSection) -> dict[str, Any]:
     params: dict[str, Any] = {}
     if table.title is not None:
         params["title"] = table.title
-    if table.highlight is not None:
-        params["highlight"] = table.highlight
+    if table.dump is not None:
+        params["dump"] = table.dump
+    if table.command is not None:
+        params["command"] = table.command
+    if table.sha is not None:
+        params["sha"] = table.sha
     return params
 
 

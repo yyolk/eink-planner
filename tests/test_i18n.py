@@ -14,7 +14,7 @@ def test_load_en_toml_representative_keys():
     i18n = I18n.load(REPO / "locales" / "en.toml", locale="en")
     assert i18n.locale == "en"
     assert i18n.t("week_name") == "Week"
-    assert i18n.t("top_priorities") == "Top priorities"
+    assert i18n.t("priorities") == "Priorities"
     assert i18n.t("quarter.short") == "Q"
     assert i18n.t("months.full.january") == "January"
     assert i18n.t("weekday.letter.monday") == "M"
@@ -71,7 +71,7 @@ def test_generate_english_strings_match_previous_meanings():
     for label in (
         "Week",
         "Schedule",
-        "Top priorities",
+        "Priorities",
         "Notes",
         "More",
         "Quarter",
@@ -81,7 +81,7 @@ def test_generate_english_strings_match_previous_meanings():
     ):
         assert label in typst
     assert "Q1" in typst
-    assert "[W], [M], [T], [W], [T], [F], [S], [S]" in typst
+    assert "[], [M], [T], [W], [T], [F], [S], [S]" in typst
 
 
 def test_path_like_locale_code_is_config_error():

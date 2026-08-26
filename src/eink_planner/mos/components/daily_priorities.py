@@ -1,4 +1,4 @@
-"""Top-priorities checkbox list on the day page."""
+"""Priorities checkbox list on the day page."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from typing import Any
 from eink_planner.i18n import I18n
 
 
-class DailyTopPriorities:
+class DailyPriorities:
     def __init__(self, i18n: I18n, number: int, **_rest: Any) -> None:
         self.i18n = i18n
         self.number = int(number)
@@ -16,9 +16,9 @@ class DailyTopPriorities:
         return f"""grid(
   columns: 1fr,
   inset: 0mm,
-  stroke: (_, _) => (bottom: regular_stroke),
+  stroke: (_, _) => (bottom: regular_stroke + black),
 
-  grid.cell(stroke: (bottom: thick_stroke), box(height: regular_height, align(horizon, [{self.i18n.t("top_priorities")}]))),
+  grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [{self.i18n.t("priorities")}]))),
   {self._lines()}
 )"""
 
