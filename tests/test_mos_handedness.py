@@ -114,7 +114,7 @@ count = 5
     dto = parse_toml(text, source="swapped-daily.toml")
     params = _daily_section(dto)["params"]
     assert [c["class"] for c in params["left_column"]] == ["notes", "little_calendar"]
-    assert [c["class"] for c in params["right_column"]] == ["schedule", "top_priorities"]
+    assert [c["class"] for c in params["right_column"]] == ["schedule", "priorities"]
     assert dto["planner"]["params"]["little_calendar"]["week_placement"] == "right"
 
     typst_src = _generate(short_january(dto))
@@ -166,7 +166,7 @@ def test_existing_mos_left_and_nomad_daily_still_parse(path: Path):
     dto = load(path)
     params = _daily_section(dto)["params"]
     assert [c["class"] for c in params["left_column"]] == ["schedule", "little_calendar"]
-    assert [c["class"] for c in params["right_column"]] == ["top_priorities", "notes"]
+    assert [c["class"] for c in params["right_column"]] == ["priorities", "notes"]
     assert dto["planner"]["params"]["mos_layout"]["side_menu_position"] == "left"
 
 
@@ -178,7 +178,7 @@ def test_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert mos["menu_rotate"] == "270deg"
     assert mos["reverse_months_quarters_items"] is True
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
-    assert [c["class"] for c in daily["left_column"]] == ["top_priorities", "notes"]
+    assert [c["class"] for c in daily["left_column"]] == ["priorities", "notes"]
     assert [c["class"] for c in daily["right_column"]] == ["schedule", "little_calendar"]
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert "colophon" not in names
@@ -206,7 +206,7 @@ def test_nomad_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
     assert daily["columns_width"] == "(5fr, 3fr)"
     assert daily["items_spacing"] == "4mm"
-    assert [c["class"] for c in daily["left_column"]] == ["top_priorities", "notes"]
+    assert [c["class"] for c in daily["left_column"]] == ["priorities", "notes"]
     assert [c["class"] for c in daily["right_column"]] == ["schedule", "little_calendar"]
     notes = daily["left_column"][1]["params"]
     assert notes["notes_height"] == "1fr"
@@ -245,10 +245,10 @@ def test_shipped_mos_daily_schedule_track_stays_3fr_on_both_handedness():
     left = _daily_section(load(MOS_LEFT))["params"]
     assert left["columns_width"] == "(3fr, 5fr)"
     assert [c["class"] for c in left["left_column"]] == ["schedule", "little_calendar"]
-    assert [c["class"] for c in left["right_column"]] == ["top_priorities", "notes"]
+    assert [c["class"] for c in left["right_column"]] == ["priorities", "notes"]
 
     for path in (MOS_RIGHT, NOMAD_MOS_RIGHT):
         right = _daily_section(load(path))["params"]
         assert right["columns_width"] == "(5fr, 3fr)", path.name
-        assert [c["class"] for c in right["left_column"]] == ["top_priorities", "notes"]
+        assert [c["class"] for c in right["left_column"]] == ["priorities", "notes"]
         assert [c["class"] for c in right["right_column"]] == ["schedule", "little_calendar"]

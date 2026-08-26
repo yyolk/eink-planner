@@ -333,8 +333,8 @@ def _component_schedule(raw: Schedule) -> dict[str, Any]:
 
 def _component_priorities(raw: Priorities) -> dict[str, Any]:
     return {
-        "name": "top priorities",
-        "class": "top_priorities",
+        "name": "priorities",
+        "class": "priorities",
         "enabled": True,
         "params": {"number": raw.count},
     }

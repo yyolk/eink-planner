@@ -39,7 +39,7 @@ _LEFT = [
     },
 ]
 _RIGHT = [
-    {"class": "top_priorities", "enabled": True, "params": {"number": 5}},
+    {"class": "priorities", "enabled": True, "params": {"number": 5}},
     {
         "class": "notes",
         "enabled": True,
@@ -208,7 +208,7 @@ def test_notes_alone_when_daily_notes_off():
 def test_notes_pattern_switches():
     for pattern in ("lined", "review_lined", "dotted", "dotted_centered"):
         right = [
-            {"class": "top_priorities", "enabled": True, "params": {"number": 5}},
+            {"class": "priorities", "enabled": True, "params": {"number": 5}},
             {
                 "class": "notes",
                 "enabled": True,

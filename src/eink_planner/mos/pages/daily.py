@@ -10,14 +10,14 @@ from eink_planner.config import StrictDict, _to_plain
 from eink_planner.i18n import I18n
 from eink_planner.mos.components.daily_notes import DailyNotes
 from eink_planner.mos.components.daily_schedule import DailySchedule
-from eink_planner.mos.components.daily_top_priorities import DailyTopPriorities
+from eink_planner.mos.components.daily_priorities import DailyPriorities
 from eink_planner.mos.components.little_calendar import LittleCalendar
 from eink_planner.mos.manifest import Manifest
 
 
 COMPONENT_CLASSES = {
     "schedule": DailySchedule,
-    "top_priorities": DailyTopPriorities,
+    "priorities": DailyPriorities,
     "notes": DailyNotes,
     "little_calendar": LittleCalendar,
 }

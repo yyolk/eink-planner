@@ -89,7 +89,7 @@ def test_mos_left_daily_columns():
     params = daily["params"]
     assert params["columns_width"] == "(3fr, 5fr)"
     assert [c["class"] for c in params["left_column"]] == ["schedule", "little_calendar"]
-    assert [c["class"] for c in params["right_column"]] == ["top_priorities", "notes"]
+    assert [c["class"] for c in params["right_column"]] == ["priorities", "notes"]
     schedule = params["left_column"][0]["params"]
     assert schedule["from"] == 8
     assert schedule["to"] == 20
@@ -105,7 +105,7 @@ def test_mos_right_daily_track_flip():
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")
     params = daily["params"]
     assert params["columns_width"] == "(5fr, 3fr)"
-    assert [c["class"] for c in params["left_column"]] == ["top_priorities", "notes"]
+    assert [c["class"] for c in params["left_column"]] == ["priorities", "notes"]
     assert [c["class"] for c in params["right_column"]] == ["schedule", "little_calendar"]
     assert params["left_column"][0]["params"]["number"] == 5
     schedule = params["right_column"][0]["params"]
