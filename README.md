@@ -62,6 +62,11 @@ Flags:
 
 A name in the top-level `sections = ["cover", …]` list is enabled, in that order. Comment a name out of `sections` to disable it. Details live under `[section.<name>]`. There is no `enabled = true` flag, and `debug` does not belong in the profile — use `lyp generate --debug`. At least one section must remain.
 
+## Sample pages
+
+2026 from [`configs/158x210-mos-left.toml`](configs/158x210-mos-left.toml). MOS strip on the left. This profile ships cover through daily notes plus the colophon (no projects, habits, review, or meetings).
+
+
 ## Device profiles
 
 Sizes are 1:1 on glass at 300 PPI.
@@ -105,10 +110,13 @@ Enabled MOS (Months on the Side) sections, in order:
 8. Projects (index of write-in names + one kanban board per project)
 9. Habits (index of 12 months + one habit-tracker grid per month)
 10. Review (index of weeks + one lined leftover-notes page per week; no MOS)
+11. Meetings (index of write-in names + one lined page per meeting)
+12. Colophon (quiet About page)
 
 `[section.projects]` takes optional `pages` (default 16) and `card_rows` (default 5). Only Nomad ships projects enabled.
 `[section.habits]` takes optional `habit_columns` (default 6) and `names` (default `[]`; first N header slots are typeset, the rest stay write-in). Enabled on both Nomad profiles.
 `[section.review]` takes optional `weeks_per_page` (default 13). The week field is lined by default and can be `pattern = "dotted"`. Listing `review` without a table uses those defaults. Enabled on both Nomad profiles after Habits.
+`[section.meetings]` takes optional `index_pages` (default 1). Enabled on Nomad after Review.
 
 Internal PDF links use Typst `#padded_link` / `<label>` the same way LYP does. A link is only emitted when the target page exists; otherwise the cell stays plain text.
 
