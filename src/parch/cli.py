@@ -1,4 +1,4 @@
-"""CLI: `parch generate <config>` / `lyp generate <config>`."""
+"""CLI: `parch generate <config>`."""
 
 from __future__ import annotations
 

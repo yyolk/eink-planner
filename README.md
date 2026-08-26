@@ -44,8 +44,6 @@ uv run parch generate configs/158x210-mos-right.toml -w out/mos-right
 uv run parch generate configs/kindle-scribe.toml -w out/scribe
 ```
 
-`lyp` is still an alias for `parch` (LYP heritage).
-
 Flags:
 
 | Flag | Default | Meaning |

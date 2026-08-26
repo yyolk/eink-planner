@@ -17,7 +17,6 @@ dev = ["pytest>=8.0"]
 
 [project.scripts]
 parch = "parch.cli:main"
-lyp = "parch.cli:main"
 
 [build-system]
 requires = ["hatchling"]

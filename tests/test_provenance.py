@@ -29,9 +29,9 @@ def test_config_sha256_matches_hashlib(tmp_path):
 
 
 def test_format_command_joins_argv():
-    assert format_command(["lyp", "generate", "foo.toml"]) == "lyp generate foo.toml"
-    joined = format_command(["lyp", "generate", "file with space.toml"])
-    assert "lyp generate" in joined
+    assert format_command(["parch", "generate", "foo.toml"]) == "parch generate foo.toml"
+    joined = format_command(["parch", "generate", "file with space.toml"])
+    assert "parch generate" in joined
     assert "file with space.toml" in joined
 
 
@@ -103,7 +103,7 @@ def test_collect_provenance_keys(tmp_path, monkeypatch):
     path.write_text("year 2026\n", encoding="utf-8")
     prov = collect_provenance(
         config_path=path,
-        argv=["lyp", "generate", str(path)],
+        argv=["parch", "generate", str(path)],
         start=tmp_path,
     )
     assert set(prov) == {
@@ -118,12 +118,12 @@ def test_collect_provenance_keys(tmp_path, monkeypatch):
     assert prov["config_text"] == "year 2026\n"
     assert prov["config_sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
     assert prov["git_sha"] is None
-    assert "lyp generate" in prov["command"]
+    assert "parch generate" in prov["command"]
     assert str(path) in prov["config_path"]
 
 
 def test_apply_provenance_attaches_to_planner_params():
     dto = StrictDict({"planner": {"params": {}, "sections": []}})
-    out = apply_provenance(dto, {"command": "lyp generate x.toml", "git_sha": None})
-    assert out["planner"]["params"]["provenance"]["command"] == "lyp generate x.toml"
+    out = apply_provenance(dto, {"command": "parch generate x.toml", "git_sha": None})
+    assert out["planner"]["params"]["provenance"]["command"] == "parch generate x.toml"
     assert "provenance" not in dto["planner"]["params"]
