@@ -60,6 +60,7 @@ class WeekdayFull(StrictModel):
 class Weekday(StrictModel):
     letter: WeekdayLetter
     full: WeekdayFull
+    short: WeekdayFull
 
 
 class Locale(StrictModel):
@@ -72,6 +73,7 @@ class Locale(StrictModel):
     more_daily_notes: str
     notes: str
     projects: str
+    habits: str
     todo: str
     doing: str
     done: str

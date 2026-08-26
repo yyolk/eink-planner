@@ -43,6 +43,8 @@ def test_happy_path_locale():
     locale = load_locale(LOCALE)
     assert locale.week_name == "Week"
     assert locale.projects == "Projects"
+    assert locale.habits == "Habits"
+    assert locale.weekday.short.monday == "Mon"
     assert locale.quarter.short == "Q"
 
 
@@ -140,7 +142,7 @@ def test_known_sections_match_section_tables():
     from eink_planner.models import KNOWN_SECTIONS
     from eink_planner.models.device import SectionTables
     assert KNOWN_SECTIONS == frozenset(SectionTables.model_fields)
-    assert {"cover", "daily", "daily_notes", "projects", "colophon"} <= KNOWN_SECTIONS
+    assert {"cover", "daily", "daily_notes", "projects", "habits", "colophon"} <= KNOWN_SECTIONS
 
 
 def test_daily_components_match_daily_track_fields():
@@ -155,4 +157,16 @@ def test_unknown_grid_pattern_on_notes_is_validation_error():
         DailyNotesSection(pages=1, pattern="grid")
     with pytest.raises(ValidationError):
         Notes(pattern="grid", title_height="4mm")
+
+
+def test_habits_section_defaults_and_names_length():
+    from eink_planner.models.device import HabitsSection
+
+    section = HabitsSection()
+    assert section.habit_columns == 6
+    assert section.names == []
+    ok = HabitsSection(habit_columns=2, names=["A", "B"])
+    assert ok.names == ["A", "B"]
+    with pytest.raises(ValidationError, match="habit_columns"):
+        HabitsSection(habit_columns=2, names=["A", "B", "C"])
 

@@ -237,7 +237,7 @@ def test_shipped_nomad_mos_right_omits_colophon():
     dto = load(NOMAD_MOS_RIGHT)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert "colophon" not in names
-    assert names == ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
+    assert names == ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "habits"]
 
 
 def test_shipped_mos_daily_schedule_track_stays_3fr_on_both_handedness():

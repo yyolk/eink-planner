@@ -34,6 +34,7 @@ SECTIONS = (
     "daily",
     "daily_notes",
     "projects",
+    "habits",
 )
 
 _MISSING_LABEL = re.compile(
@@ -67,6 +68,8 @@ def classify_label(label: str) -> str:
         return "monthly"
     if re.fullmatch(r"\d{4}W\d{2}", label):
         return "weekly"
+    if label == "habits" or label.startswith("habits-"):
+        return "habits"
     if label.startswith("daily-note-"):
         return "daily_notes"
     if re.fullmatch(r"\d{4}-\d{2}-\d{2}", label):
@@ -134,18 +137,18 @@ def test_omit_one_section_compiles_pdf(kind, tmp_path):
 @pytest.mark.parametrize(
     "omit,remain",
     [
-        (("annual", "quarterly"), ("cover", "monthly", "weekly", "daily", "daily_notes", "projects")),
-        (("weekly",), ("cover", "annual", "quarterly", "monthly", "daily", "daily_notes", "projects")),
-        (("monthly",), ("cover", "annual", "quarterly", "weekly", "daily", "daily_notes", "projects")),
-        (("daily",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes", "projects")),
-        (("daily_notes",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily", "projects")),
+        (("annual", "quarterly"), ("cover", "monthly", "weekly", "daily", "daily_notes", "projects", "habits")),
+        (("weekly",), ("cover", "annual", "quarterly", "monthly", "daily", "daily_notes", "projects", "habits")),
+        (("monthly",), ("cover", "annual", "quarterly", "weekly", "daily", "daily_notes", "projects", "habits")),
+        (("daily",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes", "projects", "habits")),
+        (("daily_notes",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily", "projects", "habits")),
         (
             ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes"),
-            ("daily", "projects"),
+            ("daily", "projects", "habits"),
         ),
         (
             ("annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"),
-            ("cover", "projects"),
+            ("cover", "projects", "habits"),
         ),
     ],
     ids=[

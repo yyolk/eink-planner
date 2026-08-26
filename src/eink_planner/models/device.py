@@ -234,6 +234,19 @@ class ProjectsSection(StrictModel):
     card_rows: StrictInt = 8
 
 
+class HabitsSection(StrictModel):
+    habit_columns: StrictInt = 6
+    names: list[str] = []
+
+    @model_validator(mode="after")
+    def _names_fit_columns(self) -> HabitsSection:
+        if len(self.names) > self.habit_columns:
+            raise ValueError(
+                f"names has {len(self.names)} entries but habit_columns is {self.habit_columns}"
+            )
+        return self
+
+
 class ColophonSection(StrictModel):
     title: str | None = None
     highlight: StrictBool | None = None
@@ -248,6 +261,7 @@ class SectionTables(StrictModel):
     daily: DailySection | None = None
     daily_notes: DailyNotesSection | None = None
     projects: ProjectsSection | None = None
+    habits: HabitsSection | None = None
     colophon: ColophonSection | list[ColophonSection] | None = None
 
     @field_validator("colophon", mode="before")
@@ -327,6 +341,8 @@ class DeviceProfile(StrictModel):
                 raise ValueError("section.daily must have both left and right tracks")
         if "projects" in names and tables.projects is None:
             tables.projects = ProjectsSection()
+        if "habits" in names and tables.habits is None:
+            tables.habits = HabitsSection()
         return self
 
 

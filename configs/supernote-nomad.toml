@@ -11,6 +11,7 @@ sections = [
   "daily",
   "daily_notes",
   "projects",
+  "habits",
 ]
 
 [device]
@@ -99,3 +100,6 @@ pattern = "dotted"
 [section.projects]
 pages = 20
 card_rows = 8
+
+[section.habits]
+habit_columns = 6

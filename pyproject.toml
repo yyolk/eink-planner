@@ -34,7 +34,10 @@ packages = ["src/eink_planner"]
 package = true
 
 [dependency-groups]
-dev = ["pytest>=8.0"]
+dev = [
+    "pillow>=12.3.0",
+    "pytest>=8.0",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

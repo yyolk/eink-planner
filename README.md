@@ -89,7 +89,7 @@ Device profiles and locale files are TOML. Config keys use underscores (`week_st
 uv run pytest
 ```
 
-CI runs pytest and a Nomad `lyp generate`.
+CI runs pytest and a Nomad `lyp generate`. Visual design checks live in `tests/visual.py` and can be dropped with the tests that import them.
 
 ## Layout of a generated planner
 
@@ -103,8 +103,10 @@ Enabled MOS (Months on the Side) sections, in order:
 6. Daily (schedule + little calendar + priorities + notes)
 7. Daily notes (extra dotted pages)
 8. Projects (index of write-in names + one kanban board per project)
+9. Habits (index of 12 months + one habit-tracker grid per month)
 
 `[section.projects]` takes optional `pages` (default 20) and `card_rows` (default 8). Only Nomad ships projects enabled.
+`[section.habits]` takes optional `habit_columns` (default 6) and `names` (default `[]`; first N header slots are typeset, the rest stay write-in). Enabled on both Nomad profiles.
 
 Internal PDF links use Typst `#padded_link` / `<label>` the same way LYP does. A link is only emitted when the target page exists; otherwise the cell stays plain text.
 
