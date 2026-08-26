@@ -88,6 +88,9 @@ class Daily:
             params = data.get("params") or {}
             if isinstance(params, StrictDict):
                 params = params.to_plain()
+            extra = {}
+            if klass is LittleCalendar:
+                extra["show_week_letter"] = False
             pieces.append(
                 klass(
                     i18n=self.i18n,
@@ -95,6 +98,7 @@ class Daily:
                     month=self.day.month(),
                     day=self.day,
                     **params,
+                    **extra,
                 ).generate()
             )
         if not pieces:

@@ -26,28 +26,26 @@ class DailySchedule:
         self.time_format = time_format
 
     def generate(self) -> str:
-        trailing = "box(height: regular_height)" if self.trailing_30_minutes else ""
+        trailing = f",\n  {self._half_tick()}" if self.trailing_30_minutes else ""
         return f"""grid(
   columns: 1fr,
   inset: 0mm,
-  stroke: (_, y) =>
-    if calc.even(y) {{ ( bottom: regular_stroke + black ) }}
-    else {{ ( bottom: regular_stroke + gray ) }},
   grid.cell(
-    stroke: (bottom: thick_stroke),
+    stroke: (bottom: regular_stroke + black),
     box(height: regular_height, align(horizon, [{self.i18n.t("schedule")}]))
   ),
-  {self._schedule_lines()},
-
-  {trailing}
+  {self._schedule_lines()}{trailing}
 )"""
+
+    def _half_tick(self) -> str:
+        return "box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black)))"
 
     def _schedule_lines(self) -> str:
         lines = []
         for hour in range(self.from_hour, self.to_hour + 1):
             pretty = self._pretty_hour(hour)
             lines.append(
-                f"box(height: regular_height, align(horizon, [{pretty}])), box(height: regular_height)"
+                f"grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [{pretty}]))), {self._half_tick()}"
             )
         return ",\n".join(lines)
 
