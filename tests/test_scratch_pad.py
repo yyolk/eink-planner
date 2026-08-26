@@ -207,7 +207,14 @@ def test_shipped_profiles_keep_dotted_scratch_areas(path: Path):
     for name in ("daily_notes", "quarterly", "monthly", "weekly"):
         assert _section(dto, name)["params"]["pattern"] == "dotted"
     typst = _generate(short_january(dto))
-    assert "rect_pattern(lined)" not in typst
+    names = [s["name"] for s in dto["planner"]["sections"]]
+    if "review" in names:
+        for page in typst.split("#pagebreak()"):
+            if "rect_pattern(lined)" in page:
+                assert "rotate(" not in page
+                assert "<review-" in page
+    else:
+        assert "rect_pattern(lined)" not in typst
     assert "rect_pattern(dotted)" in typst
     assert "grid.cell(colspan: 3, scratch_pad)" not in typst
     assert "#let scratch_pad = rect_pattern(dotted)" in typst

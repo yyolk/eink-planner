@@ -44,6 +44,7 @@ def test_happy_path_locale():
     assert locale.week_name == "Week"
     assert locale.projects == "Projects"
     assert locale.habits == "Habits"
+    assert locale.review == "Review"
     assert locale.weekday.short.monday == "Mon"
     assert locale.quarter.short == "Q"
 
@@ -142,7 +143,7 @@ def test_known_sections_match_section_tables():
     from eink_planner.models import KNOWN_SECTIONS
     from eink_planner.models.device import SectionTables
     assert KNOWN_SECTIONS == frozenset(SectionTables.model_fields)
-    assert {"cover", "daily", "daily_notes", "projects", "habits", "colophon"} <= KNOWN_SECTIONS
+    assert {"cover", "daily", "daily_notes", "projects", "habits", "review", "colophon"} <= KNOWN_SECTIONS
 
 
 def test_daily_components_match_daily_track_fields():
@@ -169,4 +170,14 @@ def test_habits_section_defaults_and_names_length():
     assert ok.names == ["A", "B"]
     with pytest.raises(ValidationError, match="habit_columns"):
         HabitsSection(habit_columns=2, names=["A", "B", "C"])
+
+
+def test_review_section_defaults_and_weeks_per_page():
+    from eink_planner.models.device import ReviewSection
+
+    section = ReviewSection()
+    assert section.weeks_per_page == 13
+    assert ReviewSection(weeks_per_page=12).weeks_per_page == 12
+    with pytest.raises(ValidationError, match="weeks_per_page"):
+        ReviewSection(weeks_per_page=0)
 

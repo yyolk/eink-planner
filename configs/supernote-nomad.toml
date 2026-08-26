@@ -12,6 +12,7 @@ sections = [
   "daily_notes",
   "projects",
   "habits",
+  "review",
 ]
 
 [device]

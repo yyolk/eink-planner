@@ -291,9 +291,11 @@ def test_index_is_raw_typst_month_pages_use_mos():
 def test_nomad_full_year_is_thirteen_pages_of_habits():
     dto = load(NOMAD)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
-    assert names[-1] == "habits"
-    assert dto["planner"]["sections"][-1]["params"]["habit_columns"] == 6
-    assert dto["planner"]["sections"][-1]["params"]["names"] == []
+    assert "habits" in names
+    assert names[-2] == "habits"
+    habits = next(s for s in dto["planner"]["sections"] if s["name"] == "habits")
+    assert habits["params"]["habit_columns"] == 6
+    assert habits["params"]["names"] == []
     typst = _generate(dto)
     assert "<habits>" in typst
     for name in MONTHS:
