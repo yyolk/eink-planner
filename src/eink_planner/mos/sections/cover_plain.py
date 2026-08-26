@@ -7,6 +7,15 @@ from typing import Any
 from eink_planner.mos.page_data import PageData
 
 
+def _escape(text: str) -> str:
+    return (
+        text.replace("\\", "\\\\")
+        .replace("#", "\\#")
+        .replace("[", "\\[")
+        .replace("]", "\\]")
+    )
+
+
 class CoverPlain:
     def __init__(self, section_name: str, name: str, font_size: str, **_rest: Any) -> None:
         self.section_name = section_name
@@ -19,13 +28,23 @@ class CoverPlain:
     def pages(self, _manifest) -> list[PageData]:
         return [PageData(raw_typst=True, content=self._cover())]
 
+    def _lines(self) -> list[str]:
+        return [line for line in str(self.name).split("\n") if line.strip()]
+
     def _cover(self) -> str:
-        # YAML "2026\\n\\nPlanner" → Typst line breaks
-        name = str(self.name).replace("\n", " \\ ")
+        lines = [_escape(line) for line in self._lines()]
+        size = self.font_size
+        if not lines:
+            body = "[]"
+        elif len(lines) == 1:
+            body = f"text(size: {size})[{lines[0]}]"
+        else:
+            parts = [f"text(size: {size})[{lines[0]}]"]
+            parts.extend(f"text(size: {size} * 0.45)[{line}]" for line in lines[1:])
+            body = f"stack(spacing: {size} * 0.12, {', '.join(parts)})"
         return f"""#grid(
   columns: 1fr,
-  rows: 1fr,
+  rows: (1fr, 2fr),
   align: center + horizon,
-
-  text(size: {self.font_size})[{name}]
+  {body}
 )"""

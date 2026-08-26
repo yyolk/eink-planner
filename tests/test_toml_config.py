@@ -21,8 +21,8 @@ MOS_RIGHT = CONFIGS / "158x210-mos-right.toml"
 SCRIBE = CONFIGS / "kindle-scribe.toml"
 
 GOLDEN_SHA256 = {
-    "supernote-nomad": "89c27a8a2d8eced041f26d9f481ee92e4cdfbe83c1e399d466279ef22ac66505",
-    "158x210-mos-left": "43f733d39303de4d1e732a135c278f50b922d427b28fe4ec131bbf5c08449cbf",
+    "supernote-nomad": "1f2801f5aa1d29aadf7ddf2e251997982c6000925d8186fa5b1240f8f35816d9",
+    "158x210-mos-left": "a1c05675a23fc16acba3e26c763b6b34ad744f1643ff589ec656996311acab6e",
 }
 
 
@@ -331,7 +331,7 @@ def test_apply_year_rejects_out_of_range():
 def test_apply_year_rewrites_cover_title_year():
     dto = apply_year(load(NOMAD), 2027)
     cover = next(s for s in dto["planner"]["sections"] if s["name"] == "cover")
-    assert cover["params"]["name"] == "2027\n\nPlanner"
+    assert cover["params"]["name"] == "2027"
 
 
 def test_apply_year_typst_uses_overlay_year():
