@@ -1,4 +1,4 @@
-"""Weekly Review: index of weeks and one lined leftover-notes page per week.
+"""Weekly Review: index of weeks and one leftover-notes page per week.
 
 Raw Typst only — no MOS chrome. Sibling of Habits, not a second weekly planner.
 """
@@ -48,12 +48,14 @@ class Review:
         i18n: I18n,
         configurator: Configurator,
         weeks_per_page: int = DEFAULT_WEEKS_PER_PAGE,
+        pattern: str = "lined",
         **_rest: Any,
     ) -> None:
         self.section_name = section_name
         self.i18n = i18n
         self.configurator = configurator
         self.weeks_per_page = int(weeks_per_page)
+        self.pattern = pattern
         self.weekday_start = configurator.weekday_start()
         self.first_week_day = configurator.start_date().beginning_of_month().beginning_of_week()
         self.last_week_day = configurator.end_date().end_of_month().end_of_week()
@@ -253,8 +255,13 @@ class Review:
   ),
   line(length: 100%, stroke: regular_stroke)
 )"""
-        return f"""#let review_lined = {_REVIEW_LINED}
-#grid(
+        if self.pattern == "dotted":
+            field = "rect_pattern(dotted)"
+            prefix = ""
+        else:
+            field = "rect_pattern(review_lined)"
+            prefix = f"#let review_lined = {_REVIEW_LINED}\n"
+        return f"""{prefix}#grid(
   columns: 1fr,
   rows: (auto, auto, auto, 1fr),
   row-gutter: {_INDEX_ROW_GUTTER},
@@ -262,7 +269,7 @@ class Review:
   {breadcrumb},
   {week_line},
   {day_strip},
-  rect_pattern(review_lined)
+  {field}
 )"""
 
     def _day_cell(self, manifest: Manifest, day: Day) -> str:

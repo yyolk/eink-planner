@@ -376,7 +376,10 @@ def _section_habits(table: HabitsSection | None) -> dict[str, Any]:
 def _section_review(table: ReviewSection | None) -> dict[str, Any]:
     if table is None:
         table = ReviewSection()
-    return {"weeks_per_page": table.weeks_per_page}
+    params: dict[str, Any] = {"weeks_per_page": table.weeks_per_page}
+    if table.pattern is not None:
+        params["pattern"] = table.pattern
+    return params
 
 
 def _little_cal_dict(raw: LittleCalendar | None) -> dict[str, Any]:
@@ -405,6 +408,7 @@ def _apply_section_patterns(sections: list[dict[str, Any]], house: str) -> None:
                     if comp_params.get("pattern") is None:
                         comp_params["pattern"] = house
         elif name in {"daily_notes", "quarterly", "monthly", "weekly"}:
+            # Review is not in this set: its default is lined, not the house scratch_pad.
             if params.get("pattern") is None:
                 params["pattern"] = house
 

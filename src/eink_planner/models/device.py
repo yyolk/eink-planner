@@ -236,6 +236,7 @@ class ProjectsSection(StrictModel):
 
 class ReviewSection(StrictModel):
     weeks_per_page: StrictInt = 13
+    pattern: OptionalPattern = "lined"
 
     @model_validator(mode="after")
     def _weeks_per_page_positive(self) -> ReviewSection:

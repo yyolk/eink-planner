@@ -51,6 +51,7 @@ def _review(dto) -> Review:
         i18n=I18n.load_default(REPO, "en"),
         configurator=Configurator(dto),
         weeks_per_page=params.get("weeks_per_page", Review.DEFAULT_WEEKS_PER_PAGE),
+        pattern=params.get("pattern", "lined"),
     )
 
 
@@ -78,9 +79,10 @@ def _index_page(typst: str, page_id: str = "review") -> str:
 
 
 def _week_page(typst: str, week_id: str) -> str:
-    label = f"<review-{week_id}>"
+    # Week pages define the label next to #h(0.6em); index pages only link to it.
+    marker = f"<review-{week_id}> #h(0.6em)"
     for page in _pages(typst):
-        if label in page and "review_lined" in page and "rotate(" not in page:
+        if marker in page and "rotate(" not in page:
             return page
     raise AssertionError(f"no Review week page {week_id}")
 
@@ -91,8 +93,10 @@ def test_listed_without_table_defaults_weeks_per_page():
     assert section["name"] == "review"
     assert section["class"] == "review"
     assert section["params"]["weeks_per_page"] == 13
+    assert section["params"]["pattern"] == "lined"
     review = _review(dto)
     assert review.weeks_per_page == Review.DEFAULT_WEEKS_PER_PAGE == 13
+    assert review.pattern == "lined"
     typst = _generate(dto)
     assert "<review>" in typst
     for week_id, number, rng in _JAN_WEEKS:
@@ -405,6 +409,8 @@ def test_nomad_ships_review_after_habits():
     assert names[-2] == "habits"
     review = next(s for s in dto["planner"]["sections"] if s["name"] == "review")
     assert review["params"]["weeks_per_page"] == 13
+    assert review["params"]["pattern"] == "lined"
+    assert "pattern" not in NOMAD.read_text(encoding="utf-8").split("[section.habits]")[-1]
 
 
 def test_short_january_review_compiles(tmp_path):
@@ -475,3 +481,63 @@ def test_page_sizes_absorb_only_when_previous_stays_at_most_14():
         )
     )
     assert two._page_sizes(5) == [2, 3]
+
+
+def test_house_dotted_does_not_flip_review_from_lined():
+    style = """[style]
+scratch_pad = "dotted"
+
+[style.stroke]
+regular = "0.3pt"
+thick = "0.6pt"
+
+[style.type]
+body = "8pt"
+h1 = "8mm"
+
+[style.margin]
+top = "8mm"
+bottom = "0mm"
+left = "0mm"
+right = "4mm"
+
+[style.gutter]
+column = "8pt"
+"""
+    dto = parse_toml(
+        _minimal(enable=["review"], style=style, sections=""),
+        source="house-dotted.toml",
+    )
+    assert dto["planner"]["params"]["scratch_pad"] == "dotted"
+    assert dto["planner"]["sections"][0]["params"]["pattern"] == "lined"
+    typst = _generate(short_january(dto))
+    week = _week_page(typst, "2026W01")
+    assert "rect_pattern(review_lined)" in week
+    assert "rect_pattern(lined)" not in week
+    assert "rect_pattern(dotted)" not in week
+
+
+def test_review_pattern_dotted_uses_house_dotted_tiling():
+    dto = parse_toml(
+        _minimal(enable=["review"], sections='[section.review]\npattern = "dotted"\n'),
+        source="dotted.toml",
+    )
+    assert dto["planner"]["sections"][0]["params"]["pattern"] == "dotted"
+    typst = _generate(short_january(dto))
+    week = _week_page(typst, "2026W01")
+    assert "rect_pattern(dotted)" in week
+    assert "review_lined" not in week
+    assert "rect_pattern(review_lined)" not in week
+    assert "rect_pattern(lined)" not in week
+    index = _index_page(typst)
+    assert "review_lined" not in index
+    assert "rect_pattern(review_lined)" not in index
+
+
+def test_review_invalid_pattern_rejected():
+    with pytest.raises(ConfigError, match="unknown"):
+        parse_toml(
+            _minimal(enable=["review"], sections='[section.review]\npattern = "grid"\n'),
+            source="grid.toml",
+        )
+

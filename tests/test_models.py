@@ -177,7 +177,11 @@ def test_review_section_defaults_and_weeks_per_page():
 
     section = ReviewSection()
     assert section.weeks_per_page == 13
+    assert section.pattern == "lined"
     assert ReviewSection(weeks_per_page=12).weeks_per_page == 12
+    assert ReviewSection(pattern="dotted").pattern == "dotted"
     with pytest.raises(ValidationError, match="weeks_per_page"):
         ReviewSection(weeks_per_page=0)
+    with pytest.raises(ValidationError, match="unknown"):
+        ReviewSection(pattern="grid")
 
