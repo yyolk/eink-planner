@@ -11,13 +11,19 @@ from eink_planner.config import load
 from eink_planner.i18n import I18n
 from eink_planner.toml_config import apply_debug, apply_year
 from eink_planner.provenance import apply_provenance, collect_provenance
+from eink_planner.mos.configurator import Configurator
 from eink_planner.services.compile import Compile, CompileError
 from eink_planner.services.generate import Generate
-from eink_planner.services.preview_svg import DEFAULT_SCALE, parse_pages, preview_svg
+from eink_planner.services.preview_svg import DEFAULT_SCALE, parse_pages, preview_svg, sample_page_numbers
 
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+def samples_dest(repo: Path, config: str | Path) -> Path:
+    """README sample dir: docs/samples/<config-stem>/."""
+    return repo / "docs" / "samples" / Path(config).stem
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -77,10 +83,15 @@ def build_parser() -> argparse.ArgumentParser:
         default="en",
         help="Locale code (default: en)",
     )
-    prev.add_argument(
+    pages_or_samples = prev.add_mutually_exclusive_group(required=True)
+    pages_or_samples.add_argument(
         "--pages",
-        required=True,
         help="1-based pages to export, e.g. 1,2,7 or 1-3",
+    )
+    pages_or_samples.add_argument(
+        "--samples",
+        action="store_true",
+        help="Export README sample pages by Typst label to docs/samples/<config-stem>/",
     )
     prev.add_argument(
         "--scale",
@@ -151,10 +162,21 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
     (workdir / "index.typst").write_text(typst_source, encoding="utf-8")
     print(f"Wrote {workdir / 'index.typst'}")
 
-    try:
-        pages = parse_pages(args.pages)
-    except ValueError as exc:
-        raise CompileError(str(exc)) from exc
+    if args.samples:
+        if args.crop:
+            raise CompileError("--crop cannot be used with --samples")
+        cfg = Configurator(dto)
+        year = cfg.start_date().year
+        week_id = cfg.start_date().week().id
+        jan1 = f"{year:04d}-01-01"
+        stems = sample_page_numbers(typst_source, year=year, week_id=week_id, jan1=jan1)
+        pages = list(stems.values())
+    else:
+        try:
+            pages = parse_pages(args.pages)
+        except ValueError as exc:
+            raise CompileError(str(exc)) from exc
+        stems = None
     written = Compile().compile_svg(
         workdir=workdir,
         file="index.typst",
@@ -162,13 +184,23 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
         dest_pattern="preview-{p}.svg",
         tools_dir=repo / ".tools",
     )
-    for path in written:
-        raw = path.read_text(encoding="utf-8")
-        path.write_text(
-            preview_svg(raw, scale=args.scale, crop=bool(args.crop)),
-            encoding="utf-8",
-        )
-        print(f"Wrote {path}")
+    if stems is None:
+        for path in written:
+            raw = path.read_text(encoding="utf-8")
+            path.write_text(
+                preview_svg(raw, scale=args.scale, crop=bool(args.crop)),
+                encoding="utf-8",
+            )
+            print(f"Wrote {path}")
+        return 0
+    dest_dir = samples_dest(repo, args.config)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    by_page = {int(path.stem.split("-")[-1]): path for path in written}
+    for stem, number in stems.items():
+        raw = by_page[number].read_text(encoding="utf-8")
+        dest = dest_dir / f"{stem}.svg"
+        dest.write_text(preview_svg(raw, scale=args.scale, crop=False), encoding="utf-8")
+        print(f"Wrote {dest} (page {number})")
     return 0
 
 

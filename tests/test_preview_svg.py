@@ -1,6 +1,8 @@
+from pathlib import Path
+
 import pytest
 
-from eink_planner.cli import build_parser
+from eink_planner.cli import build_parser, samples_dest
 from eink_planner.services.compile import Compile, CompileError
 from eink_planner.services.preview_svg import (
     DEFAULT_SCALE,
@@ -60,6 +62,43 @@ def test_preview_svg_cli_defaults():
     assert args.scale == DEFAULT_SCALE
     assert args.crop is False
     assert args.pages == "1,2"
+
+
+def test_preview_svg_cli_samples():
+    parser = build_parser()
+    args = parser.parse_args(
+        ["preview-svg", "configs/158x210-mos-left.toml", "--samples"]
+    )
+    assert args.samples is True
+    assert args.pages is None
+    assert args.scale == DEFAULT_SCALE
+    assert args.crop is False
+
+
+def test_preview_svg_cli_pages_and_samples_conflict():
+    parser = build_parser()
+    with pytest.raises(SystemExit):
+        parser.parse_args(
+            [
+                "preview-svg",
+                "configs/158x210-mos-left.toml",
+                "--pages",
+                "1,2",
+                "--samples",
+            ]
+        )
+
+
+def test_preview_svg_cli_requires_pages_or_samples():
+    parser = build_parser()
+    with pytest.raises(SystemExit):
+        parser.parse_args(["preview-svg", "configs/158x210-mos-left.toml"])
+
+
+def test_samples_dest_uses_config_stem():
+    assert samples_dest(Path("/repo"), "configs/158x210-mos-left.toml") == Path(
+        "/repo/docs/samples/158x210-mos-left"
+    )
 
 
 def test_generate_cli_unchanged():
