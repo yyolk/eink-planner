@@ -66,7 +66,7 @@ A name in the top-level `sections = ["cover", …]` list is enabled, in that ord
 
 2026 from [`configs/158x210-mos-left.toml`](configs/158x210-mos-left.toml). MOS strip on the left. This profile ships cover through daily notes plus the colophon (no projects, habits, review, or meetings). Previews are Typst SVGs at half scale.
 
-| | |
+| Section | Page |
 | --- | --- |
 | Cover | <img src="docs/samples/158x210-mos-left/cover.svg" alt="Cover" width="224" /> |
 | Annual | <img src="docs/samples/158x210-mos-left/annual.svg" alt="Annual" width="224" /> |
