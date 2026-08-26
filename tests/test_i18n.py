@@ -14,7 +14,7 @@ def test_load_en_toml_representative_keys():
     i18n = I18n.load(REPO / "locales" / "en.toml", locale="en")
     assert i18n.locale == "en"
     assert i18n.t("week_name") == "Week"
-    assert i18n.t("top_priorities") == "Priorities"
+    assert i18n.t("priorities") == "Priorities"
     assert i18n.t("quarter.short") == "Q"
     assert i18n.t("months.full.january") == "January"
     assert i18n.t("weekday.letter.monday") == "M"

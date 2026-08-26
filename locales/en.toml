@@ -4,7 +4,7 @@ language = "en"
 
 week_name = "Week"
 schedule = "Schedule"
-top_priorities = "Priorities"
+priorities = "Priorities"
 monthly_notes = "Notes"
 daily_notes = "Notes"
 more_daily_notes = "More"

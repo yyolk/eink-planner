@@ -67,7 +67,7 @@ class Locale(StrictModel):
     language: str
     week_name: str
     schedule: str
-    top_priorities: str
+    priorities: str
     monthly_notes: str
     daily_notes: str
     more_daily_notes: str
