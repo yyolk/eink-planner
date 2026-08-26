@@ -15,6 +15,7 @@ from eink_planner.mos.configurator import Configurator
 from eink_planner.mos.manifest import Manifest
 from eink_planner.mos.page_data import PageData
 from eink_planner.mos.sections.annual import Annual
+from eink_planner.mos.sections._shared import _REVIEW_LINED
 
 _INDEX_LEFT_INSET = "4mm"
 _INDEX_BOTTOM_INSET = "4mm"
@@ -25,17 +26,6 @@ _EN_DASH = "–"
 _WEEK_NUM_COL = "2em"
 _MIN_PACK_ROWS = 12
 _MAX_PACK_ROWS = 14
-# Review week field only — do not touch global `#let lined` (luma grey).
-_REVIEW_LINED = """tiling(
-  size: (regular_height, regular_height),
-  place(
-    line(
-      start: (0%, regular_height - 0.15mm),
-      end: (100%, regular_height - 0.15mm),
-      stroke: regular_stroke + black
-    ),
-  )
-)"""
 
 
 class Review:

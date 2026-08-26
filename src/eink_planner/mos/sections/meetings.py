@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import math
-import re
 from typing import Any
 
 from eink_planner.i18n import I18n
@@ -11,6 +10,7 @@ from eink_planner.mos.configurator import Configurator
 from eink_planner.mos.manifest import Manifest
 from eink_planner.mos.page_data import PageData
 from eink_planner.mos.sections.annual import Annual
+from eink_planner.mos.sections._shared import _REVIEW_LINED, _length_mm
 
 # Match the Projects index so row capacity tracks the same geometry.
 _INDEX_LEFT_INSET = "4mm"
@@ -22,33 +22,6 @@ _NUM_COL = "2em"
 _DATE_COL = "16mm"
 _TOPIC_LINES = 4
 _ACTION_LINES = 5
-_LENGTH = re.compile(r"^([+-]?(?:\d+(?:\.\d*)?|\.\d+))(mm|cm|pt)$")
-# Review week field only — do not touch global `#let lined` (luma grey).
-_REVIEW_LINED = """tiling(
-  size: (regular_height, regular_height),
-  place(
-    line(
-      start: (0%, regular_height - 0.15mm),
-      end: (100%, regular_height - 0.15mm),
-      stroke: regular_stroke + black
-    ),
-  )
-)"""
-
-
-def _length_mm(token: str) -> float:
-    """Parse a Typst length token (`mm` / `cm` / `pt`) into millimetres."""
-    text = str(token).strip()
-    match = _LENGTH.fullmatch(text)
-    if match is None:
-        raise ValueError(f"unrecognized length token: {token!r}")
-    value = float(match.group(1))
-    unit = match.group(2)
-    if unit == "mm":
-        return value
-    if unit == "cm":
-        return value * 10.0
-    return value * 25.4 / 72.0
 
 
 class Meetings:
