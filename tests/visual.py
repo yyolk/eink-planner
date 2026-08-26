@@ -55,7 +55,8 @@ def full_width_bands(
     coverage: float = 0.62,
 ) -> list[tuple[int, int, int]]:
     """Return (y0, y1, thickness_px) for dark full-width rows, skipping the MOS strip."""
-    im = Image.open(image).convert("L")
+    with Image.open(image) as src:
+        im = src.convert("L")
     width, height = im.size
     pixels = im.load()
     x0 = int(width * x0_frac)
