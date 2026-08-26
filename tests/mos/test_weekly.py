@@ -135,21 +135,26 @@ def test_pattern_switches():
 def test_title_is_year_slash_week_crumb_and_kills_calendar_chip():
     manifest = Manifest()
     manifest.register_source(Annual.ID)
-    pages = _section().pages(manifest)
+    section = _section()
+    pages = section.pages(manifest)
     year_cell = manifest.link_or_content(Annual.ID, "2026")
     first = pages[0]
     assert first.nav_links == []
     assert first.show_quarters is True
-    assert first.highlight_months == []
+    assert len(first.highlight_months) == 1
+    assert first.highlight_months[0].id == "month-2026-01-01"
+    assert first.highlight_months[0].name == "january"
     assert first.highlight_quarters == []
     assert f"text(size: h1, {year_cell})" in first.title
     assert "text(size: h1)[/]" in first.title
     assert "Week 1 <2026W01>" in first.title
     assert "Calendar" not in first.title
     assert "Calendar" not in first.content
-    for page in pages:
+    for week, page in zip(section._weeks(), pages, strict=True):
+        thursday = next(day for day in week.days() if day.weekday_name == "thursday")
         assert page.nav_links == []
-        assert page.highlight_months == []
+        assert page.highlight_months == [thursday.month()]
+        assert len(page.highlight_months) == 1
         assert page.highlight_quarters == []
         assert page.show_quarters is True
         assert "Calendar" not in page.title
@@ -158,7 +163,7 @@ def test_title_is_year_slash_week_crumb_and_kills_calendar_chip():
         assert f"text(size: h1, {year_cell})" in page.title
 
 
-def test_generated_year_crumb_links_to_annual_and_inverts_nothing():
+def test_generated_year_crumb_links_to_annual_and_inverts_thursday_month():
     text = omit_toml_sections(NOMAD.read_text(encoding="utf-8"), _BULKY)
     typst = _generate(parse_toml(text, source="nomad-weekly.toml"))
     pages = _week_pages(typst)
@@ -177,13 +182,17 @@ def test_generated_year_crumb_links_to_annual_and_inverts_nothing():
     assert "grid.cell(colspan: 3, rect_pattern" not in w01
     assert w01.count("rect_pattern(dotted)") == 8
     assert "[Notes]" in w01
-    assert "table.cell(fill: black, text(white)[#padded_link(<month-" not in w01
-    assert "table.cell(fill: black, text(white)[#padded_link(<quarter-" not in w01
-    assert "table.cell([#padded_link(<month-2026-01-01>)[Jan]])" in w01
+    assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in w01
     assert "table.cell([#padded_link(<quarter-2026-1>)[Q1]])" in w01
+    assert "table.cell(fill: black, text(white)[#padded_link(<quarter-" not in w01
+    assert "table.cell(fill: black, text(white)[#padded_link(<month-2025-12-01>)" not in w01
     assert "Q1" in w01 and "Q4" in w01
-    assert "table.cell(fill: black" not in w01
+    assert w01.count("table.cell(fill: black") == 1
     assert "Week 28 <2026W28>" in w28
     assert "Monday 6" in w28
     assert w28.count("Calendar") == 0
     assert w28.count("rect_pattern(dotted)") == 8
+    assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-07-01>)[Jul]])" in w28
+    assert "table.cell([#padded_link(<quarter-2026-3>)[Q3]])" in w28
+    assert "table.cell(fill: black, text(white)[#padded_link(<quarter-" not in w28
+    assert w28.count("table.cell(fill: black") == 1

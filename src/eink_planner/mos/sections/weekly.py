@@ -47,11 +47,12 @@ class Weekly:
                 column_gutter=self.column_gutter,
                 pattern=self.pattern,
             )
+            thursday = next(day for day in week.days() if day.weekday_name == "thursday")
             out.append(
                 PageData(
                     title=self._title(manifest, weekly),
                     content=weekly.content(),
-                    highlight_months=[],
+                    highlight_months=[thursday.month()],
                     highlight_quarters=[],
                     nav_links=[],
                 )
