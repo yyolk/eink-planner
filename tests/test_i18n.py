@@ -21,6 +21,7 @@ def test_load_en_toml_representative_keys():
     assert i18n.t("weekday.full.friday") == "Friday"
     assert i18n.t("projects") == "Projects"
     assert i18n.t("habits") == "Habits"
+    assert i18n.t("review") == "Review"
     assert i18n.t("weekday.short.monday") == "Mon"
     assert i18n.t("weekday.short.sunday") == "Sun"
     assert i18n.t("todo") == "TODO"
@@ -73,6 +74,7 @@ def test_generate_english_strings_match_previous_meanings():
         "Quarter",
         "Jan",
         "Monday",
+        "Review",
     ):
         assert label in typst
     assert "Q1" in typst

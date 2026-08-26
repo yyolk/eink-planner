@@ -234,6 +234,17 @@ class ProjectsSection(StrictModel):
     card_rows: StrictInt = 8
 
 
+class ReviewSection(StrictModel):
+    weeks_per_page: StrictInt = 13
+    pattern: OptionalPattern = "lined"
+
+    @model_validator(mode="after")
+    def _weeks_per_page_positive(self) -> ReviewSection:
+        if self.weeks_per_page < 1:
+            raise ValueError("weeks_per_page must be at least 1")
+        return self
+
+
 class HabitsSection(StrictModel):
     habit_columns: StrictInt = 6
     names: list[str] = []
@@ -262,6 +273,7 @@ class SectionTables(StrictModel):
     daily_notes: DailyNotesSection | None = None
     projects: ProjectsSection | None = None
     habits: HabitsSection | None = None
+    review: ReviewSection | None = None
     colophon: ColophonSection | list[ColophonSection] | None = None
 
     @field_validator("colophon", mode="before")
@@ -343,6 +355,8 @@ class DeviceProfile(StrictModel):
             tables.projects = ProjectsSection()
         if "habits" in names and tables.habits is None:
             tables.habits = HabitsSection()
+        if "review" in names and tables.review is None:
+            tables.review = ReviewSection()
         return self
 
 

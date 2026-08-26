@@ -74,6 +74,7 @@ class Locale(StrictModel):
     notes: str
     projects: str
     habits: str
+    review: str
     todo: str
     doing: str
     done: str
