@@ -66,6 +66,37 @@ A name in the top-level `sections = ["cover", …]` list is enabled, in that ord
 
 2026 from [`configs/158x210-mos-left.toml`](configs/158x210-mos-left.toml). MOS strip on the left. This profile ships cover through daily notes plus the colophon (no projects, habits, review, or meetings).
 
+![Cover](https://github.com/user-attachments/assets/41a650f5-58a3-48c0-ac47-cd48e7a03da1)
+
+Cover.
+
+![Annual](https://github.com/user-attachments/assets/ac5a2b53-743e-4ab2-93ee-aced52f6acd4)
+
+Year door.
+
+![Quarter 1](https://github.com/user-attachments/assets/823f12ab-0bfc-4b91-ac62-810f985cca88)
+
+Quarter 1.
+
+![January](https://github.com/user-attachments/assets/844e2c0b-fbc5-46af-b66f-3e800afda6e6)
+
+January.
+
+![Week 1](https://github.com/user-attachments/assets/c06a8a97-be8b-4b1e-9af4-83a5f801bf84)
+
+Week 1.
+
+![1 January](https://github.com/user-attachments/assets/18429e60-0f2d-4f0c-bbe1-b8e2bf135b3c)
+
+Thursday 1 January.
+
+![Daily notes](https://github.com/user-attachments/assets/4efe9b97-167b-4cbd-8fab-442e395b4edc)
+
+Daily notes overflow (1/2).
+
+![About this notebook](https://github.com/user-attachments/assets/12065a61-7894-4c27-a1b1-3b990dee8e2a)
+
+Colophon.
 
 ## Device profiles
 
