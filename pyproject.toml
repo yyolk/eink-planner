@@ -10,6 +10,7 @@ authors = [
 ]
 dependencies = [
     "pydantic>=2.13.4",
+    "questionary",
 ]
 
 [project.optional-dependencies]

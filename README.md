@@ -56,6 +56,14 @@ Flags:
 
 `--year` also rewrites the cover title year when the old year is in the title.
 
+Copy a shipped profile to start a new year or trim sections:
+
+```shell
+uv run parch new --from supernote-nomad --year 2027 --yes -o mine.toml
+```
+
+`parch new` without `--yes` asks for starting profile, year, sections, and output path. Locale stays `parch generate -l`.
+
 A name in the top-level `sections = ["cover", …]` list is enabled, in that order. Comment a name out of `sections` to disable it. Details live under `[section.<name>]`. There is no `enabled = true` flag, and `debug` does not belong in the profile — use `parch generate --debug`. At least one section must remain.
 
 ## Sample pages
