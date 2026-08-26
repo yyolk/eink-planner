@@ -21,6 +21,7 @@ class LittleCalendar:
         inset: str,
         day: Day | None = None,
         show_month_name: bool = False,
+        show_week_letter: bool = True,
         **_rest: Any,
     ) -> None:
         self.i18n = i18n
@@ -29,6 +30,7 @@ class LittleCalendar:
         self.month = month
         self.today = day
         self.show_month_name = bool(show_month_name)
+        self.show_week_letter = bool(show_week_letter)
         self.inset = inset
 
     def generate(self) -> str:
@@ -40,7 +42,7 @@ class LittleCalendar:
   rows: 1fr,
 
   {self._optional_month_name()}
-  {self._heading()}, grid.hline(stroke: regular_stroke),
+  {self._heading()}, grid.hline(stroke: regular_stroke + black),
   {self._day_cells()}
 )"""
 
@@ -48,7 +50,7 @@ class LittleCalendar:
         if self.week_placement not in {"left", "right"}:
             return "none"
         x = "7" if self.week_placement == "right" else "1"
-        return f"(x, _) => if x == {x} {{( left: regular_stroke )}}"
+        return f"(x, _) => if x == {x} {{( left: regular_stroke + black )}}"
 
     def _columns(self) -> str:
         cols = ["1fr"] * 7
@@ -63,14 +65,14 @@ class LittleCalendar:
     colspan: {colspan},
     [{name}]
   ),
-  grid.hline(stroke: regular_stroke),
+  grid.hline(stroke: regular_stroke + black),
 """
 
     def _heading(self) -> str:
         weeks = self._month_in_weeks()
         sample = weeks[1] if len(weeks) > 1 else weeks[0]
         heading = [f"[{self.i18n.t(f'weekday.letter.{day.weekday_name}')}]" for day in sample]
-        week_label = f"[{self.i18n.t('weekday.letter.week')}]"
+        week_label = f"[{self.i18n.t('weekday.letter.week')}]" if self.show_week_letter else "[]"
         return ", ".join(self._with_week_column(heading, week_label))
 
     def _day_cells(self) -> str:

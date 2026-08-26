@@ -95,3 +95,31 @@ def test_week_placement_right_and_none():
     assert "stroke: none" in none
     assert "columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in none
     assert "[M], [T], [W], [T], [F], [S], [S]" in none
+
+
+def test_structural_strokes_are_black():
+    named = LittleCalendar(
+        i18n=_i18n(),
+        manifest=Manifest(),
+        week_placement="left",
+        month=make_month("2021-02"),
+        inset="5pt",
+        show_month_name=True,
+    ).generate()
+    assert "grid.hline(stroke: regular_stroke + black)" in named
+    assert "left: regular_stroke + black" in named
+    assert named.count("grid.hline(stroke: regular_stroke + black)") == 2
+    assert "grid.hline(stroke: regular_stroke)," not in named.replace("regular_stroke + black", "")
+
+
+def test_hides_week_letter():
+    typst = LittleCalendar(
+        i18n=_i18n(),
+        manifest=Manifest(),
+        week_placement="left",
+        month=make_month("2021-02"),
+        inset="5pt",
+        show_week_letter=False,
+    ).generate()
+    assert "[], [M], [T], [W], [T], [F], [S], [S]" in typst
+    assert "[W], [M], [T], [W], [T], [F], [S], [S]" not in typst

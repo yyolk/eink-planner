@@ -36,9 +36,10 @@ class Annual:
         manifest.register_source(self.ID)
 
     def pages(self, manifest: Manifest) -> list[PageData]:
+        year = self.configurator.start_date().year
         return [
             PageData(
-                title=f"text(size: h1)[Calendar<{self.ID}>]",
+                title=f"text(size: h1)[{year}<{self.ID}>]",
                 content=self._content(manifest),
                 page_id=self.ID,
             )
@@ -51,16 +52,22 @@ class Annual:
                 manifest=manifest,
                 month=month,
                 **self.little_calendar,
+                show_week_letter=False,
             ).generate()
             for month in self._range()
         ]
+        parts: list[str] = []
+        for i, item in enumerate(items):
+            parts.append(item)
+            if (i + 1) % 3 == 0 and (i + 1) < len(items):
+                parts.append("grid.hline(stroke: regular_stroke + black)")
         return f"""grid(
   columns: (1fr, 1fr, 1fr),
-  rows: 1fr,
+  rows: (1fr, 1fr, 1fr, 1fr),
   column-gutter: regular_column_gutter,
   row-gutter: {self.row_gutter},
 
-  {",\n".join(items)}
+  {",\n".join(parts)}
 )"""
 
     def _range(self):
