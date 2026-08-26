@@ -24,7 +24,7 @@ jobs:
       - uses: astral-sh/setup-uv@v7
       - run: uv sync --group dev
       - name: Regenerate 158×210 sample SVGs
-        run: uv run python scripts/regen_readme_samples.py
+        run: uv run lyp preview-svg configs/158x210-mos-left.toml --samples
       - name: Open a PR when SVGs changed
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

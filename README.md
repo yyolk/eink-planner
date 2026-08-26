@@ -64,7 +64,11 @@ A name in the top-level `sections = ["cover", …]` list is enabled, in that ord
 
 ## Sample pages
 
-2026 from [`configs/158x210-mos-left.toml`](configs/158x210-mos-left.toml). MOS strip on the left. This profile ships cover through daily notes plus the colophon (no projects, habits, review, or meetings). Previews are Typst SVGs at half scale.
+2026 from [`configs/158x210-mos-left.toml`](configs/158x210-mos-left.toml). MOS strip on the left. This profile ships cover through daily notes plus the colophon (no projects, habits, review, or meetings). Previews are Typst SVGs at half scale. Regenerate with:
+
+```shell
+uv run lyp preview-svg configs/158x210-mos-left.toml --samples
+```
 
 | Section | Page |
 | --- | --- |
