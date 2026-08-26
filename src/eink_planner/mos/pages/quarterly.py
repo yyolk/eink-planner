@@ -63,6 +63,7 @@ class Quarterly:
                 manifest=self.manifest,
                 month=month,
                 **self.little_calendar,
+                show_week_letter=False,
             ).generate()
             for month in self.quarter.months()
         ]

@@ -12,8 +12,10 @@ from eink_planner.i18n import I18n
 from eink_planner.toml_config import parse_toml
 from eink_planner.mos.manifest import Manifest
 from eink_planner.mos.pages.quarterly import Quarterly
+from eink_planner.mos.sections.annual import Annual
+from eink_planner.mos.sections.quarterly import Quarterly as QuarterlySection
 from eink_planner.services.generate import Generate
-from tests.helpers import make_quarter
+from tests.helpers import make_configurator, make_quarter
 from tests.test_toml_omit_sections import compile_pdf
 from tests.toml_fixtures import omit_toml_sections
 
@@ -44,6 +46,16 @@ def _page(date_str: str, months_column: str = "left") -> Quarterly:
         manifest=Manifest(),
         quarter=make_quarter(date_str),
         months_column=months_column,
+        little_calendar=_little_calendar(),
+    )
+
+
+def _section() -> QuarterlySection:
+    return QuarterlySection(
+        section_name="quarterly",
+        i18n=_i18n(),
+        configurator=make_configurator(),
+        months_column="left",
         little_calendar=_little_calendar(),
     )
 
@@ -112,6 +124,11 @@ def test_full_year_quarter_pages_include_all_three_months(path: Path):
         for name in months:
             assert f"[{name}]" in page, f"Q{number} missing {name} in {path.name}"
         assert page.count("colspan:") == 3
+        assert "Calendar" not in page
+        assert "text(size: h1)[/]" in page
+        assert f"Quarter {number} <quarter-2026-{number}>" in page
+        assert "[], [M], [T], [W], [T], [F], [S], [S]" in page
+        assert "[W], [M], [T], [W], [T], [F], [S], [S]" not in page
 
 
 def test_shipped_profiles_q3_compile_with_three_months(tmp_path):
@@ -137,3 +154,41 @@ def test_shipped_profiles_q3_compile_with_three_months(tmp_path):
         q3_pdf = next(page for page in extracted.split("\x0c") if "Quarter 3" in page)
         for month in Q3_MONTHS:
             assert month in q3_pdf, f"{name} Q3 PDF missing {month}"
+
+
+def test_title_is_year_slash_quarter_crumb_and_kills_calendar_chip():
+    manifest = Manifest()
+    manifest.register_source(Annual.ID)
+    pages = _section().pages(manifest)
+    assert len(pages) == 4
+    year_cell = manifest.link_or_content(Annual.ID, "2026")
+    for number, page in enumerate(pages, start=1):
+        assert page.nav_links == []
+        assert page.highlight_months == []
+        assert len(page.highlight_quarters) == 1
+        assert page.highlight_quarters[0].number == number
+        assert f"text(size: h1, {year_cell})" in page.title
+        assert "text(size: h1)[/]" in page.title
+        assert f"Quarter {number} <quarter-2026-{number}>" in page.title
+        assert "Calendar" not in page.title
+        assert "Calendar" not in page.content
+
+
+def test_little_calendars_omit_week_letter():
+    content = _page("2026-01-01").content()
+    assert "[], [M], [T], [W], [T], [F], [S], [S]" in content
+    assert "[W], [M], [T], [W], [T], [F], [S], [S]" not in content
+
+
+def test_generated_year_crumb_links_to_annual():
+    skip = ("monthly", "weekly", "daily", "daily_notes", "colophon", "projects", "habits", "review", "meetings")
+    text = omit_toml_sections(NOMAD.read_text(encoding="utf-8"), skip)
+    typst = _generate(parse_toml(text, source="nomad-q-annual.toml"))
+    pages = _quarter_pages(typst)
+    q1 = pages[1]
+    assert "padded_link(<annual>)[2026]" in q1
+    assert "text(size: h1)[/]" in q1
+    assert "Quarter 1 <quarter-2026-1>" in q1
+    assert "Calendar" not in q1
+    assert q1.count("Calendar") == 0
+
