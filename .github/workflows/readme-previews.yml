@@ -13,6 +13,7 @@ concurrency:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   regen:
@@ -24,7 +25,9 @@ jobs:
       - run: uv sync --group dev
       - name: Regenerate 158×210 sample SVGs
         run: uv run python scripts/regen_readme_samples.py
-      - name: Push only when SVGs changed
+      - name: Open a PR when SVGs changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git add docs/samples/158x210-mos-left
           if git diff --cached --quiet; then
@@ -33,5 +36,19 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C chore/readme-preview-svgs
           git commit -m "Regenerate 158×210 README preview SVGs."
-          git push
+          git push --force-with-lease origin chore/readme-preview-svgs
+          existing="$(gh pr list --head chore/readme-preview-svgs --state open --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            echo "updated PR #$existing"
+            exit 0
+          fi
+          gh pr create --base master --head chore/readme-preview-svgs \
+            --title "Regenerate 158×210 README preview SVGs" \
+            --body "$(cat <<'EOF'
+          Bot-generated Typst preview SVGs for the README. Merge after CI passes.
+
+          This PR is opened instead of pushing to master so the required \`test\` check can run.
+          EOF
+          )"
