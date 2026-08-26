@@ -36,6 +36,7 @@ SECTIONS = (
     "projects",
     "habits",
     "review",
+    "meetings",
 )
 
 _MISSING_LABEL = re.compile(
@@ -73,6 +74,8 @@ def classify_label(label: str) -> str:
         return "habits"
     if label == "review" or label.startswith("review-"):
         return "review"
+    if label == "meetings" or label.startswith("meetings-") or label.startswith("meeting-"):
+        return "meetings"
     if label.startswith("daily-note-"):
         return "daily_notes"
     if re.fullmatch(r"\d{4}-\d{2}-\d{2}", label):
@@ -140,18 +143,18 @@ def test_omit_one_section_compiles_pdf(kind, tmp_path):
 @pytest.mark.parametrize(
     "omit,remain",
     [
-        (("annual", "quarterly"), ("cover", "monthly", "weekly", "daily", "daily_notes", "projects", "habits", "review")),
-        (("weekly",), ("cover", "annual", "quarterly", "monthly", "daily", "daily_notes", "projects", "habits", "review")),
-        (("monthly",), ("cover", "annual", "quarterly", "weekly", "daily", "daily_notes", "projects", "habits", "review")),
-        (("daily",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes", "projects", "habits", "review")),
-        (("daily_notes",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily", "projects", "habits", "review")),
+        (("annual", "quarterly"), ("cover", "monthly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "meetings")),
+        (("weekly",), ("cover", "annual", "quarterly", "monthly", "daily", "daily_notes", "projects", "habits", "review", "meetings")),
+        (("monthly",), ("cover", "annual", "quarterly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "meetings")),
+        (("daily",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes", "projects", "habits", "review", "meetings")),
+        (("daily_notes",), ("cover", "annual", "quarterly", "monthly", "weekly", "daily", "projects", "habits", "review", "meetings")),
         (
             ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes"),
-            ("daily", "projects", "habits", "review"),
+            ("daily", "projects", "habits", "review", "meetings"),
         ),
         (
             ("annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"),
-            ("cover", "projects", "habits", "review"),
+            ("cover", "projects", "habits", "review", "meetings"),
         ),
     ],
     ids=[

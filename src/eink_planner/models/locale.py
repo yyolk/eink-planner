@@ -73,8 +73,11 @@ class Locale(StrictModel):
     more_daily_notes: str
     notes: str
     projects: str
+    meetings: str
     habits: str
     review: str
+    topics: str
+    action_items: str
     todo: str
     doing: str
     done: str

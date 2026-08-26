@@ -234,6 +234,16 @@ class ProjectsSection(StrictModel):
     card_rows: StrictInt = 5
 
 
+class MeetingsSection(StrictModel):
+    index_pages: StrictInt = 1
+
+    @model_validator(mode="after")
+    def _index_pages_positive(self) -> MeetingsSection:
+        if self.index_pages < 1:
+            raise ValueError("index_pages must be at least 1")
+        return self
+
+
 class ReviewSection(StrictModel):
     weeks_per_page: StrictInt = 13
     pattern: OptionalPattern = "lined"
@@ -272,6 +282,7 @@ class SectionTables(StrictModel):
     daily: DailySection | None = None
     daily_notes: DailyNotesSection | None = None
     projects: ProjectsSection | None = None
+    meetings: MeetingsSection | None = None
     habits: HabitsSection | None = None
     review: ReviewSection | None = None
     colophon: ColophonSection | list[ColophonSection] | None = None
@@ -353,6 +364,8 @@ class DeviceProfile(StrictModel):
                 raise ValueError("section.daily must have both left and right tracks")
         if "projects" in names and tables.projects is None:
             tables.projects = ProjectsSection()
+        if "meetings" in names and tables.meetings is None:
+            tables.meetings = MeetingsSection()
         if "habits" in names and tables.habits is None:
             tables.habits = HabitsSection()
         if "review" in names and tables.review is None:

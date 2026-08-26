@@ -29,6 +29,7 @@ from eink_planner.models.device import (
     Notes,
     Priorities,
     HabitsSection,
+    MeetingsSection,
     ProjectsSection,
     QuarterlySection,
     ReviewSection,
@@ -45,6 +46,7 @@ _SECTION_CLASS = {
     "daily": "daily",
     "daily_notes": "daily_notes",
     "projects": "projects",
+    "meetings": "meetings",
     "habits": "habits",
     "review": "review",
     "colophon": "colophon",
@@ -59,6 +61,7 @@ _SECTION_NAME = {
     "daily": "daily",
     "daily_notes": "daily_notes",
     "projects": "projects",
+    "meetings": "meetings",
     "habits": "habits",
     "review": "review",
     "colophon": "colophon",
@@ -226,6 +229,8 @@ def _build_section_params(kind: str, raw: Any, extras: dict[str, Any]) -> dict[s
         return _section_daily_notes(raw)
     if kind == "projects":
         return _section_projects(raw)
+    if kind == "meetings":
+        return _section_meetings(raw)
     if kind == "habits":
         return _section_habits(raw)
     if kind == "review":
@@ -365,6 +370,12 @@ def _section_projects(table: ProjectsSection | None) -> dict[str, Any]:
     if table is None:
         return {"pages": 16, "card_rows": 5}
     return {"pages": table.pages, "card_rows": table.card_rows}
+
+
+def _section_meetings(table: MeetingsSection | None) -> dict[str, Any]:
+    if table is None:
+        return {"index_pages": 1}
+    return {"index_pages": table.index_pages}
 
 
 def _section_habits(table: HabitsSection | None) -> dict[str, Any]:
