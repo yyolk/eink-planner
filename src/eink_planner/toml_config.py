@@ -363,7 +363,7 @@ def _section_daily_notes(table: DailyNotesSection) -> dict[str, Any]:
 
 def _section_projects(table: ProjectsSection | None) -> dict[str, Any]:
     if table is None:
-        return {"pages": 20, "card_rows": 8}
+        return {"pages": 16, "card_rows": 5}
     return {"pages": table.pages, "card_rows": table.card_rows}
 
 

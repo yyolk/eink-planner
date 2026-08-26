@@ -230,8 +230,8 @@ class DailyNotesSection(StrictModel):
 
 
 class ProjectsSection(StrictModel):
-    pages: StrictInt = 20
-    card_rows: StrictInt = 8
+    pages: StrictInt = 16
+    card_rows: StrictInt = 5
 
 
 class ReviewSection(StrictModel):

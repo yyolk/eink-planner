@@ -185,3 +185,12 @@ def test_review_section_defaults_and_weeks_per_page():
     with pytest.raises(ValidationError, match="unknown"):
         ReviewSection(pattern="grid")
 
+
+
+def test_projects_section_defaults():
+    from eink_planner.models.device import ProjectsSection
+
+    section = ProjectsSection()
+    assert section.pages == 16
+    assert section.card_rows == 5
+    assert ProjectsSection(pages=20, card_rows=8).pages == 20
