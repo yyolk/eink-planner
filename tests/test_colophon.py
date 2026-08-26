@@ -434,6 +434,45 @@ def test_drop_empty_tables_helper():
     assert "[section.cover]" in out
 
 
+def test_drop_empty_tables_keeps_quoted_and_dotted_keys():
+    text = (
+        '[a]\n"a b" = 1\n\n'
+        "[b]\nfoo.bar = 1\n\n"
+        "[empty]\n# comment only\n\n"
+        "[c]\n'x y' = 2\n"
+    )
+    out = drop_empty_tables(text)
+    assert "[a]" in out
+    assert '"a b" = 1' in out
+    assert "[b]" in out
+    assert "foo.bar = 1" in out
+    assert "[c]" in out
+    assert "'x y' = 2" in out
+    assert "[empty]" not in out
+
+
+def test_two_dump_colophons_use_unique_start_and_end():
+    a = _colophon_with_dump(dump=True)
+    b = _colophon_with_dump(dump=True)
+    ca = a.pages(None)[0].content
+    cb = b.pages(None)[0].content
+    assert a._dump_state_name() != b._dump_state_name()
+    assert a._dump_end_label() != b._dump_end_label()
+    assert a._dump_state_name() in ca
+    assert a._dump_end_label() in ca
+    assert b._dump_state_name() in cb
+    assert b._dump_end_label() in cb
+    assert a._dump_state_name() not in cb
+    assert b._dump_state_name() not in ca
+    assert "colophon-start\"" not in ca
+    assert "<colophon-end>" not in ca
+    assert "header:" in ca
+    assert DEFAULT_TITLE in ca
+    # continuation title + quiet 1/N stay in the header
+    assert 'align(left, text(size: h1, weight: "bold")[' + DEFAULT_TITLE + "])" in ca
+    assert "0.85em" in ca
+
+
 def test_colophon_last_default_does_not_dump(tmp_path):
     path = tmp_path / "last.toml"
     path.write_text(NOMAD.read_text(encoding="utf-8"), encoding="utf-8")

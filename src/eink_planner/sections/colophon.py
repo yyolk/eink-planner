@@ -23,7 +23,10 @@ _DEVICE_NAMES = {
 }
 
 _TABLE_HEADER = re.compile(r"(?m)^[ \t]*\[(\[?)([^\]]+)\](\]?)[ \t]*\r?\n")
-_KEY_LINE = re.compile(r"(?m)^[ \t]*[A-Za-z0-9_-]+[ \t]*=")
+_BARE_KEY = r"[A-Za-z0-9_-]+"
+_QUOTED_KEY = r'"(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\''
+_KEY = rf"(?:{_BARE_KEY}|{_QUOTED_KEY})"
+_KEY_LINE = re.compile(rf"(?m)^[ \t]*{_KEY}(?:[ \t]*\.[ \t]*{_KEY})*[ \t]*=")
 
 
 def _escape(text: str) -> str:
@@ -132,7 +135,7 @@ class Colophon:
         if dumped.strip():
             parts.append("#v(1em)")
             parts.append(f"#raw(block: true, {typst_string(dumped)})")
-            parts.append("#[] <colophon-end>")
+            parts.append(f"#[] <{self._dump_end_label()}>")
         return "\n".join(parts)
 
     def _enabled_width_labels(self) -> list[str]:
@@ -249,18 +252,31 @@ class Colophon:
         raw = prov.get("config_text")
         return str(raw) if raw else ""
 
+    def _dump_uid(self) -> str:
+        return str(id(self))
+
+    def _dump_state_name(self) -> str:
+        return f"colophon-start-{self._dump_uid()}"
+
+    def _dump_end_label(self) -> str:
+        return f"colophon-end-{self._dump_uid()}"
+
     def _dump_pagination(self) -> str:
         # Quiet 1/N only when the dump actually paginates. Header is empty on
-        # a single page and after <colophon-end> so later MOS pages stay put
-        # when dump is mid-book. 1/N lives in the header (shipped devices use
-        # a 0mm bottom margin, so a footer is clipped). Continuation pages
-        # repeat the same title so a mid-table dump is never untitled.
+        # a single page and after this instance's end label so later MOS pages
+        # stay put when dump is mid-book. Unique state/label per instance so
+        # two dump colophons do not share start/end. 1/N lives in the header
+        # (shipped devices use a 0mm bottom margin, so a footer is clipped).
+        # Continuation pages repeat the same title so a mid-table dump is
+        # never untitled.
         title = _escape(self.title)
-        return f"""#context {{ state("colophon-start", 0).update(here().page()) }}
+        state_name = self._dump_state_name()
+        end_label = self._dump_end_label()
+        return f"""#context {{ state("{state_name}", 0).update(here().page()) }}
 #set page(header: context {{
-  let start-page = state("colophon-start", 0).final()
+  let start-page = state("{state_name}", 0).final()
   let cur = here().page()
-  let hits = query(<colophon-end>)
+  let hits = query(<{end_label}>)
   let last = if hits.len() > 0 {{ hits.first().location().page() }} else {{ cur }}
   if last > start-page and cur <= last {{
     let nums = text(size: 0.85em)[#(cur - start-page + 1)/#(last - start-page + 1)]
