@@ -66,38 +66,15 @@ A name in the top-level `sections = ["cover", …]` list is enabled, in that ord
 
 2026 from [`configs/158x210-mos-left.toml`](configs/158x210-mos-left.toml). MOS strip on the left. This profile ships cover through daily notes plus the colophon (no projects, habits, review, or meetings). Previews are Typst SVGs at half scale.
 
-<img src="docs/samples/158x210-mos-left/cover.svg" alt="Cover" width="224" />
-
-Cover.
-
-<img src="docs/samples/158x210-mos-left/annual.svg" alt="Annual" width="224" />
-
-Year door.
-
-<img src="docs/samples/158x210-mos-left/quarterly-q1.svg" alt="Quarter 1" width="224" />
-
-Quarter 1.
-
-<img src="docs/samples/158x210-mos-left/monthly-jan.svg" alt="January" width="224" />
-
-January.
-
-<img src="docs/samples/158x210-mos-left/weekly-w01.svg" alt="Week 1" width="224" />
-
-Week 1.
-
-<img src="docs/samples/158x210-mos-left/daily-jan1.svg" alt="1 January" width="224" />
-
-Thursday 1 January.
-
-<img src="docs/samples/158x210-mos-left/notes-jan1.svg" alt="Daily notes" width="224" />
-
-Daily notes overflow (1/2).
-
-<img src="docs/samples/158x210-mos-left/colophon.svg" alt="About this notebook" width="224" />
-
-Colophon.
-
+| Cover | Year door |
+| :---: | :---: |
+| <img src="docs/samples/158x210-mos-left/cover.svg" alt="Cover" width="224" /> | <img src="docs/samples/158x210-mos-left/annual.svg" alt="Annual" width="224" /> |
+| Quarter 1 | January |
+| <img src="docs/samples/158x210-mos-left/quarterly-q1.svg" alt="Quarter 1" width="224" /> | <img src="docs/samples/158x210-mos-left/monthly-jan.svg" alt="January" width="224" /> |
+| Week 1 | Thursday 1 January |
+| <img src="docs/samples/158x210-mos-left/weekly-w01.svg" alt="Week 1" width="224" /> | <img src="docs/samples/158x210-mos-left/daily-jan1.svg" alt="1 January" width="224" /> |
+| Daily notes overflow (1/2) | Colophon |
+| <img src="docs/samples/158x210-mos-left/notes-jan1.svg" alt="Daily notes" width="224" /> | <img src="docs/samples/158x210-mos-left/colophon.svg" alt="About this notebook" width="224" /> |
 
 ## Device profiles
 
