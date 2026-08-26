@@ -21,7 +21,7 @@ MOS_RIGHT = CONFIGS / "158x210-mos-right.toml"
 SCRIBE = CONFIGS / "kindle-scribe.toml"
 
 GOLDEN_SHA256 = {
-    "supernote-nomad": "d62a58adf0ddb1d8e93c42f4600bbecc37d4be0329302d81c28109810cc33f73",
+    "supernote-nomad": "89c27a8a2d8eced041f26d9f481ee92e4cdfbe83c1e399d466279ef22ac66505",
     "158x210-mos-left": "43f733d39303de4d1e732a135c278f50b922d427b28fe4ec131bbf5c08449cbf",
 }
 
@@ -116,8 +116,8 @@ def test_mos_right_daily_track_flip():
 def test_nomad_projects_pages_and_card_rows():
     dto = load(NOMAD)
     projects = next(s for s in dto["planner"]["sections"] if s["name"] == "projects")
-    assert projects["params"]["pages"] == 20
-    assert projects["params"]["card_rows"] == 8
+    assert projects["params"]["pages"] == 16
+    assert projects["params"]["card_rows"] == 5
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert "projects" in names
     assert names[-1] == "review"

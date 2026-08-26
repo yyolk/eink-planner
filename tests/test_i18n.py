@@ -24,9 +24,9 @@ def test_load_en_toml_representative_keys():
     assert i18n.t("review") == "Review"
     assert i18n.t("weekday.short.monday") == "Mon"
     assert i18n.t("weekday.short.sunday") == "Sun"
-    assert i18n.t("todo") == "TODO"
-    assert i18n.t("doing") == "DOING"
-    assert i18n.t("done") == "DONE"
+    assert i18n.t("todo") == "To do"
+    assert i18n.t("doing") == "Doing"
+    assert i18n.t("done") == "Done"
     assert i18n.t("title") == "TITLE"
     assert i18n.t("date") == "DATE"
 

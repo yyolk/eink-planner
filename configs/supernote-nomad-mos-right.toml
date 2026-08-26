@@ -101,5 +101,9 @@ inset = "3pt"
 pages = 2
 pattern = "dotted"
 
+[section.projects]
+pages = 16
+card_rows = 5
+
 [section.habits]
 habit_columns = 6

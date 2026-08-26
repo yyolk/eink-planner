@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import re
 from pathlib import Path
 
 import pytest
@@ -11,7 +12,7 @@ from eink_planner import ConfigError
 from eink_planner.config import load
 from eink_planner.i18n import I18n
 from eink_planner.mos.configurator import Configurator
-from eink_planner.mos.sections.projects import Projects, _length_mm
+from eink_planner.mos.sections.projects import Projects, _CARD_BASELINES, _NUM_COL, _length_mm
 from eink_planner.services.generate import Generate
 from eink_planner.toml_config import parse_toml
 from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf
@@ -19,6 +20,9 @@ from tests.toml_fixtures import _minimal, short_january
 
 REPO = Path(__file__).resolve().parents[1]
 NOMAD = REPO / "configs/supernote-nomad.toml"
+
+_CARD_STROKE = "stroke: regular_stroke + black"
+_CARD_LINE = "line(length: size.width, stroke: 0.2pt + black)"
 
 
 def _generate(dto) -> str:
@@ -48,34 +52,39 @@ def test_length_mm_parses_mm_cm_pt():
     assert abs(_length_mm("72pt") - 25.4) < 1e-9
 
 
-def test_omit_pages_defaults_to_twenty():
+def test_omit_pages_defaults_to_sixteen():
     dto = parse_toml(_minimal(enable=["projects"], sections=""), source="default-pages.toml")
     section = dto["planner"]["sections"][0]
     assert section["name"] == "projects"
     assert section["class"] == "projects"
-    assert section["params"]["pages"] == 20
-    assert section["params"]["card_rows"] == 8
+    assert section["params"]["pages"] == 16
+    assert section["params"]["card_rows"] == 5
     projects = _projects(dto)
-    assert projects.card_rows == Projects.CARDS == 8
+    assert projects.card_rows == Projects.CARDS == 5
+    assert Projects.DEFAULT_PAGES == 16
     rpp = projects.rows_per_index_page()
     n_index = projects.index_page_count()
     assert rpp >= 1
-    assert n_index == math.ceil(20 / rpp)
+    assert n_index == math.ceil(16 / rpp)
     typst = _generate(dto)
     assert "<projects>" in typst
-    for i in range(1, 21):
+    for i in range(1, 17):
         assert f"<project-{i}>" in typst
-    assert "<project-21>" not in typst
-    assert typst.count("#pagebreak()") == n_index + 20 - 1
-    first = min(20, rpp)
+    assert "<project-17>" not in typst
+    assert typst.count("#pagebreak()") == n_index + 16 - 1
+    first = min(16, rpp)
     assert "rows: (" + ", ".join(["2 * regular_height"] * first) + ")" in typst
-    leftover = 20 - first
+    leftover = 16 - first
     if leftover:
         assert "rows: (" + ", ".join(["2 * regular_height"] * leftover) + ")" in typst
         assert "<projects-2>" in typst
-    assert "rows: (" + ", ".join(["1fr"] * 20) + ")" not in typst
-    card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern_centered(dotted_centered))"
-    assert typst.count(card) == projects.card_rows * 3 * 20
+        assert "rows: (" + ", ".join(["1fr"] * leftover) + ")" not in typst
+    assert "rows: (" + ", ".join(["1fr"] * 16) + ")" not in typst
+    assert typst.count(_CARD_STROKE) >= projects.card_rows * 3 * 16
+    assert typst.count(_CARD_LINE) == _CARD_BASELINES * projects.card_rows * 3 * 16
+    assert "rect_pattern_centered(dotted_centered)" not in typst
+    assert "luma(180)" not in typst
+    assert "→" not in typst
 
 
 def test_pages_three_emits_index_and_three_boards():
@@ -97,7 +106,7 @@ def test_pages_three_emits_index_and_three_boards():
     assert typst.count("#pagebreak()") == 3
 
 
-def test_index_links_to_boards_and_board_links_back():
+def test_index_number_is_the_only_board_link():
     dto = parse_toml(
         _minimal(
             enable=["annual", "projects"],
@@ -111,9 +120,22 @@ pages = 3
         source="links.toml",
     )
     typst = _generate(dto)
-    assert "padded_link(<project-1>)" in typst
-    assert "padded_link(<project-2>)" in typst
-    assert "padded_link(<project-3>)" in typst
+    pages = typst.split("#pagebreak()")
+    index = next(page for page in pages if "<projects>" in page)
+    assert "→" not in index
+    assert f"columns: ({_NUM_COL}, 1fr)" in index
+    assert "2 * regular_height, 2 * regular_height, 2 * regular_height" in index
+    for i in (1, 2, 3):
+        assert f"padded_link(<project-{i}>," in index
+        # write-in cell is paper, not a second door
+        assert f"padded_link(<project-{i}>, [])" not in index
+        assert f"padded_link(<project-{i}>)[]" not in index
+    # number cell is a full-band hit target; write-in is the following []
+    assert re.search(
+        r"padded_link\(<project-1>, box\(width: 100%, height: 100%",
+        index,
+    )
+    assert index.count("[]") >= 3
     assert "padded_link(<projects>)" in typst
     assert "padded_link(<annual>)" in typst
     labels = set(_LABEL_DEF.findall(typst))
@@ -140,9 +162,16 @@ def test_locale_strings_appear():
         source="strings.toml",
     )
     typst = _generate(dto)
-    for label in ("TITLE", "DATE", "TODO", "DOING", "DONE", "Projects"):
+    for label in ("To do", "Doing", "Done", "Projects"):
         assert label in typst
-    assert "rect_pattern_centered(dotted_centered)" in typst
+    assert "TITLE" not in typst
+    assert "DATE" not in typst
+    assert "TODO" not in typst
+    assert "DOING" not in typst
+    assert "DONE" not in typst
+    assert "rect_pattern_centered(dotted_centered)" not in typst
+    assert _CARD_STROKE in typst
+    assert typst.count(_CARD_LINE) == _CARD_BASELINES * 5 * 3
 
 
 def test_unknown_key_on_section_projects_raises():
@@ -196,36 +225,41 @@ def test_pages_are_raw_typst_without_mos_chrome():
     assert "<project-1>" in typst
 
 
-def test_index_rows_are_fixed_line_height_and_boards_use_eight_even_cards():
-    assert Projects.CARDS == 8
+def test_index_rows_are_fixed_line_height_and_boards_use_five_fat_cards():
+    assert Projects.CARDS == 5
     dto = parse_toml(
         _minimal(enable=["projects"], sections="[section.projects]\npages = 3\n"),
         source="layout.toml",
     )
     typst = _generate(dto)
     assert "rows: (2 * regular_height, 2 * regular_height, 2 * regular_height)" in typst
-    assert "rows: (1fr, 1fr, 1fr)" not in typst
-    assert "rows: (" + ", ".join(["1fr"] * 8) + ")" in typst
-    card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern_centered(dotted_centered))"
-    assert typst.count(card) == 8 * 3 * 3
+    # leftover index rows stay 2× regular_height; card interiors use placed 1/4–3/4 lines
+    assert "rows: (1fr, 1fr, 1fr)" not in typst  # no 1fr baseline grid
+    assert "1/4 * size.height" in typst
+    assert "2/4 * size.height" in typst
+    assert "3/4 * size.height" in typst
+    assert "rows: (" + ", ".join(["1fr"] * 5) + ")" in typst
+    assert "rows: (" + ", ".join(["1fr"] * 8) + ")" not in typst
+    assert typst.count(_CARD_STROKE) >= 5 * 3 * 3
+    assert typst.count(_CARD_LINE) == _CARD_BASELINES * 5 * 3 * 3
+    assert "rect_pattern_centered(dotted_centered)" not in typst
+    assert "luma(180)" not in typst
 
 
-def test_card_rows_five_emits_five_one_fr_rows_per_column():
+def test_card_rows_eight_emits_eight_one_fr_rows_per_column():
     dto = parse_toml(
-        _minimal(enable=["projects"], sections="[section.projects]\npages = 1\ncard_rows = 5\n"),
-        source="card_rows-5.toml",
+        _minimal(enable=["projects"], sections="[section.projects]\npages = 1\ncard_rows = 8\n"),
+        source="card_rows-8.toml",
     )
     params = dto["planner"]["sections"][0]["params"]
     assert params["pages"] == 1
-    assert params["card_rows"] == 5
+    assert params["card_rows"] == 8
     projects = _projects(dto)
-    assert projects.card_rows == 5
-    assert Projects.CARDS == 8
+    assert projects.card_rows == 8
+    assert Projects.CARDS == 5
     typst = _generate(dto)
-    assert "rows: (" + ", ".join(["1fr"] * 5) + ")" in typst
-    assert "rows: (" + ", ".join(["1fr"] * 8) + ")" not in typst
-    card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern_centered(dotted_centered))"
-    assert typst.count(card) == projects.card_rows * 3 * 1
+    assert "rows: (" + ", ".join(["1fr"] * 8) + ")" in typst
+    assert typst.count(_CARD_LINE) == _CARD_BASELINES * 8 * 3 * 1
 
 
 def test_index_paginates_and_late_board_links_to_its_index_page():
@@ -271,18 +305,76 @@ pages = {n}
     assert "padded_link(<projects>)" in pages[2]
 
 
+def test_nomad_default_is_one_index_page():
+    dto = load(NOMAD)
+    projects = _projects(dto)
+    assert projects.pages_num == 16
+    assert projects.card_rows == 5
+    assert projects.rows_per_index_page() == 16
+    assert projects.index_page_count() == 1
+    typst = _generate(short_january(dto))
+    assert "<projects>" in typst
+    assert "<projects-2>" not in typst
+    assert "<project-1>" in typst
+    assert "<project-16>" in typst
+    assert "<project-17>" not in typst
+    assert "padded_link(<annual>)" in typst
+    index = next(page for page in typst.split("#pagebreak()") if "<projects>" in page)
+    assert "→" not in index
+    assert f"columns: ({_NUM_COL}, 1fr)" in index
+    assert "rows: (" + ", ".join(["2 * regular_height"] * 16) + ")" in index
+    assert "rows: (" + ", ".join(["1fr"] * 16) + ")" not in index
+
+
+def test_pages_twenty_paginates_without_stretching_leftover_rows():
+    slim = parse_toml(
+        _minimal(
+            device="""[device]
+name = "supernote-nomad"
+width = "118.87mm"
+height = "158.5mm"
+ppi = 300""",
+            enable=["projects"],
+            sections="""[section.projects]
+pages = 20
+""",
+        ),
+        source="pages-20-leftover.toml",
+    )
+    projects = _projects(slim)
+    assert projects.rows_per_index_page() == 16
+    assert projects.index_page_count() == 2
+    typst = _generate(slim)
+    assert "<projects>" in typst
+    assert "<projects-2>" in typst
+    assert "<project-20>" in typst
+    assert "<project-21>" not in typst
+    leftover = "rows: (" + ", ".join(["2 * regular_height"] * 4) + ")"
+    fattened = "rows: (" + ", ".join(["1fr"] * 4) + ")"
+    assert leftover in typst
+    assert fattened not in typst
+    pages = typst.split("#pagebreak()")
+    second = next(page for page in pages if "<projects-2>" in page)
+    assert leftover in second
+    assert fattened not in second
+    assert "→" not in second
+    board_late = next(page for page in pages if "<project-17>" in page and "1fr, 1fr, 1fr" in page)
+    assert "padded_link(<projects-2>)" in board_late
+    assert "padded_link(<projects>)" not in board_late
+
+
 def test_nomad_parses_and_compiles(tmp_path):
     dto = load(NOMAD)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert "projects" in names
     projects = next(s for s in dto["planner"]["sections"] if s["name"] == "projects")
-    assert projects["params"]["pages"] == 20
-    assert projects["params"]["card_rows"] == 8
+    assert projects["params"]["pages"] == 16
+    assert projects["params"]["card_rows"] == 5
     typst = _generate(short_january(dto))
     assert "<projects>" in typst
-    assert "<projects-2>" in typst
+    assert "<projects-2>" not in typst
     assert "<project-1>" in typst
-    assert "<project-20>" in typst
+    assert "<project-16>" in typst
     assert "padded_link(<annual>)" in typst
     pdf, stderr = compile_pdf(typst, tmp_path / "nomad-projects")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
@@ -310,7 +402,7 @@ pages = 3
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
 
 
-def test_kanban_centered_dots_leave_notes_global_dotted():
+def test_kanban_baselines_leave_notes_global_dotted():
     dto = parse_toml(
         _minimal(
             enable=["daily", "daily_notes", "projects"],
@@ -334,31 +426,23 @@ pattern = "dotted"
 pages = 1
 """,
         ),
-        source="centered-vs-notes.toml",
+        source="baselines-vs-notes.toml",
     )
     typst = _generate(dto)
     assert "#let dotted =" in typst
     assert "dx: 0.5pt" in typst
     assert "dy: regular_height - 0.3mm" in typst
-    assert "#let dotted_centered = tiling(" in typst
-    assert "center + horizon" in typst
-    assert "#let rect_pattern_centered(pattern) = box(" in typst
-    assert "layout(size =>" in typst
-    assert "calc.floor(size.width.pt() / cell.pt())" in typst
-    assert "calc.floor(size.height.pt() / cell.pt())" in typst
-    assert "let nw = cols * cell" in typst
-    assert "let nh = rows * cell" in typst
-    assert "calc.rem(" not in typst
-    assert "clip: true" not in typst
-    card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern_centered(dotted_centered))"
-    assert typst.count(card) == _projects(dto).card_rows * 3
-    assert "inset: 0pt, rect_pattern(dotted)" not in typst
+    assert "#let rect_pattern(pattern) = rect(" in typst
+    assert "rect_pattern_centered(dotted_centered)" not in typst
+    assert _CARD_STROKE in typst
+    assert typst.count(_CARD_LINE) == _CARD_BASELINES * _projects(dto).card_rows * 3
     assert "#let scratch_pad = rect_pattern(dotted)" in typst
     pages = typst.split("#pagebreak()")
     board_pages = [page for page in pages if "1/1 <project-1>" in page]
     assert board_pages
-    assert all("rect_pattern_centered(dotted_centered)" in page for page in board_pages)
-    assert all("rect_pattern(dotted)" not in page for page in board_pages)
+    assert all("rect_pattern_centered" not in page for page in board_pages)
+    assert all(_CARD_STROKE in page for page in board_pages)
+    assert all(_CARD_LINE in page for page in board_pages)
     notes_body_pages = [
         page
         for page in pages

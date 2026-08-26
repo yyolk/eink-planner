@@ -18,6 +18,10 @@ _INDEX_BOTTOM_INSET = "4mm"
 _INDEX_ROW_GUTTER = "3mm"
 _ROW_HEIGHT = "2 * regular_height"
 _ROW_HEIGHT_MULT = 2
+# Two figures share an x, like Review week numbers. Write-in is the 1fr paper.
+_NUM_COL = "2em"
+# Fat cards: sentence + two wrap lines on Nomad-sized 5-row boards.
+_CARD_BASELINES = 3
 _LENGTH = re.compile(r"^([+-]?(?:\d+(?:\.\d*)?|\.\d+))(mm|cm|pt)$")
 
 
@@ -38,8 +42,8 @@ def _length_mm(token: str) -> float:
 
 class Projects:
     ID = "projects"
-    DEFAULT_PAGES = 20
-    CARDS = 8
+    DEFAULT_PAGES = 16
+    CARDS = 5
 
     def __init__(
         self,
@@ -135,17 +139,29 @@ class Projects:
             return f"[{label} <{page_id}>]"
         return f"[#{manifest.link_or_content(self.ID, label)} <{page_id}>]"
 
+    def _index_row(self, manifest: Manifest, index: int) -> str:
+        bid = self.board_id(index)
+        number = f"[{index}]"
+        hit = f"box(width: 100%, height: 100%, align(horizon + left, {number}))"
+        if manifest.source(bid):
+            # Number cell only — write-in paper stays unlinkable.
+            hit = f"padded_link(<{bid}>, {hit})"
+        return (
+            "  grid.cell(\n"
+            "    align: horizon + left,\n"
+            f"    {hit}\n"
+            "  ),\n"
+            "  []"
+        )
+
     def _index(self, manifest: Manifest, page: int, start: int, end: int) -> str:
         n = max(0, end - start + 1)
         if n:
-            rows = []
-            for index in range(start, end + 1):
-                bid = self.board_id(index)
-                number = manifest.link_or_content(bid, str(index))
-                arrow = manifest.link_or_content(bid, "→")
-                rows.append(f"  {number}, [], {arrow}")
+            rows = [self._index_row(manifest, index) for index in range(start, end + 1)]
+            # Fixed 2×-regular_height rows. Leftover last pages keep the same
+            # height (white below) — never 1fr-fatten a short leftover.
             body = f"""grid(
-  columns: (auto, 1fr, auto),
+  columns: ({_NUM_COL}, 1fr),
   rows: ({", ".join([_ROW_HEIGHT] * n)}),
   align: horizon,
   stroke: (bottom: regular_stroke),
@@ -163,26 +179,36 @@ class Projects:
   {body}
 )"""
 
+    def _card(self) -> str:
+        # Explicit lines at 1/4, 2/4, 3/4 of the inner box. A 1fr cell
+        # bottom-stroke sits on the frame and rounds to 2px on Nomad.
+        lines = "\n    ".join(
+            f"place(dy: {frac} * size.height, line(length: size.width, stroke: 0.2pt + black))"
+            for frac in ("1/4", "2/4", "3/4")
+        )
+        return f"""grid.cell(
+  stroke: regular_stroke + black,
+  inset: (x: 3pt, y: 4pt),
+  layout(size => {{
+    {lines}
+  }})
+)"""
+
     def _board(self, manifest: Manifest, index: int) -> str:
         projects = self.i18n.t("projects")
-        title = self.i18n.t("title")
-        date = self.i18n.t("date")
         todo = self.i18n.t("todo")
         doing = self.i18n.t("doing")
         done = self.i18n.t("done")
         bid = self.board_id(index)
         n = self.pages_num
         header = f"""grid(
-  columns: (auto, 1fr, auto, 1fr, auto),
+  columns: (1fr, auto),
   column-gutter: 6pt,
   align: horizon,
-  [*{title}*],
   grid.cell(stroke: (bottom: regular_stroke), []),
-  [*{date}*],
-  grid.cell(stroke: (bottom: regular_stroke), []),
-  [{index}/{n} <{bid}>]
+  text(size: 0.85em)[{index}/{n} <{bid}>]
 )"""
-        card = "grid.cell(stroke: regular_stroke + luma(180), inset: 0pt, rect_pattern_centered(dotted_centered))"
+        card = self._card()
         cards = ",\n    ".join([card] * self.card_rows)
         column = f"""grid(
   columns: 1fr,
