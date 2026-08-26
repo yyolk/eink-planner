@@ -64,7 +64,7 @@ def _review_pages(typst: str) -> list[str]:
     for page in _pages(typst):
         if "rotate(" in page:
             continue
-        if "<review" in page or "rect_pattern(lined)" in page:
+        if "<review" in page or "review_lined" in page:
             out.append(page)
     return out
 
@@ -80,7 +80,7 @@ def _index_page(typst: str, page_id: str = "review") -> str:
 def _week_page(typst: str, week_id: str) -> str:
     label = f"<review-{week_id}>"
     for page in _pages(typst):
-        if label in page and "rect_pattern(lined)" in page and "rotate(" not in page:
+        if label in page and "review_lined" in page and "rotate(" not in page:
             return page
     raise AssertionError(f"no Review week page {week_id}")
 
@@ -101,8 +101,8 @@ def test_listed_without_table_defaults_weeks_per_page():
         assert str(number) in typst
         assert rng in typst
     assert "<review-2>" in typst
-    assert "<review-5>" in typst
-    assert "<review-6>" not in typst
+    assert "<review-4>" in typst
+    assert "<review-5>" not in typst
 
 
 def test_short_january_is_one_index_and_five_weeks():
@@ -161,14 +161,15 @@ def test_index_is_raw_typst_full_band_no_arrows_no_invert():
     assert "Q4" not in index
     assert "Q1" not in index
     assert "columns: 1fr" in index
+    assert "columns: (2em, 1fr)" in index
     assert "align: horizon + left" in index
-    assert "align(horizon + left" in index
     assert "box(width: 100%, height: 100%" in index
     assert (
         "padded_link(<review-2026W01>, box(width: 100%, height: 100%"
         in index
     )
     assert "padded_link(<review-2026W01>)[1" not in index
+    assert "[1 #text(size: 0.85em)" not in index
     assert "[W01" not in index
     assert " W01" not in index
     assert "W1 " not in index
@@ -203,20 +204,17 @@ def test_weeks_per_page_paginates_index_ids_and_crumb_targets():
     typst = _generate(short_january(dto))
     assert "<review>" in typst
     assert "<review-2>" in typst
-    assert "<review-3>" in typst
-    assert "<review-4>" not in typst
+    assert "<review-3>" not in typst
     page1 = _index_page(typst, "review")
     page2 = _index_page(typst, "review-2")
-    page3 = _index_page(typst, "review-3")
     assert "<review-2026W01>" in page1
     assert "<review-2026W02>" in page1
     assert "<review-2026W03>" in page2
     assert "<review-2026W04>" in page2
-    assert "<review-2026W05>" in page3
+    assert "<review-2026W05>" in page2
     assert f"Dec 29 {_EN_DASH} Jan 11" in page1
-    assert f"Jan 12 {_EN_DASH} 25" in page2
-    assert f"Jan 26 {_EN_DASH} Feb 1" in page3
-    for page in (page1, page2, page3):
+    assert f"Jan 12 {_EN_DASH} Feb 1" in page2
+    for page in (page1, page2):
         assert "[Review <" in page
         assert "2026" in page
         assert "Q4" not in page
@@ -228,9 +226,9 @@ def test_weeks_per_page_paginates_index_ids_and_crumb_targets():
     assert "padded_link(<review-2>)" not in w1
     assert "padded_link(<review-2>)" in w3
     assert "padded_link(<review>)" not in w3
-    assert "padded_link(<review-3>)" in w5
+    assert "padded_link(<review-2>)" in w5
     assert "padded_link(<review>)" not in w5
-    assert "padded_link(<review-2>)" not in w5
+    assert "padded_link(<review-3>)" not in w5
 
 
 def test_full_year_default_pagination_ids():
@@ -240,25 +238,24 @@ def test_full_year_default_pagination_ids():
     assert "<review-2>" in typst
     assert "<review-3>" in typst
     assert "<review-4>" in typst
-    assert "<review-5>" in typst
-    assert "<review-6>" not in typst
+    assert "<review-5>" not in typst
     page1 = _index_page(typst, "review")
     page4 = _index_page(typst, "review-4")
-    page5 = _index_page(typst, "review-5")
     assert "<review-2026W01>" in page1
     assert "<review-2026W13>" in page1
     assert "<review-2026W14>" not in page1
     assert "<review-2026W40>" in page4
     assert "<review-2026W44>" in page4
     assert "<review-2026W52>" in page4
-    assert "<review-2026W53>" in page5
+    assert "<review-2026W53>" in page4
     assert _W44_RANGE in page4
-    assert _W53_RANGE in page5
+    assert _W53_RANGE in page4
     w44 = _week_page(typst, "2026W44")
     assert "padded_link(<review-4>)" in w44
     assert "padded_link(<review>)" not in w44
     w53 = _week_page(typst, "2026W53")
-    assert "padded_link(<review-5>)" in w53
+    assert "padded_link(<review-4>)" in w53
+    assert "padded_link(<review-5>)" not in w53
 
 
 def test_week_page_is_raw_typst_lined_not_mos():
@@ -266,7 +263,11 @@ def test_week_page_is_raw_typst_lined_not_mos():
     typst = _generate(short_january(dto))
     week = _week_page(typst, "2026W01")
     assert "rotate(" not in week
-    assert "rect_pattern(lined)" in week
+    assert "rect_pattern(lined)" not in week
+    assert "rect_pattern(review_lined)" in week
+    assert "regular_stroke + black" in week
+    assert "regular_stroke + luma(130)" not in week
+    assert "luma(130)" not in week
     assert "rect_pattern(dotted)" not in week
     assert "Q4" not in week
     assert "Q1" not in week
@@ -280,7 +281,7 @@ def test_week_page_is_raw_typst_lined_not_mos():
     assert "columns: (1fr, 1fr, 1fr)" not in week
     assert "columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in week
     # writing field is one full-width lined column, not 7 or 3 day columns
-    assert week.count("rect_pattern(lined)") == 1
+    assert week.count("rect_pattern(review_lined)") == 1
     assert "grid.cell(colspan: 3, rect_pattern" not in week
     assert "What went" not in week
     assert "prompt" not in week.lower()
@@ -436,3 +437,41 @@ def test_range_helper_matches_locale_short_months():
     assert review.range_label(weeks[0].days()[0], weeks[0].days()[-1]) == f"Dec 29 {_EN_DASH} Jan 4"
     assert review.range_label(weeks[1].days()[0], weeks[1].days()[-1]) == f"Jan 5 {_EN_DASH} 11"
     assert review.range_label(weeks[4].days()[0], weeks[4].days()[-1]) == f"Jan 26 {_EN_DASH} Feb 1"
+
+
+def test_chunks_pack_53_weeks_as_13_13_13_14():
+    dto = parse_toml(_minimal(enable=["review"], sections=""), source="pack.toml")
+    review = _review(dto)
+    weeks = review._weeks()
+    assert len(weeks) == 53
+    assert review._page_sizes(53) == [13, 13, 13, 14]
+    chunks = review._chunks(weeks)
+    assert [len(c) for c in chunks] == [13, 13, 13, 14]
+    assert [w.number for w in chunks[-1]] == list(range(40, 54))
+    assert review._index_count(53) == 4
+
+
+def test_short_index_keeps_13_row_height():
+    dto = parse_toml(_minimal(enable=["review"], sections=""), source="short-height.toml")
+    typst = _generate(short_january(dto))
+    index = _index_page(typst)
+    assert "rows: (5fr, 8fr)" in index
+    assert "columns: (2em, 1fr)" in index
+
+
+def test_page_sizes_absorb_only_when_previous_stays_at_most_14():
+    dto = parse_toml(
+        _minimal(enable=["review"], sections="[section.review]\nweeks_per_page = 20\n"),
+        source="leftover.toml",
+    )
+    review = _review(dto)
+    assert review.weeks_per_page == 20
+    assert review._page_sizes(21) == [20, 1]
+    assert review._page_sizes(53) == [20, 20, 13]
+    two = _review(
+        parse_toml(
+            _minimal(enable=["review"], sections="[section.review]\nweeks_per_page = 2\n"),
+            source="two.toml",
+        )
+    )
+    assert two._page_sizes(5) == [2, 3]

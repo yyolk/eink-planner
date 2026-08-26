@@ -21,6 +21,21 @@ _INDEX_BOTTOM_INSET = "4mm"
 _INDEX_ROW_GUTTER = "3mm"
 _DAY_STRIP_HEIGHT = "8mm"
 _EN_DASH = "–"
+# Two figures share an x; dates then share the next column's x.
+_WEEK_NUM_COL = "2em"
+_MIN_PACK_ROWS = 12
+_MAX_PACK_ROWS = 14
+# Review week field only — do not touch global `#let lined` (luma grey).
+_REVIEW_LINED = """tiling(
+  size: (regular_height, regular_height),
+  place(
+    line(
+      start: (0%, regular_height - 0.15mm),
+      end: (100%, regular_height - 0.15mm),
+      stroke: regular_stroke + black
+    ),
+  )
+)"""
 
 
 class Review:
@@ -85,21 +100,36 @@ class Review:
             weeks.append(Week(weekday_start=self.weekday_start, day=chunk[0]))
         return weeks
 
-    def _chunks(self, weeks: list[Week]) -> list[list[Week]]:
+    def _page_sizes(self, n_weeks: int) -> list[int]:
         n = self.weeks_per_page
         if n < 1:
             raise ValueError("weeks_per_page must be at least 1")
-        if not weeks:
-            return [[]]
-        return [weeks[i : i + n] for i in range(0, len(weeks), n)]
+        if n_weeks <= 0:
+            return [0]
+        sizes = [n] * (n_weeks // n)
+        rem = n_weeks % n
+        if rem:
+            sizes.append(rem)
+        if (
+            len(sizes) >= 2
+            and sizes[-1] < _MIN_PACK_ROWS
+            and sizes[-2] + sizes[-1] <= _MAX_PACK_ROWS
+        ):
+            sizes[-2] += sizes[-1]
+            sizes.pop()
+        return sizes
+
+    def _chunks(self, weeks: list[Week]) -> list[list[Week]]:
+        sizes = self._page_sizes(len(weeks))
+        out: list[list[Week]] = []
+        i = 0
+        for size in sizes:
+            out.append(weeks[i : i + size])
+            i += size
+        return out
 
     def _index_count(self, n_weeks: int) -> int:
-        if n_weeks <= 0:
-            return 1
-        n = self.weeks_per_page
-        if n < 1:
-            raise ValueError("weeks_per_page must be at least 1")
-        return (n_weeks + n - 1) // n
+        return len(self._page_sizes(n_weeks))
 
     def _year(self) -> int:
         return self.configurator.start_date().year
@@ -114,26 +144,36 @@ class Review:
             return f"{first_month} {first.month_day} {_EN_DASH} {last.month_day}"
         return f"{first_month} {first.month_day} {_EN_DASH} {last_month} {last.month_day}"
 
-    def _index(self, manifest: Manifest, weeks: list[Week], page_index: int) -> str:
-        page_id = self.index_id(page_index)
+    def _index_row(self, manifest: Manifest, week: Week) -> str:
+        hid = self.week_page_id(week)
+        days = week.days()
+        rng = self.range_label(days[0], days[-1])
+        inner = (
+            "grid(\n"
+            f"      columns: ({_WEEK_NUM_COL}, 1fr),\n"
+            "      rows: 1fr,\n"
+            "      align: horizon + left,\n"
+            "      inset: 0pt,\n"
+            f"      [{week.number}],\n"
+            f"      text(size: 0.85em)[{rng}]\n"
+            "    )"
+        )
+        band = f"box(width: 100%, height: 100%, {inner})"
+        if manifest.source(hid):
+            band = f"padded_link(<{hid}>, {band})"
+        return (
+            "  grid.cell(\n"
+            "    align: horizon + left,\n"
+            f"    {band}\n"
+            "  )"
+        )
+
+    def _index_body(self, manifest: Manifest, weeks: list[Week]) -> str:
         n = len(weeks)
-        if n:
-            rows = []
-            for week in weeks:
-                hid = self.week_page_id(week)
-                days = week.days()
-                rng = self.range_label(days[0], days[-1])
-                label = f"{week.number} #text(size: 0.85em)[{rng}]"
-                band = f"box(width: 100%, height: 100%, align(horizon + left, [{label}]))"
-                if manifest.source(hid):
-                    band = f"padded_link(<{hid}>, {band})"
-                rows.append(
-                    "  grid.cell(\n"
-                    "    align: horizon + left,\n"
-                    f"    {band}\n"
-                    "  )"
-                )
-            body = f"""box(
+        if not n:
+            return "[]"
+        rows = [self._index_row(manifest, week) for week in weeks]
+        inner = f"""box(
   width: 100%,
   height: 100%,
   grid(
@@ -145,8 +185,22 @@ class Review:
 {",\n".join(rows)}
   )
 )"""
-        else:
-            body = "[]"
+        # Full pages (12–14, or a user-sized complete chunk) fill with 1fr.
+        # A short leftover keeps a 13-row row height; empty paper stays below.
+        if n >= _MIN_PACK_ROWS or n >= self.weeks_per_page:
+            return inner
+        empty = self.DEFAULT_WEEKS_PER_PAGE - n
+        return f"""grid(
+  columns: 1fr,
+  rows: ({n}fr, {empty}fr),
+  inset: 0pt,
+  {inner},
+  []
+)"""
+
+    def _index(self, manifest: Manifest, weeks: list[Week], page_index: int) -> str:
+        page_id = self.index_id(page_index)
+        body = self._index_body(manifest, weeks)
         if weeks:
             span = self.range_label(weeks[0].days()[0], weeks[-1].days()[-1])
             quiet = f"text(size: 0.85em)[{span}]"
@@ -199,7 +253,8 @@ class Review:
   ),
   line(length: 100%, stroke: regular_stroke)
 )"""
-        return f"""#grid(
+        return f"""#let review_lined = {_REVIEW_LINED}
+#grid(
   columns: 1fr,
   rows: (auto, auto, auto, 1fr),
   row-gutter: {_INDEX_ROW_GUTTER},
@@ -207,7 +262,7 @@ class Review:
   {breadcrumb},
   {week_line},
   {day_strip},
-  rect_pattern(lined)
+  rect_pattern(review_lined)
 )"""
 
     def _day_cell(self, manifest: Manifest, day: Day) -> str:
