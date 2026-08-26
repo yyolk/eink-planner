@@ -57,13 +57,13 @@ class Quarterly:
 )"""
 
     def _months(self) -> list[str]:
+        params = {**self.little_calendar, "show_week_letter": False}
         return [
             LittleCalendar(
                 i18n=self.i18n,
                 manifest=self.manifest,
                 month=month,
-                **self.little_calendar,
-                show_week_letter=False,
+                **params,
             ).generate()
             for month in self.quarter.months()
         ]

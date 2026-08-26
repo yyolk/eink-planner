@@ -180,6 +180,19 @@ def test_little_calendars_omit_week_letter():
     assert "[W], [M], [T], [W], [T], [F], [S], [S]" not in content
 
 
+def test_week_letter_stays_off_when_little_calendar_sets_true():
+    page = Quarterly(
+        i18n=_i18n(),
+        manifest=Manifest(),
+        quarter=make_quarter("2026-01-01"),
+        months_column="left",
+        little_calendar={**_little_calendar(), "show_week_letter": True},
+    )
+    content = page.content()
+    assert "[], [M], [T], [W], [T], [F], [S], [S]" in content
+    assert "[W], [M], [T], [W], [T], [F], [S], [S]" not in content
+
+
 def test_generated_year_crumb_links_to_annual():
     skip = ("monthly", "weekly", "daily", "daily_notes", "colophon", "projects", "habits", "review", "meetings")
     text = omit_toml_sections(NOMAD.read_text(encoding="utf-8"), skip)
