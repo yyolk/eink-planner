@@ -37,8 +37,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     new = sub.add_parser(
         "new",
-        help="Write a planner TOML from a shipped profile",
-        description="Write a planner TOML by copying a shipped profile.",
+        help="Write a planner from a shipped profile.",
+        description="Write a planner from a shipped profile.",
         epilog="Shipped profiles: " + shipped_help() + ".",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -53,18 +53,18 @@ def build_parser() -> argparse.ArgumentParser:
         dest="from_profile",
         default=None,
         metavar="PROFILE",
-        help=f"Starting profile: shipped stem or path (default: {DEFAULT_FROM})",
+        help=f"Starting profile or path (default {DEFAULT_FROM}).",
     )
     new.add_argument(
         "--year",
         type=int,
         default=None,
-        help="Overlay calendar.year and a year-like cover title",
+        help="Year. Also updates a year-only cover title.",
     )
     new.add_argument(
         "--sections",
         default=None,
-        help="Comma list replacing the top-level sections array",
+        help="Sections to keep, comma-separated.",
     )
     new.add_argument(
         "--yes",

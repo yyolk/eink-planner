@@ -136,6 +136,7 @@ def test_parser_new_and_top_help():
     help_text = parser.format_help()
     assert "new" in help_text
     assert "generate" in help_text
+    assert "Write a planner from a shipped profile." in help_text
 
 
 def test_new_help_lists_device_names(capsys):
@@ -144,12 +145,17 @@ def test_new_help_lists_device_names(capsys):
         parser.parse_args(["new", "--help"])
     assert exc.value.code == 0
     out = capsys.readouterr().out
+    assert "Write a planner from a shipped profile." in out
+    assert "Starting profile or path (default supernote-nomad)." in out
+    assert "Year. Also updates a year-only cover title." in out
+    assert "Sections to keep, comma-separated." in out
     assert "SuperNote Nomad" in out
     assert "SuperNote Nomad (left-handed)" in out
     assert "Kindle Scribe" in out
-    assert "158×210 MOS-left" in out
-    assert "158×210 MOS-left lined" in out
-    assert "158×210 MOS-right" in out
+    assert "158×210 lined" in out
+    assert "158×210 (left-handed)" in out
+    assert "MOS-left" not in out
+    assert "MOS-right" not in out
 
 
 def test_no_config_or_mos_flags():

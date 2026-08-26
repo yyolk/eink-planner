@@ -19,9 +19,9 @@ SHIPPED_PROFILES: tuple[tuple[str, str], ...] = (
     ("SuperNote Nomad", "supernote-nomad"),
     ("SuperNote Nomad (left-handed)", "supernote-nomad-mos-right"),
     ("Kindle Scribe", "kindle-scribe"),
-    ("158×210 MOS-left", "158x210-mos-left"),
-    ("158×210 MOS-left lined", "158x210-mos-left-lined"),
-    ("158×210 MOS-right", "158x210-mos-right"),
+    ("158×210", "158x210-mos-left"),
+    ("158×210 lined", "158x210-mos-left-lined"),
+    ("158×210 (left-handed)", "158x210-mos-right"),
 )
 
 CANONICAL_SECTIONS: tuple[str, ...] = (
