@@ -11,6 +11,7 @@ from eink_planner.mos.configurator import Configurator
 from eink_planner.mos.manifest import Manifest
 from eink_planner.mos.page_data import PageData
 from eink_planner.mos.pages.weekly import Weekly as WeeklyPage
+from eink_planner.mos.sections.annual import Annual
 
 
 class Weekly:
@@ -48,13 +49,30 @@ class Weekly:
             )
             out.append(
                 PageData(
-                    title=weekly.title(),
+                    title=self._title(manifest, weekly),
                     content=weekly.content(),
-                    highlight_months=week.in_months(),
-                    highlight_quarters=week.in_quarters(),
+                    highlight_months=[],
+                    highlight_quarters=[],
+                    nav_links=[],
                 )
             )
         return out
+
+    def _year(self) -> int:
+        return self.configurator.start_date().year
+
+    def _year_cell(self, manifest: Manifest) -> str:
+        return manifest.link_or_content(Annual.ID, str(self._year()))
+
+    def _title(self, manifest: Manifest, page: WeeklyPage) -> str:
+        return f"""grid(
+  columns: (auto, auto, 1fr),
+  column-gutter: 6pt,
+  align: horizon,
+  text(size: h1, {self._year_cell(manifest)}),
+  text(size: h1)[/],
+  {page.title()}
+)"""
 
     def _weeks(self) -> list[Week]:
         days = list(walk(self.first_week_day, self.last_week_day))
