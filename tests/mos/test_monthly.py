@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 import subprocess
 
 from eink_planner.i18n import I18n
@@ -78,7 +79,7 @@ def _month_pages(typst_src: str) -> dict[str, str]:
 
 def test_january_keeps_full_weekdays_and_five_body_rows():
     content = _page("2026-01").content()
-    assert "rows: (auto, 1fr)" in content
+    assert "rows: (auto, auto, 1fr)" in content
     assert "rows: (regular_height, 16mm, 16mm, 16mm, 16mm, 16mm)" in content
     for name in ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"):
         assert f"align(center + horizon)[{name}]" in content
@@ -90,7 +91,7 @@ def test_august_2026_is_six_rows_on_one_page():
     content = page.content()
     weeks = page._month_in_weeks()
     assert len(weeks) == 6
-    assert "rows: (auto, 1fr)" in content
+    assert "rows: (auto, auto, 1fr)" in content
     assert "rows: (regular_height, 16mm, 16mm, 16mm, 16mm, 16mm, 16mm)" in content
     assert content.count("rotate(90deg") == 6
 
@@ -181,7 +182,7 @@ def test_generated_year_crumb_links_to_annual_and_inverts_only_the_month():
     assert "Q1" in jan and "Q4" in jan
     assert "August<month-2026-08-01>" in aug
     assert aug.count("rotate(90deg") == 6
-    assert "rows: (auto, 1fr)" in aug
+    assert "rows: (auto, auto, 1fr)" in aug
     month_slices = [page for page in typst.split("#pagebreak()") if "August<month-2026-08-01>" in page]
     assert len(month_slices) == 1
 
@@ -199,6 +200,8 @@ def test_six_row_august_compiles_as_one_pdf_page(tmp_path):
     assert "rows: (regular_height, 16mm, 16mm, 16mm, 16mm, 16mm, 16mm)" in august
     pdf, stderr = compile_pdf(typst, tmp_path / "monthly-year")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
+    if shutil.which("pdfinfo") is None:
+        return
     info = subprocess.run(
         ["pdfinfo", str(pdf)],
         check=True,

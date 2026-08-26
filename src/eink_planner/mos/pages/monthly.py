@@ -37,7 +37,7 @@ class Monthly:
     def content(self) -> str:
         return f"""grid(
   columns: 1fr,
-  rows: (auto, 1fr),
+  rows: (auto, auto, 1fr),
 
   grid(
     stroke: regular_stroke,
