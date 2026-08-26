@@ -86,7 +86,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--scale",
         type=float,
         default=DEFAULT_SCALE,
-        help="Linear scale for width/height (default: 1/3). 1 keeps Typst page size",
+        help="Linear scale for width/height (default: 1/2). 1 keeps Typst page size",
     )
     prev.add_argument(
         "--crop",

@@ -1,4 +1,4 @@
-"""Shrink Typst SVG pages for previews (third-scale or crop)."""
+"""Shrink Typst SVG pages for previews (half-scale or crop)."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ _TRANSLATE = re.compile(
 )
 # SVG matrix (a b c d e f): x' = a x + c y + e, y' = b x + d y + f
 _IDENT = (1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
-DEFAULT_SCALE = 1 / 3
+DEFAULT_SCALE = 1 / 2
 
 
 def parse_pages(spec: str) -> list[int]:
@@ -82,7 +82,7 @@ def _set_attr(tag: str, name: str, value: str) -> str:
 
 
 def scale_svg(svg: str, factor: float = DEFAULT_SCALE) -> str:
-    """Keep ``viewBox``; shrink ``width`` / ``height`` by ``factor`` (1/3 default)."""
+    """Keep ``viewBox``; shrink ``width`` / ``height`` by ``factor`` (1/2 default)."""
     if factor <= 0:
         raise ValueError(f"scale factor must be positive, got {factor}")
     tag, start, end = _root_open_tag(svg)
