@@ -64,39 +64,40 @@ A name in the top-level `sections = ["cover", …]` list is enabled, in that ord
 
 ## Sample pages
 
-2026 from [`configs/158x210-mos-left.toml`](configs/158x210-mos-left.toml). MOS strip on the left. This profile ships cover through daily notes plus the colophon (no projects, habits, review, or meetings).
+2026 from [`configs/158x210-mos-left.toml`](configs/158x210-mos-left.toml). MOS strip on the left. This profile ships cover through daily notes plus the colophon (no projects, habits, review, or meetings). Previews are Typst SVGs at half scale.
 
-<img src="https://github.com/user-attachments/assets/41a650f5-58a3-48c0-ac47-cd48e7a03da1" alt="Cover" width="187" />
+<img src="docs/samples/158x210-mos-left/cover.svg" alt="Cover" width="224" />
 
 Cover.
 
-<img src="https://github.com/user-attachments/assets/ac5a2b53-743e-4ab2-93ee-aced52f6acd4" alt="Annual" width="187" />
+<img src="docs/samples/158x210-mos-left/annual.svg" alt="Annual" width="224" />
 
 Year door.
 
-<img src="https://github.com/user-attachments/assets/823f12ab-0bfc-4b91-ac62-810f985cca88" alt="Quarter 1" width="187" />
+<img src="docs/samples/158x210-mos-left/quarterly-q1.svg" alt="Quarter 1" width="224" />
 
 Quarter 1.
 
-<img src="https://github.com/user-attachments/assets/844e2c0b-fbc5-46af-b66f-3e800afda6e6" alt="January" width="187" />
+<img src="docs/samples/158x210-mos-left/monthly-jan.svg" alt="January" width="224" />
 
 January.
 
-<img src="https://github.com/user-attachments/assets/c06a8a97-be8b-4b1e-9af4-83a5f801bf84" alt="Week 1" width="187" />
+<img src="docs/samples/158x210-mos-left/weekly-w01.svg" alt="Week 1" width="224" />
 
 Week 1.
 
-<img src="https://github.com/user-attachments/assets/18429e60-0f2d-4f0c-bbe1-b8e2bf135b3c" alt="1 January" width="187" />
+<img src="docs/samples/158x210-mos-left/daily-jan1.svg" alt="1 January" width="224" />
 
 Thursday 1 January.
 
-<img src="https://github.com/user-attachments/assets/4efe9b97-167b-4cbd-8fab-442e395b4edc" alt="Daily notes" width="187" />
+<img src="docs/samples/158x210-mos-left/notes-jan1.svg" alt="Daily notes" width="224" />
 
 Daily notes overflow (1/2).
 
-<img src="https://github.com/user-attachments/assets/12065a61-7894-4c27-a1b1-3b990dee8e2a" alt="About this notebook" width="187" />
+<img src="docs/samples/158x210-mos-left/colophon.svg" alt="About this notebook" width="224" />
 
 Colophon.
+
 
 ## Device profiles
 
