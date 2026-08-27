@@ -14,7 +14,7 @@ from parch.provenance import apply_provenance, collect_provenance
 from parch.mos.configurator import Configurator
 from parch.services.compile import Compile, CompileError
 from parch.services.generate import Generate
-from parch.services.config_file import DEFAULT_FROM, resolve_from, run_new, shipped_help
+from parch.services.config_file import DEFAULT_FROM, open_resolved, run_new, shipped_help
 from parch.services.preview_svg import DEFAULT_SCALE, parse_pages, preview_svg, sample_page_numbers
 
 
@@ -174,18 +174,17 @@ def new_cmd(args: argparse.Namespace) -> int:
 
 
 def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
-    config_path = resolve_from(args.config)
-    i18n = I18n.load_default(args.locale)
-
-    dto = apply_debug(load(config_path), debug=bool(args.debug))
-    dto = apply_year(dto, args.year)
-    dto = apply_provenance(
-        dto,
-        collect_provenance(
-            config_path=config_path,
-            argv=list(argv) if argv is not None else list(sys.argv),
-        ),
-    )
+    with open_resolved(args.config) as config_path:
+        i18n = I18n.load_default(args.locale)
+        dto = apply_debug(load(config_path), debug=bool(args.debug))
+        dto = apply_year(dto, args.year)
+        dto = apply_provenance(
+            dto,
+            collect_provenance(
+                config_path=config_path,
+                argv=list(argv) if argv is not None else list(sys.argv),
+            ),
+        )
     typst_source = Generate(i18n=i18n).generate(dto)
 
     workdir = Path(args.workdir)
@@ -205,17 +204,17 @@ def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
 
 def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
     repo = _repo_root()
-    config_path = resolve_from(args.config)
-    i18n = I18n.load_default(args.locale)
-    dto = apply_debug(load(config_path), debug=bool(args.debug))
-    dto = apply_year(dto, args.year)
-    dto = apply_provenance(
-        dto,
-        collect_provenance(
-            config_path=config_path,
-            argv=list(argv) if argv is not None else list(sys.argv),
-        ),
-    )
+    with open_resolved(args.config) as config_path:
+        i18n = I18n.load_default(args.locale)
+        dto = apply_debug(load(config_path), debug=bool(args.debug))
+        dto = apply_year(dto, args.year)
+        dto = apply_provenance(
+            dto,
+            collect_provenance(
+                config_path=config_path,
+                argv=list(argv) if argv is not None else list(sys.argv),
+            ),
+        )
     typst_source = Generate(i18n=i18n).generate(dto)
     workdir = Path(args.workdir)
     workdir.mkdir(parents=True, exist_ok=True)

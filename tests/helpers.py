@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
-from importlib.resources import as_file, files
+from importlib.resources import files
 from pathlib import Path
 
 import pytest
@@ -13,19 +13,22 @@ from parch.calendar.week import Week
 from parch.config import StrictDict
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
-from parch.services.config_file import resolve_from
 
 
 def base_config(stem: str) -> Path:
     """Filesystem path to a packaged device profile."""
-    return resolve_from(stem)
+    resource = files("parch.data") / "configs" / f"{stem}.toml"
+    if isinstance(resource, Path):
+        return resource
+    raise RuntimeError("base_config is checkout-only")
 
 
 def packaged_locale(locale: str = "en") -> Path:
     """Filesystem path to a packaged locale TOML."""
     resource = files("parch.data") / "locales" / f"{locale}.toml"
-    with as_file(resource) as path:
-        return Path(path)
+    if isinstance(resource, Path):
+        return resource
+    raise RuntimeError("packaged_locale is checkout-only")
 
 
 def load_default(locale: str = "en") -> I18n:

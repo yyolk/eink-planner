@@ -7,6 +7,8 @@ import re
 import sys
 import tempfile
 import tomllib
+from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import date
 from importlib.resources import as_file, files
 from pathlib import Path
@@ -61,18 +63,41 @@ def shipped_help() -> str:
     return ", ".join(label for label, _stem in SHIPPED_PROFILES)
 
 
-def resolve_from(spec: str) -> Path:
-    """Resolve spec as an existing path, else a packaged configs/<stem>.toml."""
+def _unknown_profile(spec: str) -> ConfigError:
+    names = ", ".join(stem for _label, stem in SHIPPED_PROFILES)
+    return ConfigError(
+        f"unknown profile {spec!r}; expected a path or shipped name ({names})"
+    )
+
+
+def _packaged_config(spec: str):
     given = Path(spec)
     if given.is_file():
         return given
     resource = files("parch.data") / "configs" / f"{spec}.toml"
-    if resource.is_file():
-        with as_file(resource) as path:
-            return Path(path)
-    names = ", ".join(stem for _label, stem in SHIPPED_PROFILES)
+    if not resource.is_file():
+        raise _unknown_profile(spec)
+    return resource
+
+
+@contextmanager
+def open_resolved(spec: str) -> Iterator[Path]:
+    """Yield a live path for spec; zip temps stay open through the with."""
+    resource = _packaged_config(spec)
+    if isinstance(resource, Path):
+        yield resource
+        return
+    with as_file(resource) as path:
+        yield Path(path)
+
+
+def resolve_from(spec: str) -> Path:
+    """Resolve spec as an existing path, else a disk-backed packaged config."""
+    resource = _packaged_config(spec)
+    if isinstance(resource, Path):
+        return resource
     raise ConfigError(
-        f"unknown profile {spec!r}; expected a path or shipped name ({names})"
+        f"profile {spec!r} is zip-backed; use open_resolved to keep the temp file alive"
     )
 
 
@@ -119,8 +144,8 @@ def run_new(
     if from_profile is None:
         from_profile = DEFAULT_FROM
 
-    source = resolve_from(from_profile)
-    text, data = _read_source(source)
+    with open_resolved(from_profile) as source:
+        text, data = _read_source(source)
     source_year = _year_from_data(data)
     source_sections = _sections_from_data(data)
 
