@@ -13,8 +13,8 @@ Default device is the **SuperNote Nomad** (A6 X2), MOS strip on the left. A Noma
 Needs [uv](https://docs.astral.sh/uv/) and Python 3.12+.
 
 ```shell
-cd parch
-uv sync
+uv tool install parch
+parch generate supernote-nomad
 ```
 
 `typst` is used to compile the PDF. If it is not on `PATH`, the compile step downloads the official Typst v0.15.1 binary for the current OS/arch into `.tools/typst` (`.tools/typst.exe` on Windows).
@@ -106,6 +106,13 @@ Presets also live in `parch.devices`. The Nomad profile scales strokes, type, an
 Shipped configs keep the **MOS** (Months on the Side) layout: side menu on the physical left except 158×210 MOS-right and SuperNote Nomad MOS-right (physical right), reversed months/quarters, Monday week start, daily schedule 8–20, 5 priorities, 2 extra daily note pages, dotted scratch pad on most shipped configs (the 158×210 MOS-left lined sibling uses `scratch_pad = "lined"` under `[style]` with daily on-page notes still dotted). `pattern` is per notes area (dotted default; `lined` is the other option). MOS-left/MOS-right names are the physical MOS strip side (nav left / nav right), not which hand you write with. MOS-left is the right-handed writing layout (nav opposite the writing hand); MOS-right is the left-handed writing layout.
 
 Device profiles and locale files are TOML. Config keys use underscores (`week_starts`, `side_menu`, `daily_notes`); filenames may still use hyphens (`supernote-nomad.toml`).
+
+## Development
+
+```shell
+cd parch
+uv sync
+```
 
 ## Tests
 

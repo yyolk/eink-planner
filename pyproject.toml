@@ -1,12 +1,21 @@
 [project]
 name = "parch"
 version = "0.1.0"
-description = "Yearly planner PDFs for e-ink devices (Python port of kudrykv/LYP via Typst)"
+description = "parch -- pages for e-ink."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.12"
 authors = [
-  { name = "PDF Planner Project" }
+  { name = "Joseph Chiocchi", email = "joe@yolk.cc" },
+]
+keywords = ["e-ink", "planner", "typst", "supernote"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Printing",
 ]
 dependencies = [
     "pydantic>=2.13.4",
@@ -15,6 +24,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+
+[project.urls]
+Homepage = "https://github.com/yyolk/parch"
+Repository = "https://github.com/yyolk/parch"
+Issues = "https://github.com/yyolk/parch/issues"
 
 [project.scripts]
 parch = "parch.cli:main"
