@@ -186,12 +186,13 @@ def test_contents_page_has_no_back_link_mark():
     assert _MARK_RULE not in page
 
 
-def test_annual_keeps_calendar_chip_and_links_to_index():
+def test_annual_has_no_calendar_chip_and_links_to_index():
     typst = _generate(load(NOMAD))
     page = _annual_page(typst)
-    assert "padded_link(<annual>" in page
-    assert "Calendar" in page
-    assert "fill: black" in page
+    assert "padded_link(<annual>, [Calendar])" not in page
+    assert "[Calendar]" not in page
+    assert "grid.cell(fill: black, text(white)[#padded_link(<annual>, [Calendar])])" not in page
+    assert "2026<annual>" in page
     assert _MARK_LINK in page
     assert _MARK_RULE in page
     assert page.count(_MARK_RULE) == 5
@@ -226,8 +227,25 @@ def test_mos_right_mark_sits_next_to_strip():
     page = _annual_page(typst)
     title_at = page.index("2026<annual>")
     mark_at = page.index(_MARK_LINK)
-    chip_at = page.index("[Calendar]")
-    assert title_at < mark_at < chip_at
+    assert title_at < mark_at
+    assert "padded_link(<annual>, [Calendar])" not in page
+    assert "[Calendar]" not in page
+    for label in ("Q1", "Q2", "Q3", "Q4"):
+        assert label in page
+    assert page.count(_MARK_RULE) == 5
+
+
+def test_mos_left_annual_mark_is_trail_strip_sibling():
+    typst = _generate(load(NOMAD))
+    page = _annual_page(typst)
+    title_at = page.index("2026<annual>")
+    mark_at = page.index(_MARK_LINK)
+    assert title_at < mark_at
+    heading = page[page.index("stack(") : mark_at]
+    assert "dir: rtl" in heading
+    assert "columns: (auto, auto)" not in heading
+    assert "padded_link(<annual>, [Calendar])" not in page
+    assert "[Calendar]" not in page
     for label in ("Q1", "Q2", "Q3", "Q4"):
         assert label in page
     assert page.count(_MARK_RULE) == 5

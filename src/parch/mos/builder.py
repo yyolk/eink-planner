@@ -101,8 +101,8 @@ class Builder:
         chip = self.navigation.heading_menu_grid(page_id=page_id, nav_links=nav_links)
         height = _v(self.heading, "height")
         body = body_size_token(self.configurator)
-        if mos_right or chip:
-            trailing = trail_strip(self.manifest, height, body, chip)
+        trailing = trail_strip(self.manifest, height, body, chip)
+        if mos_right or chip or (trailing and page_id == "annual"):
             parts = [p for p in (title, trailing) if p]
         elif title:
             parts = [lead_title(self.manifest, height, title, body)]
