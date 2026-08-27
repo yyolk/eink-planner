@@ -1,4 +1,4 @@
-"""CLI: `parch generate <config>`."""
+"""CLI: `parch new` and `parch generate`."""
 
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ from parch.provenance import apply_provenance, collect_provenance
 from parch.mos.configurator import Configurator
 from parch.services.compile import Compile, CompileError
 from parch.services.generate import Generate
+from parch.services.config_file import DEFAULT_FROM, run_new, shipped_help
 from parch.services.preview_svg import DEFAULT_SCALE, parse_pages, preview_svg, sample_page_numbers
 
 
@@ -33,6 +34,48 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--version", action="version", version=f"parch {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
+
+    new = sub.add_parser(
+        "new",
+        help="Write a planner from a shipped profile.",
+        description="Write a planner from a shipped profile.",
+        epilog="Shipped profiles: " + shipped_help() + ".",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    new.add_argument("outfile", nargs="?", help="Output path")
+    new.add_argument(
+        "-o",
+        "--output",
+        help="Output path (alias for outfile)",
+    )
+    new.add_argument(
+        "--from",
+        dest="from_profile",
+        default=None,
+        metavar="PROFILE",
+        help=f"Starting profile or path (default {DEFAULT_FROM}).",
+    )
+    new.add_argument(
+        "--year",
+        type=int,
+        default=None,
+        help="Year. Also updates a year-only cover title.",
+    )
+    new.add_argument(
+        "--sections",
+        default=None,
+        help="Sections to keep, comma-separated.",
+    )
+    new.add_argument(
+        "--yes",
+        action="store_true",
+        help="No prompts; use flags and source-file defaults",
+    )
+    new.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite an existing outfile",
+    )
 
     gen = sub.add_parser("generate", help="Generate Typst + PDF from a TOML config")
     gen.add_argument("config", help="Path to planner TOML config")
@@ -112,6 +155,23 @@ def build_parser() -> argparse.ArgumentParser:
         help="Overlay planner year (dates and cover title; not a config key)",
     )
     return parser
+
+
+def new_cmd(args: argparse.Namespace) -> int:
+    outfile = args.outfile
+    if outfile and args.output and outfile != args.output:
+        raise ConfigError("give outfile as a positional or -o, not both")
+    if outfile is None:
+        outfile = args.output
+    return run_new(
+        repo=_repo_root(),
+        outfile=outfile,
+        from_profile=args.from_profile,
+        year=args.year,
+        sections=args.sections,
+        yes=bool(args.yes),
+        force=bool(args.force),
+    )
 
 
 def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
@@ -209,6 +269,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     full_argv = list(sys.argv) if argv is None else [parser.prog, *argv]
     try:
+        if args.command == "new":
+            return new_cmd(args)
         if args.command == "generate":
             return generate_cmd(args, argv=full_argv)
         if args.command == "preview-svg":
