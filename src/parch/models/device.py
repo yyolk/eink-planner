@@ -129,6 +129,10 @@ class CoverSection(StrictModel):
     font_size: str
 
 
+class IndexSection(StrictModel):
+    """Optional Contents page. No required fields."""
+
+
 class AnnualSection(StrictModel):
     row_gutter: str | None = None
     show_month_name: StrictBool | None = None
@@ -277,6 +281,7 @@ class ColophonSection(StrictModel):
 
 class SectionTables(StrictModel):
     cover: CoverSection | None = None
+    index: IndexSection | None = None
     annual: AnnualSection | None = None
     quarterly: QuarterlySection | None = None
     monthly: MonthlySection | None = None
@@ -351,6 +356,8 @@ class DeviceProfile(StrictModel):
         tables = self.section
         if "cover" in names and tables.cover is None:
             raise ValueError("cover is listed in sections but [section.cover] is missing")
+        if "index" in names and tables.index is None:
+            tables.index = IndexSection()
         if "quarterly" in names and tables.quarterly is None:
             raise ValueError("quarterly is listed in sections but [section.quarterly] is missing")
         if "monthly" in names and tables.monthly is None:

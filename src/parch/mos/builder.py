@@ -10,12 +10,14 @@ from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.navigation import NavLink, Navigation
 from parch.mos.page_data import PageData
+from parch.mos.contents_mark import body_size_token, lead_title, trail_strip
 from parch.mos.preamble import Preamble
 
 
 class Builder:
     def __init__(self, i18n: I18n, configurator: Configurator, manifest: Manifest) -> None:
         self.configurator = configurator
+        self.manifest = manifest
         self.pages: list[str] = []
         self.preamble = Preamble(configurator)
         self.navigation = Navigation(i18n=i18n, manifest=manifest, configurator=configurator)
@@ -91,18 +93,21 @@ class Builder:
         nav_links: list[tuple[str, str] | NavLink] | None = None,
         heading_dir: str | None = None,
     ) -> str:
+        mos_right = _v(self.mos_layout, "side_menu_position") == "right"
         if heading_dir is None:
-            direction = "ltr" if _v(self.mos_layout, "side_menu_position") == "right" else "rtl"
+            direction = "ltr" if mos_right else "rtl"
         else:
             direction = heading_dir
-        parts = [
-            p
-            for p in (
-                title,
-                self.navigation.heading_menu_grid(page_id=page_id, nav_links=nav_links),
-            )
-            if p
-        ]
+        chip = self.navigation.heading_menu_grid(page_id=page_id, nav_links=nav_links)
+        height = _v(self.heading, "height")
+        body = body_size_token(self.configurator)
+        if mos_right or chip:
+            trailing = trail_strip(self.manifest, height, body, chip)
+            parts = [p for p in (title, trailing) if p]
+        elif title:
+            parts = [lead_title(self.manifest, height, title, body)]
+        else:
+            parts = []
         joined = ",\n".join(parts)
         return f"""stack(
   dir: {direction},

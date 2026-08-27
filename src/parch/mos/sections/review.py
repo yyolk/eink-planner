@@ -13,6 +13,7 @@ from parch.calendar.week import Week
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
+from parch.mos.contents_mark import body_size_token, heading_height_token, lead_title
 from parch.mos.page_data import PageData
 from parch.mos.sections.annual import Annual
 from parch.mos.sections._shared import _REVIEW_LINED
@@ -207,6 +208,7 @@ class Review:
   text(size: h1)[/],
   text(size: h1, {review_cell})
 )"""
+        breadcrumb = lead_title(manifest, heading_height_token(self.configurator), breadcrumb, body_size_token(self.configurator))
         return f"""#grid(
   columns: 1fr,
   rows: (auto, auto, 1fr),
@@ -231,6 +233,7 @@ class Review:
   text(size: h1)[/],
   text(size: h1, {review_cell})
 )"""
+        breadcrumb = lead_title(manifest, heading_height_token(self.configurator), breadcrumb, body_size_token(self.configurator))
         week_line = f"[{week.number} <{page_id}> #h(0.6em) #text(size: 0.85em)[{rng}]]"
         cells = ", ".join(self._day_cell(manifest, day) for day in days)
         day_strip = f"""stack(

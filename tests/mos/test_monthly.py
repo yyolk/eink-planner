@@ -27,6 +27,7 @@ _MONTH_PARAMS = {
 }
 
 _BULKY = (
+    "index",
     "daily",
     "daily_notes",
     "colophon",

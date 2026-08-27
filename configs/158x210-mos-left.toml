@@ -5,6 +5,7 @@
 
 sections = [
   "cover",
+  "index",
   "annual",
   "quarterly",
   "monthly",

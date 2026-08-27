@@ -1,5 +1,6 @@
 from parch.mos.sections.annual import Annual
 from parch.mos.sections.cover_plain import CoverPlain
+from parch.mos.sections.index import Index
 from parch.mos.sections.daily import Daily
 from parch.mos.sections.daily_notes import DailyNotes
 from parch.mos.sections.monthly import Monthly
@@ -13,6 +14,7 @@ from parch.mos.sections.weekly import Weekly
 __all__ = [
     "Annual",
     "CoverPlain",
+    "Index",
     "Daily",
     "DailyNotes",
     "Habits",
