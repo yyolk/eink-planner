@@ -226,3 +226,12 @@ def test_mos_right_mark_sits_next_to_strip():
         assert label in page
     assert page.count(_MARK_RULE) == 4
 
+
+def test_daily_year_chip_sits_beside_lead_title():
+    typst = _generate(load(NOMAD))
+    page = next(p for p in _pages(typst) if "1 <2026-01-01>" in p)
+    title_at = page.index("1 <2026-01-01>")
+    mark_at = page.index(_MARK_LINK)
+    chip_at = page.index("[2026]")
+    assert title_at < mark_at < chip_at
+

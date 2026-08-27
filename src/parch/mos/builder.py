@@ -101,13 +101,13 @@ class Builder:
         chip = self.navigation.heading_menu_grid(page_id=page_id, nav_links=nav_links)
         height = _v(self.heading, "height")
         body = body_size_token(self.configurator)
-        if mos_right:
+        if chip:
             trailing = trail_strip(self.manifest, height, body, chip)
             parts = [p for p in (title, trailing) if p]
+        elif title:
+            parts = [lead_title(self.manifest, height, title, body)]
         else:
-            if title:
-                title = lead_title(self.manifest, height, title, body)
-            parts = [p for p in (title, chip) if p]
+            parts = []
         joined = ",\n".join(parts)
         return f"""stack(
   dir: {direction},

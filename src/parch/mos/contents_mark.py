@@ -70,7 +70,7 @@ def lead_title(
         return title
     return (
         "grid(\n"
-        "  columns: (auto, 1fr),\n"
+        "  columns: (auto, auto),\n"
         "  column-gutter: 6pt,\n"
         "  align: horizon,\n"
         f"  {mark},\n"
