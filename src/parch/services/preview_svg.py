@@ -198,6 +198,7 @@ def preview_svg(svg: str, *, scale: float = DEFAULT_SCALE, crop: bool = False) -
 
 SAMPLE_STEMS = (
     "cover",
+    "contents",
     "annual",
     "quarterly-q1",
     "monthly-jan",
@@ -232,11 +233,12 @@ def sample_page_numbers(typst: str, *, year: int, week_id: str, jan1: str) -> di
         raise ValueError("empty typst")
     return {
         "cover": 1,
+        "contents": _first_page(chunks, "<index>]", "contents"),
         "annual": _first_page(chunks, "<annual>]", "annual"),
         "quarterly-q1": _first_page(chunks, f"<quarter-{year}-1>]", "quarterly"),
         "monthly-jan": _first_page(chunks, f"<month-{jan1}>]", "monthly"),
         "weekly-w01": _first_page(chunks, f"<{week_id}>]", "weekly"),
         "daily-jan1": _first_page(chunks, f"text(size: h1)[1 <{jan1}>]", "daily"),
         "notes-jan1": _first_page(chunks, f"<daily-note-{jan1}-page-1>]", "daily notes"),
-        "colophon": _first_page(chunks, "About this notebook", "colophon"),
+        "colophon": _first_page(chunks, "<colophon>]", "colophon"),
     }
