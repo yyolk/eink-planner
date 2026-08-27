@@ -162,9 +162,12 @@ def run_new(
     tmp = Path(tmp_name)
     try:
         try:
-            os.write(fd, written.encode("utf-8"))
-        finally:
+            handle = os.fdopen(fd, "w", encoding="utf-8")
+        except Exception:
             os.close(fd)
+            raise
+        with handle:
+            handle.write(written)
         load(tmp)
         tmp.replace(dest)
     finally:
