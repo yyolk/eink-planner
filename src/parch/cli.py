@@ -108,6 +108,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Overlay planner year (dates and cover title; not a config key)",
     )
+    press.add_argument(
+        "--ir",
+        action="store_true",
+        help="Use the experimental layout IR (MOS builds a tree; Typst only paints)",
+    )
 
     proof = sub.add_parser(
         "proof",
@@ -188,7 +193,31 @@ def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
                 argv=list(argv) if argv is not None else list(sys.argv),
             ),
         )
+    if getattr(args, "ir", False):
+        return _generate_ir(args, dto, i18n)
     typst_source = Generate(i18n=i18n).generate(dto)
+
+    workdir = Path(args.workdir)
+    workdir.mkdir(parents=True, exist_ok=True)
+    (workdir / "index.typst").write_text(typst_source, encoding="utf-8")
+    print(f"Wrote {workdir / 'index.typst'}")
+
+    pdf = Compile().compile(
+        workdir=workdir,
+        file="index.typst",
+        enable_ghostscript=args.with_ghostscript,
+        tools_dir=_repo_root() / ".tools",
+    )
+    print(f"Wrote {pdf}")
+    return 0
+
+
+def _generate_ir(args: argparse.Namespace, dto, i18n: I18n) -> int:
+    from parch.ir.mos import build_planner
+    from parch.ir.typst import render_typst
+
+    print("using layout IR")
+    typst_source = render_typst(build_planner(dto, i18n))
 
     workdir = Path(args.workdir)
     workdir.mkdir(parents=True, exist_ok=True)
