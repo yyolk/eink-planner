@@ -242,4 +242,6 @@ def test_mos_right_habits_mark_sits_next_to_strip():
     page = next(p for p in _pages(typst) if "January<habits-january>" in p)
     title_at = page.index("January<habits-january>")
     mark_at = page.index(_MARK_LINK)
-    assert title_at < mark_at
+    strip_at = page.index("rowspan: 2")
+    assert title_at < mark_at < strip_at
+    assert page[mark_at:strip_at].count("padded_link") == 1
