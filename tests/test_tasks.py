@@ -67,7 +67,7 @@ def _index_page(typst: str, page_id: str = "tasks") -> str:
 def _week_page(typst: str, week_id: str) -> str:
     marker = f"<tasks-{week_id}>"
     for page in _pages(typst):
-        if marker in page and "rotate(" not in page and f"[Tasks <tasks-" not in page:
+        if marker in page and "rotate(" not in page and "[Tasks <tasks-" not in page:
             # week pages define #[] <tasks-WEEK>; index pages only link to it
             if f"#[] <tasks-{week_id}>" in page:
                 return page
