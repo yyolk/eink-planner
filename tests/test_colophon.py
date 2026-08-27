@@ -316,9 +316,11 @@ def test_shipped_profiles_include_colophon_where_shipped():
         "supernote-nomad.toml",
         "supernote-nomad-mos-right.toml",
         "kindle-scribe.toml",
+        "kindle-scribe-mos-right.toml",
         "158x210-mos-left.toml",
         "158x210-mos-left-lined.toml",
         "158x210-mos-right.toml",
+        "158x210-mos-right-lined.toml",
     }
     for name in include:
         dto = load(base_config(name.removesuffix(".toml")))

@@ -18,7 +18,9 @@ NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
 MOS_LEFT = base_config("158x210-mos-left")
 MOS_LEFT_LINED = base_config("158x210-mos-left-lined")
 MOS_RIGHT = base_config("158x210-mos-right")
+MOS_RIGHT_LINED = base_config("158x210-mos-right-lined")
 SCRIBE = base_config("kindle-scribe")
+SCRIBE_MOS_RIGHT = base_config("kindle-scribe-mos-right")
 
 GOLDEN_SHA256 = {
     "supernote-nomad": "6d4ac8d6fb58f2d88726d5099642b9b90f2edde676a4ffc8667d91a07c3d653a",
@@ -26,7 +28,7 @@ GOLDEN_SHA256 = {
 }
 
 
-@pytest.mark.parametrize("path", [NOMAD, NOMAD_MOS_RIGHT, MOS_LEFT, MOS_LEFT_LINED, MOS_RIGHT, SCRIBE])
+@pytest.mark.parametrize("path", [NOMAD, NOMAD_MOS_RIGHT, MOS_LEFT, MOS_LEFT_LINED, MOS_RIGHT, MOS_RIGHT_LINED, SCRIBE, SCRIBE_MOS_RIGHT])
 def test_parse_shipped_toml_profiles(path: Path):
     dto = load(path)
     assert dto["template"] == "mos"
