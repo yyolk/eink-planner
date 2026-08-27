@@ -235,3 +235,11 @@ def test_daily_year_chip_sits_beside_lead_title():
     chip_at = page.index("[2026]")
     assert title_at < mark_at < chip_at
 
+
+
+def test_mos_right_habits_mark_sits_next_to_strip():
+    typst = _generate(load(NOMAD_MOS_RIGHT))
+    page = next(p for p in _pages(typst) if "January<habits-january>" in p)
+    title_at = page.index("January<habits-january>")
+    mark_at = page.index(_MARK_LINK)
+    assert title_at < mark_at
