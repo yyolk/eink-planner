@@ -21,8 +21,8 @@ MOS_RIGHT = CONFIGS / "158x210-mos-right.toml"
 SCRIBE = CONFIGS / "kindle-scribe.toml"
 
 GOLDEN_SHA256 = {
-    "supernote-nomad": "94a2f4fdfc207368ee54fa0701a6f127fadb784b29223c807300679da448a0bf",
-    "158x210-mos-left": "b75b5da4811f0b735352ae19216e68c8895bf1a3eddab0856b8b34abb4804ec9",
+    "supernote-nomad": "7042ba631e8e0319a11ce000a32e50bcc0c21b0f7acd9f6c8db5712f541e49cc",
+    "158x210-mos-left": "ae1bc667985443378c95fa7cbb82de22a2ab59729426ff8bff0e298e46bf63d0",
 }
 
 

@@ -136,7 +136,11 @@ def test_sample_page_numbers_from_labels():
     typst = """
 cover
 #pagebreak()
+text(size: h1, weight: "bold")[Contents <index>]
+About this notebook
+#pagebreak()
 text(size: h1)[2026<annual>]
+padded_link(<index>)
 padded_link(<quarter-2026-1>)
 padded_link(<month-2026-01-01>)
 padded_link(<2026W01>)
@@ -155,25 +159,26 @@ padded_link(<daily-note-2026-01-01-page-1>)
 #pagebreak()
 text(size: h1)[1 <daily-note-2026-01-01-page-1>]
 #pagebreak()
-About this notebook
+text(size: h1, weight: "bold")[About this notebook <colophon>]
 """
     pages = sample_page_numbers(
         typst, year=2026, week_id="2026W01", jan1="2026-01-01"
     )
     assert pages == {
         "cover": 1,
-        "annual": 2,
-        "quarterly-q1": 3,
-        "monthly-jan": 5,
-        "weekly-w01": 6,
-        "daily-jan1": 7,
-        "notes-jan1": 8,
-        "colophon": 9,
+        "contents": 2,
+        "annual": 3,
+        "quarterly-q1": 4,
+        "monthly-jan": 6,
+        "weekly-w01": 7,
+        "daily-jan1": 8,
+        "notes-jan1": 9,
+        "colophon": 10,
     }
 
 
 def test_sample_page_numbers_missing_label():
     from parch.services.preview_svg import sample_page_numbers
 
-    with pytest.raises(ValueError, match="annual"):
+    with pytest.raises(ValueError, match="contents"):
         sample_page_numbers("cover only", year=2026, week_id="2026W01", jan1="2026-01-01")

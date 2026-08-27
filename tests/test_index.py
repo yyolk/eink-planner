@@ -202,6 +202,8 @@ def test_colophon_has_mark_and_unchanged_facts():
     page = _colophon_page(typst)
     assert _MARK_LINK in page
     assert _MARK_RULE in page
+    assert page.index("columns: (auto, auto)") < page.index(_MARK_LINK)
+    assert page.index(_MARK_LINK) < page.index("[About this notebook <colophon>]")
     assert "[*Device*]" in page
     assert "[*Year*]" in page
     assert "[*Version*]" in page

@@ -68,7 +68,7 @@ A name in the top-level `sections = ["cover", …]` list is enabled, in that ord
 
 ## Sample pages
 
-2026 from [`configs/158x210-mos-left.toml`](configs/158x210-mos-left.toml). MOS strip on the left. This profile ships cover through daily notes plus the colophon (no projects, habits, review, or meetings). Previews are Typst SVGs at half scale. Regenerate with:
+2026 from [`configs/158x210-mos-left.toml`](configs/158x210-mos-left.toml). MOS strip on the left. This profile ships cover, Contents, the calendar sections, and the colophon (no projects, habits, review, tasks, or meetings). Previews are Typst SVGs at half scale. Regenerate with:
 
 ```shell
 uv run parch preview-svg configs/158x210-mos-left.toml --samples
@@ -77,6 +77,7 @@ uv run parch preview-svg configs/158x210-mos-left.toml --samples
 | Section | Page |
 | --- | --- |
 | Cover | <img src="docs/samples/158x210-mos-left/cover.svg" alt="Cover" width="224" /> |
+| Contents | <img src="docs/samples/158x210-mos-left/contents.svg" alt="Contents" width="224" /> |
 | Annual | <img src="docs/samples/158x210-mos-left/annual.svg" alt="Annual" width="224" /> |
 | Quarterly | <img src="docs/samples/158x210-mos-left/quarterly-q1.svg" alt="Quarterly" width="224" /> |
 | Monthly | <img src="docs/samples/158x210-mos-left/monthly-jan.svg" alt="Monthly" width="224" /> |
