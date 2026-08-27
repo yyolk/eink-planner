@@ -157,10 +157,11 @@ def run_new(
         sections=chosen_sections,
         source_sections=source_sections,
     )
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_name = tempfile.mkstemp(dir=dest.parent, suffix=".toml")
-    tmp = Path(tmp_name)
+    tmp: Path | None = None
     try:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        fd, tmp_name = tempfile.mkstemp(dir=dest.parent, suffix=".toml")
+        tmp = Path(tmp_name)
         try:
             handle = os.fdopen(fd, "w", encoding="utf-8")
         except Exception:
@@ -170,8 +171,11 @@ def run_new(
             handle.write(written)
         load(tmp)
         tmp.replace(dest)
+    except OSError as exc:
+        raise ConfigError(f"{dest}: {exc}") from exc
     finally:
-        tmp.unlink(missing_ok=True)
+        if tmp is not None:
+            tmp.unlink(missing_ok=True)
     print(f"Wrote {dest}")
     return 0
 

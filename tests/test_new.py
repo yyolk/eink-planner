@@ -272,3 +272,26 @@ def test_overlay_indented_sections_replaced_in_place():
     assert written.count("sections =") == 1
     data = tomllib.loads(written)
     assert data["sections"] == ["cover"]
+
+
+def test_new_dest_parent_is_file(tmp_path, capsys):
+    parent = tmp_path / "existing_file"
+    parent.write_text("keep\n", encoding="utf-8")
+    out = parent / "child.toml"
+    rc = main(
+        [
+            "new",
+            "--from",
+            "supernote-nomad",
+            "--yes",
+            "-o",
+            str(out),
+        ]
+    )
+    assert rc == 1
+    err = capsys.readouterr().err
+    assert "error:" in err
+    assert str(out) in err
+    assert "Traceback" not in err
+    assert parent.read_text(encoding="utf-8") == "keep\n"
+    assert parent.is_file()
