@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
@@ -10,11 +9,10 @@ from parch.mos.sections.annual import Annual
 from parch.mos.sections.daily_notes import DailyNotes
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
-from tests.helpers import make_configurator
+from tests.helpers import base_config, load_default, make_configurator
 from tests.toml_fixtures import omit_toml_sections
 
-REPO = Path(__file__).resolve().parents[2]
-NOMAD = REPO / "configs/supernote-nomad.toml"
+NOMAD = base_config("supernote-nomad")
 
 _BULKY = (
     "colophon",
@@ -36,7 +34,7 @@ _BANNED_BODY = (
 
 
 def _i18n() -> I18n:
-    return I18n.load_default(REPO, "en")
+    return load_default()
 
 
 def _section(

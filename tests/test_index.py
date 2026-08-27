@@ -2,19 +2,16 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from parch.config import load
-from parch.i18n import I18n
 from parch.services.config_file import CANONICAL_SECTIONS
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import compile_pdf
 from tests.toml_fixtures import _minimal, omit_toml_sections, short_january
+from tests.helpers import base_config, load_default
 
-REPO = Path(__file__).resolve().parents[1]
-NOMAD = REPO / "configs/supernote-nomad.toml"
-NOMAD_MOS_RIGHT = REPO / "configs/supernote-nomad-mos-right.toml"
+NOMAD = base_config("supernote-nomad")
+NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
 
 _TOC_TITLE = 'weight: "bold")[Contents <index>]'
 _MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
@@ -22,7 +19,7 @@ _MARK_LINK = "padded_link(<index>"
 
 
 def _generate(dto) -> str:
-    return Generate(i18n=I18n.load_default(REPO, "en")).generate(dto)
+    return Generate(i18n=load_default()).generate(dto)
 
 
 def _pages(typst: str) -> list[str]:
@@ -258,7 +255,6 @@ def test_daily_year_chip_sits_beside_lead_title():
     mark_at = page.index(_MARK_LINK)
     chip_at = page.index("[2026]")
     assert title_at < mark_at < chip_at
-
 
 
 def test_mos_right_habits_mark_sits_next_to_strip():

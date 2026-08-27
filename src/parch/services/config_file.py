@@ -8,6 +8,7 @@ import sys
 import tempfile
 import tomllib
 from datetime import date
+from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Any
 
@@ -60,18 +61,15 @@ def shipped_help() -> str:
     return ", ".join(label for label, _stem in SHIPPED_PROFILES)
 
 
-def resolve_from(spec: str, repo: Path) -> Path:
-    """Resolve --from as an existing path, else configs/<stem>.toml, else configs/<stem>."""
+def resolve_from(spec: str) -> Path:
+    """Resolve spec as an existing path, else a packaged configs/<stem>.toml."""
     given = Path(spec)
     if given.is_file():
         return given
-    configs = repo / "configs"
-    dotted = configs / f"{spec}.toml"
-    if dotted.is_file():
-        return dotted
-    bare = configs / spec
-    if bare.is_file():
-        return bare
+    resource = files("parch.data") / "configs" / f"{spec}.toml"
+    if resource.is_file():
+        with as_file(resource) as path:
+            return Path(path)
     names = ", ".join(stem for _label, stem in SHIPPED_PROFILES)
     raise ConfigError(
         f"unknown profile {spec!r}; expected a path or shipped name ({names})"
@@ -107,7 +105,6 @@ def overlay_toml(
 
 def run_new(
     *,
-    repo: Path,
     outfile: str | Path | None,
     from_profile: str | None,
     year: int | None,
@@ -122,7 +119,7 @@ def run_new(
     if from_profile is None:
         from_profile = DEFAULT_FROM
 
-    source = resolve_from(from_profile, repo)
+    source = resolve_from(from_profile)
     text, data = _read_source(source)
     source_year = _year_from_data(data)
     source_sections = _sections_from_data(data)

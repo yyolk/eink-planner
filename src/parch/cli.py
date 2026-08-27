@@ -14,7 +14,7 @@ from parch.provenance import apply_provenance, collect_provenance
 from parch.mos.configurator import Configurator
 from parch.services.compile import Compile, CompileError
 from parch.services.generate import Generate
-from parch.services.config_file import DEFAULT_FROM, run_new, shipped_help
+from parch.services.config_file import DEFAULT_FROM, resolve_from, run_new, shipped_help
 from parch.services.preview_svg import DEFAULT_SCALE, parse_pages, preview_svg, sample_page_numbers
 
 
@@ -78,7 +78,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     gen = sub.add_parser("generate", help="Generate Typst + PDF from a TOML config")
-    gen.add_argument("config", help="Path to planner TOML config")
+    gen.add_argument("config", help="Planner profile (path or shipped stem)")
     gen.add_argument(
         "-w",
         "--workdir",
@@ -113,7 +113,7 @@ def build_parser() -> argparse.ArgumentParser:
         "preview-svg",
         help="Compile selected Typst pages to preview SVGs (not a PDF raster)",
     )
-    prev.add_argument("config", help="Path to planner TOML config")
+    prev.add_argument("config", help="Planner profile (path or shipped stem)")
     prev.add_argument(
         "-w",
         "--workdir",
@@ -164,7 +164,6 @@ def new_cmd(args: argparse.Namespace) -> int:
     if outfile is None:
         outfile = args.output
     return run_new(
-        repo=_repo_root(),
         outfile=outfile,
         from_profile=args.from_profile,
         year=args.year,
@@ -175,15 +174,15 @@ def new_cmd(args: argparse.Namespace) -> int:
 
 
 def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
-    repo = _repo_root()
-    i18n = I18n.load_default(repo, args.locale)
+    config_path = resolve_from(args.config)
+    i18n = I18n.load_default(args.locale)
 
-    dto = apply_debug(load(args.config), debug=bool(args.debug))
+    dto = apply_debug(load(config_path), debug=bool(args.debug))
     dto = apply_year(dto, args.year)
     dto = apply_provenance(
         dto,
         collect_provenance(
-            config_path=args.config,
+            config_path=config_path,
             argv=list(argv) if argv is not None else list(sys.argv),
         ),
     )
@@ -198,7 +197,7 @@ def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
         workdir=workdir,
         file="index.typst",
         enable_ghostscript=args.with_ghostscript,
-        tools_dir=repo / ".tools",
+        tools_dir=_repo_root() / ".tools",
     )
     print(f"Wrote {pdf}")
     return 0
@@ -206,13 +205,14 @@ def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
 
 def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
     repo = _repo_root()
-    i18n = I18n.load_default(repo, args.locale)
-    dto = apply_debug(load(args.config), debug=bool(args.debug))
+    config_path = resolve_from(args.config)
+    i18n = I18n.load_default(args.locale)
+    dto = apply_debug(load(config_path), debug=bool(args.debug))
     dto = apply_year(dto, args.year)
     dto = apply_provenance(
         dto,
         collect_provenance(
-            config_path=args.config,
+            config_path=config_path,
             argv=list(argv) if argv is not None else list(sys.argv),
         ),
     )

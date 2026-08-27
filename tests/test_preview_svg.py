@@ -56,7 +56,7 @@ def test_preview_svg_crop_then_scale():
 def test_preview_svg_cli_defaults():
     parser = build_parser()
     args = parser.parse_args(
-        ["preview-svg", "configs/158x210-mos-left.toml", "--pages", "1,2"]
+        ["preview-svg", "158x210-mos-left", "--pages", "1,2"]
     )
     assert args.command == "preview-svg"
     assert args.scale == DEFAULT_SCALE
@@ -67,7 +67,7 @@ def test_preview_svg_cli_defaults():
 def test_preview_svg_cli_samples():
     parser = build_parser()
     args = parser.parse_args(
-        ["preview-svg", "configs/158x210-mos-left.toml", "--samples"]
+        ["preview-svg", "158x210-mos-left", "--samples"]
     )
     assert args.samples is True
     assert args.pages is None
@@ -81,7 +81,7 @@ def test_preview_svg_cli_pages_and_samples_conflict():
         parser.parse_args(
             [
                 "preview-svg",
-                "configs/158x210-mos-left.toml",
+                "158x210-mos-left",
                 "--pages",
                 "1,2",
                 "--samples",
@@ -92,18 +92,18 @@ def test_preview_svg_cli_pages_and_samples_conflict():
 def test_preview_svg_cli_requires_pages_or_samples():
     parser = build_parser()
     with pytest.raises(SystemExit):
-        parser.parse_args(["preview-svg", "configs/158x210-mos-left.toml"])
+        parser.parse_args(["preview-svg", "158x210-mos-left"])
 
 
 def test_samples_dest_uses_config_stem():
-    assert samples_dest(Path("/repo"), "configs/158x210-mos-left.toml") == Path(
+    assert samples_dest(Path("/repo"), "158x210-mos-left") == Path(
         "/repo/docs/samples/158x210-mos-left"
     )
 
 
 def test_generate_cli_unchanged():
     parser = build_parser()
-    args = parser.parse_args(["generate", "configs/supernote-nomad.toml"])
+    args = parser.parse_args(["generate", "supernote-nomad"])
     assert args.command == "generate"
     assert not hasattr(args, "pages") or args.command == "generate"
 

@@ -2,26 +2,24 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 
 import pytest
 
 from parch import ConfigError
 from parch.config import load
-from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.sections.habits import Habits, _habit_header
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf
 from tests.toml_fixtures import _minimal, short_january
+from tests.helpers import base_config, load_default
 
-REPO = Path(__file__).resolve().parents[1]
 
 def _habit_header_src(name: str) -> str:
     return _habit_header(name)
 
-NOMAD = REPO / "configs/supernote-nomad.toml"
+NOMAD = base_config("supernote-nomad")
 MONTHS = (
     "january",
     "february",
@@ -39,7 +37,7 @@ MONTHS = (
 
 
 def _generate(dto) -> str:
-    return Generate(i18n=I18n.load_default(REPO, "en")).generate(dto)
+    return Generate(i18n=load_default()).generate(dto)
 
 
 def _habits(dto) -> Habits:
@@ -50,7 +48,7 @@ def _habits(dto) -> Habits:
             break
     return Habits(
         section_name="habits",
-        i18n=I18n.load_default(REPO, "en"),
+        i18n=load_default(),
         configurator=Configurator(dto),
         habit_columns=params.get("habit_columns", Habits.DEFAULT_COLUMNS),
         names=params.get("names"),

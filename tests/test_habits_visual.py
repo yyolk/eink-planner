@@ -2,24 +2,22 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from statistics import median
 
-from parch.i18n import I18n
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import compile_pdf
 from tests.toml_fixtures import _minimal
 from tests.visual import full_width_bands, raster_page
+from tests.helpers import load_default
 
-REPO = Path(__file__).resolve().parents[1]
 _DEC_PAGE = 13  # habits-only: index, Jan…Dec
 _DPI = 200  # 0.4mm ≈ 3.1px; regular 0.3pt ≈ 0.8px
 _THICK_PX = 3
 
 
 def _generate(dto) -> str:
-    return Generate(i18n=I18n.load_default(REPO, "en")).generate(dto)
+    return Generate(i18n=load_default()).generate(dto)
 
 
 def test_december_friday_rules_are_thicker_than_grid(tmp_path):

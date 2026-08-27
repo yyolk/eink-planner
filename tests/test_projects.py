@@ -4,29 +4,27 @@ from __future__ import annotations
 
 import math
 import re
-from pathlib import Path
 
 import pytest
 
 from parch import ConfigError
 from parch.config import load
-from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.sections.projects import Projects, _CARD_BASELINES, _NUM_COL, _length_mm
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf
 from tests.toml_fixtures import _minimal, short_january
+from tests.helpers import base_config, load_default
 
-REPO = Path(__file__).resolve().parents[1]
-NOMAD = REPO / "configs/supernote-nomad.toml"
+NOMAD = base_config("supernote-nomad")
 
 _CARD_STROKE = "stroke: regular_stroke + black"
 _CARD_LINE = "line(length: size.width, stroke: 0.2pt + black)"
 
 
 def _generate(dto) -> str:
-    return Generate(i18n=I18n.load_default(REPO, "en")).generate(dto)
+    return Generate(i18n=load_default()).generate(dto)
 
 
 def _projects(dto, pages: int | None = None) -> Projects:
@@ -39,7 +37,7 @@ def _projects(dto, pages: int | None = None) -> Projects:
         params["pages"] = pages
     return Projects(
         section_name="projects",
-        i18n=I18n.load_default(REPO, "en"),
+        i18n=load_default(),
         configurator=Configurator(dto),
         pages=params.get("pages", Projects.DEFAULT_PAGES),
         card_rows=params.get("card_rows", Projects.CARDS),

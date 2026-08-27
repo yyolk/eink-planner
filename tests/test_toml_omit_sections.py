@@ -15,15 +15,15 @@ import pytest
 
 from parch import ConfigError
 from parch.config import StrictDict, load
-from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.services.compile import ensure_typst
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.toml_fixtures import omit_toml_sections, short_january
+from tests.helpers import base_config, load_default
 
 REPO = Path(__file__).resolve().parents[1]
-NOMAD = REPO / "configs/supernote-nomad.toml"
+NOMAD = base_config("supernote-nomad")
 
 SECTIONS = (
     "cover",
@@ -61,7 +61,7 @@ def _enabled_names(dto: StrictDict) -> list[str]:
 
 
 def _generate(dto: StrictDict) -> str:
-    return Generate(i18n=I18n.load_default(REPO, "en")).generate(dto)
+    return Generate(i18n=load_default()).generate(dto)
 
 
 def classify_label(label: str) -> str:

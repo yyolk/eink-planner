@@ -10,7 +10,6 @@ import pytest
 
 from parch import ConfigError, __version__
 from parch.config import StrictDict, load
-from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.provenance import apply_provenance, collect_provenance
 from parch.sections.colophon import DEFAULT_TITLE, Colophon, drop_empty_tables
@@ -22,16 +21,17 @@ from tests.test_toml_omit_sections import (
     compile_pdf,
 )
 from tests.toml_fixtures import _minimal, short_january
+from tests.helpers import base_config, load_default
 
 REPO = Path(__file__).resolve().parents[1]
-NOMAD = REPO / "configs/supernote-nomad.toml"
+NOMAD = base_config("supernote-nomad")
 
 _BUILD_LOG = ("Command", "Git commit", "SHA-256", "Config path", "Config")
 _THEME = ('lang: "toml"', "syntaxes:", "theme:")
 
 
 def _generate(dto: StrictDict) -> str:
-    return Generate(i18n=I18n.load_default(REPO, "en")).generate(dto)
+    return Generate(i18n=load_default()).generate(dto)
 
 
 def _attach(dto: StrictDict, path: Path, argv: list[str] | None = None) -> StrictDict:
@@ -321,7 +321,7 @@ def test_shipped_profiles_include_colophon_where_shipped():
         "158x210-mos-right.toml",
     }
     for name in include:
-        dto = load(REPO / "configs" / name)
+        dto = load(base_config(name.removesuffix(".toml")))
         names = [s["name"] for s in Configurator(dto).enabled_sections()]
         assert names[-1] == "colophon", name
 

@@ -2,22 +2,20 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 
 import pytest
 
 from parch import ConfigError
 from parch.config import load
-from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.sections.review import Review
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf
 from tests.toml_fixtures import _minimal, short_january
+from tests.helpers import base_config, load_default
 
-REPO = Path(__file__).resolve().parents[1]
-NOMAD = REPO / "configs/supernote-nomad.toml"
+NOMAD = base_config("supernote-nomad")
 _EN_DASH = "–"
 
 # 2026, Monday week start: Jan 1 is Thursday.
@@ -37,7 +35,7 @@ _W53_RANGE = f"Dec 28 {_EN_DASH} Jan 3"
 
 
 def _generate(dto) -> str:
-    return Generate(i18n=I18n.load_default(REPO, "en")).generate(dto)
+    return Generate(i18n=load_default()).generate(dto)
 
 
 def _review(dto) -> Review:
@@ -48,7 +46,7 @@ def _review(dto) -> Review:
             break
     return Review(
         section_name="review",
-        i18n=I18n.load_default(REPO, "en"),
+        i18n=load_default(),
         configurator=Configurator(dto),
         weeks_per_page=params.get("weeks_per_page", Review.DEFAULT_WEEKS_PER_PAGE),
         pattern=params.get("pattern", "lined"),

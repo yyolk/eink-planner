@@ -23,25 +23,25 @@ uv sync
 
 ```shell
 # SuperNote Nomad 2026 (default profile, MOS-left) → ./out/index.pdf
-uv run parch generate configs/supernote-nomad.toml
+uv run parch generate supernote-nomad
 
 # SuperNote Nomad 2027 from the shipped 2026 profile (CLI overlay)
-uv run parch generate configs/supernote-nomad.toml --year 2027
+uv run parch generate supernote-nomad --year 2027
 
 # SuperNote Nomad MOS-right → ./out/nomad-mos-right/index.pdf
-uv run parch generate configs/supernote-nomad-mos-right.toml -w out/nomad-mos-right
+uv run parch generate supernote-nomad-mos-right -w out/nomad-mos-right
 
 # 158×210 MOS-left → ./out/mos-left/index.pdf
-uv run parch generate configs/158x210-mos-left.toml -w out/mos-left
+uv run parch generate 158x210-mos-left -w out/mos-left
 
 # 158×210 MOS-left lined → ./out/mos-left-lined/index.pdf
-uv run parch generate configs/158x210-mos-left-lined.toml -w out/mos-left-lined
+uv run parch generate 158x210-mos-left-lined -w out/mos-left-lined
 
 # 158×210 MOS-right → ./out/mos-right/index.pdf
-uv run parch generate configs/158x210-mos-right.toml -w out/mos-right
+uv run parch generate 158x210-mos-right -w out/mos-right
 
 # Kindle Scribe → ./out/scribe/index.pdf
-uv run parch generate configs/kindle-scribe.toml -w out/scribe
+uv run parch generate kindle-scribe -w out/scribe
 ```
 
 Flags:
@@ -49,7 +49,7 @@ Flags:
 | Flag | Default | Meaning |
 | --- | --- | --- |
 | `-w` / `--workdir` | `./out` | Where `index.typst` and `index.pdf` are written |
-| `-l` / `--locale` | `en` | Locale code (`locales/<code>.toml`) |
+| `-l` / `--locale` | `en` | Locale code |
 | `-g` / `--with-ghostscript` | off | Optional PDF shrink via `gs` |
 | `--debug` | off | Draw MOS debug strokes (not a config key) |
 | `--year` | file year | Overlay planner year (dates and cover title; not a config key) |
@@ -68,10 +68,10 @@ A name in the top-level `sections = ["cover", …]` list is enabled, in that ord
 
 ## Sample pages
 
-2026 from [`configs/158x210-mos-left.toml`](configs/158x210-mos-left.toml). MOS strip on the left. This profile ships cover, Contents, the calendar sections, and the colophon (no projects, habits, review, tasks, or meetings). Previews are Typst SVGs at half scale. Regenerate with:
+2026 from [`158x210-mos-left`](src/parch/data/configs/158x210-mos-left.toml). MOS strip on the left. This profile ships cover, Contents, the calendar sections, and the colophon (no projects, habits, review, tasks, or meetings). Previews are Typst SVGs at half scale. Regenerate with:
 
 ```shell
-uv run parch preview-svg configs/158x210-mos-left.toml --samples
+uv run parch preview-svg 158x210-mos-left --samples
 ```
 
 | Section | Page |
@@ -92,12 +92,12 @@ Sizes are 1:1 on glass at 300 PPI.
 
 | Device | Pixels | Page (pt) | Page (mm) | Config |
 | --- | --- | --- | --- | --- |
-| SuperNote Nomad (A6 X2) | 1404×1872 | 336.96×449.28 | 118.87×158.5 | `configs/supernote-nomad.toml` |
-| SuperNote Nomad MOS-right | 1404×1872 | 336.96×449.28 | 118.87×158.5 | `configs/supernote-nomad-mos-right.toml` |
-| 158×210 MOS-left | — | 447.87×595.28 | 158×210 | `configs/158x210-mos-left.toml` |
-| 158×210 MOS-left lined | — | 447.87×595.28 | 158×210 | `configs/158x210-mos-left-lined.toml` |
-| 158×210 MOS-right | — | 447.87×595.28 | 158×210 | `configs/158x210-mos-right.toml` |
-| Kindle Scribe | 1860×2480 | 446.4×595.2 | 157.48×209.97 | `configs/kindle-scribe.toml` |
+| SuperNote Nomad (A6 X2) | 1404×1872 | 336.96×449.28 | 118.87×158.5 | `supernote-nomad` |
+| SuperNote Nomad MOS-right | 1404×1872 | 336.96×449.28 | 118.87×158.5 | `supernote-nomad-mos-right` |
+| 158×210 MOS-left | — | 447.87×595.28 | 158×210 | `158x210-mos-left` |
+| 158×210 MOS-left lined | — | 447.87×595.28 | 158×210 | `158x210-mos-left-lined` |
+| 158×210 MOS-right | — | 447.87×595.28 | 158×210 | `158x210-mos-right` |
+| Kindle Scribe | 1860×2480 | 446.4×595.2 | 157.48×209.97 | `kindle-scribe` |
 
 Presets also live in `parch.devices`. The Nomad profile scales strokes, type, and gutters down slightly from the original 158×210 MOS-left gist so the MOS layout still fits the smaller page.
 

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
@@ -11,11 +10,10 @@ from parch.mos.sections.annual import Annual
 from parch.mos.sections.weekly import Weekly as WeeklySection
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
-from tests.helpers import make_configurator, make_week
+from tests.helpers import base_config, load_default, make_configurator, make_week
 from tests.toml_fixtures import omit_toml_sections
 
-REPO = Path(__file__).resolve().parents[2]
-NOMAD = REPO / "configs/supernote-nomad.toml"
+NOMAD = base_config("supernote-nomad")
 
 _BULKY = (
     "daily",
@@ -50,7 +48,7 @@ OLD_W01_DAYS = (
 
 
 def _i18n() -> I18n:
-    return I18n.load_default(REPO, "en")
+    return load_default()
 
 
 def _page(date_str: str, pattern: str = "dotted", manifest: Manifest | None = None) -> Weekly:
