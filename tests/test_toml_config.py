@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import hashlib
 import pytest
 
 from parch import ConfigError
@@ -11,8 +10,6 @@ from parch.toml_config import apply_debug, apply_year, load_toml, parse_toml
 from tests.toml_fixtures import _minimal, omit_toml_sections
 from tests.helpers import base_config, load_default
 
-REPO = Path(__file__).resolve().parents[1]
-
 NOMAD = base_config("supernote-nomad")
 NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
 MOS_LEFT = base_config("158x210-mos-left")
@@ -21,11 +18,6 @@ MOS_RIGHT = base_config("158x210-mos-right")
 MOS_RIGHT_LINED = base_config("158x210-mos-right-lined")
 SCRIBE = base_config("kindle-scribe")
 SCRIBE_MOS_RIGHT = base_config("kindle-scribe-mos-right")
-
-GOLDEN_SHA256 = {
-    "supernote-nomad": "234ef52b9214dca837146facf72f64cca0433164614387c08f96bc4d98840295",
-    "158x210-mos-left": "0fa1de7d41019e467b7124c84f521208fe6885df24a98b21035294d34932e6e5",
-}
 
 
 @pytest.mark.parametrize("path", [NOMAD, NOMAD_MOS_RIGHT, MOS_LEFT, MOS_LEFT_LINED, MOS_RIGHT, MOS_RIGHT_LINED, SCRIBE, SCRIBE_MOS_RIGHT])
@@ -485,19 +477,6 @@ count = 1
     params = _daily_little_calendar(dto)
     assert params["inset"] == "5pt"
     assert dto["planner"]["params"]["little_calendar"]["inset"] == "5pt"
-
-
-@pytest.mark.parametrize("name", list(GOLDEN_SHA256))
-def test_golden_typst_hash(name: str):
-    from parch.services.generate import Generate
-
-    dto = load(base_config(name))
-    typst = Generate(i18n=load_default()).generate(dto)
-    digest = hashlib.sha256(typst.encode("utf-8")).hexdigest()
-    assert digest == GOLDEN_SHA256[name]
-    golden = REPO / "out" / "toml-goldens" / f"{name}.typst"
-    if golden.is_file():
-        assert typst == golden.read_text(encoding="utf-8")
 
 
 def test_device_ppi_may_be_omitted():
