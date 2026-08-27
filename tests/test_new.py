@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import tomllib
-from pathlib import Path
 
 import pytest
 
 from parch.cli import build_parser, main
 from parch.config import load
 from parch.services.config_file import overlay_toml
+from tests.helpers import base_config
 
-REPO = Path(__file__).resolve().parents[1]
-NOMAD = REPO / "configs" / "supernote-nomad.toml"
+NOMAD = base_config("supernote-nomad")
 
 
 def test_new_yes_year(tmp_path, capsys):

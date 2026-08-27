@@ -9,16 +9,16 @@ from parch.config import load
 from parch.mos.configurator import Configurator
 from parch.toml_config import apply_debug, apply_year, load_toml, parse_toml
 from tests.toml_fixtures import _minimal, omit_toml_sections
+from tests.helpers import base_config, load_default
 
 REPO = Path(__file__).resolve().parents[1]
-CONFIGS = REPO / "configs"
 
-NOMAD = CONFIGS / "supernote-nomad.toml"
-NOMAD_MOS_RIGHT = CONFIGS / "supernote-nomad-mos-right.toml"
-MOS_LEFT = CONFIGS / "158x210-mos-left.toml"
-MOS_LEFT_LINED = CONFIGS / "158x210-mos-left-lined.toml"
-MOS_RIGHT = CONFIGS / "158x210-mos-right.toml"
-SCRIBE = CONFIGS / "kindle-scribe.toml"
+NOMAD = base_config("supernote-nomad")
+NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
+MOS_LEFT = base_config("158x210-mos-left")
+MOS_LEFT_LINED = base_config("158x210-mos-left-lined")
+MOS_RIGHT = base_config("158x210-mos-right")
+SCRIBE = base_config("kindle-scribe")
 
 GOLDEN_SHA256 = {
     "supernote-nomad": "6d4ac8d6fb58f2d88726d5099642b9b90f2edde676a4ffc8667d91a07c3d653a",
@@ -50,9 +50,9 @@ def test_load_rejects_yaml_and_kdl_device_profiles():
     with pytest.raises(ConfigError, match="TOML"):
         load("foo.kdl")
     with pytest.raises(ConfigError, match="TOML"):
-        load(CONFIGS / "supernote-nomad.kdl")
+        load("supernote-nomad.kdl")
     with pytest.raises(ConfigError, match="TOML"):
-        load(CONFIGS / "supernote-nomad.yaml")
+        load("supernote-nomad.yaml")
 
 
 def test_load_toml_invalid_utf8_is_config_error(tmp_path):
@@ -339,13 +339,12 @@ def test_apply_year_rewrites_cover_title_year():
 
 
 def test_apply_year_typst_uses_overlay_year():
-    from parch.i18n import I18n
     from parch.services.generate import Generate
 
     dto = apply_year(load(NOMAD), 2027)
     data = dto.to_plain()
     data["planner"]["params"]["end_date"] = "2027-01-07"
-    typst = Generate(i18n=I18n.load_default(REPO, "en")).generate(data)
+    typst = Generate(i18n=load_default()).generate(data)
     assert "2027-01-01" in typst
     assert "<2026-01-01>" not in typst
     assert "2027" in typst
@@ -488,11 +487,10 @@ count = 1
 
 @pytest.mark.parametrize("name", list(GOLDEN_SHA256))
 def test_golden_typst_hash(name: str):
-    from parch.i18n import I18n
     from parch.services.generate import Generate
 
-    dto = load(CONFIGS / f"{name}.toml")
-    typst = Generate(i18n=I18n.load_default(REPO, "en")).generate(dto)
+    dto = load(base_config(name))
+    typst = Generate(i18n=load_default()).generate(dto)
     digest = hashlib.sha256(typst.encode("utf-8")).hexdigest()
     assert digest == GOLDEN_SHA256[name]
     golden = REPO / "out" / "toml-goldens" / f"{name}.typst"

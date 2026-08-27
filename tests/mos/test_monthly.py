@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import shutil
 import subprocess
 
@@ -13,12 +12,11 @@ from parch.mos.sections.annual import Annual
 from parch.mos.sections.monthly import Monthly as MonthlySection
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
-from tests.helpers import make_configurator, make_month
+from tests.helpers import base_config, load_default, make_configurator, make_month
 from tests.test_toml_omit_sections import compile_pdf
 from tests.toml_fixtures import omit_toml_sections
 
-REPO = Path(__file__).resolve().parents[2]
-NOMAD = REPO / "configs/supernote-nomad.toml"
+NOMAD = base_config("supernote-nomad")
 
 _MONTH_PARAMS = {
     "week_placement": "left",
@@ -43,7 +41,7 @@ INNER_DAY_BOX = "box(stroke: regular_stroke, inset: 3pt)"
 
 
 def _i18n() -> I18n:
-    return I18n.load_default(REPO, "en")
+    return load_default()
 
 
 def _page(yyyy_mm: str, week_placement: str = "left") -> Monthly:

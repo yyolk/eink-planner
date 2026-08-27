@@ -1,17 +1,14 @@
-from pathlib import Path
-
 import pytest
 
 from parch import ConfigError
 from parch.config import load
 from parch.i18n import I18n
 from parch.services.generate import Generate
-
-REPO = Path(__file__).resolve().parents[1]
+from tests.helpers import base_config, load_default, packaged_locale
 
 
 def test_load_en_toml_representative_keys():
-    i18n = I18n.load(REPO / "locales" / "en.toml", locale="en")
+    i18n = I18n.load(packaged_locale(), locale="en")
     assert i18n.locale == "en"
     assert i18n.t("week_name") == "Week"
     assert i18n.t("priorities") == "Priorities"
@@ -36,15 +33,17 @@ def test_load_en_toml_representative_keys():
 
 
 def test_load_default_prefers_toml():
-    i18n = I18n.load_default(REPO, "en")
+    i18n = load_default()
     assert i18n.t("week_name") == "Week"
-    assert (REPO / "locales" / "en.toml").exists()
-    assert not (REPO / "locales" / "en.yaml").exists()
-    assert not (REPO / "locales" / "en.kdl").exists()
+    locale = packaged_locale()
+    assert locale.exists()
+    assert locale.suffix == ".toml"
+    assert not locale.with_suffix(".yaml").exists()
+    assert not locale.with_suffix(".kdl").exists()
 
 
 def test_missing_key_is_config_error():
-    i18n = I18n.load_default(REPO, "en")
+    i18n = load_default()
     with pytest.raises(ConfigError, match="missing translation: no.such.key"):
         i18n.t("no.such.key")
 
@@ -65,10 +64,10 @@ def test_directory_yaml_only_is_config_error(tmp_path):
 
 
 def test_generate_english_strings_match_previous_meanings():
-    dto = load(REPO / "configs" / "supernote-nomad.toml")
+    dto = load(base_config("supernote-nomad"))
     data = dto.to_plain()
     data["planner"]["params"]["end_date"] = "2026-01-07"
-    typst = Generate(i18n=I18n.load_default(REPO, "en")).generate(data)
+    typst = Generate(i18n=load_default()).generate(data)
     for label in (
         "Week",
         "Schedule",
@@ -88,12 +87,12 @@ def test_generate_english_strings_match_previous_meanings():
 def test_path_like_locale_code_is_config_error():
     locale = "../configs/supernote-nomad"
     with pytest.raises(ConfigError, match="locale: expected a code like en") as exc:
-        I18n.load_default(REPO, locale)
+        I18n.load_default(locale)
     assert repr(locale) in str(exc.value)
 
 
 def test_load_explicit_toml_file_still_works():
-    i18n = I18n.load(REPO / "locales" / "en.toml")
+    i18n = I18n.load(packaged_locale())
     assert i18n.t("week_name") == "Week"
 
 

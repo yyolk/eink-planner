@@ -7,6 +7,7 @@ Lookup keys follow the locale table shape (``week_name``, ``quarter.short``,
 from __future__ import annotations
 
 import tomllib
+from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Any
 
@@ -50,11 +51,10 @@ class I18n:
         raise ConfigError(f"{path}: unsupported locale suffix {suffix!r} (use .toml)")
 
     @classmethod
-    def load_default(cls, package_root: Path | None = None, locale: str = "en") -> I18n:
-        if package_root is None:
-            # src/parch/i18n.py → repo root
-            package_root = Path(__file__).resolve().parents[2]
-        return cls.load(package_root / "locales", locale=locale)
+    def load_default(cls, locale: str = "en") -> I18n:
+        """Load a packaged locale by code."""
+        with as_file(files("parch.data")) as package_dir:
+            return cls.load(package_dir / "locales", locale=locale)
 
 
 def _resolve_locale_file(directory: Path, locale: str) -> Path:

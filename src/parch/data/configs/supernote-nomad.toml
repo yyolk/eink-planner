@@ -1,6 +1,6 @@
 # SuperNote Nomad (A6 X2)
 # 1404×1872 @ 300 PPI → 118.87 × 158.5 mm
-# MOS-left default; MOS-right sibling: configs/supernote-nomad-mos-right.toml
+# MOS-left default; MOS-right sibling: supernote-nomad-mos-right
 
 sections = [
   "cover",

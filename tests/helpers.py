@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from datetime import date
+from importlib.resources import files
+from pathlib import Path
 
 import pytest
 
@@ -9,7 +11,28 @@ from parch.calendar.month import Month
 from parch.calendar.quarter import Quarter
 from parch.calendar.week import Week
 from parch.config import StrictDict
+from parch.i18n import I18n
 from parch.mos.configurator import Configurator
+
+
+def base_config(stem: str) -> Path:
+    """Filesystem path to a packaged device profile."""
+    resource = files("parch.data") / "configs" / f"{stem}.toml"
+    if isinstance(resource, Path):
+        return resource
+    raise RuntimeError("base_config is checkout-only")
+
+
+def packaged_locale(locale: str = "en") -> Path:
+    """Filesystem path to a packaged locale TOML."""
+    resource = files("parch.data") / "locales" / f"{locale}.toml"
+    if isinstance(resource, Path):
+        return resource
+    raise RuntimeError("packaged_locale is checkout-only")
+
+
+def load_default(locale: str = "en") -> I18n:
+    return I18n.load_default(locale)
 
 
 def make_day(date_str: str, weekday_start: str = "monday") -> Day:

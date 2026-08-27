@@ -6,14 +6,13 @@ from pathlib import Path
 
 from PIL import Image
 
-from parch.i18n import I18n
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import _LABEL_DEF, compile_pdf
 from tests.toml_fixtures import _minimal
 from tests.visual import card_interior_lines, raster_page
+from tests.helpers import load_default
 
-REPO = Path(__file__).resolve().parents[1]
 _DPI = 200
 _GAP_PX = 3
 _COL_FRACS = (0.20, 0.50, 0.80)
@@ -32,7 +31,7 @@ ppi = 300"""
 
 
 def _generate(dto) -> str:
-    return Generate(i18n=I18n.load_default(REPO, "en")).generate(dto)
+    return Generate(i18n=load_default()).generate(dto)
 
 
 def _board_png(tmp_path: Path, device: str, stem: str) -> Path:

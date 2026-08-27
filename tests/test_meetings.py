@@ -3,22 +3,20 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
 
 import pytest
 
 from parch import ConfigError
 from parch.config import load
-from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.sections.meetings import Meetings, _NUM_COL
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf
 from tests.toml_fixtures import _minimal, short_january
+from tests.helpers import base_config, load_default
 
-REPO = Path(__file__).resolve().parents[1]
-NOMAD = REPO / "configs/supernote-nomad.toml"
+NOMAD = base_config("supernote-nomad")
 
 _NOMAD_DEVICE = """[device]
 name = "supernote-nomad"
@@ -28,7 +26,7 @@ ppi = 300"""
 
 
 def _generate(dto) -> str:
-    return Generate(i18n=I18n.load_default(REPO, "en")).generate(dto)
+    return Generate(i18n=load_default()).generate(dto)
 
 
 def _meetings(dto, index_pages: int | None = None) -> Meetings:
@@ -41,7 +39,7 @@ def _meetings(dto, index_pages: int | None = None) -> Meetings:
         params["index_pages"] = index_pages
     return Meetings(
         section_name="meetings",
-        i18n=I18n.load_default(REPO, "en"),
+        i18n=load_default(),
         configurator=Configurator(dto),
         index_pages=params.get("index_pages", Meetings.DEFAULT_INDEX_PAGES),
     )

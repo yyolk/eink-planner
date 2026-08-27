@@ -3,19 +3,17 @@
 from __future__ import annotations
 
 import tomllib
-from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
 
 from parch.models import DeviceProfile, load_device_profile, load_locale
 from tests.toml_fixtures import _minimal
+from tests.helpers import base_config, packaged_locale
 
-REPO = Path(__file__).resolve().parents[1]
-CONFIGS = REPO / "configs"
-MOS_LEFT = CONFIGS / "158x210-mos-left.toml"
-MOS_RIGHT = CONFIGS / "158x210-mos-right.toml"
-LOCALE = REPO / "locales" / "en.toml"
+MOS_LEFT = base_config("158x210-mos-left")
+MOS_RIGHT = base_config("158x210-mos-right")
+LOCALE = packaged_locale()
 
 
 def test_happy_path_mos_left():

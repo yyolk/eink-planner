@@ -15,16 +15,14 @@ from parch.mos.pages.quarterly import Quarterly
 from parch.mos.sections.annual import Annual
 from parch.mos.sections.quarterly import Quarterly as QuarterlySection
 from parch.services.generate import Generate
-from tests.helpers import make_configurator, make_quarter
+from tests.helpers import base_config, load_default, make_configurator, make_quarter
 from tests.test_toml_omit_sections import compile_pdf
 from tests.toml_fixtures import omit_toml_sections
 
-REPO = Path(__file__).resolve().parents[2]
-CONFIGS = REPO / "configs"
-MOS_LEFT = CONFIGS / "158x210-mos-left.toml"
-MOS_RIGHT = CONFIGS / "158x210-mos-right.toml"
-NOMAD = CONFIGS / "supernote-nomad.toml"
-NOMAD_MOS_RIGHT = CONFIGS / "supernote-nomad-mos-right.toml"
+MOS_LEFT = base_config("158x210-mos-left")
+MOS_RIGHT = base_config("158x210-mos-right")
+NOMAD = base_config("supernote-nomad")
+NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
 
 Q1_MONTHS = ("January", "February", "March")
 Q3_MONTHS = ("July", "August", "September")
@@ -33,7 +31,7 @@ _BULKY = ("index", "annual", "monthly", "weekly", "daily", "daily_notes", "colop
 
 
 def _i18n() -> I18n:
-    return I18n.load_default(REPO, "en")
+    return load_default()
 
 
 def _little_calendar() -> dict:

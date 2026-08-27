@@ -6,19 +6,17 @@ import pytest
 
 from parch import ConfigError
 from parch.config import load
-from parch.i18n import I18n
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.toml_fixtures import _minimal, short_january
+from tests.helpers import base_config, load_default
 
-REPO = Path(__file__).resolve().parents[1]
-CONFIGS = REPO / "configs"
-NOMAD = CONFIGS / "supernote-nomad.toml"
-NOMAD_MOS_RIGHT = CONFIGS / "supernote-nomad-mos-right.toml"
-MOS_LEFT = CONFIGS / "158x210-mos-left.toml"
-MOS_LEFT_LINED = CONFIGS / "158x210-mos-left-lined.toml"
-MOS_RIGHT = CONFIGS / "158x210-mos-right.toml"
-SCRIBE = CONFIGS / "kindle-scribe.toml"
+NOMAD = base_config("supernote-nomad")
+NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
+MOS_LEFT = base_config("158x210-mos-left")
+MOS_LEFT_LINED = base_config("158x210-mos-left-lined")
+MOS_RIGHT = base_config("158x210-mos-right")
+SCRIBE = base_config("kindle-scribe")
 
 _STYLE_LINED = """[style]
 scratch_pad = "lined"
@@ -43,7 +41,7 @@ column = "8pt"
 
 
 def _generate(dto) -> str:
-    return Generate(i18n=I18n.load_default(REPO, "en")).generate(dto)
+    return Generate(i18n=load_default()).generate(dto)
 
 
 def _section(dto, name: str):

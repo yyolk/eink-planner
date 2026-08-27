@@ -2,25 +2,23 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 
 from PIL import Image
 
-from parch.i18n import I18n
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import SECTIONS, compile_pdf
 from tests.toml_fixtures import omit_toml_sections
 from tests.visual import ink_bbox, raster_page
+from tests.helpers import base_config, load_default
 
-REPO = Path(__file__).resolve().parents[1]
-NOMAD = REPO / "configs/supernote-nomad.toml"
+NOMAD = base_config("supernote-nomad")
 _DPI = 200
 _OTHERS = [name for name in SECTIONS if name != "cover"]
 
 
 def _generate(dto) -> str:
-    return Generate(i18n=I18n.load_default(REPO, "en")).generate(dto)
+    return Generate(i18n=load_default()).generate(dto)
 
 
 def test_cover_year_sits_in_upper_third(tmp_path):
