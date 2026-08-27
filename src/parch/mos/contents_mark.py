@@ -1,4 +1,4 @@
-"""Contents back-link mark: four house-stroke bars, header-tall tap."""
+"""Contents back-link mark: five house-stroke bars, sibling-cap stack."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ def heading_height_token(configurator: Any) -> str:
 
 
 def body_size_token(configurator: Any) -> str:
-    """House body size so mark em is a body cap, not h1."""
+    """House body size for raw pages whose sibling type is body."""
     if configurator is not None and hasattr(configurator, "dig"):
         size = configurator.dig("document", "text", "size")
         if size:
@@ -36,25 +36,32 @@ def body_size_token(configurator: Any) -> str:
 
 def contents_mark(
     manifest: Manifest | None,
-    heading_height: str,
+    heading_height: str | None,
     body_size: str = "8pt",
+    face: str | None = None,
 ) -> str:
-    """Four house-stroke bars linking to Contents, or empty when index is off."""
+    """Five house-stroke bars linking to Contents, or empty when index is off."""
     if manifest is None or not manifest.source(INDEX_ID):
         return ""
-    bar = "line(length: 1.2em, stroke: thick_stroke + black)"
-    glyph = f"""text(size: {body_size}, box(
-  width: 1.2em,
-  height: {heading_height},
-  align(horizon + left, stack(
-    dir: ttb,
-    spacing: 0.15em,
-    {bar},
-    {bar},
-    {bar},
-    {bar},
-  ))
-))"""
+    type_size = face or "h1"
+    bar = "line(length: 0.844em, stroke: thick_stroke + black)"
+    glyph = f"""text(size: {type_size}, context {{
+  let cap = 0.7em.to-absolute()
+  let gap = (cap - 5 * thick_stroke) / 4
+  box(
+    width: 0.844em,
+    height: cap,
+    align(horizon + left, stack(
+      dir: ttb,
+      spacing: gap,
+      {bar},
+      {bar},
+      {bar},
+      {bar},
+      {bar},
+    ))
+  )
+}})"""
     return f"padded_link(<{INDEX_ID}>, {glyph})"
 
 
@@ -65,7 +72,7 @@ def lead_title(
     body_size: str = "8pt",
 ) -> str:
     """Glue the Contents mark to the left of *title* (two-column grid)."""
-    mark = contents_mark(manifest, heading_height, body_size)
+    mark = contents_mark(manifest, heading_height, body_size, face="h1")
     if not mark:
         return title
     return (
@@ -86,7 +93,7 @@ def trail_strip(
     chip: str | None = None,
 ) -> str | None:
     """Mark immediately left of *chip*, flush to the MOS strip."""
-    mark = contents_mark(manifest, heading_height, body_size)
+    mark = contents_mark(manifest, heading_height, body_size, face="h1")
     if mark and chip:
         return (
             "grid(\n"
@@ -98,4 +105,3 @@ def trail_strip(
             ")"
         )
     return mark or chip
-

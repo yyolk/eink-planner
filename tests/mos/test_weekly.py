@@ -178,7 +178,7 @@ def test_generated_year_crumb_links_to_annual_and_inverts_thursday_month():
     assert "Thursday 1" in w01
     assert "Monday, 29" not in w01
     assert "Thursday,  1" not in w01
-    assert w01.count("line(length: 1.2em, stroke: thick_stroke + black)") == 4
+    assert w01.count("line(length: 0.844em, stroke: thick_stroke + black)") == 5
     assert "grid.cell(stroke: (bottom: thick_stroke" not in w01
     assert "grid.cell(colspan: 3, rect_pattern" not in w01
     assert w01.count("rect_pattern(dotted)") == 8

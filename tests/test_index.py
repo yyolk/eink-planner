@@ -17,7 +17,7 @@ NOMAD = REPO / "configs/supernote-nomad.toml"
 NOMAD_MOS_RIGHT = REPO / "configs/supernote-nomad-mos-right.toml"
 
 _TOC_TITLE = 'weight: "bold")[Contents <index>]'
-_MARK_RULE = "line(length: 1.2em, stroke: thick_stroke + black)"
+_MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
 _MARK_LINK = "padded_link(<index>"
 
 
@@ -190,7 +190,7 @@ def test_annual_keeps_calendar_chip_and_links_to_index():
     assert "fill: black" in page
     assert _MARK_LINK in page
     assert _MARK_RULE in page
-    assert page.count(_MARK_RULE) == 4
+    assert page.count(_MARK_RULE) == 5
 
 
 def test_colophon_has_mark_and_unchanged_facts():
@@ -224,7 +224,7 @@ def test_mos_right_mark_sits_next_to_strip():
     assert title_at < mark_at < chip_at
     for label in ("Q1", "Q2", "Q3", "Q4"):
         assert label in page
-    assert page.count(_MARK_RULE) == 4
+    assert page.count(_MARK_RULE) == 5
 
 
 def test_daily_year_chip_sits_beside_lead_title():

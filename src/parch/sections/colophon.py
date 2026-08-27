@@ -7,7 +7,7 @@ from typing import Any
 
 from parch import __version__
 from parch.config import StrictDict, _to_plain
-from parch.mos.contents_mark import body_size_token, contents_mark, heading_height_token
+from parch.mos.contents_mark import body_size_token, contents_mark
 from parch.mos.page_data import PageData
 from parch.mos.sections.annual import Annual
 
@@ -130,7 +130,8 @@ class Colophon:
         title = _escape(self.title)
         dumped = drop_empty_tables(self._config_text()) if self.dump else ""
         parts: list[str] = []
-        mark = contents_mark(manifest, heading_height_token(self.configurator), body_size_token(self.configurator))
+        body = body_size_token(self.configurator)
+        mark = contents_mark(manifest, None, body, face=body)
         if dumped.strip():
             # Page setup first so Typst does not break between the list and the dump.
             parts.append(self._dump_pagination(mark))
