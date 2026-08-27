@@ -41,8 +41,12 @@ CANONICAL_SECTIONS: tuple[str, ...] = (
 
 _CANONICAL_SET = frozenset(CANONICAL_SECTIONS)
 _YEAR_TITLE = re.compile(r"^\d{4}$")
-_CALENDAR_TABLE = re.compile(r"(?ms)^\[calendar\]\n(?:(?!^\[).)*")
-_COVER_TABLE = re.compile(r"(?ms)^\[section\.cover\]\n(?:(?!^\[).)*")
+_CALENDAR_TABLE = re.compile(
+    r"(?ms)^[ \t]*\[[ \t]*calendar[ \t]*\][ \t]*(#[^\n]*)?\n(?:(?!^\[).)*"
+)
+_COVER_TABLE = re.compile(
+    r"(?ms)^[ \t]*\[[ \t]*section\.cover[ \t]*\][ \t]*(#[^\n]*)?\n(?:(?!^\[).)*"
+)
 _SECTIONS_ARRAY = re.compile(r"(?ms)^sections\s*=\s*\[.*?\]")
 _YEAR_ASSIGN = re.compile(r"(?m)^year\s*=\s*\d+")
 _TITLE_ASSIGN = re.compile(r'(?m)^title\s*=\s*"([^"]*)"')
@@ -123,6 +127,10 @@ def run_new(
         year = _prompt_year(source_year)
     if year is None:
         year = source_year
+    if year is not None and not (
+        isinstance(year, int) and not isinstance(year, bool) and 1 <= year <= 9999
+    ):
+        raise ConfigError("year must be between 1 and 9999")
 
     chosen_sections: list[str] | None
     if sections is not None:
@@ -148,8 +156,13 @@ def run_new(
         source_sections=source_sections,
     )
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(written, encoding="utf-8")
-    load(dest)
+    tmp = dest.with_name(dest.name + ".tmp.toml")
+    try:
+        tmp.write_text(written, encoding="utf-8")
+        load(tmp)
+        tmp.replace(dest)
+    finally:
+        tmp.unlink(missing_ok=True)
     print(f"Wrote {dest}")
     return 0
 

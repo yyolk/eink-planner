@@ -9,6 +9,7 @@ import pytest
 
 from parch.cli import build_parser, main
 from parch.config import load
+from parch.services.config_file import overlay_toml
 
 REPO = Path(__file__).resolve().parents[1]
 NOMAD = REPO / "configs" / "supernote-nomad.toml"
@@ -167,3 +168,66 @@ def test_no_config_or_mos_flags():
     with pytest.raises(SystemExit):
         parser.parse_args(["edit", "x.toml"])
 
+
+def test_new_year_zero_rejected(tmp_path, capsys):
+    out = tmp_path / "mine.toml"
+    rc = main(
+        [
+            "new",
+            "--from",
+            "supernote-nomad",
+            "--year",
+            "0",
+            "--yes",
+            "-o",
+            str(out),
+        ]
+    )
+    assert rc == 1
+    assert "year must be between 1 and 9999" in capsys.readouterr().err
+    assert not out.exists()
+    assert not (tmp_path / "mine.toml.tmp.toml").exists()
+
+
+def test_overlay_table_headers_allow_space_and_comment():
+    text = (
+        "[device]\n"
+        "year = 1999\n"
+        "name = \"x\"\n"
+        "\n"
+        "[ calendar ] # hi\n"
+        "year = 2026\n"
+        "week_starts = \"Monday\"\n"
+        "\n"
+        "[section.cover] # x\n"
+        'title = "2026"\n'
+    )
+    written = overlay_toml(text, year=2027)
+    data = tomllib.loads(written)
+    assert data["calendar"]["year"] == 2027
+    assert data["device"]["year"] == 1999
+    assert data["section"]["cover"]["title"] == "2027"
+
+
+def test_new_force_keeps_dest_when_source_invalid(tmp_path, capsys):
+    dest = tmp_path / "mine.toml"
+    dest.write_text(NOMAD.read_text(encoding="utf-8"), encoding="utf-8")
+    before = dest.read_bytes()
+    src = tmp_path / "bad.toml"
+    src.write_text("[device]\nname = \"x\"\n", encoding="utf-8")
+    rc = main(
+        [
+            "new",
+            "--from",
+            str(src),
+            "--yes",
+            "--force",
+            "-o",
+            str(dest),
+        ]
+    )
+    assert rc == 1
+    assert dest.read_bytes() == before
+    assert not (tmp_path / "mine.toml.tmp.toml").exists()
+    err = capsys.readouterr().err
+    assert err
