@@ -405,7 +405,7 @@ def test_unknown_key_on_section_review_raises():
 def test_nomad_ships_review_after_habits():
     dto = load(NOMAD)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
-    assert names[-4:] == ["habits", "review", "meetings", "colophon"]
+    assert names[-5:] == ["habits", "review", "tasks", "meetings", "colophon"]
     review = next(s for s in dto["planner"]["sections"] if s["name"] == "review")
     assert review["params"]["weeks_per_page"] == 13
     assert review["params"]["pattern"] == "lined"

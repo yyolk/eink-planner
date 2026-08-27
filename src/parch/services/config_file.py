@@ -38,6 +38,7 @@ CANONICAL_SECTIONS: tuple[str, ...] = (
     "projects",
     "habits",
     "review",
+    "tasks",
     "meetings",
     "colophon",
 )

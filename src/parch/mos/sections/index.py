@@ -26,6 +26,7 @@ _HUMAN = {
     "projects": "Projects",
     "habits": "Habits",
     "review": "Review",
+    "tasks": "Tasks",
     "meetings": "Meetings",
     "colophon": "About this notebook",
 }

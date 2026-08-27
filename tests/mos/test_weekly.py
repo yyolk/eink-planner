@@ -24,6 +24,7 @@ _BULKY = (
     "projects",
     "habits",
     "review",
+    "tasks",
     "meetings",
 )
 

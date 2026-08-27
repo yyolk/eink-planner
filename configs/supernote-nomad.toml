@@ -14,6 +14,7 @@ sections = [
   "projects",
   "habits",
   "review",
+  "tasks",
   "meetings",
   "colophon",
 ]

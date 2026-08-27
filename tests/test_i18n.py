@@ -23,6 +23,7 @@ def test_load_en_toml_representative_keys():
     assert i18n.t("meetings") == "Meetings"
     assert i18n.t("habits") == "Habits"
     assert i18n.t("review") == "Review"
+    assert i18n.t("tasks") == "Tasks"
     assert i18n.t("topics") == "Topics"
     assert i18n.t("action_items") == "Action items"
     assert i18n.t("weekday.short.monday") == "Mon"

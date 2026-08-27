@@ -37,6 +37,7 @@ SECTIONS = (
     "projects",
     "habits",
     "review",
+    "tasks",
     "meetings",
     "colophon",
 )
@@ -80,6 +81,8 @@ def classify_label(label: str) -> str:
         return "habits"
     if label == "review" or label.startswith("review-"):
         return "review"
+    if label == "tasks" or label.startswith("tasks-"):
+        return "tasks"
     if label == "meetings" or label.startswith("meetings-") or label.startswith("meeting-"):
         return "meetings"
     if label.startswith("daily-note-"):
@@ -149,18 +152,18 @@ def test_omit_one_section_compiles_pdf(kind, tmp_path):
 @pytest.mark.parametrize(
     "omit,remain",
     [
-        (("annual", "quarterly"), ("cover", "index", "monthly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "meetings", "colophon")),
-        (("weekly",), ("cover", "index", "annual", "quarterly", "monthly", "daily", "daily_notes", "projects", "habits", "review", "meetings", "colophon")),
-        (("monthly",), ("cover", "index", "annual", "quarterly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "meetings", "colophon")),
-        (("daily",), ("cover", "index", "annual", "quarterly", "monthly", "weekly", "daily_notes", "projects", "habits", "review", "meetings", "colophon")),
-        (("daily_notes",), ("cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "projects", "habits", "review", "meetings", "colophon")),
+        (("annual", "quarterly"), ("cover", "index", "monthly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "tasks", "meetings", "colophon")),
+        (("weekly",), ("cover", "index", "annual", "quarterly", "monthly", "daily", "daily_notes", "projects", "habits", "review", "tasks", "meetings", "colophon")),
+        (("monthly",), ("cover", "index", "annual", "quarterly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "tasks", "meetings", "colophon")),
+        (("daily",), ("cover", "index", "annual", "quarterly", "monthly", "weekly", "daily_notes", "projects", "habits", "review", "tasks", "meetings", "colophon")),
+        (("daily_notes",), ("cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "projects", "habits", "review", "tasks", "meetings", "colophon")),
         (
             ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes"),
-            ("index", "daily", "projects", "habits", "review", "meetings", "colophon"),
+            ("index", "daily", "projects", "habits", "review", "tasks", "meetings", "colophon"),
         ),
         (
             ("annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"),
-            ("cover", "index", "projects", "habits", "review", "meetings", "colophon"),
+            ("cover", "index", "projects", "habits", "review", "tasks", "meetings", "colophon"),
         ),
     ],
     ids=[

@@ -259,6 +259,16 @@ class ReviewSection(StrictModel):
         return self
 
 
+class TasksSection(StrictModel):
+    weeks_per_page: StrictInt = 13
+
+    @model_validator(mode="after")
+    def _weeks_per_page_positive(self) -> TasksSection:
+        if self.weeks_per_page < 1:
+            raise ValueError("weeks_per_page must be at least 1")
+        return self
+
+
 class HabitsSection(StrictModel):
     habit_columns: StrictInt = 6
     names: list[str] = []
@@ -292,6 +302,7 @@ class SectionTables(StrictModel):
     meetings: MeetingsSection | None = None
     habits: HabitsSection | None = None
     review: ReviewSection | None = None
+    tasks: TasksSection | None = None
     colophon: ColophonSection | list[ColophonSection] | None = None
 
     @field_validator("colophon", mode="before")
@@ -379,6 +390,8 @@ class DeviceProfile(StrictModel):
             tables.habits = HabitsSection()
         if "review" in names and tables.review is None:
             tables.review = ReviewSection()
+        if "tasks" in names and tables.tasks is None:
+            tables.tasks = TasksSection()
         return self
 
 

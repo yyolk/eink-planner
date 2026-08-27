@@ -9,6 +9,7 @@ from parch.mos.sections.meetings import Meetings
 from parch.mos.sections.projects import Projects
 from parch.mos.sections.quarterly import Quarterly
 from parch.mos.sections.review import Review
+from parch.mos.sections.tasks import Tasks
 from parch.mos.sections.weekly import Weekly
 
 __all__ = [
@@ -23,5 +24,6 @@ __all__ = [
     "Projects",
     "Quarterly",
     "Review",
+    "Tasks",
     "Weekly",
 ]

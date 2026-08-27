@@ -66,6 +66,7 @@ def _slim_text() -> str:
             "projects",
             "habits",
             "review",
+            "tasks",
             "meetings",
         ],
     )
@@ -98,6 +99,7 @@ def test_contents_lists_enabled_human_names_in_sections_order():
         "Projects",
         "Habits",
         "Review",
+        "Tasks",
         "Meetings",
         "About this notebook",
     ]
@@ -118,6 +120,7 @@ def test_contents_lists_enabled_human_names_in_sections_order():
         "projects",
         "habits",
         "review",
+        "tasks",
         "meetings",
         "colophon",
     ):
@@ -133,7 +136,7 @@ def test_slim_lists_calendar_and_about_only():
     assert page.index("Calendar") < page.index("About this notebook")
     assert "padded_link(<annual>" in page
     assert "padded_link(<colophon>" in page
-    for name in ("Quarters", "Months", "Weeks", "Days", "Projects", "Habits", "Review", "Meetings"):
+    for name in ("Quarters", "Months", "Weeks", "Days", "Projects", "Habits", "Review", "Tasks", "Meetings"):
         assert name not in page
     assert "Cover" not in page
 
@@ -149,6 +152,7 @@ def test_fullish_list_includes_all_enabled_sections():
         "Projects",
         "Habits",
         "Review",
+        "Tasks",
         "Meetings",
     ):
         assert name in page
