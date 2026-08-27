@@ -460,7 +460,7 @@ def test_contents_mark_on_tasks_when_index_on():
     week = _week_page(typst, "2026W01")
     assert "padded_link(<index>" in index
     assert "padded_link(<index>" in week
-    assert "line(length: 1.2em, stroke: thick_stroke + black)" in index
+    assert "line(length: 0.844em, stroke: thick_stroke + black)" in index
     contents = next(p for p in _pages(typst) if 'weight: "bold")[Contents <index>]' in p)
     assert "padded_link(<index>" not in contents
     assert "padded_link(<tasks>" in contents
