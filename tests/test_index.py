@@ -14,9 +14,10 @@ from tests.toml_fixtures import _minimal, omit_toml_sections, short_january
 
 REPO = Path(__file__).resolve().parents[1]
 NOMAD = REPO / "configs/supernote-nomad.toml"
+NOMAD_MOS_RIGHT = REPO / "configs/supernote-nomad-mos-right.toml"
 
 _TOC_TITLE = 'weight: "bold")[Contents <index>]'
-_MARK_RULE = "line(length: 1em, stroke: regular_stroke + black)"
+_MARK_RULE = "rect(width: 1.2em, height: 0.7mm, fill: black)"
 _MARK_LINK = "padded_link(<index>"
 
 
@@ -189,7 +190,7 @@ def test_annual_keeps_calendar_chip_and_links_to_index():
     assert "fill: black" in page
     assert _MARK_LINK in page
     assert _MARK_RULE in page
-    assert page.count(_MARK_RULE) == 3
+    assert page.count(_MARK_RULE) == 4
 
 
 def test_colophon_has_mark_and_unchanged_facts():
@@ -212,3 +213,16 @@ def test_slim_compiles(tmp_path):
     page = _contents_page(typst)
     assert "Calendar" in page
     assert "About this notebook" in page
+
+
+def test_mos_right_mark_sits_next_to_strip():
+    typst = _generate(load(NOMAD_MOS_RIGHT))
+    page = _annual_page(typst)
+    title_at = page.index("2026<annual>")
+    mark_at = page.index(_MARK_LINK)
+    chip_at = page.index("[Calendar]")
+    assert title_at < mark_at < chip_at
+    for label in ("Q1", "Q2", "Q3", "Q4"):
+        assert label in page
+    assert page.count(_MARK_RULE) == 4
+

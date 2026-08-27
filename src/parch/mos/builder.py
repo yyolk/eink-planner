@@ -10,7 +10,7 @@ from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.navigation import NavLink, Navigation
 from parch.mos.page_data import PageData
-from parch.mos.contents_mark import body_size_token, lead_title
+from parch.mos.contents_mark import body_size_token, lead_title, trail_strip
 from parch.mos.preamble import Preamble
 
 
@@ -93,20 +93,21 @@ class Builder:
         nav_links: list[tuple[str, str] | NavLink] | None = None,
         heading_dir: str | None = None,
     ) -> str:
+        mos_right = _v(self.mos_layout, "side_menu_position") == "right"
         if heading_dir is None:
-            direction = "ltr" if _v(self.mos_layout, "side_menu_position") == "right" else "rtl"
+            direction = "ltr" if mos_right else "rtl"
         else:
             direction = heading_dir
-        if title:
-            title = lead_title(self.manifest, _v(self.heading, "height"), title, body_size_token(self.configurator))
-        parts = [
-            p
-            for p in (
-                title,
-                self.navigation.heading_menu_grid(page_id=page_id, nav_links=nav_links),
-            )
-            if p
-        ]
+        chip = self.navigation.heading_menu_grid(page_id=page_id, nav_links=nav_links)
+        height = _v(self.heading, "height")
+        body = body_size_token(self.configurator)
+        if mos_right:
+            trailing = trail_strip(self.manifest, height, body, chip)
+            parts = [p for p in (title, trailing) if p]
+        else:
+            if title:
+                title = lead_title(self.manifest, height, title, body)
+            parts = [p for p in (title, chip) if p]
         joined = ",\n".join(parts)
         return f"""stack(
   dir: {direction},

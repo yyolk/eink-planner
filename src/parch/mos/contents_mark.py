@@ -1,4 +1,4 @@
-"""Contents back-link mark: three short rules, header-tall tap."""
+"""Contents back-link mark: four filled bars, header-tall tap."""
 
 from __future__ import annotations
 
@@ -33,27 +33,28 @@ def body_size_token(configurator: Any) -> str:
             return str(size)
     return "8pt"
 
+
 def contents_mark(
     manifest: Manifest | None,
     heading_height: str,
     body_size: str = "8pt",
 ) -> str:
-    """Three-rule list glyph linking to Contents, or empty when index is off."""
+    """Four filled bars linking to Contents, or empty when index is off."""
     if manifest is None or not manifest.source(INDEX_ID):
         return ""
-    glyph = (
-        f"text(size: {body_size}, box(\n"
-        f"  width: {heading_height},\n"
-        f"  height: {heading_height},\n"
-        f"  align(horizon + left, stack(\n"
-        f"    dir: ttb,\n"
-        f"    spacing: 0.15em,\n"
-        f"    line(length: 1em, stroke: regular_stroke + black),\n"
-        f"    line(length: 1em, stroke: regular_stroke + black),\n"
-        f"    line(length: 1em, stroke: regular_stroke + black),\n"
-        f"  ))\n"
-        f"))"
-    )
+    bar = "rect(width: 1.2em, height: 0.7mm, fill: black)"
+    glyph = f"""text(size: {body_size}, box(
+  width: 1.2em,
+  height: {heading_height},
+  align(horizon + left, stack(
+    dir: ttb,
+    spacing: 0.35mm,
+    {bar},
+    {bar},
+    {bar},
+    {bar},
+  ))
+))"""
     return f"padded_link(<{INDEX_ID}>, {glyph})"
 
 
@@ -76,3 +77,25 @@ def lead_title(
         f"  {title}\n"
         ")"
     )
+
+
+def trail_strip(
+    manifest: Manifest | None,
+    heading_height: str,
+    body_size: str = "8pt",
+    chip: str | None = None,
+) -> str | None:
+    """Mark immediately left of *chip*, flush to the MOS strip."""
+    mark = contents_mark(manifest, heading_height, body_size)
+    if mark and chip:
+        return (
+            "grid(\n"
+            "  columns: (auto, auto),\n"
+            "  column-gutter: 6pt,\n"
+            "  align: horizon,\n"
+            f"  {mark},\n"
+            f"  {chip}\n"
+            ")"
+        )
+    return mark or chip
+
