@@ -66,7 +66,7 @@ class Quarterly:
 
     def _title(self, manifest: Manifest, page: QuarterlyPage) -> str:
         return f"""grid(
-  columns: (auto, auto, 1fr),
+  columns: (auto, auto, auto),
   column-gutter: 6pt,
   align: horizon,
   text(size: h1, {self._year_cell(manifest)}),
