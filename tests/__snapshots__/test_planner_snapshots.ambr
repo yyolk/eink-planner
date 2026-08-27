@@ -1,0 +1,1347 @@
+# serializer version: 1
+# name: test_shipped_planner_page_tree[158x210-mos-left]
+  list([
+    dict({
+      'name': 'cover',
+      'pages': 1,
+    }),
+    dict({
+      'name': 'index',
+      'pages': 1,
+    }),
+    dict({
+      'name': 'annual',
+      'pages': 1,
+    }),
+    dict({
+      'name': 'quarterly',
+      'pages': 4,
+    }),
+    dict({
+      'name': 'monthly',
+      'pages': 12,
+    }),
+    dict({
+      'name': 'weekly',
+      'pages': 53,
+    }),
+    dict({
+      'name': 'daily',
+      'pages': 365,
+    }),
+    dict({
+      'name': 'daily_notes',
+      'pages': 730,
+    }),
+    dict({
+      'name': 'colophon',
+      'pages': 1,
+    }),
+  ])
+# ---
+# name: test_shipped_planner_page_tree[supernote-nomad]
+  list([
+    dict({
+      'name': 'cover',
+      'pages': 1,
+    }),
+    dict({
+      'name': 'index',
+      'pages': 1,
+    }),
+    dict({
+      'name': 'annual',
+      'pages': 1,
+    }),
+    dict({
+      'name': 'quarterly',
+      'pages': 4,
+    }),
+    dict({
+      'name': 'monthly',
+      'pages': 12,
+    }),
+    dict({
+      'name': 'weekly',
+      'pages': 53,
+    }),
+    dict({
+      'name': 'daily',
+      'pages': 365,
+    }),
+    dict({
+      'name': 'daily_notes',
+      'pages': 730,
+    }),
+    dict({
+      'name': 'projects',
+      'pages': 17,
+    }),
+    dict({
+      'name': 'habits',
+      'pages': 13,
+    }),
+    dict({
+      'name': 'review',
+      'pages': 57,
+    }),
+    dict({
+      'name': 'tasks',
+      'pages': 57,
+    }),
+    dict({
+      'name': 'meetings',
+      'pages': 17,
+    }),
+    dict({
+      'name': 'colophon',
+      'pages': 1,
+    }),
+  ])
+# ---
+# name: test_short_january_critical_pages[158x210-mos-left]
+  dict({
+    'annual': '''
+      #grid(
+        columns: (10mm, 1fr),
+        rows: (10mm, 1fr),
+        column-gutter: 2mm,
+        row-gutter: 2mm,
+        
+        grid.cell(
+        rowspan: 2,
+      
+        rotate(
+          270deg,
+          origin: center + horizon,
+          reflow: true,
+      
+          table(
+            columns: (3fr, 1fr),
+            rows: 1fr,
+            inset: 0pt,
+            column-gutter: regular_column_gutter,
+            stroke: 0pt,
+      
+            table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell([#padded_link(<month-2026-01-01>)[Jan]])
+      ),
+      table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
+      )
+          )
+        )
+      ), grid.cell(align: horizon, stack(
+        dir: rtl,
+        spacing: 1fr,
+        text(size: h1)[2026<annual>],
+      pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
+        let cap = 0.7em.to-absolute()
+        let gap = (cap - 5 * thick_stroke) / 4
+        box(
+          width: 0.844em,
+          height: cap,
+          align(horizon + left, stack(
+            dir: ttb,
+            spacing: gap,
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+          ))
+        )
+      })))
+      )),
+        grid(
+        columns: (1fr, 1fr, 1fr),
+        rows: (1fr),
+        column-gutter: regular_column_gutter,
+        row-gutter: 5pt,
+      
+        grid(
+        align: center + horizon,
+        inset: 5pt,
+        stroke: (x, _) => if x == 1 {( left: regular_stroke + black )},
+        columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
+        rows: 1fr,
+      
+        grid.cell(
+          colspan: 8,
+          [January]
+        ),
+        grid.hline(stroke: regular_stroke + black),
+      
+        [], [M], [T], [W], [T], [F], [S], [S], grid.hline(stroke: regular_stroke + black),
+        padded_link(<2026W01>)[1], [], [], [], padded_link(<2026-01-01>)[1], padded_link(<2026-01-02>)[2], padded_link(<2026-01-03>)[3], padded_link(<2026-01-04>)[4],
+      padded_link(<2026W02>)[2], padded_link(<2026-01-05>)[5], padded_link(<2026-01-06>)[6], padded_link(<2026-01-07>)[7], padded_link(<2026-01-08>)[8], padded_link(<2026-01-09>)[9], padded_link(<2026-01-10>)[10], padded_link(<2026-01-11>)[11],
+      padded_link(<2026W03>)[3], padded_link(<2026-01-12>)[12], padded_link(<2026-01-13>)[13], padded_link(<2026-01-14>)[14], [15], [16], [17], [18],
+      padded_link(<2026W04>)[4], [19], [20], [21], [22], [23], [24], [25],
+      padded_link(<2026W05>)[5], [26], [27], [28], [29], [30], [31], []
+      )
+      )
+      )
+    ''',
+    'colophon': '''
+      #block[
+        #set par(spacing: 0em)
+        #grid(
+        columns: (auto, auto),
+        column-gutter: 6pt,
+        align: horizon,
+        padded_link(<index>, text(size: h1, context {
+        let cap = 0.7em.to-absolute()
+        let gap = (cap - 5 * thick_stroke) / 4
+        box(
+          width: 0.844em,
+          height: cap,
+          align(horizon + left, stack(
+            dir: ttb,
+            spacing: gap,
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+          ))
+        )
+      })),
+        text(size: h1, weight: "bold")[About this notebook <colophon>]
+      )
+        #v(1em)
+        #context grid(
+          columns: (measure(text(weight: "bold")[Version]).width, 1fr),
+          column-gutter: regular_column_gutter,
+          rows: regular_height,
+          align: horizon,
+            [*Device*], [158 × 210],
+            [*Year*], padded_link(<annual>)[2026],
+            [*Version*], [VERSION],
+        )
+      ]
+    ''',
+    'daily': '''
+      #grid(
+        columns: (10mm, 1fr),
+        rows: (10mm, 1fr),
+        column-gutter: 2mm,
+        row-gutter: 2mm,
+        
+        grid.cell(
+        rowspan: 2,
+      
+        rotate(
+          270deg,
+          origin: center + horizon,
+          reflow: true,
+      
+          table(
+            columns: (3fr, 1fr),
+            rows: 1fr,
+            inset: 0pt,
+            column-gutter: regular_column_gutter,
+            stroke: 0pt,
+      
+            table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
+      ),
+      table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
+      )
+          )
+        )
+      ), grid.cell(align: horizon, stack(
+        dir: rtl,
+        spacing: 1fr,
+        grid(
+        columns: (auto, auto),
+        rows: (3fr, 2fr),
+        column-gutter: regular_column_gutter,
+        
+        grid.cell(
+          rowspan: 2,
+          align: center + horizon,
+          rect(
+            stroke: (right: regular_stroke),
+      
+            text(size: h1)[1 <2026-01-01>]
+          )
+        ),
+        [*Thursday*],
+        padded_link(<2026W01>)[Week 1]
+      ),
+      grid(
+        columns: (auto, auto),
+        column-gutter: 6pt,
+        align: horizon,
+        padded_link(<index>, text(size: h1, context {
+        let cap = 0.7em.to-absolute()
+        let gap = (cap - 5 * thick_stroke) / 4
+        box(
+          width: 0.844em,
+          height: cap,
+          align(horizon + left, stack(
+            dir: ttb,
+            spacing: gap,
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+          ))
+        )
+      })),
+        grid(
+        rows: 10mm,
+        columns: 1,
+        inset: 7pt,
+      
+        stroke: (x, y)  => if x > 0 { ( left: regular_stroke ) },
+        padded_link(<annual>, [2026])
+      )
+      )
+      )),
+        grid(
+        columns: (3fr, 5fr),
+        rows: 1fr,
+        column-gutter: regular_column_gutter,
+      
+        grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        row-gutter: 5mm,
+        grid(
+        columns: 1fr,
+        inset: 0mm,
+        grid.cell(
+          stroke: (bottom: regular_stroke + black),
+          box(height: regular_height, align(horizon, [Schedule]))
+        ),
+        grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [ 8]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [ 9]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [10]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [11]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [12]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [13]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [14]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [15]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [16]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [17]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [18]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [19]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [20]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+        box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black)))
+      ),
+      grid(
+        align: center + horizon,
+        inset: 5pt,
+        stroke: (x, _) => if x == 1 {( left: regular_stroke + black )},
+        columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
+        rows: 1fr,
+      
+        
+        [], [M], [T], [W], [T], [F], [S], [S], grid.hline(stroke: regular_stroke + black),
+        padded_link(<2026W01>)[1], [], [], [], grid.cell(fill: black, text(white, padded_link(<2026-01-01>)[1])), padded_link(<2026-01-02>)[2], padded_link(<2026-01-03>)[3], padded_link(<2026-01-04>)[4],
+      padded_link(<2026W02>)[2], padded_link(<2026-01-05>)[5], padded_link(<2026-01-06>)[6], padded_link(<2026-01-07>)[7], padded_link(<2026-01-08>)[8], padded_link(<2026-01-09>)[9], padded_link(<2026-01-10>)[10], padded_link(<2026-01-11>)[11],
+      padded_link(<2026W03>)[3], padded_link(<2026-01-12>)[12], padded_link(<2026-01-13>)[13], padded_link(<2026-01-14>)[14], [15], [16], [17], [18],
+      padded_link(<2026W04>)[4], [19], [20], [21], [22], [23], [24], [25],
+      padded_link(<2026W05>)[5], [26], [27], [28], [29], [30], [31], []
+      )
+      ),
+        grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        row-gutter: 5mm,
+        grid(
+        columns: 1fr,
+        inset: 0mm,
+        stroke: (_, _) => (bottom: regular_stroke + black),
+      
+        grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [Priorities]))),
+        box(height: regular_height, align(horizon, [$square.stroked$])),
+      box(height: regular_height, align(horizon, [$square.stroked$])),
+      box(height: regular_height, align(horizon, [$square.stroked$])),
+      box(height: regular_height, align(horizon, [$square.stroked$])),
+      box(height: regular_height, align(horizon, [$square.stroked$]))
+      ),
+      grid(
+        columns: (1fr, auto),
+        rows: (5mm, 1fr),
+        grid.cell(align: horizon, stroke: (bottom: regular_stroke + black), [Notes]),
+        grid.cell(align: horizon + right, stroke: (bottom: regular_stroke + black), padded_link(<daily-note-2026-01-01-page-1>)[More]),
+        grid.cell(colspan: 2, rect_pattern(dotted))
+      )
+      )
+      )
+      )
+    ''',
+    'monthly': '''
+      #grid(
+        columns: (10mm, 1fr),
+        rows: (10mm, 1fr),
+        column-gutter: 2mm,
+        row-gutter: 2mm,
+        
+        grid.cell(
+        rowspan: 2,
+      
+        rotate(
+          270deg,
+          origin: center + horizon,
+          reflow: true,
+      
+          table(
+            columns: (3fr, 1fr),
+            rows: 1fr,
+            inset: 0pt,
+            column-gutter: regular_column_gutter,
+            stroke: 0pt,
+      
+            table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
+      ),
+      table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
+      )
+          )
+        )
+      ), grid.cell(align: horizon, stack(
+        dir: rtl,
+        spacing: 1fr,
+        grid(
+        columns: (auto, auto),
+        column-gutter: 6pt,
+        align: horizon,
+        padded_link(<index>, text(size: h1, context {
+        let cap = 0.7em.to-absolute()
+        let gap = (cap - 5 * thick_stroke) / 4
+        box(
+          width: 0.844em,
+          height: cap,
+          align(horizon + left, stack(
+            dir: ttb,
+            spacing: gap,
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+          ))
+        )
+      })),
+        grid(
+        columns: (auto, auto, auto),
+        column-gutter: 6pt,
+        align: horizon,
+        text(size: h1, padded_link(<annual>)[2026]),
+        text(size: h1)[/],
+        text(size: h1)[January<month-2026-01-01>]
+      )
+      )
+      )),
+        grid(
+        columns: 1fr,
+        rows: (auto, auto, 1fr),
+      
+        grid(
+          stroke: regular_stroke,
+          columns: (regular_height, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
+          rows: (regular_height, 2.5cm, 2.5cm, 2.5cm, 2.5cm, 2.5cm),
+      
+          [], align(center + horizon)[Monday], align(center + horizon)[Tuesday], align(center + horizon)[Wednesday], align(center + horizon)[Thursday], align(center + horizon)[Friday], align(center + horizon)[Saturday], align(center + horizon)[Sunday],
+          align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W01>)[1]]), [], [], [], grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-01>)[1]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-03>)[3]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-04>)[4]]),
+      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-05>)[5]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-06>)[6]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-07>)[7]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-08>)[8]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-09>)[9]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-10>)[10]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-11>)[11]]),
+      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W03>)[3]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-12>)[12]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-13>)[13]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-14>)[14]]), grid.cell(align: top + left, inset: 3pt, [#[15]]), grid.cell(align: top + left, inset: 3pt, [#[16]]), grid.cell(align: top + left, inset: 3pt, [#[17]]), grid.cell(align: top + left, inset: 3pt, [#[18]]),
+      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W04>)[4]]), grid.cell(align: top + left, inset: 3pt, [#[19]]), grid.cell(align: top + left, inset: 3pt, [#[20]]), grid.cell(align: top + left, inset: 3pt, [#[21]]), grid.cell(align: top + left, inset: 3pt, [#[22]]), grid.cell(align: top + left, inset: 3pt, [#[23]]), grid.cell(align: top + left, inset: 3pt, [#[24]]), grid.cell(align: top + left, inset: 3pt, [#[25]]),
+      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W05>)[5]]), grid.cell(align: top + left, inset: 3pt, [#[26]]), grid.cell(align: top + left, inset: 3pt, [#[27]]), grid.cell(align: top + left, inset: 3pt, [#[28]]), grid.cell(align: top + left, inset: 3pt, [#[29]]), grid.cell(align: top + left, inset: 3pt, [#[30]]), grid.cell(align: top + left, inset: 3pt, [#[31]]), []
+        ),
+        grid.hline(stroke: regular_stroke + black),
+        rect_pattern(dotted)
+      )
+      )
+    ''',
+    'preamble': '''
+      #set page(
+        width: 158mm,
+        height: 210mm,
+      
+        margin: (
+          top: 10mm,
+          right: 5mm,
+          bottom: 0mm,
+          left: 0mm,
+        )
+      )
+      
+      #set text(
+        size: 10pt
+      )
+      
+      #let regular_stroke = 0.4pt
+      #let thick_stroke = 0.8pt
+      #let regular_height = 5mm
+      #let regular_column_gutter = 10pt
+      
+      #let h1 = 10mm
+      
+      #let dotted = tiling(
+        size: (regular_height, regular_height),
+        place(
+          dx: 0.5pt,
+          dy: regular_height - 0.3mm,
+          circle(
+            radius: 0.141mm,
+            fill: black
+          )
+        ),
+      )
+      
+      #let lined = tiling(
+        size: (regular_height, regular_height),
+        place(
+          line(
+            start: (0%, regular_height - 0.15mm),
+            end: (100%, regular_height - 0.15mm),
+            stroke: regular_stroke + luma(130)
+          ),
+        )
+      )
+      
+      #let rect_pattern(pattern) = rect(
+        width: 100%,
+        height: 100%,
+        fill: pattern
+      )
+      
+      #let dotted_centered = tiling(
+        size: (regular_height, regular_height),
+        // place(center + horizon) does not resolve against a tiling cell
+        // (circles sit on the origin and clip to quarters). Size the cell
+        // first so align can actually center the 0.141mm circle.
+        block(
+          width: regular_height,
+          height: regular_height,
+          align(
+            center + horizon,
+            circle(
+              radius: 0.141mm,
+              fill: black
+            )
+          )
+        ),
+      )
+      
+      #let rect_pattern_centered(pattern) = box(
+        width: 100%,
+        height: 100%,
+        layout(size => {
+          let cell = regular_height.to-absolute()
+          let cols = calc.floor(size.width.pt() / cell.pt())
+          let rows = calc.floor(size.height.pt() / cell.pt())
+          if cols == 0 or rows == 0 {
+            box()
+          } else {
+            let nw = cols * cell
+            let nh = rows * cell
+            let dx = (size.width - nw) / 2
+            let dy = (size.height - nh) / 2
+            place(
+              dx: dx,
+              dy: dy,
+              rect(
+                width: nw,
+                height: nh,
+                fill: pattern
+              )
+            )
+          }
+        })
+      )
+      
+      #let scratch_pad = rect_pattern(dotted)
+      
+      #let padded_link(padding: 8pt, target, content) = box(
+        inset: -padding,
+        link(target)[#box(inset: padding, content)]
+      )
+    ''',
+    'weekly': '''
+      #grid(
+        columns: (10mm, 1fr),
+        rows: (10mm, 1fr),
+        column-gutter: 2mm,
+        row-gutter: 2mm,
+        
+        grid.cell(
+        rowspan: 2,
+      
+        rotate(
+          270deg,
+          origin: center + horizon,
+          reflow: true,
+      
+          table(
+            columns: (3fr, 1fr),
+            rows: 1fr,
+            inset: 0pt,
+            column-gutter: regular_column_gutter,
+            stroke: 0pt,
+      
+            table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
+      ),
+      table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
+      )
+          )
+        )
+      ), grid.cell(align: horizon, stack(
+        dir: rtl,
+        spacing: 1fr,
+        grid(
+        columns: (auto, auto),
+        column-gutter: 6pt,
+        align: horizon,
+        padded_link(<index>, text(size: h1, context {
+        let cap = 0.7em.to-absolute()
+        let gap = (cap - 5 * thick_stroke) / 4
+        box(
+          width: 0.844em,
+          height: cap,
+          align(horizon + left, stack(
+            dir: ttb,
+            spacing: gap,
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+          ))
+        )
+      })),
+        grid(
+        columns: (auto, auto, auto),
+        column-gutter: 6pt,
+        align: horizon,
+        text(size: h1, padded_link(<annual>)[2026]),
+        text(size: h1)[/],
+        text(size: h1)[Week 1 <2026W01>]
+      )
+      )
+      )),
+        grid(
+        columns: (1fr, 1fr, 1fr),
+        rows: (1fr, 1fr, 1fr),
+        column-gutter: 5pt,
+      
+        grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), [Monday 29]),
+        rect_pattern(dotted)
+      ), grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), [Tuesday 30]),
+        rect_pattern(dotted)
+      ), grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), [Wednesday 31]),
+        rect_pattern(dotted)
+      ),
+        grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), padded_link(<2026-01-01>)[Thursday 1]),
+        rect_pattern(dotted)
+      ), grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), padded_link(<2026-01-02>)[Friday 2]),
+        rect_pattern(dotted)
+      ), grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), padded_link(<2026-01-03>)[Saturday 3]),
+        rect_pattern(dotted)
+      ),
+        grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), padded_link(<2026-01-04>)[Sunday 4]),
+        rect_pattern(dotted)
+      ), grid.cell(colspan: 2, grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), [Notes]),
+        rect_pattern(dotted)
+      ))
+      )
+      )
+    ''',
+  })
+# ---
+# name: test_short_january_critical_pages[supernote-nomad]
+  dict({
+    'annual': '''
+      #grid(
+        columns: (8mm, 1fr),
+        rows: (8mm, 1fr),
+        column-gutter: 1.5mm,
+        row-gutter: 1.5mm,
+        
+        grid.cell(
+        rowspan: 2,
+      
+        rotate(
+          270deg,
+          origin: center + horizon,
+          reflow: true,
+      
+          table(
+            columns: (3fr, 1fr),
+            rows: 1fr,
+            inset: 0pt,
+            column-gutter: regular_column_gutter,
+            stroke: 0pt,
+      
+            table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell([#padded_link(<month-2026-01-01>)[Jan]])
+      ),
+      table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
+      )
+          )
+        )
+      ), grid.cell(align: horizon, stack(
+        dir: rtl,
+        spacing: 1fr,
+        text(size: h1)[2026<annual>],
+      pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
+        let cap = 0.7em.to-absolute()
+        let gap = (cap - 5 * thick_stroke) / 4
+        box(
+          width: 0.844em,
+          height: cap,
+          align(horizon + left, stack(
+            dir: ttb,
+            spacing: gap,
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+          ))
+        )
+      })))
+      )),
+        grid(
+        columns: (1fr, 1fr, 1fr),
+        rows: (1fr),
+        column-gutter: regular_column_gutter,
+        row-gutter: 4pt,
+      
+        grid(
+        align: center + horizon,
+        inset: 3pt,
+        stroke: (x, _) => if x == 1 {( left: regular_stroke + black )},
+        columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
+        rows: 1fr,
+      
+        grid.cell(
+          colspan: 8,
+          [January]
+        ),
+        grid.hline(stroke: regular_stroke + black),
+      
+        [], [M], [T], [W], [T], [F], [S], [S], grid.hline(stroke: regular_stroke + black),
+        padded_link(<2026W01>)[1], [], [], [], padded_link(<2026-01-01>)[1], padded_link(<2026-01-02>)[2], padded_link(<2026-01-03>)[3], padded_link(<2026-01-04>)[4],
+      padded_link(<2026W02>)[2], padded_link(<2026-01-05>)[5], padded_link(<2026-01-06>)[6], padded_link(<2026-01-07>)[7], padded_link(<2026-01-08>)[8], padded_link(<2026-01-09>)[9], padded_link(<2026-01-10>)[10], padded_link(<2026-01-11>)[11],
+      padded_link(<2026W03>)[3], padded_link(<2026-01-12>)[12], padded_link(<2026-01-13>)[13], padded_link(<2026-01-14>)[14], [15], [16], [17], [18],
+      padded_link(<2026W04>)[4], [19], [20], [21], [22], [23], [24], [25],
+      padded_link(<2026W05>)[5], [26], [27], [28], [29], [30], [31], []
+      )
+      )
+      )
+    ''',
+    'colophon': '''
+      #block[
+        #set par(spacing: 0em)
+        #grid(
+        columns: (auto, auto),
+        column-gutter: 6pt,
+        align: horizon,
+        padded_link(<index>, text(size: h1, context {
+        let cap = 0.7em.to-absolute()
+        let gap = (cap - 5 * thick_stroke) / 4
+        box(
+          width: 0.844em,
+          height: cap,
+          align(horizon + left, stack(
+            dir: ttb,
+            spacing: gap,
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+          ))
+        )
+      })),
+        text(size: h1, weight: "bold")[About this notebook <colophon>]
+      )
+        #v(1em)
+        #context grid(
+          columns: (measure(text(weight: "bold")[Version]).width, 1fr),
+          column-gutter: regular_column_gutter,
+          rows: regular_height,
+          align: horizon,
+            [*Device*], [SuperNote Nomad],
+            [*Year*], padded_link(<annual>)[2026],
+            [*Version*], [VERSION],
+        )
+      ]
+    ''',
+    'daily': '''
+      #grid(
+        columns: (8mm, 1fr),
+        rows: (8mm, 1fr),
+        column-gutter: 1.5mm,
+        row-gutter: 1.5mm,
+        
+        grid.cell(
+        rowspan: 2,
+      
+        rotate(
+          270deg,
+          origin: center + horizon,
+          reflow: true,
+      
+          table(
+            columns: (3fr, 1fr),
+            rows: 1fr,
+            inset: 0pt,
+            column-gutter: regular_column_gutter,
+            stroke: 0pt,
+      
+            table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
+      ),
+      table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
+      )
+          )
+        )
+      ), grid.cell(align: horizon, stack(
+        dir: rtl,
+        spacing: 1fr,
+        grid(
+        columns: (auto, auto),
+        rows: (3fr, 2fr),
+        column-gutter: regular_column_gutter,
+        
+        grid.cell(
+          rowspan: 2,
+          align: center + horizon,
+          rect(
+            stroke: (right: regular_stroke),
+      
+            text(size: h1)[1 <2026-01-01>]
+          )
+        ),
+        [*Thursday*],
+        padded_link(<2026W01>)[Week 1]
+      ),
+      grid(
+        columns: (auto, auto),
+        column-gutter: 6pt,
+        align: horizon,
+        padded_link(<index>, text(size: h1, context {
+        let cap = 0.7em.to-absolute()
+        let gap = (cap - 5 * thick_stroke) / 4
+        box(
+          width: 0.844em,
+          height: cap,
+          align(horizon + left, stack(
+            dir: ttb,
+            spacing: gap,
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+          ))
+        )
+      })),
+        grid(
+        rows: 8mm,
+        columns: 1,
+        inset: 7pt,
+      
+        stroke: (x, y)  => if x > 0 { ( left: regular_stroke ) },
+        padded_link(<annual>, [2026])
+      )
+      )
+      )),
+        grid(
+        columns: (3fr, 5fr),
+        rows: 1fr,
+        column-gutter: regular_column_gutter,
+      
+        grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        row-gutter: 4mm,
+        grid(
+        columns: 1fr,
+        inset: 0mm,
+        grid.cell(
+          stroke: (bottom: regular_stroke + black),
+          box(height: regular_height, align(horizon, [Schedule]))
+        ),
+        grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [ 8]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [ 9]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [10]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [11]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [12]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [13]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [14]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [15]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [16]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [17]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [18]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [19]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+      grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [20]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
+        box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black)))
+      ),
+      grid(
+        align: center + horizon,
+        inset: 3pt,
+        stroke: (x, _) => if x == 1 {( left: regular_stroke + black )},
+        columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
+        rows: 1fr,
+      
+        
+        [], [M], [T], [W], [T], [F], [S], [S], grid.hline(stroke: regular_stroke + black),
+        padded_link(<2026W01>)[1], [], [], [], grid.cell(fill: black, text(white, padded_link(<2026-01-01>)[1])), padded_link(<2026-01-02>)[2], padded_link(<2026-01-03>)[3], padded_link(<2026-01-04>)[4],
+      padded_link(<2026W02>)[2], padded_link(<2026-01-05>)[5], padded_link(<2026-01-06>)[6], padded_link(<2026-01-07>)[7], padded_link(<2026-01-08>)[8], padded_link(<2026-01-09>)[9], padded_link(<2026-01-10>)[10], padded_link(<2026-01-11>)[11],
+      padded_link(<2026W03>)[3], padded_link(<2026-01-12>)[12], padded_link(<2026-01-13>)[13], padded_link(<2026-01-14>)[14], [15], [16], [17], [18],
+      padded_link(<2026W04>)[4], [19], [20], [21], [22], [23], [24], [25],
+      padded_link(<2026W05>)[5], [26], [27], [28], [29], [30], [31], []
+      )
+      ),
+        grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        row-gutter: 4mm,
+        grid(
+        columns: 1fr,
+        inset: 0mm,
+        stroke: (_, _) => (bottom: regular_stroke + black),
+      
+        grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [Priorities]))),
+        box(height: regular_height, align(horizon, [$square.stroked$])),
+      box(height: regular_height, align(horizon, [$square.stroked$])),
+      box(height: regular_height, align(horizon, [$square.stroked$])),
+      box(height: regular_height, align(horizon, [$square.stroked$])),
+      box(height: regular_height, align(horizon, [$square.stroked$]))
+      ),
+      grid(
+        columns: (1fr, auto),
+        rows: (4mm, 1fr),
+        grid.cell(align: horizon, stroke: (bottom: regular_stroke + black), [Notes]),
+        grid.cell(align: horizon + right, stroke: (bottom: regular_stroke + black), padded_link(<daily-note-2026-01-01-page-1>)[More]),
+        grid.cell(colspan: 2, rect_pattern(dotted))
+      )
+      )
+      )
+      )
+    ''',
+    'monthly': '''
+      #grid(
+        columns: (8mm, 1fr),
+        rows: (8mm, 1fr),
+        column-gutter: 1.5mm,
+        row-gutter: 1.5mm,
+        
+        grid.cell(
+        rowspan: 2,
+      
+        rotate(
+          270deg,
+          origin: center + horizon,
+          reflow: true,
+      
+          table(
+            columns: (3fr, 1fr),
+            rows: 1fr,
+            inset: 0pt,
+            column-gutter: regular_column_gutter,
+            stroke: 0pt,
+      
+            table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
+      ),
+      table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
+      )
+          )
+        )
+      ), grid.cell(align: horizon, stack(
+        dir: rtl,
+        spacing: 1fr,
+        grid(
+        columns: (auto, auto),
+        column-gutter: 6pt,
+        align: horizon,
+        padded_link(<index>, text(size: h1, context {
+        let cap = 0.7em.to-absolute()
+        let gap = (cap - 5 * thick_stroke) / 4
+        box(
+          width: 0.844em,
+          height: cap,
+          align(horizon + left, stack(
+            dir: ttb,
+            spacing: gap,
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+          ))
+        )
+      })),
+        grid(
+        columns: (auto, auto, auto),
+        column-gutter: 6pt,
+        align: horizon,
+        text(size: h1, padded_link(<annual>)[2026]),
+        text(size: h1)[/],
+        text(size: h1)[January<month-2026-01-01>]
+      )
+      )
+      )),
+        grid(
+        columns: 1fr,
+        rows: (auto, auto, 1fr),
+      
+        grid(
+          stroke: regular_stroke,
+          columns: (regular_height, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
+          rows: (regular_height, 16mm, 16mm, 16mm, 16mm, 16mm),
+      
+          [], align(center + horizon)[Monday], align(center + horizon)[Tuesday], align(center + horizon)[Wednesday], align(center + horizon)[Thursday], align(center + horizon)[Friday], align(center + horizon)[Saturday], align(center + horizon)[Sunday],
+          align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W01>)[1]]), [], [], [], grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-01>)[1]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-03>)[3]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-04>)[4]]),
+      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-05>)[5]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-06>)[6]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-07>)[7]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-08>)[8]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-09>)[9]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-10>)[10]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-11>)[11]]),
+      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W03>)[3]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-12>)[12]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-13>)[13]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-14>)[14]]), grid.cell(align: top + left, inset: 3pt, [#[15]]), grid.cell(align: top + left, inset: 3pt, [#[16]]), grid.cell(align: top + left, inset: 3pt, [#[17]]), grid.cell(align: top + left, inset: 3pt, [#[18]]),
+      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W04>)[4]]), grid.cell(align: top + left, inset: 3pt, [#[19]]), grid.cell(align: top + left, inset: 3pt, [#[20]]), grid.cell(align: top + left, inset: 3pt, [#[21]]), grid.cell(align: top + left, inset: 3pt, [#[22]]), grid.cell(align: top + left, inset: 3pt, [#[23]]), grid.cell(align: top + left, inset: 3pt, [#[24]]), grid.cell(align: top + left, inset: 3pt, [#[25]]),
+      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W05>)[5]]), grid.cell(align: top + left, inset: 3pt, [#[26]]), grid.cell(align: top + left, inset: 3pt, [#[27]]), grid.cell(align: top + left, inset: 3pt, [#[28]]), grid.cell(align: top + left, inset: 3pt, [#[29]]), grid.cell(align: top + left, inset: 3pt, [#[30]]), grid.cell(align: top + left, inset: 3pt, [#[31]]), []
+        ),
+        grid.hline(stroke: regular_stroke + black),
+        rect_pattern(dotted)
+      )
+      )
+    ''',
+    'preamble': '''
+      #set page(
+        width: 118.87mm,
+        height: 158.5mm,
+      
+        margin: (
+          top: 8mm,
+          right: 4mm,
+          bottom: 0mm,
+          left: 0mm,
+        )
+      )
+      
+      #set text(
+        size: 8pt
+      )
+      
+      #let regular_stroke = 0.3pt
+      #let thick_stroke = 0.6pt
+      #let regular_height = 4mm
+      #let regular_column_gutter = 8pt
+      
+      #let h1 = 8mm
+      
+      #let dotted = tiling(
+        size: (regular_height, regular_height),
+        place(
+          dx: 0.5pt,
+          dy: regular_height - 0.3mm,
+          circle(
+            radius: 0.141mm,
+            fill: black
+          )
+        ),
+      )
+      
+      #let lined = tiling(
+        size: (regular_height, regular_height),
+        place(
+          line(
+            start: (0%, regular_height - 0.15mm),
+            end: (100%, regular_height - 0.15mm),
+            stroke: regular_stroke + luma(130)
+          ),
+        )
+      )
+      
+      #let rect_pattern(pattern) = rect(
+        width: 100%,
+        height: 100%,
+        fill: pattern
+      )
+      
+      #let dotted_centered = tiling(
+        size: (regular_height, regular_height),
+        // place(center + horizon) does not resolve against a tiling cell
+        // (circles sit on the origin and clip to quarters). Size the cell
+        // first so align can actually center the 0.141mm circle.
+        block(
+          width: regular_height,
+          height: regular_height,
+          align(
+            center + horizon,
+            circle(
+              radius: 0.141mm,
+              fill: black
+            )
+          )
+        ),
+      )
+      
+      #let rect_pattern_centered(pattern) = box(
+        width: 100%,
+        height: 100%,
+        layout(size => {
+          let cell = regular_height.to-absolute()
+          let cols = calc.floor(size.width.pt() / cell.pt())
+          let rows = calc.floor(size.height.pt() / cell.pt())
+          if cols == 0 or rows == 0 {
+            box()
+          } else {
+            let nw = cols * cell
+            let nh = rows * cell
+            let dx = (size.width - nw) / 2
+            let dy = (size.height - nh) / 2
+            place(
+              dx: dx,
+              dy: dy,
+              rect(
+                width: nw,
+                height: nh,
+                fill: pattern
+              )
+            )
+          }
+        })
+      )
+      
+      #let scratch_pad = rect_pattern(dotted)
+      
+      #let padded_link(padding: 6pt, target, content) = box(
+        inset: -padding,
+        link(target)[#box(inset: padding, content)]
+      )
+    ''',
+    'weekly': '''
+      #grid(
+        columns: (8mm, 1fr),
+        rows: (8mm, 1fr),
+        column-gutter: 1.5mm,
+        row-gutter: 1.5mm,
+        
+        grid.cell(
+        rowspan: 2,
+      
+        rotate(
+          270deg,
+          origin: center + horizon,
+          reflow: true,
+      
+          table(
+            columns: (3fr, 1fr),
+            rows: 1fr,
+            inset: 0pt,
+            column-gutter: regular_column_gutter,
+            stroke: 0pt,
+      
+            table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
+      ),
+      table(
+        stroke: regular_stroke,
+        columns: (1fr),
+        rows: 1fr,
+        align: horizon + center,
+      
+        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
+      )
+          )
+        )
+      ), grid.cell(align: horizon, stack(
+        dir: rtl,
+        spacing: 1fr,
+        grid(
+        columns: (auto, auto),
+        column-gutter: 6pt,
+        align: horizon,
+        padded_link(<index>, text(size: h1, context {
+        let cap = 0.7em.to-absolute()
+        let gap = (cap - 5 * thick_stroke) / 4
+        box(
+          width: 0.844em,
+          height: cap,
+          align(horizon + left, stack(
+            dir: ttb,
+            spacing: gap,
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+            line(length: 0.844em, stroke: thick_stroke + black),
+          ))
+        )
+      })),
+        grid(
+        columns: (auto, auto, auto),
+        column-gutter: 6pt,
+        align: horizon,
+        text(size: h1, padded_link(<annual>)[2026]),
+        text(size: h1)[/],
+        text(size: h1)[Week 1 <2026W01>]
+      )
+      )
+      )),
+        grid(
+        columns: (1fr, 1fr, 1fr),
+        rows: (1fr, 1fr, 1fr),
+        column-gutter: 4pt,
+      
+        grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), [Monday 29]),
+        rect_pattern(dotted)
+      ), grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), [Tuesday 30]),
+        rect_pattern(dotted)
+      ), grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), [Wednesday 31]),
+        rect_pattern(dotted)
+      ),
+        grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), padded_link(<2026-01-01>)[Thursday 1]),
+        rect_pattern(dotted)
+      ), grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), padded_link(<2026-01-02>)[Friday 2]),
+        rect_pattern(dotted)
+      ), grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), padded_link(<2026-01-03>)[Saturday 3]),
+        rect_pattern(dotted)
+      ),
+        grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), padded_link(<2026-01-04>)[Sunday 4]),
+        rect_pattern(dotted)
+      ), grid.cell(colspan: 2, grid(
+        columns: 1fr,
+        rows: (auto, 1fr),
+        grid.cell(stroke: (bottom: regular_stroke + black), [Notes]),
+        rect_pattern(dotted)
+      ))
+      )
+      )
+    ''',
+  })
+# ---

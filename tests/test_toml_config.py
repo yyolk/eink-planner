@@ -479,39 +479,6 @@ count = 1
     assert dto["planner"]["params"]["little_calendar"]["inset"] == "5pt"
 
 
-@pytest.mark.parametrize("name", ["supernote-nomad", "158x210-mos-left"])
-def test_shipped_planner_page_tree(name: str):
-    from parch.calendar import walk
-    from parch.mos.coordinator import Coordinator
-
-    dto = load(base_config(name))
-    cfg = Configurator(dto)
-    pairs = Coordinator(dto, i18n=load_default()).section_pages()
-    assert [section for section, _ in pairs] == [s["name"] for s in cfg.enabled_sections()]
-    last_name, last_pages = pairs[-1]
-    assert last_name == "colophon"
-    assert len(last_pages) == 1
-    assert last_pages[0].raw_typst
-    assert "<colophon>" in last_pages[0].content
-    by_name = dict(pairs)
-    n_days = sum(1 for _ in walk(cfg.start_date(), cfg.end_date()))
-    n_months = sum(1 for _ in walk(cfg.start_date().month(), cfg.end_date().month()))
-    n_quarters = sum(1 for _ in walk(cfg.start_date().quarter(), cfg.end_date().quarter()))
-    week_days = sum(
-        1
-        for _ in walk(
-            cfg.start_date().beginning_of_month().beginning_of_week(),
-            cfg.end_date().end_of_month().end_of_week(),
-        )
-    )
-    assert len(by_name["daily"]) == n_days
-    assert len(by_name["monthly"]) == n_months
-    assert len(by_name["quarterly"]) == n_quarters
-    assert len(by_name["weekly"]) == week_days // 7
-    for section, pages in pairs:
-        assert pages, section
-
-
 def test_device_ppi_may_be_omitted():
     dto = parse_toml(
         _minimal(

@@ -48,6 +48,7 @@ package = true
 dev = [
     "pillow>=12.3.0",
     "pytest>=8.0",
+    "syrupy>=6.0.0",
 ]
 
 [tool.pytest.ini_options]
