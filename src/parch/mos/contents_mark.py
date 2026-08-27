@@ -39,6 +39,7 @@ def contents_mark(
     heading_height: str | None,
     body_size: str = "8pt",
     face: str | None = None,
+    link_padding: str | None = None,
 ) -> str:
     """Five house-stroke bars linking to Contents, or empty when index is off."""
     if manifest is None or not manifest.source(INDEX_ID):
@@ -62,7 +63,9 @@ def contents_mark(
     ))
   )
 }})"""
-    return f"padded_link(<{INDEX_ID}>, {glyph})"
+    if link_padding is None:
+        return f"padded_link(<{INDEX_ID}>, {glyph})"
+    return f"padded_link(padding: {link_padding}, <{INDEX_ID}>, {glyph})"
 
 
 def lead_title(
@@ -93,7 +96,11 @@ def trail_strip(
     chip: str | None = None,
 ) -> str | None:
     """Mark immediately left of *chip*, flush to the MOS strip."""
-    mark = contents_mark(manifest, heading_height, body_size, face="h1")
+    # Flush to the MOS strip: do not let padded_link inset paint on Q1.
+    mark = contents_mark(
+        manifest, heading_height, body_size, face="h1",
+        link_padding=None if chip else "0pt",
+    )
     if mark and chip:
         return (
             "grid(\n"
@@ -104,4 +111,6 @@ def trail_strip(
             f"  {chip}\n"
             ")"
         )
+    if mark and not chip:
+        return f"pad(right: 3mm, {mark})"
     return mark or chip

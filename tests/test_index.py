@@ -16,6 +16,7 @@ NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
 _TOC_TITLE = 'weight: "bold")[Contents <index>]'
 _MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
 _MARK_LINK = "padded_link(<index>"
+_MARK_FLUSH = "padded_link(padding: 0pt, <index>"
 
 
 def _generate(dto) -> str:
@@ -190,7 +191,7 @@ def test_annual_has_no_calendar_chip_and_links_to_index():
     assert "[Calendar]" not in page
     assert "grid.cell(fill: black, text(white)[#padded_link(<annual>, [Calendar])])" not in page
     assert "2026<annual>" in page
-    assert _MARK_LINK in page
+    assert _MARK_FLUSH in page
     assert _MARK_RULE in page
     assert page.count(_MARK_RULE) == 5
 
@@ -223,7 +224,7 @@ def test_mos_right_mark_sits_next_to_strip():
     typst = _generate(load(NOMAD_MOS_RIGHT))
     page = _annual_page(typst)
     title_at = page.index("2026<annual>")
-    mark_at = page.index(_MARK_LINK)
+    mark_at = page.index(_MARK_FLUSH)
     assert title_at < mark_at
     assert "padded_link(<annual>, [Calendar])" not in page
     assert "[Calendar]" not in page
@@ -236,7 +237,7 @@ def test_mos_left_annual_mark_is_trail_strip_sibling():
     typst = _generate(load(NOMAD))
     page = _annual_page(typst)
     title_at = page.index("2026<annual>")
-    mark_at = page.index(_MARK_LINK)
+    mark_at = page.index(_MARK_FLUSH)
     assert title_at < mark_at
     heading = page[page.index("stack(") : mark_at]
     assert "dir: rtl" in heading
@@ -261,7 +262,7 @@ def test_mos_right_habits_mark_sits_next_to_strip():
     typst = _generate(load(NOMAD_MOS_RIGHT))
     page = next(p for p in _pages(typst) if "January<habits-january>" in p)
     title_at = page.index("January<habits-january>")
-    mark_at = page.index(_MARK_LINK)
+    mark_at = page.index(_MARK_FLUSH)
     strip_at = page.index("rowspan: 2")
     assert title_at < mark_at < strip_at
     assert page[mark_at:strip_at].count("padded_link") == 1

@@ -67,7 +67,7 @@ class Weekly:
 
     def _title(self, manifest: Manifest, page: WeeklyPage) -> str:
         return f"""grid(
-  columns: (auto, auto, 1fr),
+  columns: (auto, auto, auto),
   column-gutter: 6pt,
   align: horizon,
   text(size: h1, {self._year_cell(manifest)}),

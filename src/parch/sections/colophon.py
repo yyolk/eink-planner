@@ -18,9 +18,11 @@ _DEVICE_NAMES = {
     "supernote-nomad": "SuperNote Nomad",
     "supernote-nomad-mos-right": "SuperNote Nomad",
     "kindle-scribe": "Kindle Scribe",
+    "kindle-scribe-mos-right": "Kindle Scribe",
     "158x210-mos-left": "158 × 210",
     "158x210-mos-left-lined": "158 × 210",
     "158x210-mos-right": "158 × 210",
+    "158x210-mos-right-lined": "158 × 210",
 }
 
 _TABLE_HEADER = re.compile(r"(?m)^[ \t]*\[(\[?)([^\]]+)\](\]?)[ \t]*\r?\n")
