@@ -1,4 +1,4 @@
-"""Contents back-link mark: four filled bars, header-tall tap."""
+"""Contents back-link mark: four house-stroke bars, header-tall tap."""
 
 from __future__ import annotations
 
@@ -39,16 +39,16 @@ def contents_mark(
     heading_height: str,
     body_size: str = "8pt",
 ) -> str:
-    """Four filled bars linking to Contents, or empty when index is off."""
+    """Four house-stroke bars linking to Contents, or empty when index is off."""
     if manifest is None or not manifest.source(INDEX_ID):
         return ""
-    bar = "rect(width: 1.2em, height: 0.7mm, fill: black)"
+    bar = "line(length: 1.2em, stroke: thick_stroke + black)"
     glyph = f"""text(size: {body_size}, box(
   width: 1.2em,
   height: {heading_height},
   align(horizon + left, stack(
     dir: ttb,
-    spacing: 0.35mm,
+    spacing: 0.15em,
     {bar},
     {bar},
     {bar},

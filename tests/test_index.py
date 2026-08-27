@@ -17,7 +17,7 @@ NOMAD = REPO / "configs/supernote-nomad.toml"
 NOMAD_MOS_RIGHT = REPO / "configs/supernote-nomad-mos-right.toml"
 
 _TOC_TITLE = 'weight: "bold")[Contents <index>]'
-_MARK_RULE = "rect(width: 1.2em, height: 0.7mm, fill: black)"
+_MARK_RULE = "line(length: 1.2em, stroke: thick_stroke + black)"
 _MARK_LINK = "padded_link(<index>"
 
 
