@@ -111,7 +111,13 @@ def build_parser() -> argparse.ArgumentParser:
     press.add_argument(
         "--ir",
         action="store_true",
-        help="Use the experimental layout IR (MOS builds a tree; Typst only paints)",
+        help="Use the experimental layout IR (MOS builds a tree; backend only paints)",
+    )
+    press.add_argument(
+        "--backend",
+        choices=("typst", "fpdf2"),
+        default="typst",
+        help="PDF backend (default: typst). fpdf2 implies --ir",
     )
 
     proof = sub.add_parser(
@@ -193,7 +199,7 @@ def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
                 argv=list(argv) if argv is not None else list(sys.argv),
             ),
         )
-    if getattr(args, "ir", False):
+    if getattr(args, "backend", "typst") == "fpdf2" or getattr(args, "ir", False):
         return _generate_ir(args, dto, i18n)
     typst_source = Generate(i18n=i18n).generate(dto)
 
@@ -214,13 +220,23 @@ def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
 
 def _generate_ir(args: argparse.Namespace, dto, i18n: I18n) -> int:
     from parch.ir.mos import build_planner
-    from parch.ir.typst import render_typst
 
     print("using layout IR")
-    typst_source = render_typst(build_planner(dto, i18n))
+    doc = build_planner(dto, i18n)
 
     workdir = Path(args.workdir)
     workdir.mkdir(parents=True, exist_ok=True)
+
+    if getattr(args, "backend", "typst") == "fpdf2":
+        from parch.ir.fpdf import render_fpdf
+
+        dest = render_fpdf(doc, workdir / "index.pdf")
+        print(f"Wrote {dest}")
+        return 0
+
+    from parch.ir.typst import render_typst
+
+    typst_source = render_typst(doc)
     (workdir / "index.typst").write_text(typst_source, encoding="utf-8")
     print(f"Wrote {workdir / 'index.typst'}")
 

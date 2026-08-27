@@ -46,9 +46,12 @@ clamps to zero.
   labels*, and *rowspan chrome* — not missing page-level primitives.
 - Putting chrome in the tree is the right call. The cost is one side-menu copy
   per chrome page. Fine for an exploration; a later pass could intern it.
-- Typst-IR and a later fpdf2-IR will not be pixel-identical. Fonts (Typst
-  default vs Times), fr leftover, and how rotate is applied all differ.
-  Recognizable MOS is the bar, not a screenshot diff.
+- Typst-IR and fpdf2-IR are not pixel-identical. Fonts (Typst default vs
+  Times), fr leftover, and how rotate is applied all differ. Recognizable
+  MOS is the bar, not a screenshot diff.
+- fpdf2 `rotation()` restores font size. Set the font *before* rotating;
+  do not cache `set_font` across a graphics-state restore (cover 36pt
+  would otherwise leak onto 7pt side-menu labels).
 - One-pass top-down is enough when MOS is honest about `auto` vs `fr`. Daily
   left column is `auto` schedule + `1fr` calendar. That is the whole trick.
 - Special-casing a whole page in one painter is how the backends drifted. If a
@@ -80,9 +83,12 @@ clamps to zero.
 
 ```shell
 parch press supernote-nomad --ir -w out/ir-typst
+parch press supernote-nomad --backend fpdf2 -w out/ir-fpdf
 ```
 
-The default generate path (`Generate` string MOS + Compile) is unchanged.
+`--ir` (or `--ir --backend typst`) paints through Typst. `--backend fpdf2`
+implies IR and paints through fpdf2. The default generate path (`Generate`
+string MOS + Compile) is unchanged.
 
 ## What we would change if we keep this
 
