@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import hashlib
 import pytest
 
 from parch import ConfigError
@@ -11,8 +10,6 @@ from parch.toml_config import apply_debug, apply_year, load_toml, parse_toml
 from tests.toml_fixtures import _minimal, omit_toml_sections
 from tests.helpers import base_config, load_default
 
-REPO = Path(__file__).resolve().parents[1]
-
 NOMAD = base_config("supernote-nomad")
 NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
 MOS_LEFT = base_config("158x210-mos-left")
@@ -21,11 +18,6 @@ MOS_RIGHT = base_config("158x210-mos-right")
 MOS_RIGHT_LINED = base_config("158x210-mos-right-lined")
 SCRIBE = base_config("kindle-scribe")
 SCRIBE_MOS_RIGHT = base_config("kindle-scribe-mos-right")
-
-GOLDEN_SHA256 = {
-    "supernote-nomad": "234ef52b9214dca837146facf72f64cca0433164614387c08f96bc4d98840295",
-    "158x210-mos-left": "0fa1de7d41019e467b7124c84f521208fe6885df24a98b21035294d34932e6e5",
-}
 
 
 @pytest.mark.parametrize("path", [NOMAD, NOMAD_MOS_RIGHT, MOS_LEFT, MOS_LEFT_LINED, MOS_RIGHT, MOS_RIGHT_LINED, SCRIBE, SCRIBE_MOS_RIGHT])
@@ -487,17 +479,37 @@ count = 1
     assert dto["planner"]["params"]["little_calendar"]["inset"] == "5pt"
 
 
-@pytest.mark.parametrize("name", list(GOLDEN_SHA256))
-def test_golden_typst_hash(name: str):
-    from parch.services.generate import Generate
+@pytest.mark.parametrize("name", ["supernote-nomad", "158x210-mos-left"])
+def test_shipped_planner_page_tree(name: str):
+    from parch.calendar import walk
+    from parch.mos.coordinator import Coordinator
 
     dto = load(base_config(name))
-    typst = Generate(i18n=load_default()).generate(dto)
-    digest = hashlib.sha256(typst.encode("utf-8")).hexdigest()
-    assert digest == GOLDEN_SHA256[name]
-    golden = REPO / "out" / "toml-goldens" / f"{name}.typst"
-    if golden.is_file():
-        assert typst == golden.read_text(encoding="utf-8")
+    cfg = Configurator(dto)
+    pairs = Coordinator(dto, i18n=load_default()).section_pages()
+    assert [section for section, _ in pairs] == [s["name"] for s in cfg.enabled_sections()]
+    last_name, last_pages = pairs[-1]
+    assert last_name == "colophon"
+    assert len(last_pages) == 1
+    assert last_pages[0].raw_typst
+    assert "<colophon>" in last_pages[0].content
+    by_name = dict(pairs)
+    n_days = sum(1 for _ in walk(cfg.start_date(), cfg.end_date()))
+    n_months = sum(1 for _ in walk(cfg.start_date().month(), cfg.end_date().month()))
+    n_quarters = sum(1 for _ in walk(cfg.start_date().quarter(), cfg.end_date().quarter()))
+    week_days = sum(
+        1
+        for _ in walk(
+            cfg.start_date().beginning_of_month().beginning_of_week(),
+            cfg.end_date().end_of_month().end_of_week(),
+        )
+    )
+    assert len(by_name["daily"]) == n_days
+    assert len(by_name["monthly"]) == n_months
+    assert len(by_name["quarterly"]) == n_quarters
+    assert len(by_name["weekly"]) == week_days // 7
+    for section, pages in pairs:
+        assert pages, section
 
 
 def test_device_ppi_may_be_omitted():

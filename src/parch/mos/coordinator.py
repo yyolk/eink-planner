@@ -50,18 +50,20 @@ class Coordinator:
         self.configurator = Configurator(dto)
         self.manifest = Manifest()
 
-    def generate(self) -> str:
-        builder = Builder(i18n=self.i18n, configurator=self.configurator, manifest=self.manifest)
+    def section_pages(self) -> list[tuple[str, list]]:
+        """Enabled sections in order, each with the pages it contributes."""
         sections = [self._section(dto) for dto in self.configurator.enabled_sections()]
         for section in sections:
             self.manifest.register_section(section.section_name)
         for section in sections:
             section.register(self.manifest)
-        pages = []
-        for section in sections:
-            pages.extend(section.pages(self.manifest))
-        for page in pages:
-            builder.add(page)
+        return [(section.section_name, section.pages(self.manifest)) for section in sections]
+
+    def generate(self) -> str:
+        builder = Builder(i18n=self.i18n, configurator=self.configurator, manifest=self.manifest)
+        for _name, pages in self.section_pages():
+            for page in pages:
+                builder.add(page)
         return builder.generate()
 
     def _section(self, dto: Any):
