@@ -55,6 +55,7 @@ _TITLE_ASSIGN = re.compile(r'(?m)^[ \t]*title\s*=\s*"([^"]*)"')
 
 
 def shipped_help() -> str:
+    """Return the display labels of all shipped profiles as a comma-separated string."""
     return ", ".join(label for label, _stem in SHIPPED_PROFILES)
 
 
@@ -77,6 +78,18 @@ def resolve_from(spec: str, repo: Path) -> Path:
 
 
 def parse_sections(raw: str) -> list[str]:
+    """
+    Parse and validate a comma-separated list of planner section names.
+    
+    Parameters:
+    	raw (str): Comma-separated section names.
+    
+    Returns:
+    	list[str]: Valid section names in canonical order.
+    
+    Raises:
+    	ConfigError: If the input is empty or contains an unknown section.
+    """
     names = [part.strip() for part in raw.split(",") if part.strip()]
     if not names:
         raise ConfigError("sections must be non-empty")
@@ -94,7 +107,18 @@ def overlay_toml(
     sections: list[str] | None = None,
     source_sections: list[str] | None = None,
 ) -> str:
-    """Copy source text and surgically overlay year / cover title / sections."""
+    """
+    Apply optional year and section overrides to planner TOML text.
+    
+    Parameters:
+        text (str): Source TOML text.
+        year (int | None): Year to apply to the calendar and cover title.
+        sections (list[str] | None): Section names to apply.
+        source_sections (list[str] | None): Sections currently selected in the source.
+    
+    Returns:
+        str: TOML text with the requested overrides applied.
+    """
     if year is not None:
         text = _replace_calendar_year(text, year)
         text = _replace_cover_title_year(text, year)
@@ -113,6 +137,24 @@ def run_new(
     yes: bool,
     force: bool,
 ) -> int:
+    """
+    Create a planner TOML file from a shipped or specified profile.
+    
+    Parameters:
+    	repo (Path): Repository containing the available profile configurations.
+    	outfile (str | Path | None): Destination path for the generated configuration.
+    	from_profile (str | None): Profile name or source path to use.
+    	year (int | None): Calendar year to apply to the generated configuration.
+    	sections (str | None): Comma-separated section names to include.
+    	yes (bool): Disable interactive prompts.
+    	force (bool): Allow overwriting an existing destination file.
+    
+    Returns:
+    	int: `0` after the configuration is written successfully.
+    
+    Raises:
+    	ConfigError: If the profile, inputs, destination, or generated configuration is invalid, or if file operations fail.
+    """
     interactive = (not yes) and sys.stdin.isatty()
 
     if from_profile is None and interactive:
@@ -181,6 +223,15 @@ def run_new(
 
 
 def _read_source(path: Path) -> tuple[str, dict[str, Any]]:
+    """
+    Read and parse a TOML source file.
+    
+    Parameters:
+        path (Path): Path to the TOML file.
+    
+    Returns:
+        tuple[str, dict[str, Any]]: The source text and its parsed TOML table.
+    """
     try:
         text = path.read_text(encoding="utf-8")
     except OSError as exc:
@@ -195,6 +246,14 @@ def _read_source(path: Path) -> tuple[str, dict[str, Any]]:
 
 
 def _year_from_data(data: dict[str, Any]) -> int:
+    """Return the calendar year from parsed configuration data, or the current year when the configured value is unavailable or invalid.
+    
+    Parameters:
+    	data (dict[str, Any]): Parsed configuration data containing an optional calendar year.
+    
+    Returns:
+    	int: A valid calendar year.
+    """
     calendar = data.get("calendar")
     if isinstance(calendar, dict):
         raw = calendar.get("year")
@@ -204,6 +263,11 @@ def _year_from_data(data: dict[str, Any]) -> int:
 
 
 def _sections_from_data(data: dict[str, Any]) -> list[str]:
+    """Extract string section names from parsed configuration data.
+    
+    Returns:
+    	list[str]: String entries from the ``sections`` field, or an empty list when the field is not a list.
+    """
     raw = data.get("sections")
     if not isinstance(raw, list):
         return []
@@ -211,6 +275,14 @@ def _sections_from_data(data: dict[str, Any]) -> list[str]:
 
 
 def _coerce_outfile(outfile: str | Path | None) -> Path | None:
+    """Convert a non-empty output path value to an expanded path.
+    
+    Parameters:
+    	outfile (str | Path | None): Output path value to convert.
+    
+    Returns:
+    	Path | None: The expanded output path, or `None` when the value is missing or blank.
+    """
     if outfile is None:
         return None
     text = str(outfile).strip()
@@ -220,6 +292,11 @@ def _coerce_outfile(outfile: str | Path | None) -> Path | None:
 
 
 def _replace_calendar_year(text: str, year: int) -> str:
+    """
+    Replace the calendar year in TOML text.
+    
+    If the calendar table has no year assignment, adds one to that table. If no calendar table exists, replaces the first year assignment anywhere in the text.
+    """
     def repl_block(match: re.Match[str]) -> str:
         block = match.group(0)
         new_block, n = _YEAR_ASSIGN.subn(f"year = {year}", block, count=1)
@@ -237,6 +314,16 @@ def _replace_calendar_year(text: str, year: int) -> str:
 
 
 def _replace_cover_title_year(text: str, year: int) -> str:
+    """
+    Replace a numeric cover title year in the first cover section.
+    
+    Parameters:
+        text (str): TOML source text.
+        year (int): Year to use when the cover title contains exactly four digits.
+    
+    Returns:
+        str: TOML text with the eligible cover title year replaced.
+    """
     def repl_block(match: re.Match[str]) -> str:
         block = match.group(0)
 
@@ -252,6 +339,16 @@ def _replace_cover_title_year(text: str, year: int) -> str:
 
 
 def _replace_sections(text: str, names: list[str]) -> str:
+    """
+    Replace the first sections array in TOML text with the supplied section names.
+    
+    Parameters:
+    	text (str): TOML source text.
+    	names (list[str]): Section names to write in the array.
+    
+    Returns:
+    	str: TOML text containing the replacement sections array.
+    """
     inner = "\n".join(f'  "{name}",' for name in names)
     formatted = f"sections = [\n{inner}\n]"
     new_text, n = _SECTIONS_ARRAY.subn(formatted, text, count=1)
@@ -261,6 +358,15 @@ def _replace_sections(text: str, names: list[str]) -> str:
 
 
 def _prompt_profile() -> str:
+    """
+    Prompt for and return the selected shipped planner profile.
+    
+    Returns:
+        str: The profile stem selected by the user.
+    
+    Raises:
+        ConfigError: If the prompt is cancelled.
+    """
     questionary = _questionary()
     answer = questionary.select(
         "Starting profile",
@@ -275,9 +381,29 @@ def _prompt_profile() -> str:
 
 
 def _prompt_year(default: int) -> int:
+    """
+    Prompt for and return a valid calendar year.
+    
+    Parameters:
+    	default (int): The initial year shown in the prompt.
+    
+    Returns:
+    	int: The entered year, from 1 through 9999.
+    
+    Raises:
+    	ConfigError: If the prompt is cancelled.
+    """
     questionary = _questionary()
 
     def _ok(text: str) -> bool | str:
+        """Validate that input represents a calendar year from 1 through 9999.
+        
+        Parameters:
+            text (str): User input containing the year.
+        
+        Returns:
+            bool | str: `True` when valid, otherwise an error message.
+        """
         try:
             value = int(text.strip())
         except ValueError:
@@ -293,6 +419,18 @@ def _prompt_year(default: int) -> int:
 
 
 def _prompt_sections(source: list[str]) -> list[str]:
+    """
+    Prompt for the sections to include in the planner configuration.
+    
+    Parameters:
+        source (list[str]): Section names selected by the source profile by default.
+    
+    Returns:
+        list[str]: The selected section names in canonical order.
+    
+    Raises:
+        ConfigError: If the prompt is cancelled.
+    """
     questionary = _questionary()
     checked = set(source)
 
@@ -313,6 +451,15 @@ def _prompt_sections(source: list[str]) -> list[str]:
 
 
 def _prompt_outfile() -> Path:
+    """
+    Prompt for and return the destination path for the generated planner file.
+    
+    Returns:
+    	Path: The expanded output path.
+    
+    Raises:
+    	ConfigError: If the prompt is cancelled or no output path is provided.
+    """
     questionary = _questionary()
     answer = questionary.path("Output path").ask()
     if answer is None:
@@ -324,6 +471,14 @@ def _prompt_outfile() -> Path:
 
 
 def _questionary() -> Any:
+    """Load the optional dependency used for interactive prompts.
+    
+    Returns:
+        Any: The imported ``questionary`` module.
+    
+    Raises:
+        ConfigError: If ``questionary`` is not installed.
+    """
     try:
         import questionary
     except ImportError as exc:

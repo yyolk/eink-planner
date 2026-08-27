@@ -28,6 +28,13 @@ def samples_dest(repo: Path, config: str | Path) -> Path:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """
+    Build the command-line argument parser for the ``parch`` CLI.
+    
+    Returns:
+        argparse.ArgumentParser: Configured parser for the ``new``, ``generate``,
+        and ``preview-svg`` commands.
+    """
     parser = argparse.ArgumentParser(
         prog="parch",
         description="Generate a yearly e-ink planner PDF from a TOML config.",
@@ -158,6 +165,18 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def new_cmd(args: argparse.Namespace) -> int:
+    """
+    Create a planner configuration from a profile or source path.
+    
+    Parameters:
+    	args (argparse.Namespace): Parsed command-line arguments for the `new` command.
+    
+    Returns:
+    	int: The command exit status.
+    
+    Raises:
+    	ConfigError: If both output path options are provided with different values.
+    """
     outfile = args.outfile
     if outfile and args.output and outfile != args.output:
         raise ConfigError("give outfile as a positional or -o, not both")
@@ -175,6 +194,16 @@ def new_cmd(args: argparse.Namespace) -> int:
 
 
 def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
+    """
+    Generate Typst source and a PDF from the configured planner.
+    
+    Parameters:
+    	args (argparse.Namespace): Command-line options containing the configuration path, output work directory, locale, year, debug, and Ghostscript settings.
+    	argv (list[str] | None): Original command-line arguments used for provenance metadata.
+    
+    Returns:
+    	int: Zero after successful generation.
+    """
     repo = _repo_root()
     i18n = I18n.load_default(repo, args.locale)
 
@@ -265,6 +294,15 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
 
 
 def main(argv: list[str] | None = None) -> int:
+    """
+    Run the command-line interface and dispatch the selected subcommand.
+    
+    Parameters:
+        argv (list[str] | None): Command-line arguments to parse, excluding the program name. Uses the process arguments when omitted.
+    
+    Returns:
+        int: The command exit status, or 1 when configuration or compilation fails.
+    """
     parser = build_parser()
     args = parser.parse_args(argv)
     full_argv = list(sys.argv) if argv is None else [parser.prog, *argv]
