@@ -33,6 +33,7 @@ from parch.models.device import (
     ProjectsSection,
     QuarterlySection,
     ReviewSection,
+    TasksSection,
     Schedule,
     WeeklySection,
 )
@@ -50,6 +51,7 @@ _SECTION_CLASS = {
     "meetings": "meetings",
     "habits": "habits",
     "review": "review",
+    "tasks": "tasks",
     "colophon": "colophon",
 }
 
@@ -66,6 +68,7 @@ _SECTION_NAME = {
     "meetings": "meetings",
     "habits": "habits",
     "review": "review",
+    "tasks": "tasks",
     "colophon": "colophon",
 }
 
@@ -239,6 +242,8 @@ def _build_section_params(kind: str, raw: Any, extras: dict[str, Any]) -> dict[s
         return _section_habits(raw)
     if kind == "review":
         return _section_review(raw)
+    if kind == "tasks":
+        return _section_tasks(raw)
     if kind == "colophon":
         return _section_colophon(raw) if raw is not None else {}
     return {}
@@ -390,6 +395,12 @@ def _section_habits(table: HabitsSection | None) -> dict[str, Any]:
     if table is None:
         table = HabitsSection()
     return {"habit_columns": table.habit_columns, "names": list(table.names)}
+
+
+def _section_tasks(table: TasksSection | None) -> dict[str, Any]:
+    if table is None:
+        table = TasksSection()
+    return {"weeks_per_page": table.weeks_per_page}
 
 
 def _section_review(table: ReviewSection | None) -> dict[str, Any]:

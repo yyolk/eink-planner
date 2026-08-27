@@ -21,6 +21,7 @@ from parch.mos.sections.habits import Habits
 from parch.mos.sections.meetings import Meetings
 from parch.mos.sections.projects import Projects
 from parch.mos.sections.review import Review
+from parch.mos.sections.tasks import Tasks
 from parch.mos.sections.weekly import Weekly
 from parch.sections.colophon import Colophon
 
@@ -38,6 +39,7 @@ COMPONENTS = {
     "meetings": Meetings,
     "habits": Habits,
     "review": Review,
+    "tasks": Tasks,
     "colophon": Colophon,
 }
 

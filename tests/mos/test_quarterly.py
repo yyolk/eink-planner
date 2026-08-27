@@ -194,7 +194,7 @@ def test_week_letter_stays_off_when_little_calendar_sets_true():
 
 
 def test_generated_year_crumb_links_to_annual():
-    skip = ("monthly", "weekly", "daily", "daily_notes", "colophon", "projects", "habits", "review", "meetings")
+    skip = ("monthly", "weekly", "daily", "daily_notes", "colophon", "projects", "habits", "review", "tasks", "meetings")
     text = omit_toml_sections(NOMAD.read_text(encoding="utf-8"), skip)
     typst = _generate(parse_toml(text, source="nomad-q-annual.toml"))
     pages = _quarter_pages(typst)

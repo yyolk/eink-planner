@@ -34,6 +34,7 @@ _BULKY = (
     "projects",
     "habits",
     "review",
+    "tasks",
     "meetings",
 )
 _MONTHLY_ONLY = _BULKY + ("cover", "annual", "quarterly", "weekly")

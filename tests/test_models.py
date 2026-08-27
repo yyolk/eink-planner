@@ -146,7 +146,7 @@ def test_known_sections_match_section_tables():
     from parch.models import KNOWN_SECTIONS
     from parch.models.device import SectionTables
     assert KNOWN_SECTIONS == frozenset(SectionTables.model_fields)
-    assert {"cover", "daily", "daily_notes", "projects", "meetings", "habits", "review", "colophon"} <= KNOWN_SECTIONS
+    assert {"cover", "daily", "daily_notes", "projects", "meetings", "habits", "review", "tasks", "colophon"} <= KNOWN_SECTIONS
 
 
 def test_daily_components_match_daily_track_fields():

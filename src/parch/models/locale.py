@@ -76,6 +76,7 @@ class Locale(StrictModel):
     meetings: str
     habits: str
     review: str
+    tasks: str
     topics: str
     action_items: str
     todo: str
