@@ -28,7 +28,7 @@ dev = ["pytest>=8.0"]
 [project.urls]
 Homepage = "https://github.com/yyolk/parch"
 Repository = "https://github.com/yyolk/parch"
-Issues = "https://github.com/yyolk/parch"
+Issues = "https://github.com/yyolk/parch/issues"
 
 [project.scripts]
 parch = "parch.cli:main"
