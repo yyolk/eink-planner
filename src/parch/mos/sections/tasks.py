@@ -226,7 +226,7 @@ class Tasks:
   columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
   rows: {_DAY_STRIP_HEIGHT},
   align: horizon + center,
-  inset: (x: 2pt, y: 0pt),
+  inset: 0pt,
   {cells}
 )"""
         return f"""#[] <{page_id}>
@@ -244,10 +244,14 @@ class Tasks:
     def _day_cell(self, manifest: Manifest, day: Day) -> str:
         full = self.i18n.t(f"weekday.full.{day.weekday_name}")
         label = f"{full} {day.month_day}"
+        inner = (
+            "stack(dir: ttb, spacing: 1pt, "
+            f"box(text(size: 6pt)[{label}]), "
+            "line(length: 100%, stroke: regular_stroke + black))"
+        )
         band = (
             "box(width: 100%, height: 100%, align(horizon + center, "
-            f"stack(dir: ttb, spacing: 0pt, [{label}], "
-            "line(length: 100%, stroke: regular_stroke + black))))"
+            f"{inner}))"
         )
         if manifest.source(day.id):
             band = f"padded_link(<{day.id}>, {band})"

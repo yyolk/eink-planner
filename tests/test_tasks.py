@@ -294,6 +294,9 @@ count = 1
     assert "Monday 29" in week
     assert "Tuesday 30" in week
     assert "Wednesday 31" in week
+    assert "box(text(size: 6pt)[Wednesday 31])" in week
+    assert "Wed 31" not in week
+    assert week.count("line(length: 100%, stroke: regular_stroke + black)") == 7
     assert "Thursday 1" in week
     assert "Friday 2" in week
     assert "Saturday 3" in week
