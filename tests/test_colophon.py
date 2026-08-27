@@ -251,7 +251,9 @@ def test_no_padded_link_to_colophon_from_other_sections(tmp_path):
     typst_src = _generate(_attach(short_january(load(path)), path))
     targets = _PADDED_LINK.findall(typst_src)
     assert targets
-    assert all(not t.startswith("colophon") for t in targets)
+    # Contents rows may link to <colophon>; no other colophon-* targets.
+    assert all(t == "colophon" or not t.startswith("colophon") for t in targets)
+    assert "padded_link(<colophon>" in typst_src
 
 
 def test_two_colophon_nodes_emit_two_pages(tmp_path):

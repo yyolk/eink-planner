@@ -12,6 +12,7 @@ from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.sections.annual import Annual
 from parch.mos.sections.cover_plain import CoverPlain
+from parch.mos.sections.index import Index
 from parch.mos.sections.daily import Daily
 from parch.mos.sections.daily_notes import DailyNotes
 from parch.mos.sections.monthly import Monthly
@@ -26,6 +27,7 @@ from parch.sections.colophon import Colophon
 
 COMPONENTS = {
     "cover_plain": CoverPlain,
+    "index": Index,
     "annual": Annual,
     "quarterly": Quarterly,
     "monthly": Monthly,

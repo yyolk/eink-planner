@@ -10,6 +10,7 @@ from parch.calendar.month import Month
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
+from parch.mos.contents_mark import body_size_token, heading_height_token, lead_title
 from parch.mos.page_data import PageData
 from parch.mos.sections.annual import Annual
 
@@ -129,6 +130,7 @@ class Habits:
   text(size: h1)[/],
   text(size: h1, {habits_cell})
 )"""
+        breadcrumb = lead_title(manifest, heading_height_token(self.configurator), breadcrumb, body_size_token(self.configurator))
         return f"""#grid(
   columns: 1fr,
   rows: (auto, 1fr),

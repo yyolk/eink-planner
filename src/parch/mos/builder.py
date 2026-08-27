@@ -10,12 +10,14 @@ from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.navigation import NavLink, Navigation
 from parch.mos.page_data import PageData
+from parch.mos.contents_mark import body_size_token, lead_title
 from parch.mos.preamble import Preamble
 
 
 class Builder:
     def __init__(self, i18n: I18n, configurator: Configurator, manifest: Manifest) -> None:
         self.configurator = configurator
+        self.manifest = manifest
         self.pages: list[str] = []
         self.preamble = Preamble(configurator)
         self.navigation = Navigation(i18n=i18n, manifest=manifest, configurator=configurator)
@@ -95,6 +97,8 @@ class Builder:
             direction = "ltr" if _v(self.mos_layout, "side_menu_position") == "right" else "rtl"
         else:
             direction = heading_dir
+        if title:
+            title = lead_title(self.manifest, _v(self.heading, "height"), title, body_size_token(self.configurator))
         parts = [
             p
             for p in (

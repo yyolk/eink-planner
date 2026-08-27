@@ -7,6 +7,7 @@ from typing import Any
 
 from parch import __version__
 from parch.config import StrictDict, _to_plain
+from parch.mos.contents_mark import body_size_token, contents_mark, heading_height_token
 from parch.mos.page_data import PageData
 from parch.mos.sections.annual import Annual
 
@@ -96,6 +97,8 @@ def _mono_cell(value: str) -> str:
 
 
 class Colophon:
+    ID = "colophon"
+
     def __init__(
         self,
         section_name: str,
@@ -113,8 +116,9 @@ class Colophon:
         self.command = bool(command)
         self.sha = bool(sha)
 
-    def register(self, _manifest) -> None:
-        return None
+    def register(self, manifest) -> None:
+        if manifest is not None:
+            manifest.register_source(self.ID)
 
     def pages(self, manifest) -> list[PageData]:
         return [PageData(raw_typst=True, content=self._content(manifest))]
@@ -126,11 +130,15 @@ class Colophon:
         title = _escape(self.title)
         dumped = drop_empty_tables(self._config_text()) if self.dump else ""
         parts: list[str] = []
+        mark = contents_mark(manifest, heading_height_token(self.configurator), body_size_token(self.configurator))
         if dumped.strip():
             # Page setup first so Typst does not break between the list and the dump.
-            parts.append(self._dump_pagination())
+            parts.append(self._dump_pagination(mark))
         if self.command or self.sha:
             parts.append(_MONO_HELPER)
+        if mark:
+            # Header-tall mark in the top-left slot, then the signed title block.
+            parts.append(f"#{mark}")
         parts.append(self._facts_block(title, device, year_cell, version))
         if dumped.strip():
             parts.append("#v(1em)")
@@ -183,7 +191,7 @@ class Colophon:
         ]
         inner = [
             "  #set par(spacing: 0em)",
-            f'  #text(size: h1, weight: "bold")[{title}]',
+            f'  #text(size: h1, weight: "bold")[{title} <colophon>]',
             "  #v(1em)",
         ]
         label_let = self._label_width_let()
@@ -261,7 +269,7 @@ class Colophon:
     def _dump_end_label(self) -> str:
         return f"colophon-end-{self._dump_uid()}"
 
-    def _dump_pagination(self) -> str:
+    def _dump_pagination(self, mark: str = "") -> str:
         # Quiet 1/N only when the dump actually paginates. Header is empty on
         # a single page and after this instance's end label so later MOS pages
         # stay put when dump is mid-book. Unique state/label per instance so
@@ -272,6 +280,22 @@ class Colophon:
         title = _escape(self.title)
         state_name = self._dump_state_name()
         end_label = self._dump_end_label()
+        if mark:
+            continuation = f"""grid(
+        columns: (auto, 1fr, auto),
+        column-gutter: 6pt,
+        align: horizon,
+        {mark},
+        align(left, text(size: h1, weight: "bold")[{title}]),
+        align(right + horizon, nums),
+      )"""
+        else:
+            continuation = f"""grid(
+        columns: (1fr, auto),
+        column-gutter: 1em,
+        align(left, text(size: h1, weight: "bold")[{title}]),
+        align(right + horizon, nums),
+      )"""
         return f"""#context {{ state("{state_name}", 0).update(here().page()) }}
 #set page(header: context {{
   let start-page = state("{state_name}", 0).final()
@@ -281,12 +305,7 @@ class Colophon:
   if last > start-page and cur <= last {{
     let nums = text(size: 0.85em)[#(cur - start-page + 1)/#(last - start-page + 1)]
     if cur > start-page {{
-      grid(
-        columns: (1fr, auto),
-        column-gutter: 1em,
-        align(left, text(size: h1, weight: "bold")[{title}]),
-        align(right + horizon, nums),
-      )
+      {continuation}
     }} else {{
       align(right, nums)
     }}

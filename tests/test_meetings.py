@@ -295,7 +295,7 @@ def test_nomad_default_is_one_index_page():
     assert "<meeting-16>" in typst
     assert "<meeting-17>" not in typst
     assert "padded_link(<annual>)" in typst
-    index = next(page for page in typst.split("#pagebreak()") if "<meetings>" in page)
+    index = next(page for page in typst.split("#pagebreak()") if "[Meetings <meetings>]" in page)
     assert "→" not in index
     assert f"columns: ({_NUM_COL}, 1fr)" in index
     assert "rows: (" + ", ".join(["1fr"] * 16) + ")" in index

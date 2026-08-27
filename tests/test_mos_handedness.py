@@ -193,7 +193,7 @@ def test_shipped_mos_right_includes_colophon():
     dto = load(MOS_RIGHT)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert names[-1] == "colophon"
-    assert names == ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "colophon"]
+    assert names == ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "colophon"]
 
 
 def test_nomad_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
@@ -237,7 +237,7 @@ def test_shipped_nomad_mos_right_includes_colophon():
     dto = load(NOMAD_MOS_RIGHT)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert names[-1] == "colophon"
-    assert names == ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "habits", "review", "meetings", "colophon"]
+    assert names == ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "habits", "review", "meetings", "colophon"]
 
 
 def test_shipped_mos_daily_schedule_track_stays_3fr_on_both_handedness():

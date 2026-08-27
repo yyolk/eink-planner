@@ -21,8 +21,8 @@ MOS_RIGHT = CONFIGS / "158x210-mos-right.toml"
 SCRIBE = CONFIGS / "kindle-scribe.toml"
 
 GOLDEN_SHA256 = {
-    "supernote-nomad": "39affc4f69037948ef98dfb8ef4065bc030ca8189598ae0bbc36b60db0be2a3f",
-    "158x210-mos-left": "78af6dfc9aa47a5a7a669b016863feaa9695688edd691d0089fa3ef9da954bfc",
+    "supernote-nomad": "08be4025a4b9a2981a45c086f49a3358d5e0e43f076a360aa8c96d7364279594",
+    "158x210-mos-left": "93e2894fc1d017e433ff465ad9a5803022ab947bbec64a30faa98e3c34b39037",
 }
 
 
@@ -33,7 +33,7 @@ def test_parse_shipped_toml_profiles(path: Path):
     assert "debug" not in dto
     cfg = Configurator(dto)
     names = [section["name"] for section in cfg.enabled_sections()]
-    expected = ["cover", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
+    expected = ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
     if path == NOMAD:
         expected = expected + ["projects"]
     if path in {NOMAD, NOMAD_MOS_RIGHT}:

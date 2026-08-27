@@ -39,6 +39,7 @@ from parch.models.device import (
 
 _SECTION_CLASS = {
     "cover": "cover_plain",
+    "index": "index",
     "annual": "annual",
     "quarterly": "quarterly",
     "monthly": "monthly",
@@ -54,6 +55,7 @@ _SECTION_CLASS = {
 
 _SECTION_NAME = {
     "cover": "cover",
+    "index": "index",
     "annual": "annual",
     "quarterly": "quarterly",
     "monthly": "monthly",
@@ -215,6 +217,8 @@ def _sections_from_profile(profile: DeviceProfile) -> tuple[list[dict[str, Any]]
 def _build_section_params(kind: str, raw: Any, extras: dict[str, Any]) -> dict[str, Any]:
     if kind == "cover":
         return _section_cover(raw)
+    if kind == "index":
+        return {}
     if kind == "annual":
         return _section_annual(raw) if raw is not None else {}
     if kind == "quarterly":

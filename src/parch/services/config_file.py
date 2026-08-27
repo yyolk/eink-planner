@@ -28,6 +28,7 @@ SHIPPED_PROFILES: tuple[tuple[str, str], ...] = (
 
 CANONICAL_SECTIONS: tuple[str, ...] = (
     "cover",
+    "index",
     "annual",
     "quarterly",
     "monthly",
