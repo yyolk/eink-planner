@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import os
 import re
 import sys
+import tempfile
 import tomllib
 from datetime import date
 from pathlib import Path
@@ -42,14 +44,14 @@ CANONICAL_SECTIONS: tuple[str, ...] = (
 _CANONICAL_SET = frozenset(CANONICAL_SECTIONS)
 _YEAR_TITLE = re.compile(r"^\d{4}$")
 _CALENDAR_TABLE = re.compile(
-    r"(?ms)^[ \t]*\[[ \t]*calendar[ \t]*\][ \t]*(#[^\n]*)?\n(?:(?!^\[).)*"
+    r"(?ms)^[ \t]*\[[ \t]*calendar[ \t]*\][ \t]*(#[^\n]*)?\n(?:(?!^[ \t]*\[).)*"
 )
 _COVER_TABLE = re.compile(
-    r"(?ms)^[ \t]*\[[ \t]*section\.cover[ \t]*\][ \t]*(#[^\n]*)?\n(?:(?!^\[).)*"
+    r"(?ms)^[ \t]*\[[ \t]*section\.cover[ \t]*\][ \t]*(#[^\n]*)?\n(?:(?!^[ \t]*\[).)*"
 )
-_SECTIONS_ARRAY = re.compile(r"(?ms)^sections\s*=\s*\[.*?\]")
-_YEAR_ASSIGN = re.compile(r"(?m)^year\s*=\s*\d+")
-_TITLE_ASSIGN = re.compile(r'(?m)^title\s*=\s*"([^"]*)"')
+_SECTIONS_ARRAY = re.compile(r"(?ms)^[ \t]*sections\s*=\s*\[.*?\]")
+_YEAR_ASSIGN = re.compile(r"(?m)^[ \t]*year\s*=\s*\d+")
+_TITLE_ASSIGN = re.compile(r'(?m)^[ \t]*title\s*=\s*"([^"]*)"')
 
 
 def shipped_help() -> str:
@@ -156,9 +158,13 @@ def run_new(
         source_sections=source_sections,
     )
     dest.parent.mkdir(parents=True, exist_ok=True)
-    tmp = dest.with_name(dest.name + ".tmp.toml")
+    fd, tmp_name = tempfile.mkstemp(dir=dest.parent, suffix=".toml")
+    tmp = Path(tmp_name)
     try:
-        tmp.write_text(written, encoding="utf-8")
+        try:
+            os.write(fd, written.encode("utf-8"))
+        finally:
+            os.close(fd)
         load(tmp)
         tmp.replace(dest)
     finally:

@@ -231,3 +231,44 @@ def test_new_force_keeps_dest_when_source_invalid(tmp_path, capsys):
     assert not (tmp_path / "mine.toml.tmp.toml").exists()
     err = capsys.readouterr().err
     assert err
+
+
+def test_overlay_indented_calendar_year_leaves_other_tables():
+    text = (
+        "    [calendar]\n"
+        "    year = 2026\n"
+        '    week_starts = "Monday"\n'
+        "\n"
+        "    [device]\n"
+        "    year = 1999\n"
+        '    name = "x"\n'
+    )
+    written = overlay_toml(text, year=2027)
+    data = tomllib.loads(written)
+    assert data["calendar"]["year"] == 2027
+    assert data["device"]["year"] == 1999
+
+
+def test_overlay_indented_cover_title_year():
+    text = (
+        "    [section.cover]\n"
+        '    title = "2020"\n'
+    )
+    written = overlay_toml(text, year=2027)
+    data = tomllib.loads(written)
+    assert data["section"]["cover"]["title"] == "2027"
+
+
+def test_overlay_indented_sections_replaced_in_place():
+    text = (
+        '    sections = ["cover", "annual"]\n'
+        "\n"
+        "    [device]\n"
+        '    name = "x"\n'
+    )
+    written = overlay_toml(
+        text, sections=["cover"], source_sections=["cover", "annual"]
+    )
+    assert written.count("sections =") == 1
+    data = tomllib.loads(written)
+    assert data["sections"] == ["cover"]
