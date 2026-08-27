@@ -43,6 +43,7 @@ class Annual:
                 title=f"text(size: h1)[{year}<{self.ID}>]",
                 content=self._content(manifest),
                 page_id=self.ID,
+                nav_links=[],
             )
         ]
 
