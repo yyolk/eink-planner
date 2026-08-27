@@ -7,7 +7,7 @@ from typing import Any
 
 from parch import __version__
 from parch.config import StrictDict, _to_plain
-from parch.mos.contents_mark import body_size_token, contents_mark
+from parch.mos.contents_mark import body_size_token, contents_mark, heading_height_token, lead_title
 from parch.mos.page_data import PageData
 from parch.mos.sections.annual import Annual
 
@@ -131,16 +131,20 @@ class Colophon:
         dumped = drop_empty_tables(self._config_text()) if self.dump else ""
         parts: list[str] = []
         body = body_size_token(self.configurator)
-        mark = contents_mark(manifest, None, body, face=body)
+        heading = heading_height_token(self.configurator)
+        mark = contents_mark(manifest, heading, body, face="h1")
+        titled = lead_title(
+            manifest,
+            heading,
+            f'text(size: h1, weight: "bold")[{title} <colophon>]',
+            body,
+        )
         if dumped.strip():
             # Page setup first so Typst does not break between the list and the dump.
             parts.append(self._dump_pagination(mark))
         if self.command or self.sha:
             parts.append(_MONO_HELPER)
-        if mark:
-            # Header-tall mark in the top-left slot, then the signed title block.
-            parts.append(f"#{mark}")
-        parts.append(self._facts_block(title, device, year_cell, version))
+        parts.append(self._facts_block(titled, device, year_cell, version))
         if dumped.strip():
             parts.append("#v(1em)")
             parts.append(f"#raw(block: true, {typst_string(dumped)})")
@@ -173,7 +177,7 @@ class Colophon:
             "    )"
         )
 
-    def _facts_block(self, title: str, device: str, year_cell: str, version: str) -> str:
+    def _facts_block(self, titled: str, device: str, year_cell: str, version: str) -> str:
         rows = [
             f"      [*Device*], [{device}],",
             f"      [*Year*], {year_cell},",
@@ -192,7 +196,7 @@ class Colophon:
         ]
         inner = [
             "  #set par(spacing: 0em)",
-            f'  #text(size: h1, weight: "bold")[{title} <colophon>]',
+            f"  #{titled}",
             "  #v(1em)",
         ]
         label_let = self._label_width_let()
