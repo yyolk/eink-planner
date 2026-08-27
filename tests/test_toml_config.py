@@ -23,8 +23,8 @@ SCRIBE = base_config("kindle-scribe")
 SCRIBE_MOS_RIGHT = base_config("kindle-scribe-mos-right")
 
 GOLDEN_SHA256 = {
-    "supernote-nomad": "6d4ac8d6fb58f2d88726d5099642b9b90f2edde676a4ffc8667d91a07c3d653a",
-    "158x210-mos-left": "ff59a7f4648483b1980dc92aeb5e1a6967a12da28ab6d59dd045bbb0ccbe90be",
+    "supernote-nomad": "8a6adca1820d451b4a19eee1756bd299ab07d63c00c832157cbe664ce3ebbd78",
+    "158x210-mos-left": "7781affc4eb4b31b6f4d42091d8dfad9e9df8a8d9ee915579eb9010307d22d3b",
 }
 
 
