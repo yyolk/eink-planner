@@ -17,8 +17,6 @@ uv tool install parch
 parch press supernote-nomad
 ```
 
-`generate` and `preview-svg` still work.
-
 `typst` is used to compile the PDF. If it is not on `PATH`, the compile step downloads the official Typst v0.15.1 binary for the current OS/arch into `.tools/typst` (`.tools/typst.exe` on Windows).
 
 ## Press

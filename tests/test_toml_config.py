@@ -239,9 +239,9 @@ def test_debug_not_required_and_rejected_in_toml():
 
 def test_debug_cli_flag():
     parser = build_parser()
-    args = parser.parse_args(["generate", str(NOMAD), "--debug"])
+    args = parser.parse_args(["press", str(NOMAD), "--debug"])
     assert args.debug is True
-    off = parser.parse_args(["generate", str(NOMAD)])
+    off = parser.parse_args(["press", str(NOMAD)])
     assert off.debug is False
     dto = apply_debug(load(NOMAD), debug=True)
     assert dto["debug"] is True
@@ -249,39 +249,36 @@ def test_debug_cli_flag():
     gen_parser = None
     for action in parser._actions:
         if getattr(action, "dest", None) == "command":
-            gen_parser = action.choices["generate"]
-            assert action.choices["press"] is gen_parser
+            gen_parser = action.choices["press"]
     assert gen_parser is not None
     assert "--debug" in gen_parser.format_help()
 
 
-def _generate_parser():
+def _press_parser():
     parser = build_parser()
     for action in parser._actions:
         if getattr(action, "dest", None) == "command":
-            press = action.choices["press"]
-            assert action.choices["generate"] is press
-            return press
-    raise AssertionError("press/generate subparser missing")
+            return action.choices["press"]
+    raise AssertionError("press subparser missing")
 
 
 def test_year_cli_flag():
     parser = build_parser()
-    args = parser.parse_args(["generate", str(NOMAD), "--year", "2027"])
+    args = parser.parse_args(["press", str(NOMAD), "--year", "2027"])
     assert args.year == 2027
-    off = parser.parse_args(["generate", str(NOMAD)])
+    off = parser.parse_args(["press", str(NOMAD)])
     assert off.year is None
-    assert "--year" in _generate_parser().format_help()
+    assert "--year" in _press_parser().format_help()
 
 
 def test_generate_help_has_locale_not_i18n_path():
-    help_text = _generate_parser().format_help()
+    help_text = _press_parser().format_help()
     assert "--locale" in help_text
     assert "-l" in help_text
     assert "--i18n-path" not in help_text
     assert "i18n-path" not in help_text
     parser = build_parser()
-    args = parser.parse_args(["generate", str(NOMAD), "--locale", "en"])
+    args = parser.parse_args(["press", str(NOMAD), "--locale", "en"])
     assert args.locale == "en"
     assert not hasattr(args, "i18n_path")
 
@@ -289,9 +286,9 @@ def test_generate_help_has_locale_not_i18n_path():
 def test_year_cli_rejects_non_ints():
     parser = build_parser()
     with pytest.raises(SystemExit):
-        parser.parse_args(["generate", str(NOMAD), "--year", "true"])
+        parser.parse_args(["press", str(NOMAD), "--year", "true"])
     with pytest.raises(SystemExit):
-        parser.parse_args(["generate", str(NOMAD), "--year", "nope"])
+        parser.parse_args(["press", str(NOMAD), "--year", "nope"])
 
 
 def test_apply_year_overlays_start_and_end_dates():

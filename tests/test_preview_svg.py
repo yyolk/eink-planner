@@ -56,9 +56,9 @@ def test_preview_svg_crop_then_scale():
 def test_preview_svg_cli_defaults():
     parser = build_parser()
     args = parser.parse_args(
-        ["preview-svg", "158x210-mos-left", "--pages", "1,2"]
+        ["proof", "158x210-mos-left", "--pages", "1,2"]
     )
-    assert args.command in ("proof", "preview-svg")
+    assert args.command == "proof"
     assert args.run is preview_svg_cmd
     assert args.scale == DEFAULT_SCALE
     assert args.crop is False
@@ -68,7 +68,7 @@ def test_preview_svg_cli_defaults():
 def test_preview_svg_cli_samples():
     parser = build_parser()
     args = parser.parse_args(
-        ["preview-svg", "158x210-mos-left", "--samples"]
+        ["proof", "158x210-mos-left", "--samples"]
     )
     assert args.samples is True
     assert args.pages is None
@@ -81,7 +81,7 @@ def test_preview_svg_cli_pages_and_samples_conflict():
     with pytest.raises(SystemExit):
         parser.parse_args(
             [
-                "preview-svg",
+                "proof",
                 "158x210-mos-left",
                 "--pages",
                 "1,2",
@@ -93,7 +93,7 @@ def test_preview_svg_cli_pages_and_samples_conflict():
 def test_preview_svg_cli_requires_pages_or_samples():
     parser = build_parser()
     with pytest.raises(SystemExit):
-        parser.parse_args(["preview-svg", "158x210-mos-left"])
+        parser.parse_args(["proof", "158x210-mos-left"])
 
 
 def test_samples_dest_uses_config_stem():
@@ -102,15 +102,12 @@ def test_samples_dest_uses_config_stem():
     )
 
 
-def test_generate_cli_unchanged():
+def test_press_cli_unchanged():
     parser = build_parser()
-    args = parser.parse_args(["generate", "supernote-nomad"])
-    assert args.command in ("press", "generate")
+    args = parser.parse_args(["press", "supernote-nomad"])
+    assert args.command == "press"
     assert args.run is generate_cmd
-    press = parser.parse_args(["press", "supernote-nomad"])
-    assert press.command in ("press", "generate")
-    assert press.run is generate_cmd
-    assert not hasattr(args, "pages") or args.command in ("press", "generate")
+    assert not hasattr(args, "pages") or args.command == "press"
 
 
 def test_compile_svg_refuses_missing_pages(tmp_path):
