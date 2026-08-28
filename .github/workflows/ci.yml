@@ -17,5 +17,5 @@ jobs:
       - run: uv run pytest
       - name: Generate Nomad PDF
         run: |
-          uv run parch generate supernote-nomad -w out/nomad
+          uv run parch press supernote-nomad -w out/nomad
           test -s out/nomad/index.pdf
