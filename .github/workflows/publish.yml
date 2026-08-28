@@ -87,6 +87,16 @@ jobs:
         with:
           name: dist
           path: dist
-      - run: gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+      - name: Attach missing dist files
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          existing="$(gh release view "$GITHUB_REF_NAME" --json assets --jq '.assets[].name')"
+          for f in dist/*; do
+            name="${f##*/}"
+            if printf '%s\n' "$existing" | grep -Fxq "$name"; then
+              echo "skip $name (already on release)"
+              continue
+            fi
+            gh release upload "$GITHUB_REF_NAME" "$f"
+          done
