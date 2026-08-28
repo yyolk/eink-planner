@@ -21,12 +21,12 @@ REPO = Path(__file__).resolve().parents[1]
 _TINY = "#set page(width: 80pt, height: 100pt)\n= A\n#pagebreak()\n= B\n"
 
 
-def test_requested_backend_defaults_to_auto(monkeypatch):
+def test_requested_backend_defaults_to_cli(monkeypatch):
     monkeypatch.delenv("PARCH_TYPST", raising=False)
-    assert requested_typst_backend() == "auto"
+    assert requested_typst_backend() == "cli"
 
 
-@pytest.mark.parametrize("value,expected", [("cli", "cli"), ("PY", "py"), ("Auto", "auto")])
+@pytest.mark.parametrize("value,expected", [("cli", "cli"), ("PY", "py")])
 def test_requested_backend_normalizes(monkeypatch, value, expected):
     monkeypatch.setenv("PARCH_TYPST", value)
     assert requested_typst_backend() == expected
@@ -38,16 +38,16 @@ def test_requested_backend_unknown(monkeypatch):
         requested_typst_backend()
 
 
-def test_resolve_auto_without_binding(monkeypatch):
+def test_requested_backend_rejects_auto(monkeypatch):
     monkeypatch.setenv("PARCH_TYPST", "auto")
-    monkeypatch.setattr(compile_mod, "typst_py_available", lambda: False)
-    assert resolve_typst_backend() == "cli"
+    with pytest.raises(CompileError, match="unknown PARCH_TYPST"):
+        requested_typst_backend()
 
 
-def test_resolve_auto_with_binding(monkeypatch):
-    monkeypatch.setenv("PARCH_TYPST", "auto")
+def test_default_stays_cli_when_binding_present(monkeypatch):
+    monkeypatch.delenv("PARCH_TYPST", raising=False)
     monkeypatch.setattr(compile_mod, "typst_py_available", lambda: True)
-    assert resolve_typst_backend() == "py"
+    assert resolve_typst_backend() == "cli"
 
 
 def test_resolve_cli_ignores_binding(monkeypatch):

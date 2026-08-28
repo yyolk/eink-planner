@@ -55,7 +55,7 @@ OUTPUT_FILE = "index.pdf"
 TEMP_FILE = "temp.pdf"
 
 ENV_TYPST = "PARCH_TYPST"
-_BACKENDS = frozenset({"auto", "cli", "py"})
+_BACKENDS = frozenset({"cli", "py"})
 _PY_PAGE_PARAMS = ("pages", "page", "page_ranges")
 
 
@@ -64,11 +64,11 @@ class CompileError(RuntimeError):
 
 
 def requested_typst_backend() -> str:
-    """Return the raw PARCH_TYPST choice (default auto)."""
-    raw = os.environ.get(ENV_TYPST, "auto").strip().lower() or "auto"
+    """Return the raw PARCH_TYPST choice (default cli)."""
+    raw = os.environ.get(ENV_TYPST, "cli").strip().lower() or "cli"
     if raw not in _BACKENDS:
         raise CompileError(
-            f"unknown {ENV_TYPST}={raw!r}; expected auto, cli, or py"
+            f"unknown {ENV_TYPST}={raw!r}; expected cli or py"
         )
     return raw
 
@@ -87,14 +87,12 @@ def resolve_typst_backend() -> str:
     requested = requested_typst_backend()
     if requested == "cli":
         return "cli"
-    if requested == "py":
-        if not typst_py_available():
-            raise CompileError(
-                "PARCH_TYPST=py but the typst binding is not installed; "
-                "run `uv sync --extra typst-native` or set PARCH_TYPST=cli"
-            )
-        return "py"
-    return "py" if typst_py_available() else "cli"
+    if not typst_py_available():
+        raise CompileError(
+            "PARCH_TYPST=py but the typst binding is not installed; "
+            "run `uv sync --extra typst-native` or unset PARCH_TYPST"
+        )
+    return "py"
 
 
 def _import_typst_py():
