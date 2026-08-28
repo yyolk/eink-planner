@@ -4,8 +4,9 @@ MOS should build a **layout tree**. Backends only paint.
 
 This branch keeps the existing Typst-string (`mos/`) generate path. `--ir` is
 additive: same calendar, Configurator, Manifest, and I18n, a new tree in the
-middle. Unknown section classes (index, projects, habits, review, tasks,
-meetings, colophon) are skipped so Nomad still emits the core MOS pages.
+middle. Index, projects, habits, review, tasks, meetings, and colophon are in
+the tree now (raw pages, `chrome=False`, except habit month grids which use MOS
+chrome). The string MOS path is still the default.
 
 ## Why this shape
 
@@ -39,11 +40,12 @@ clamps to zero.
 
 ## What we learned
 
-- The node set is rich enough for every MOS page type (cover, annual, quarterly,
-  monthly, weekly, daily, daily notes). Painful bits were *partial strokes*,
-  *rotated labels*, and *rowspan chrome* — not missing page-level primitives.
-- Putting chrome in the tree is the right call. The cost is 1,166 copies of the
-  side menu. Fine for an exploration; a later pass could intern it.
+- The node set is rich enough for every MOS page type (cover, index, annual,
+  quarterly, monthly, weekly, daily, daily notes, projects, habits, review,
+  tasks, meetings, colophon). Painful bits were *partial strokes*, *rotated
+  labels*, and *rowspan chrome* — not missing page-level primitives.
+- Putting chrome in the tree is the right call. The cost is one side-menu copy
+  per chrome page. Fine for an exploration; a later pass could intern it.
 - Typst-IR and a later fpdf2-IR will not be pixel-identical. Fonts (Typst
   default vs Times), fr leftover, and how rotate is applied all differ.
   Recognizable MOS is the bar, not a screenshot diff.
@@ -52,8 +54,8 @@ clamps to zero.
 - Special-casing a whole page in one painter is how the backends drifted. If a
   page is painful, add a field (`Box.rotate`, `Stroke.sides`) rather than a
   `draw_monthly`.
-- Both IR painters write the full 2026 Nomad book (1,166 pages) for the core
-  MOS sections. Extra Nomad sections are skipped on this branch.
+- Both IR painters write the full 2026 Nomad book, including the extra
+  sections. Page count is whatever the builders emit (string MOS and IR match).
 
 ## Honest gaps
 
@@ -67,10 +69,12 @@ clamps to zero.
   real CSS grid this is not.
 - **DottedPad** tiling matches the existing Typst `tiling`, but alignment vs
   cell edges can drift by a fraction of a millimetre.
-- Cover is `chrome=False` and a centered `Box`. Everything else goes through
-  `frame`.
-- Index, projects, habits, review, tasks, meetings, and colophon are not
-  built on this branch.
+- Cover, Contents, and the other raw Nomad sections are `chrome=False`. Habit
+  month grids (and the core calendar pages) go through `frame`.
+- Ruled leftover paper is a `Grid` of bottom-stroked rows, not a `Line` leaf.
+  Empty habit-name headers are stroked boxes — no diagonal in the node set.
+  Colophon dump pagination (Typst page state / 1/N headers) is a single
+  `Text` block when `dump` is on.
 
 ## Commands
 
@@ -85,10 +89,8 @@ The default generate path (`Generate` string MOS + Compile) is unchanged.
 1. Delete the parallel `mos/` string builders once IR looks right. One MOS.
 2. A cheap measure pass (or cache intrinsics) so daily/weekly headings size
    without guessing.
-3. Intern chrome: one side-menu prototype, highlight as a parameter, not 1,166
-   trees.
+3. Intern chrome: one side-menu prototype, highlight as a parameter, not one
+   tree per chrome page.
 4. Drop `Page.title` / highlight fields if chrome stays in the tree — they are
    now metadata for tests.
 5. Consider a `Line` leaf if we ever want ruled pads without a second tiling.
-6. Port the remaining Nomad sections (index, projects, habits, review, tasks,
-   meetings, colophon) onto the same tree.

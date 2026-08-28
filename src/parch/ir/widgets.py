@@ -26,7 +26,7 @@ from parch.ir.nodes import (
     Text,
 )
 from parch.ir.plan import Styles
-from parch.ir.units import parse
+from parch.ir.units import parse, to_mm
 from parch.mos.manifest import Manifest
 
 
@@ -403,3 +403,82 @@ def first_present(week: list[Day | None]) -> Day:
 def weekday_row(month: Month) -> list[Day]:
     start = month.day.beginning_of_week()
     return [start + i for i in range(7)]
+
+
+def contents_mark(*, manifest: Manifest, styles: Styles) -> Node | None:
+    """Five house-stroke bars linking to Contents."""
+    if not manifest.source("index"):
+        return None
+    h1 = to_mm(styles.h1)
+    thick = to_mm(styles.thick_stroke)
+    width = Length.mm(0.844 * h1)
+    cap = 0.7 * h1
+    gap = Length.mm(max(0.0, (cap - 5 * thick) / 4.0))
+    bars = [
+        Box(min_w=width, min_h=styles.thick_stroke, fill="black")
+        for _ in range(5)
+    ]
+    return Link("index", Col(children=bars, gap=gap, weights=[AUTO] * 5))
+
+
+def lead_title(*, title: Node, manifest: Manifest, styles: Styles) -> Node:
+    """Glue the Contents mark to the left of title."""
+    mark = contents_mark(manifest=manifest, styles=styles)
+    if mark is None:
+        return title
+    return Row(children=[mark, title], gap=parse("6pt"), weights=[AUTO, AUTO])
+
+
+def trail_strip(*, manifest: Manifest, styles: Styles, chip: Node | None = None) -> Node | None:
+    """Mark immediately left of *chip*, flush to the MOS strip."""
+    mark = contents_mark(manifest=manifest, styles=styles)
+    if mark is not None and chip is not None:
+        return Row(children=[mark, chip], gap=parse("6pt"), weights=[AUTO, AUTO])
+    if mark is not None and chip is None:
+        return Row(children=[mark, Spacer(size=parse("3mm"))], weights=[AUTO, AUTO])
+    return chip
+
+
+def lined_pad(*, styles: Styles, rows: int = 16) -> Node:
+    """Ruled leftover paper as equal-fr bottom-stroked rows."""
+    stroke = Stroke(width=styles.regular_stroke, sides=("bottom",))
+    n = max(1, int(rows))
+    return Grid(
+        cols=[FR1],
+        rows=[FR1] * n,
+        cells=[Cell(Spacer(), stroke=stroke) for _ in range(n)],
+    )
+
+
+def ticked_lines(*, styles: Styles, rows: int) -> Node:
+    """Checkbox column plus ruled write-in, one regular_height per row."""
+    n = max(1, int(rows))
+    rh = styles.regular_height
+    stroke = Stroke(width=styles.regular_stroke)
+    box = Length.mm(2.2)
+    cells: list[Node | Cell] = []
+    for _ in range(n):
+        check = Box(min_w=box, min_h=box, stroke=Stroke(width=styles.regular_stroke))
+        cells.append(Cell(Box(child=check, align="center"), stroke=stroke, align="center"))
+        cells.append(Cell(Spacer(), stroke=stroke))
+    return Grid(cols=[rh, FR1], rows=[rh] * n, cells=cells)
+
+
+def ticked_field(*, styles: Styles, rows: int) -> Node:
+    """Single-column leftover ticks (Tasks week page)."""
+    n = max(1, int(rows))
+    rh = styles.regular_height
+    regular = Stroke(width=styles.regular_stroke, sides=("bottom",))
+    box = Length.mm(2.2)
+    cells: list[Node | Cell] = []
+    for _ in range(n):
+        check = Box(min_w=box, min_h=box, stroke=Stroke(width=styles.regular_stroke))
+        cells.append(
+            Cell(
+                Box(child=check, align="left", padding=Length.mm(0.4), min_h=rh),
+                stroke=regular,
+                align="horizon",
+            )
+        )
+    return Grid(cols=[FR1], rows=[rh] * n, cells=cells)
+

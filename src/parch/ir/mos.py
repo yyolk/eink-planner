@@ -32,6 +32,22 @@ from parch.ir.nodes import (
 )
 from parch.ir.plan import PlannerDoc, Styles
 from parch.ir.units import parse, parse_tracks
+from parch.ir._sections import (
+    build_colophon,
+    build_habits,
+    build_index,
+    build_meetings,
+    build_projects,
+    build_review,
+    build_tasks,
+    reg_colophon,
+    reg_habits,
+    reg_index,
+    reg_meetings,
+    reg_projects,
+    reg_review,
+    reg_tasks,
+)
 from parch.ir.widgets import (
     daily_heading,
     first_present,
@@ -508,10 +524,17 @@ def _reg_daily_notes(ctx: _Ctx, params: dict[str, Any]) -> None:
 
 _SECTION = {
     "cover_plain": (_cover, _reg_cover),
+    "index": (build_index, reg_index),
     "annual": (_annual, _reg_annual),
     "quarterly": (_quarterly, _reg_quarterly),
     "monthly": (_monthly, _reg_monthly),
     "weekly": (_weekly, _reg_weekly),
     "daily": (_daily, _reg_daily),
     "daily_notes": (_daily_notes, _reg_daily_notes),
+    "projects": (build_projects, reg_projects),
+    "habits": (build_habits, reg_habits),
+    "review": (build_review, reg_review),
+    "tasks": (build_tasks, reg_tasks),
+    "meetings": (build_meetings, reg_meetings),
+    "colophon": (build_colophon, reg_colophon),
 }
