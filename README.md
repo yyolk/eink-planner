@@ -30,6 +30,8 @@ PARCH_TYPST=py uv run parch press supernote-nomad
 
 `PARCH_TYPST` is `cli` (default) or `py`. There is no `auto`. The binding tracks Typst 0.15.0; the CLI pin remains v0.15.1.
 
+`uv run pytest` skips the full-book comparison (`slow`). Run it with `uv run pytest -m slow -o addopts=`.
+
 ## Press
 
 ```shell
