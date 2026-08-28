@@ -77,7 +77,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Overwrite an existing outfile",
     )
 
-    press = sub.add_parser("press", aliases=["generate"], help="Press a profile to PDF")
+    press = sub.add_parser("press", help="Press a profile to PDF")
     press.add_argument("config", help="Planner profile (path or shipped stem)")
     press.add_argument(
         "-w",
@@ -111,7 +111,6 @@ def build_parser() -> argparse.ArgumentParser:
 
     proof = sub.add_parser(
         "proof",
-        aliases=["preview-svg"],
         help="Pull SVG proofs of selected pages",
     )
     proof.add_argument("config", help="Planner profile (path or shipped stem)")
