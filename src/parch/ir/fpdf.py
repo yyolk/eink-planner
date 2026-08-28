@@ -76,6 +76,15 @@ def _write_dot_tile(path: Path, spacing_mm: float) -> Path:
     path.write_bytes(_grayscale_png(bytes(buf), px, px))
     return path
 
+def _latin1(text: str) -> str:
+    """Times core fonts are latin-1; map MOS dashes so review/tasks paint."""
+    return (
+        text.replace("\u2013", "-")
+        .replace("\u2014", "-")
+        .encode("latin-1", "replace")
+        .decode("latin-1")
+    )
+
 
 class IrPDF(FPDF):
     def __init__(self, page_w: float, page_h: float, styles: Styles) -> None:
@@ -174,7 +183,7 @@ class _Painter:
         self.pdf.font("B" if node.bold else "", size_pt)
         if not skip_color:
             self.pdf.set_text_color(self._ink(node.color))
-        lines = node.text.split("\n")
+        lines = _latin1(node.text).split("\n")
         th = size_pt * 25.4 / 72.0
         block = th * 1.15 * max(1, len(lines))
         align = (node.align or "center").split("+")[0].strip()
@@ -433,7 +442,7 @@ class _Painter:
         if isinstance(node, Text):
             size_pt = self._font_pt(node.size)
             self.pdf.font("B" if node.bold else "", size_pt)
-            lines = node.text.split("\n")
+            lines = _latin1(node.text).split("\n")
             return max((self.pdf.get_string_width(line) for line in lines), default=0.0) + 1.2
         if isinstance(node, Spacer):
             return to_mm(node.size) if node.size and node.size.unit in ("mm", "pt") else 0.0

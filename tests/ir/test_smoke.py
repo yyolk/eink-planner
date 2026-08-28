@@ -54,8 +54,13 @@ def test_ir_fpdf2_menu_stays_7pt_after_cover(tmp_path):
     dest = render_fpdf(doc, tmp_path / "index.pdf")
     data = dest.read_bytes()
     streams = re.findall(rb"stream\r?\n(.*?)\r?\nendstream", data, re.S)
-    assert len(streams) >= 2
-    annual = zlib.decompress(streams[1]).decode("latin1")
+    decoded = []
+    for raw in streams:
+        try:
+            decoded.append(zlib.decompress(raw).decode("latin1"))
+        except Exception:
+            continue
+    annual = next(s for s in decoded if "(Q1)" in s and "(Jan)" in s)
     assert "/F1 7.00 Tf" in annual
     assert "/F1 36.00 Tf" not in annual
     assert "(Q1)" in annual
