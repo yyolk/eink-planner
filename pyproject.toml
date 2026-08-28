@@ -24,6 +24,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+typst-native = ["typst==0.15.0"]
 
 [project.urls]
 Homepage = "https://github.com/yyolk/parch"
@@ -54,3 +55,7 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src", "."]
+addopts = ["-m", "not slow"]
+markers = [
+    "slow: full-book backend comparison",
+]

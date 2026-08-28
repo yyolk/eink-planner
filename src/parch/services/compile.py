@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import os
 import platform
 import re
@@ -53,12 +54,128 @@ _SUPPORTED_PAIRS = (
 OUTPUT_FILE = "index.pdf"
 TEMP_FILE = "temp.pdf"
 
+ENV_TYPST = "PARCH_TYPST"
+_BACKENDS = frozenset({"cli", "py"})
+_PY_PAGE_PARAMS = ("pages", "page", "page_ranges")
+
 
 class CompileError(RuntimeError):
     pass
 
 
+def requested_typst_backend() -> str:
+    """Return the raw PARCH_TYPST choice (default cli)."""
+    raw = os.environ.get(ENV_TYPST, "cli").strip().lower() or "cli"
+    if raw not in _BACKENDS:
+        raise CompileError(
+            f"unknown {ENV_TYPST}={raw!r}; expected cli or py"
+        )
+    return raw
+
+
+def typst_py_available() -> bool:
+    """True when the PyPI typst binding is importable."""
+    try:
+        import typst  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
+def resolve_typst_backend() -> str:
+    """Resolve PARCH_TYPST to cli or py."""
+    requested = requested_typst_backend()
+    if requested == "cli":
+        return "cli"
+    if not typst_py_available():
+        raise CompileError(
+            "PARCH_TYPST=py but the typst binding is not installed; "
+            "run `uv sync --extra typst-native` or unset PARCH_TYPST"
+        )
+    return "py"
+
+
+def _import_typst_py():
+    try:
+        import typst as typst_py
+    except ImportError as exc:
+        raise CompileError(
+            "PARCH_TYPST=py but the typst binding is not installed; "
+            "run `uv sync --extra typst-native` or set PARCH_TYPST=cli"
+        ) from exc
+    return typst_py
+
+
+def _typst_py_error(exc: BaseException, what: str) -> CompileError:
+    if isinstance(exc, CompileError):
+        return exc
+    message = getattr(exc, "message", None) or str(exc)
+    diagnostic = getattr(exc, "diagnostic", None)
+    if diagnostic and str(diagnostic).strip() and str(diagnostic) != str(message):
+        detail = f"{message}\n{diagnostic}"
+    else:
+        detail = str(diagnostic or message)
+    return CompileError(f"typst (py) {what} failed: {detail}")
+
+
+def _package_cache_path() -> Path:
+    path = Path.home() / ".cache" / "parch" / "packages"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def _py_pages_param(compile_fn) -> str | None:
+    try:
+        params = inspect.signature(compile_fn).parameters
+    except (TypeError, ValueError):
+        return None
+    for name in _PY_PAGE_PARAMS:
+        if name in params:
+            return name
+    return None
+
+
+def _svg_page_buffers(result) -> list[bytes]:
+    if result is None:
+        raise CompileError(
+            "typst (py) cannot select pages: compile(format='svg') returned no page bytes"
+        )
+    if isinstance(result, (bytes, bytearray)):
+        return [bytes(result)]
+    try:
+        buffers = [bytes(item) for item in result]
+    except TypeError as exc:
+        raise CompileError(
+            "typst (py) cannot select pages: compile(format='svg') did not return page bytes"
+        ) from exc
+    if not buffers:
+        raise CompileError(
+            "typst (py) cannot select pages: compile(format='svg') returned no page bytes"
+        )
+    return buffers
+
+
 class Compile:
+    def __init__(self) -> None:
+        self._py_compilers: dict[tuple[str, str], object] = {}
+
+    def _py_compiler(self, src: Path, workdir: Path):
+        key = (str(src.resolve()), str(workdir.resolve()))
+        cached = self._py_compilers.get(key)
+        if cached is not None:
+            return cached
+        typst_py = _import_typst_py()
+        try:
+            compiler = typst_py.Compiler(
+                str(src),
+                root=str(workdir),
+                package_cache_path=str(_package_cache_path()),
+            )
+        except Exception as exc:
+            raise _typst_py_error(exc, "compiler init") from exc
+        self._py_compilers[key] = compiler
+        return compiler
+
     def compile(
         self,
         workdir: str | Path,
@@ -67,8 +184,12 @@ class Compile:
         tools_dir: str | Path | None = None,
     ) -> Path:
         workdir = Path(workdir)
-        typst = ensure_typst(tools_dir=tools_dir)
-        self._compile_typst(typst, workdir, file)
+        backend = resolve_typst_backend()
+        if backend == "cli":
+            typst = ensure_typst(tools_dir=tools_dir)
+            self._compile_typst(typst, workdir, file)
+        else:
+            self._compile_typst_py(workdir, file)
         if enable_ghostscript:
             self._run_ghostscript(workdir)
         return workdir / OUTPUT_FILE
@@ -76,7 +197,7 @@ class Compile:
     def _compile_typst(self, typst: Path, workdir: Path, file: str) -> None:
         src = workdir / file
         dest = workdir / OUTPUT_FILE
-        print("Compiling with typst...")
+        print("Compiling with typst (cli)...")
         started = time.perf_counter()
         result = subprocess.run(
             [str(typst), "compile", str(src), str(dest)],
@@ -89,6 +210,22 @@ class Compile:
             raise CompileError(
                 f"typst compile failed ({result.returncode}):\n{result.stdout}\n{result.stderr}"
             )
+
+    def _compile_typst_py(self, workdir: Path, file: str) -> None:
+        src = workdir / file
+        dest = workdir / OUTPUT_FILE
+        print("Compiling with typst (py)...")
+        started = time.perf_counter()
+        try:
+            compiler = self._py_compiler(src, workdir)
+            compiler.compile(output=str(dest), format="pdf")
+        except Exception as exc:
+            if isinstance(exc, CompileError):
+                raise
+            raise _typst_py_error(exc, "compile") from exc
+        print(f"Typst compilation time: {time.perf_counter() - started:.2f}s")
+        if not dest.is_file() or dest.stat().st_size == 0:
+            raise CompileError(f"typst (py) did not write {dest}")
 
     def compile_svg(
         self,
@@ -106,10 +243,26 @@ class Compile:
             raise CompileError("SVG preview needs an explicit page list")
         if "{p}" not in dest_pattern:
             raise CompileError("SVG dest pattern must include {p}")
+        backend = resolve_typst_backend()
+        if backend == "cli":
+            return self._compile_svg_cli(
+                workdir, file, pages, dest_pattern, tools_dir, format_pages
+            )
+        return self._compile_svg_py(workdir, file, pages, dest_pattern)
+
+    def _compile_svg_cli(
+        self,
+        workdir: Path,
+        file: str,
+        pages: list[int],
+        dest_pattern: str,
+        tools_dir: str | Path | None,
+        format_pages,
+    ) -> list[Path]:
         typst = ensure_typst(tools_dir=tools_dir)
         src = workdir / file
         dest = workdir / dest_pattern
-        print("Compiling SVG pages with typst...")
+        print("Compiling SVG pages with typst (cli)...")
         started = time.perf_counter()
         result = subprocess.run(
             [
@@ -130,6 +283,57 @@ class Compile:
             raise CompileError(
                 f"typst svg compile failed ({result.returncode}):\n{result.stdout}\n{result.stderr}"
             )
+        return self._svg_dest_paths(workdir, dest_pattern, pages)
+
+    def _compile_svg_py(
+        self,
+        workdir: Path,
+        file: str,
+        pages: list[int],
+        dest_pattern: str,
+    ) -> list[Path]:
+        src = workdir / file
+        dest = workdir / dest_pattern
+        compiler = self._py_compiler(src, workdir)
+        print("Compiling SVG pages with typst (py)...")
+        started = time.perf_counter()
+        page_arg = _py_pages_param(compiler.compile)
+        if page_arg is not None:
+            try:
+                compiler.compile(output=str(dest), format="svg", **{page_arg: pages})
+            except Exception as exc:
+                if isinstance(exc, CompileError):
+                    raise
+                raise _typst_py_error(exc, "svg compile") from exc
+            print(f"Typst SVG compilation time: {time.perf_counter() - started:.2f}s")
+            return self._svg_dest_paths(workdir, dest_pattern, pages)
+        # typst-py 0.15.0 has no pages= arg. output="preview-{p}.svg" would
+        # write every page to disk; compile(format="svg") returns list[bytes].
+        try:
+            result = compiler.compile(format="svg")
+        except Exception as exc:
+            if isinstance(exc, CompileError):
+                raise
+            raise _typst_py_error(exc, "svg compile") from exc
+        print(f"Typst SVG compilation time: {time.perf_counter() - started:.2f}s")
+        buffers = _svg_page_buffers(result)
+        written: list[Path] = []
+        total = len(buffers)
+        for n in pages:
+            if n < 1 or n > total:
+                raise CompileError(
+                    f"typst (py) page {n} out of range (document has {total} pages)"
+                )
+            path = workdir / dest_pattern.replace("{p}", str(n))
+            path.write_bytes(buffers[n - 1])
+            if not path.is_file() or path.stat().st_size == 0:
+                raise CompileError(f"typst (py) did not write {path}")
+            written.append(path)
+        return written
+
+    def _svg_dest_paths(
+        self, workdir: Path, dest_pattern: str, pages: list[int]
+    ) -> list[Path]:
         written: list[Path] = []
         for n in pages:
             path = workdir / dest_pattern.replace("{p}", str(n))

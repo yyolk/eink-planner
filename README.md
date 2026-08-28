@@ -19,6 +19,23 @@ parch press supernote-nomad
 
 `typst` is used to compile the PDF. If it is not on `PATH`, the compile step downloads the official Typst v0.15.1 binary for the current OS/arch into `.tools/typst` (`.tools/typst.exe` on Windows).
 
+## Experimental: Typst via `pip install typst`
+
+Opt-in compile through the PyPI [`typst`](https://pypi.org/project/typst/) binding (messense/typst-py 0.15.0). Default is still the official CLI. The extra alone does not switch backends.
+
+From a checkout (`typst-native` lives in `pyproject.toml`):
+
+```shell
+uv sync --extra typst-native
+PARCH_TYPST=py uv run parch press supernote-nomad
+```
+
+Or with a tool install: `uv tool install --with typst==0.15.0 parch`, then `PARCH_TYPST=py parch press supernote-nomad`.
+
+`PARCH_TYPST` is `cli` (default) or `py`. There is no `auto`. The binding tracks Typst 0.15.0; the CLI pin remains v0.15.1.
+
+`uv run pytest` skips the full-book comparison (`slow`). Run it with `uv run pytest -m slow -o addopts=`.
+
 ## Press
 
 ```shell
