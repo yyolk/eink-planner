@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from parch.cli import build_parser, samples_dest
+from parch.cli import build_parser, generate_cmd, preview_svg_cmd, samples_dest
 from parch.services.compile import Compile, CompileError
 from parch.services.preview_svg import (
     DEFAULT_SCALE,
@@ -58,7 +58,8 @@ def test_preview_svg_cli_defaults():
     args = parser.parse_args(
         ["preview-svg", "158x210-mos-left", "--pages", "1,2"]
     )
-    assert args.command == "preview-svg"
+    assert args.command in ("proof", "preview-svg")
+    assert args.run is preview_svg_cmd
     assert args.scale == DEFAULT_SCALE
     assert args.crop is False
     assert args.pages == "1,2"
@@ -104,8 +105,12 @@ def test_samples_dest_uses_config_stem():
 def test_generate_cli_unchanged():
     parser = build_parser()
     args = parser.parse_args(["generate", "supernote-nomad"])
-    assert args.command == "generate"
-    assert not hasattr(args, "pages") or args.command == "generate"
+    assert args.command in ("press", "generate")
+    assert args.run is generate_cmd
+    press = parser.parse_args(["press", "supernote-nomad"])
+    assert press.command in ("press", "generate")
+    assert press.run is generate_cmd
+    assert not hasattr(args, "pages") or args.command in ("press", "generate")
 
 
 def test_compile_svg_refuses_missing_pages(tmp_path):

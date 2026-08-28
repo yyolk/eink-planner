@@ -1,4 +1,4 @@
-"""CLI: `parch new` and `parch generate`."""
+"""CLI: `parch press`, `parch proof`, and `parch new`."""
 
 from __future__ import annotations
 
@@ -33,12 +33,12 @@ def build_parser() -> argparse.ArgumentParser:
         description="Generate a yearly e-ink planner PDF from a TOML config.",
     )
     parser.add_argument("--version", action="version", version=f"parch {__version__}")
-    sub = parser.add_subparsers(dest="command", required=True)
+    sub = parser.add_subparsers(dest="command", required=True, metavar="{press,proof,new}")
 
     new = sub.add_parser(
         "new",
-        help="Write a planner from a shipped profile.",
-        description="Write a planner from a shipped profile.",
+        help="Write a profile from a shipped template.",
+        description="Write a profile from a shipped template.",
         epilog="Shipped profiles: " + shipped_help() + ".",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -77,56 +77,57 @@ def build_parser() -> argparse.ArgumentParser:
         help="Overwrite an existing outfile",
     )
 
-    gen = sub.add_parser("generate", help="Generate Typst + PDF from a TOML config")
-    gen.add_argument("config", help="Planner profile (path or shipped stem)")
-    gen.add_argument(
+    press = sub.add_parser("press", aliases=["generate"], help="Press a profile to PDF")
+    press.add_argument("config", help="Planner profile (path or shipped stem)")
+    press.add_argument(
         "-w",
         "--workdir",
         default="./out",
         help="Working directory for index.typst / index.pdf (default: ./out)",
     )
-    gen.add_argument(
+    press.add_argument(
         "-l",
         "--locale",
         default="en",
         help="Locale code (default: en)",
     )
-    gen.add_argument(
+    press.add_argument(
         "-g",
         "--with-ghostscript",
         action="store_true",
         help="Run ghostscript after compilation (reduces PDF size)",
     )
-    gen.add_argument(
+    press.add_argument(
         "--debug",
         action="store_true",
         help="Draw MOS debug strokes (not a config key)",
     )
-    gen.add_argument(
+    press.add_argument(
         "--year",
         type=int,
         default=None,
         help="Overlay planner year (dates and cover title; not a config key)",
     )
 
-    prev = sub.add_parser(
-        "preview-svg",
-        help="Compile selected Typst pages to preview SVGs (not a PDF raster)",
+    proof = sub.add_parser(
+        "proof",
+        aliases=["preview-svg"],
+        help="Pull SVG proofs of selected pages",
     )
-    prev.add_argument("config", help="Planner profile (path or shipped stem)")
-    prev.add_argument(
+    proof.add_argument("config", help="Planner profile (path or shipped stem)")
+    proof.add_argument(
         "-w",
         "--workdir",
         default="./out",
         help="Working directory for index.typst / preview SVGs (default: ./out)",
     )
-    prev.add_argument(
+    proof.add_argument(
         "-l",
         "--locale",
         default="en",
         help="Locale code (default: en)",
     )
-    pages_or_samples = prev.add_mutually_exclusive_group(required=True)
+    pages_or_samples = proof.add_mutually_exclusive_group(required=True)
     pages_or_samples.add_argument(
         "--pages",
         help="1-based pages to export, e.g. 1,2,7 or 1-3",
@@ -136,28 +137,31 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Export README sample pages by Typst label to docs/samples/<config-stem>/",
     )
-    prev.add_argument(
+    proof.add_argument(
         "--scale",
         type=float,
         default=DEFAULT_SCALE,
         help="Linear scale for width/height (default: 1/2). 1 keeps Typst page size",
     )
-    prev.add_argument(
+    proof.add_argument(
         "--crop",
         action="store_true",
         help="Tighten viewBox to glyph placements (sparse pages only; clips patterns)",
     )
-    prev.add_argument("--debug", action="store_true", help="Draw MOS debug strokes")
-    prev.add_argument(
+    proof.add_argument("--debug", action="store_true", help="Draw MOS debug strokes")
+    proof.add_argument(
         "--year",
         type=int,
         default=None,
         help="Overlay planner year (dates and cover title; not a config key)",
     )
+    new.set_defaults(run=new_cmd)
+    press.set_defaults(run=generate_cmd)
+    proof.set_defaults(run=preview_svg_cmd)
     return parser
 
 
-def new_cmd(args: argparse.Namespace) -> int:
+def new_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
     outfile = args.outfile
     if outfile and args.output and outfile != args.output:
         raise ConfigError("give outfile as a positional or -o, not both")
@@ -268,14 +272,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     full_argv = list(sys.argv) if argv is None else [parser.prog, *argv]
     try:
-        if args.command == "new":
-            return new_cmd(args)
-        if args.command == "generate":
-            return generate_cmd(args, argv=full_argv)
-        if args.command == "preview-svg":
-            return preview_svg_cmd(args, argv=full_argv)
-        parser.error(f"unknown command {args.command}")
-        return 2
+        return args.run(args, argv=full_argv)
     except (ConfigError, CompileError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

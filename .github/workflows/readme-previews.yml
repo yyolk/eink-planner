@@ -24,7 +24,7 @@ jobs:
       - uses: astral-sh/setup-uv@v7
       - run: uv sync --group dev
       - name: Regenerate 158×210 sample SVGs
-        run: uv run parch preview-svg 158x210-mos-left --samples
+        run: uv run parch proof 158x210-mos-left --samples
       - name: Open a PR when SVGs changed
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

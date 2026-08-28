@@ -250,6 +250,7 @@ def test_debug_cli_flag():
     for action in parser._actions:
         if getattr(action, "dest", None) == "command":
             gen_parser = action.choices["generate"]
+            assert action.choices["press"] is gen_parser
     assert gen_parser is not None
     assert "--debug" in gen_parser.format_help()
 
@@ -258,8 +259,10 @@ def _generate_parser():
     parser = build_parser()
     for action in parser._actions:
         if getattr(action, "dest", None) == "command":
-            return action.choices["generate"]
-    raise AssertionError("generate subparser missing")
+            press = action.choices["press"]
+            assert action.choices["generate"] is press
+            return press
+    raise AssertionError("press/generate subparser missing")
 
 
 def test_year_cli_flag():

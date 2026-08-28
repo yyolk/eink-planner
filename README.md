@@ -14,34 +14,36 @@ Needs [uv](https://docs.astral.sh/uv/) and Python 3.12+.
 
 ```shell
 uv tool install parch
-parch generate supernote-nomad
+parch press supernote-nomad
 ```
+
+`generate` and `preview-svg` still work.
 
 `typst` is used to compile the PDF. If it is not on `PATH`, the compile step downloads the official Typst v0.15.1 binary for the current OS/arch into `.tools/typst` (`.tools/typst.exe` on Windows).
 
-## Generate
+## Press
 
 ```shell
 # SuperNote Nomad 2026 (default profile, MOS-left) → ./out/index.pdf
-uv run parch generate supernote-nomad
+uv run parch press supernote-nomad
 
 # SuperNote Nomad 2027 from the shipped 2026 profile (CLI overlay)
-uv run parch generate supernote-nomad --year 2027
+uv run parch press supernote-nomad --year 2027
 
 # SuperNote Nomad MOS-right → ./out/nomad-mos-right/index.pdf
-uv run parch generate supernote-nomad-mos-right -w out/nomad-mos-right
+uv run parch press supernote-nomad-mos-right -w out/nomad-mos-right
 
 # 158×210 MOS-left → ./out/mos-left/index.pdf
-uv run parch generate 158x210-mos-left -w out/mos-left
+uv run parch press 158x210-mos-left -w out/mos-left
 
 # 158×210 MOS-left lined → ./out/mos-left-lined/index.pdf
-uv run parch generate 158x210-mos-left-lined -w out/mos-left-lined
+uv run parch press 158x210-mos-left-lined -w out/mos-left-lined
 
 # 158×210 MOS-right → ./out/mos-right/index.pdf
-uv run parch generate 158x210-mos-right -w out/mos-right
+uv run parch press 158x210-mos-right -w out/mos-right
 
 # Kindle Scribe → ./out/scribe/index.pdf
-uv run parch generate kindle-scribe -w out/scribe
+uv run parch press kindle-scribe -w out/scribe
 ```
 
 Flags:
@@ -62,16 +64,16 @@ Copy a shipped profile to start a new year or trim sections:
 uv run parch new --from supernote-nomad --year 2027 --yes -o mine.toml
 ```
 
-`parch new` without `--yes` asks for starting profile, year, sections, and output path. Locale stays `parch generate -l`.
+`parch new` without `--yes` asks for starting profile, year, sections, and output path. Locale stays `parch press -l`.
 
-A name in the top-level `sections = ["cover", …]` list is enabled, in that order. Comment a name out of `sections` to disable it. Details live under `[section.<name>]`. There is no `enabled = true` flag, and `debug` does not belong in the profile — use `parch generate --debug`. At least one section must remain.
+A name in the top-level `sections = ["cover", …]` list is enabled, in that order. Comment a name out of `sections` to disable it. Details live under `[section.<name>]`. There is no `enabled = true` flag, and `debug` does not belong in the profile — use `parch press --debug`. At least one section must remain.
 
 ## Sample pages
 
 2026 from [`158x210-mos-left`](src/parch/data/configs/158x210-mos-left.toml). MOS strip on the left. This profile ships cover, Contents, the calendar sections, and the colophon (no projects, habits, review, tasks, or meetings). Previews are Typst SVGs at half scale. Regenerate with:
 
 ```shell
-uv run parch preview-svg 158x210-mos-left --samples
+uv run parch proof 158x210-mos-left --samples
 ```
 
 | Section | Page |
@@ -120,7 +122,7 @@ uv sync
 uv run pytest
 ```
 
-CI runs pytest and a Nomad `parch generate`. Visual design checks live in `tests/visual.py` and can be dropped with the tests that import them.
+CI runs pytest and a Nomad `parch press`. Visual design checks live in `tests/visual.py` and can be dropped with the tests that import them.
 
 ## Layout of a generated planner
 

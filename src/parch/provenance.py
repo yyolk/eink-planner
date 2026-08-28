@@ -18,7 +18,7 @@ def config_sha256(path: str | Path) -> str:
 
 
 def format_command(argv: list[str]) -> str:
-    """Shell-join the real argv (``parch generate ...``)."""
+    """Shell-join the real argv (``parch press ...``)."""
     return shlex.join(str(part) for part in argv)
 
 
