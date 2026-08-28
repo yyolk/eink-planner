@@ -107,7 +107,8 @@ def test_press_cli_unchanged():
     args = parser.parse_args(["press", "supernote-nomad"])
     assert args.command == "press"
     assert args.run is generate_cmd
-    assert not hasattr(args, "pages") or args.command == "press"
+    assert not hasattr(args, "pages")
+    assert not hasattr(args, "samples")
 
 
 def test_compile_svg_refuses_missing_pages(tmp_path):
