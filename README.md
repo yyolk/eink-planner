@@ -19,6 +19,24 @@ parch press supernote-nomad
 
 `typst` is used to compile the PDF. If it is not on `PATH`, the compile step downloads the official Typst v0.15.1 binary for the current OS/arch into `.tools/typst` (`.tools/typst.exe` on Windows).
 
+## Exploratory: Typst via `pip install typst`
+
+This branch can compile through the PyPI [`typst`](https://pypi.org/project/typst/) binding (messense/typst-py 0.15.0) instead of spawning the official CLI.
+
+```shell
+uv sync --extra typst-native
+```
+
+`PARCH_TYPST` selects the backend:
+
+| Value | Behavior |
+| --- | --- |
+| `auto` (default on this branch) | Use the binding if `import typst` works, else the CLI downloader |
+| `py` | In-process binding (`uv sync --extra typst-native`) |
+| `cli` | Official Typst CLI (same as master) |
+
+The binding tracks Typst 0.15.0; the CLI pin remains v0.15.1. Master stays CLI-only until a human decides.
+
 ## Press
 
 ```shell

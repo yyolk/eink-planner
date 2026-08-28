@@ -185,3 +185,23 @@ def test_sample_page_numbers_missing_label():
 
     with pytest.raises(ValueError, match="contents"):
         sample_page_numbers("cover only", year=2026, week_id="2026W01", jan1="2026-01-01")
+
+
+def test_compile_svg_tiny_two_pages_py(tmp_path, monkeypatch):
+    typst = pytest.importorskip("typst")
+    assert typst is not None
+    monkeypatch.setenv("PARCH_TYPST", "py")
+    src = tmp_path / "index.typst"
+    src.write_text("#set page(width: 80pt, height: 100pt)\n= A\n#pagebreak()\n= B\n")
+    paths = Compile().compile_svg(
+        tmp_path,
+        pages=[1, 2],
+        dest_pattern="preview-{p}.svg",
+        tools_dir=REPO / ".tools",
+    )
+    assert [p.name for p in paths] == ["preview-1.svg", "preview-2.svg"]
+    for path in paths:
+        text = path.read_text()
+        assert "<svg" in text
+        assert "viewBox=" in text
+        assert path.stat().st_size > 0

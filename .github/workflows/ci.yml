@@ -19,3 +19,28 @@ jobs:
         run: |
           uv run parch press supernote-nomad -w out/nomad
           test -s out/nomad/index.pdf
+
+  test-typst-native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - name: Install poppler-utils
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - run: uv sync --extra typst-native --group dev
+      - name: Test with in-process typst
+        env:
+          PARCH_TYPST: py
+        run: uv run pytest
+      - name: Press Nomad with typst-py
+        env:
+          PARCH_TYPST: py
+        run: |
+          uv run parch press supernote-nomad -w out/nomad-py
+          test -s out/nomad-py/index.pdf
+      - name: Proof one MOS-left page with typst-py
+        env:
+          PARCH_TYPST: py
+        run: |
+          uv run parch proof 158x210-mos-left --pages 1 -w out/proof-py
+          test -s out/proof-py/preview-1.svg
