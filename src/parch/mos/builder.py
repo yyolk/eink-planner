@@ -1,4 +1,4 @@
-"""Assemble preamble + laid-out pages into one Typst document."""
+"""Assemble preamble + section pages; chase and compose share render() for one manifest."""
 
 from __future__ import annotations
 
@@ -28,11 +28,15 @@ class Builder:
         body = "\n#pagebreak()\n".join(self.pages)
         return f"{self.preamble.generate()}\n{body}"
 
-    def add(self, page_spec: PageData) -> None:
-        if page_spec.raw_typst:
-            self.pages.append(page_spec.content)
-        else:
-            self.pages.append(self._layout_page(page_spec))
+    def render(self, page: PageData) -> str:
+        if page.raw_typst:
+            return page.content
+        return self._layout_page(page)
+
+    def add(self, page_spec: PageData) -> str:
+        typst = self.render(page_spec)
+        self.pages.append(typst)
+        return typst
 
     def _layout_page(self, page_spec: PageData) -> str:
         debug_stroke = "stroke: regular_stroke,\n      " if self.configurator.debug() else ""
