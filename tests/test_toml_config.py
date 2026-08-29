@@ -137,6 +137,22 @@ def test_unknown_key_raises():
         parse_toml("foo = 1\n" + _minimal())
 
 
+def test_leftover_layout_table_is_unknown_key():
+    leftover = """[layout]
+name = "mos"
+side_menu = "left"
+side_menu_width = "8mm"
+reverse_months_quarters = true
+menu_rotate = "270deg"
+column_gutter = "1.5mm"
+row_gutter = "1.5mm"
+"""
+    with pytest.raises(ConfigError, match="unknown key: layout"):
+        parse_toml(_minimal() + leftover)
+    with pytest.raises(ConfigError, match="unknown key: layout"):
+        parse_toml(_minimal(mos=leftover))
+
+
 def test_style_gutter_row_is_optional_and_ignored():
     style = """[style.stroke]
 regular = "0.3pt"
@@ -225,8 +241,8 @@ def test_missing_required_keys_raise():
         parse_toml(_minimal(device=""))
     with pytest.raises(ConfigError, match="missing key: style"):
         parse_toml(_minimal(style=""))
-    with pytest.raises(ConfigError, match="missing key: layout"):
-        parse_toml(_minimal(layout=""))
+    with pytest.raises(ConfigError, match="missing key: mos"):
+        parse_toml(_minimal(mos=""))
 
 
 def test_debug_not_required_and_rejected_in_toml():

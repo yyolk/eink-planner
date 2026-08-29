@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import tomllib
 from pathlib import Path
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any
 
 from pydantic import (
     AfterValidator,
@@ -104,8 +104,7 @@ class Style(StrictModel):
     little_calendar: LittleCalendar | None = None
 
 
-class Layout(StrictModel):
-    name: Literal["mos"]
+class Mos(StrictModel):
     side_menu: str
     side_menu_width: str
     reverse_months_quarters: StrictBool
@@ -336,7 +335,7 @@ class DeviceProfile(StrictModel):
     device: Device
     calendar: Calendar
     style: Style
-    layout: Layout
+    mos: Mos
     sections: list[str]
     section: SectionTables = Field(default_factory=SectionTables)
 

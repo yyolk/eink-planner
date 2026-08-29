@@ -8,7 +8,7 @@ from parch.config import StrictDict
 def _minimal(*, enable: list[str] | None = None, **extra: str) -> str:
     """Build a minimal TOML profile.
 
-    extra keys override chunks: device, calendar, style, layout, sections,
+    extra keys override chunks: device, calendar, style, mos, sections,
     sections_list. Empty strings omit that chunk.
     """
     names = enable
@@ -37,8 +37,7 @@ right = "4mm"
 
 [style.gutter]
 column = "8pt\"""",
-        "layout": """[layout]
-name = "mos"
+        "mos": """[mos]
 side_menu = "left"
 side_menu_width = "8mm"
 reverse_months_quarters = true
@@ -59,7 +58,7 @@ font_size = "12pt\""""
             names = ["cover"]
         extra["sections_list"] = "sections = [" + ", ".join(f'"{n}"' for n in names) + "]"
     parts.update(extra)
-    order = ["sections_list", "device", "calendar", "style", "layout", "sections"]
+    order = ["sections_list", "device", "calendar", "style", "mos", "sections"]
     chunks = [parts[k] for k in order if k in parts and parts[k]]
     return "\n\n".join(chunks) + "\n"
 
