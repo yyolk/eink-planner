@@ -302,21 +302,7 @@ class SectionTables(StrictModel):
     habits: HabitsSection | None = None
     review: ReviewSection | None = None
     tasks: TasksSection | None = None
-    colophon: ColophonSection | list[ColophonSection] | None = None
-
-    @field_validator("colophon", mode="before")
-    @classmethod
-    def _colophon_shape(cls, value: Any) -> Any:
-        if value is None:
-            return None
-        if isinstance(value, list):
-            for item in value:
-                if not isinstance(item, dict):
-                    raise ValueError("expected a table")
-            return value
-        if not isinstance(value, dict):
-            raise ValueError("expected a table")
-        return value
+    colophon: ColophonSection | None = None
 
 
 KNOWN_SECTIONS = frozenset(SectionTables.model_fields)
@@ -355,7 +341,7 @@ class DeviceProfile(StrictModel):
         for name in value:
             if name not in KNOWN_SECTIONS:
                 raise ValueError(f"unknown section: {name}")
-            if name in seen and name != "colophon":
+            if name in seen:
                 raise ValueError(f"duplicate section: {name}")
             seen.add(name)
         return value

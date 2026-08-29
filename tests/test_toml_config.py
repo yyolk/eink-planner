@@ -223,7 +223,7 @@ pages = 20
 
 
 def test_colophon_array_entry_must_be_table():
-    with pytest.raises(ConfigError, match="section.colophon: expected a table"):
+    with pytest.raises(ConfigError, match="section.colophon"):
         parse_toml(
             _minimal(
                 enable=["colophon"],

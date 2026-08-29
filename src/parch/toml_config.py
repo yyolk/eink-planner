@@ -194,19 +194,11 @@ def device_profile_to_dto(profile: DeviceProfile) -> dict[str, Any]:
 def _sections_from_profile(profile: DeviceProfile) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     extras: dict[str, Any] = {}
     tables = profile.section
-    colo_queue: list[ColophonSection] | None = None
-    if isinstance(tables.colophon, list):
-        colo_queue = list(tables.colophon)
 
     sections: list[dict[str, Any]] = []
     for kind in profile.sections:
-        if kind == "colophon" and colo_queue is not None:
-            if not colo_queue:
-                raise ConfigError("section.colophon: more names in sections than [[section.colophon]] tables")
-            params = _section_colophon(colo_queue.pop(0))
-        else:
-            raw = getattr(tables, kind, None)
-            params = _build_section_params(kind, raw, extras)
+        raw = getattr(tables, kind, None)
+        params = _build_section_params(kind, raw, extras)
         sections.append(
             {
                 "name": _SECTION_NAME[kind],
