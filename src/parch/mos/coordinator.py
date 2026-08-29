@@ -1,4 +1,4 @@
-"""compose: resolve each section from SECTIONS, fill the manifest; chase stays on Builder."""
+"""compose: resolve each section from SECTIONS, fill the manifest, wrap pages through chase."""
 
 from __future__ import annotations
 
@@ -7,16 +7,21 @@ from typing import Any
 from parch import ConfigError
 from parch.config import StrictDict, _to_plain
 from parch.i18n import I18n
-from parch.mos.builder import Builder
+from parch.mos.chase import CHASES
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 
 
 class Coordinator:
-    def __init__(self, dto: StrictDict | dict[str, Any], i18n: I18n) -> None:
+    def __init__(self, dto: StrictDict | dict[str, Any], i18n: I18n, chase_name: str = "mos") -> None:
         self.i18n = i18n
         self.configurator = Configurator(dto)
         self.manifest = Manifest()
+        if chase_name not in CHASES:
+            raise ConfigError(f"unknown chase: {chase_name}")
+        self.chase = CHASES[chase_name](
+            i18n=self.i18n, configurator=self.configurator, manifest=self.manifest
+        )
 
     def section_pages(self) -> list[tuple[str, list]]:
         """Enabled sections in order, each with the pages it contributes."""
@@ -28,11 +33,10 @@ class Coordinator:
         return [(section.section_name, section.pages(self.manifest)) for section in sections]
 
     def generate(self) -> str:
-        builder = Builder(i18n=self.i18n, configurator=self.configurator, manifest=self.manifest)
         for _name, pages in self.section_pages():
             for page in pages:
-                builder.add(page)
-        return builder.generate()
+                self.chase.wrap(page, self.manifest)
+        return self.chase.document()
 
     def _section(self, dto: Any):
         from parch.sections import SECTIONS  # late: sections/__init__ imports MOS classes
