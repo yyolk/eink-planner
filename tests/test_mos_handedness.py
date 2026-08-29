@@ -32,8 +32,7 @@ def _daily_section(dto):
 def test_side_menu_right_parses():
     dto = parse_toml(
         _minimal(
-            layout="""[layout]
-name = "mos"
+            mos="""[mos]
 side_menu = "right"
 side_menu_width = "10mm"
 reverse_months_quarters = true
@@ -52,8 +51,7 @@ row_gutter = "1.5mm"
 def test_side_menu_position_is_case_insensitive():
     dto = parse_toml(
         _minimal(
-            layout="""[layout]
-name = "mos"
+            mos="""[mos]
 side_menu = "RIGHT"
 side_menu_width = "10mm"
 reverse_months_quarters = true
@@ -68,11 +66,10 @@ row_gutter = "1.5mm"
 
 
 def test_side_menu_rejects_non_left_right():
-    with pytest.raises(ConfigError, match=r"layout\.side_menu: expected left or right"):
+    with pytest.raises(ConfigError, match=r"mos\.side_menu: expected left or right"):
         parse_toml(
             _minimal(
-                layout="""[layout]
-name = "mos"
+                mos="""[mos]
 side_menu = "top"
 side_menu_width = "10mm"
 reverse_months_quarters = true

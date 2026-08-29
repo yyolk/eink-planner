@@ -13,7 +13,8 @@ class StrictModel(BaseModel):
 
 def format_validation_error(exc: ValidationError) -> str:
     """Turn the first Pydantic error into a short ConfigError message."""
-    err = exc.errors()[0]
+    errors = exc.errors()
+    err = next((item for item in errors if item["type"] == "extra_forbidden"), errors[0])
     loc = ".".join(str(part) for part in err["loc"])
     typ = err["type"]
     msg = err["msg"]

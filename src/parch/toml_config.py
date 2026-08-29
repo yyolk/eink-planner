@@ -142,18 +142,19 @@ def device_profile_to_dto(profile: DeviceProfile) -> dict[str, Any]:
     regular_height = style.regular_height or _default_regular_height(style.type.body)
     link_padding = style.link_padding or _default_link_padding(style.type.body)
 
+    mos = profile.mos
     mos_layout = {
-        "side_menu_position": profile.layout.side_menu,
-        "side_menu_width": profile.layout.side_menu_width,
-        "column_gutter": profile.layout.column_gutter,
-        "row_gutter": profile.layout.row_gutter,
-        "menu_rotate": profile.layout.menu_rotate,
-        "reverse_months_quarters": profile.layout.reverse_months_quarters,
+        "side_menu_position": mos.side_menu,
+        "side_menu_width": mos.side_menu_width,
+        "column_gutter": mos.column_gutter,
+        "row_gutter": mos.row_gutter,
+        "menu_rotate": mos.menu_rotate,
+        "reverse_months_quarters": mos.reverse_months_quarters,
     }
-    if profile.layout.reverse_months_quarters_items is not None:
-        mos_layout["reverse_months_quarters_items"] = profile.layout.reverse_months_quarters_items
+    if mos.reverse_months_quarters_items is not None:
+        mos_layout["reverse_months_quarters_items"] = mos.reverse_months_quarters_items
     else:
-        mos_layout["reverse_months_quarters_items"] = profile.layout.reverse_months_quarters
+        mos_layout["reverse_months_quarters_items"] = mos.reverse_months_quarters
 
     year = profile.calendar.year
     start_date = f"{year:04d}-01-01"
@@ -161,7 +162,7 @@ def device_profile_to_dto(profile: DeviceProfile) -> dict[str, Any]:
     end_date = f"{year:04d}-12-{last_day:02d}"
 
     return {
-        "template": profile.layout.name,
+        "template": "mos",
         "device": profile.device.name,
         "document": {
             "layout": {

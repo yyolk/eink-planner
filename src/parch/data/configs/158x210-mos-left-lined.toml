@@ -47,10 +47,9 @@ right = "5mm"
 [style.gutter]
 column = "10pt"
 
-# layout.name = "mos" → Months on the Side (vertical side menu navigation)
+# [mos] → Months on the Side (vertical side menu navigation)
 # side_menu left|right is the physical side of the MOS strip
-[layout]
-name = "mos"
+[mos]
 side_menu = "left"
 side_menu_width = "10mm"
 reverse_months_quarters = true

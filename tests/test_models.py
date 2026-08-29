@@ -18,7 +18,7 @@ LOCALE = packaged_locale()
 
 def test_happy_path_mos_left():
     profile = load_device_profile(MOS_LEFT)
-    assert profile.layout.side_menu == "left"
+    assert profile.mos.side_menu == "left"
     assert profile.sections[-1] == "colophon"
     assert profile.section.daily is not None
     assert profile.section.daily.left is not None
@@ -28,7 +28,7 @@ def test_happy_path_mos_left():
 
 def test_happy_path_mos_right():
     profile = load_device_profile(MOS_RIGHT)
-    assert profile.layout.side_menu == "right"
+    assert profile.mos.side_menu == "right"
     assert profile.section.daily is not None
     assert profile.section.daily.columns == ["5fr", "3fr"]
     assert profile.section.daily.left is not None
