@@ -1,4 +1,4 @@
-"""section and chase contracts already used by MOS."""
+"""Section is the existing MOS contract. Chase is a target protocol."""
 
 from __future__ import annotations
 
@@ -24,5 +24,5 @@ class Chase(Protocol):
     name: str
 
     def wrap(self, page: PageData, manifest: Manifest) -> str:
-        """If page.raw_typst, return page.content; else apply chase chrome (MOS: Builder._layout_page)."""
+        """If page.raw_typst, return page.content; else apply chase chrome. MOS chromes in Builder.add / Builder._layout_page."""
         ...
