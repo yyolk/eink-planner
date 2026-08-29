@@ -165,9 +165,9 @@ Internal PDF links use Typst `#padded_link` / `<label>` the same way LYP does. A
 
 ## Releasing
 
-A published GitHub Release is the ship step. Tag `vX.Y.Z` must match `[project].version` in `pyproject.toml` (no `v` in the file).
+A published GitHub Release is the ship step. Tag `vX.Y.Z` must match `[project].version` in `pyproject.toml` (no `v` in the file). Hatchling embeds that file version on the tagged commit; `publish.yml` does not compare tag and file.
 
-1. Bump the version on `master` and wait for CI (`parch press supernote-nomad`).
+1. Merge a version-bump PR to `master` and wait for CI (`parch press supernote-nomad`).
 2. **Releases → Draft a new release.** Tag `vX.Y.Z` (create on publish), target `master`.
 3. Publish. Every Release goes to [TestPyPI](https://test.pypi.org/project/parch/). A stable Release (pre-release unchecked) also waits on the `pypi` environment, then uploads to [PyPI](https://pypi.org/project/parch/). The wheel and sdist attach to that Release.
 
