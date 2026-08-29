@@ -26,10 +26,11 @@ def test_generate_missing_template_presses():
     assert "#pagebreak()" in typst
 
 
-def test_generate_unknown_chase():
+@pytest.mark.parametrize("template", ["nope", "", 0, False, ["mos"]])
+def test_generate_unknown_chase(template):
     dto = short_january(load(base_config("supernote-nomad"))).to_plain()
-    dto["template"] = "nope"
-    with pytest.raises(ConfigError, match=r"unknown chase: nope"):
+    dto["template"] = template
+    with pytest.raises(ConfigError, match=r"unknown chase:"):
         Generate(i18n=load_default()).generate(dto)
 
 

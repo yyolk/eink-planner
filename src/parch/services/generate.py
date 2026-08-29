@@ -20,7 +20,7 @@ class Generate:
         return self._select_planner(dto).generate()
 
     def _select_planner(self, dto: StrictDict) -> Coordinator:
-        name = dto.get("template") or "mos"
-        if name not in CHASES:
+        name = dto.get("template", "mos")
+        if not isinstance(name, str) or name not in CHASES:
             raise ConfigError(f"unknown chase: {name}")
         return Coordinator(dto, i18n=self.i18n, chase_name=name)
