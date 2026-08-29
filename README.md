@@ -1,4 +1,4 @@
-# ☰ parch
+# parch
 
 Yearly planner PDFs for e-ink, a Python port of [Vitaliy Kudryk’s LYP](https://github.com/kudrykv/latex-yearly-planner/tree/alpha).
 
