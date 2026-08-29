@@ -304,6 +304,13 @@ class SectionTables(StrictModel):
     tasks: TasksSection | None = None
     colophon: ColophonSection | None = None
 
+    @field_validator("colophon", mode="before")
+    @classmethod
+    def _colophon_table(cls, value: Any) -> Any:
+        if isinstance(value, list):
+            raise ValueError("expected a table")
+        return value
+
 
 KNOWN_SECTIONS = frozenset(SectionTables.model_fields)
 
