@@ -1,9 +1,10 @@
 import pytest
 
 from parch import ConfigError
+from parch.config import load
 from parch.sections import SECTIONS
 from parch.mos.coordinator import Coordinator
-from tests.helpers import load_default
+from tests.helpers import base_config, load_default
 
 _OLD_COMPONENTS = {
     "cover_plain",
@@ -28,12 +29,9 @@ def test_sections_keys_match_former_components():
 
 
 def test_unknown_section_class_raises_config_error():
-    dto = {
-        "planner": {
-            "sections": [
-                {"class": "not_a_section", "name": "bogus", "enabled": True, "params": {}},
-            ]
-        }
-    }
+    dto = load(base_config("supernote-nomad")).to_plain()
+    dto["planner"]["sections"] = [
+        {"class": "not_a_section", "name": "bogus", "enabled": True, "params": {}},
+    ]
     with pytest.raises(ConfigError, match=r"unknown section: not_a_section"):
         Coordinator(dto, i18n=load_default()).section_pages()
