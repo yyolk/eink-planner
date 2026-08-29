@@ -12,7 +12,7 @@ Manual TestPyPI-only: **Actions → Publish → `testpypi`**.
 
 ## Version bumps
 
-`uv version` writes `[project].version`. Do not hand-edit the field unless you need an exact string (`uv version 0.1.2rc1`).
+`uv version` writes `[project].version`. Exact string: `uv version 0.1.2rc1 --no-sync`. Do not hand-edit the field.
 
 From a checkout on a bump branch:
 
