@@ -90,6 +90,7 @@ jobs:
       - name: Attach missing dist files
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
           existing="$(gh release view "$GITHUB_REF_NAME" --json assets --jq '.assets[].name')"
           for f in dist/*; do
