@@ -86,10 +86,11 @@ def test_colophon_rejects_unknown_children():
 
 
 def test_multiple_colophon_nodes_parse_in_order():
-    dto = parse_toml(
-        _minimal(
-            enable=["cover", "colophon", "colophon"],
-            sections="""[section.cover]
+    with pytest.raises(ConfigError, match="duplicate section: colophon"):
+        parse_toml(
+            _minimal(
+                enable=["cover", "colophon", "colophon"],
+                sections="""[section.cover]
 title = "Hi"
 font_size = "12pt"
 
@@ -98,12 +99,9 @@ font_size = "12pt"
 [[section.colophon]]
 title = "Again"
 """,
-        ),
-        source="two-colo.toml",
-    )
-    names = [s["name"] for s in dto["planner"]["sections"]]
-    assert names == ["cover", "colophon", "colophon"]
-    assert dto["planner"]["sections"][2]["params"]["title"] == "Again"
+            ),
+            source="two-colo.toml",
+        )
 
 
 def test_colophon_is_raw_without_mos_chrome():
@@ -270,12 +268,8 @@ font_size = "12pt"
     )
     path = tmp_path / "two.toml"
     path.write_text(text, encoding="utf-8")
-    typst_src = _generate(_attach(short_january(load(path)), path))
-    assert typst_src.count(DEFAULT_TITLE) == 2
-    digest = hashlib.sha256(path.read_bytes()).hexdigest()
-    assert digest not in typst_src
-    pdf, stderr = compile_pdf(typst_src, tmp_path / "two")
-    assert pdf.is_file() and pdf.stat().st_size > 0, stderr
+    with pytest.raises(ConfigError, match="duplicate section: colophon"):
+        load(path)
 
 
 def test_generate_cmd_attaches_provenance_but_page_stays_quiet(tmp_path, monkeypatch):
