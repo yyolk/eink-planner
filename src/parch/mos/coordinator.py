@@ -1,4 +1,4 @@
-"""Wire sections → manifest → pages → builder."""
+"""compose: resolve each section from SECTIONS, fill the manifest; chase stays on Builder."""
 
 from __future__ import annotations
 
@@ -10,38 +10,6 @@ from parch.i18n import I18n
 from parch.mos.builder import Builder
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.mos.sections.annual import Annual
-from parch.mos.sections.cover_plain import CoverPlain
-from parch.mos.sections.index import Index
-from parch.mos.sections.daily import Daily
-from parch.mos.sections.daily_notes import DailyNotes
-from parch.mos.sections.monthly import Monthly
-from parch.mos.sections.quarterly import Quarterly
-from parch.mos.sections.habits import Habits
-from parch.mos.sections.meetings import Meetings
-from parch.mos.sections.projects import Projects
-from parch.mos.sections.review import Review
-from parch.mos.sections.tasks import Tasks
-from parch.mos.sections.weekly import Weekly
-from parch.sections.colophon import Colophon
-
-
-COMPONENTS = {
-    "cover_plain": CoverPlain,
-    "index": Index,
-    "annual": Annual,
-    "quarterly": Quarterly,
-    "monthly": Monthly,
-    "weekly": Weekly,
-    "daily": Daily,
-    "daily_notes": DailyNotes,
-    "projects": Projects,
-    "meetings": Meetings,
-    "habits": Habits,
-    "review": Review,
-    "tasks": Tasks,
-    "colophon": Colophon,
-}
 
 
 class Coordinator:
@@ -67,6 +35,8 @@ class Coordinator:
         return builder.generate()
 
     def _section(self, dto: Any):
+        from parch.sections import SECTIONS  # late: sections/__init__ imports MOS classes
+
         if isinstance(dto, StrictDict):
             klass_name = dto["class"]
             section_name = dto["name"]
@@ -76,9 +46,9 @@ class Coordinator:
             klass_name = dto["class"]
             section_name = dto["name"]
             params = dto.get("params") or {}
-        klass = COMPONENTS.get(klass_name)
+        klass = SECTIONS.get(klass_name)
         if klass is None:
-            raise ConfigError(f"unknown component: {klass_name}")
+            raise ConfigError(f"unknown section: {klass_name}")
         return klass(
             section_name=section_name,
             i18n=self.i18n,
