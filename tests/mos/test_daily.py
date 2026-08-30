@@ -1,4 +1,4 @@
-"""Daily pages: year chip, paper MOS, thin black schedule, no Calendar."""
+"""Daily pages: date block, Contents mark alone, paper MOS, no year chip."""
 
 from __future__ import annotations
 
@@ -7,7 +7,6 @@ from parch.calendar.dated_note import DatedNote
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
 from parch.mos.pages.daily import Daily
-from parch.sections.annual import Annual
 from parch.sections.daily import Daily as DailySection
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
@@ -15,6 +14,11 @@ from tests.helpers import base_config, load_default, make_configurator, make_day
 from tests.toml_fixtures import omit_toml_sections
 
 NOMAD = base_config("supernote-nomad")
+NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
+
+_MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
+_MARK_FLUSH = "padded_link(padding: 0pt, <index>"
+_TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
 
 _BULKY = (
     "colophon",
@@ -105,15 +109,13 @@ def test_title_keeps_day_weekday_and_week_n():
     assert "Calendar" not in title
 
 
-def test_nav_links_are_year_chip_not_calendar():
-    manifest = Manifest()
-    manifest.register_source(Annual.ID)
+def test_nav_links_empty_not_year_chip_or_calendar():
     section = _section()
-    pages = section.pages(manifest)
+    pages = section.pages(Manifest())
     assert len(pages) == 4
     for day, page in zip(section._range(), pages, strict=True):
-        assert page.nav_links == [(Annual.ID, "2026")]
-        assert page.nav_links != []
+        assert page.nav_links == []
+        assert page.page_id == DailySection.ID
         assert page.highlight_months == [day.month()]
         assert len(page.highlight_months) == 1
         assert page.highlight_quarters == []
@@ -225,13 +227,20 @@ def test_calendar_appears_nowhere_on_title_or_content():
     assert "Calendar" not in content
 
 
-def test_generated_year_chip_links_to_annual_and_inverts_january_only():
+def test_generated_contents_mark_alone_and_inverts_january_only():
     text = omit_toml_sections(NOMAD.read_text(encoding="utf-8"), _BULKY)
     typst = _generate(parse_toml(text, source="nomad-daily.toml"))
     pages = _daily_pages(typst)
     jan1 = pages["jan1"]
-    assert "padded_link(<annual>, [2026])" in jan1
+    assert "padded_link(<annual>, [2026])" not in jan1
     assert "grid.cell(fill: black, text(white)[#padded_link(<annual>, [2026])])" not in jan1
+    assert _TRAIL_MARK in jan1
+    assert _MARK_FLUSH in jan1
+    assert jan1.count(_MARK_RULE) == 5
+    assert jan1.index("1 <2026-01-01>") < jan1.index(_TRAIL_MARK)
+    heading = jan1[jan1.index("stack(") : jan1.index(_TRAIL_MARK)]
+    assert "dir: rtl" in heading
+    assert "column-gutter: 6pt" not in heading
     assert "text(size: h1)[1 <2026-01-01>]" in jan1
     assert "[*Thursday*]" in jan1
     assert "Week 1" in jan1
@@ -253,4 +262,24 @@ def test_generated_year_chip_links_to_annual_and_inverts_january_only():
     assert "table.cell(fill: black, text(white)[#padded_link(<quarter-" not in jan1
     assert "Q1" in jan1 and "Q4" in jan1
     assert "Jan" in jan1 and "Dec" in jan1
+    assert jan1.count("table.cell(fill: black") == 1
+
+
+def test_generated_mos_right_contents_mark_alone_left_of_q1():
+    text = omit_toml_sections(NOMAD_MOS_RIGHT.read_text(encoding="utf-8"), _BULKY)
+    typst = _generate(parse_toml(text, source="nomad-mos-right-daily.toml"))
+    pages = _daily_pages(typst)
+    jan1 = pages["jan1"]
+    assert "padded_link(<annual>, [2026])" not in jan1
+    assert _TRAIL_MARK in jan1
+    assert jan1.count(_MARK_RULE) == 5
+    assert jan1.index("1 <2026-01-01>") < jan1.index(_TRAIL_MARK)
+    heading = jan1[jan1.index("stack(") : jan1.index(_TRAIL_MARK)]
+    assert "dir: ltr" in heading
+    assert "column-gutter: 6pt" not in heading
+    assert "2026 /" not in jan1
+    assert "text(size: h1)[/]" not in jan1
+    assert jan1.count("Calendar") == 0
+    assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in jan1
+    assert "table.cell([#padded_link(<quarter-2026-1>)[Q1]])" in jan1
     assert jan1.count("table.cell(fill: black") == 1
