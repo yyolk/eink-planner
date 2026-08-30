@@ -9,6 +9,8 @@ import pytest
 from parch import ConfigError
 from parch.config import load
 from parch.mos.configurator import Configurator
+from parch.compose.page_data import HeadingMark
+from parch.mos.manifest import Manifest
 from parch.sections.projects import Projects, _NUM_COL, _length_mm
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
@@ -30,6 +32,7 @@ _SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
 _SEATED_TITLE = "let seated_title ="
 _SEATED_MARK = "let seated_mark ="
 _SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
+_FOLLOW_RTL = "dir: rtl,\n    spacing: 0.5em,"
 _CARD_STROKE = "stroke: regular_stroke + black"
 _CARD_LINE = "line(length: size.width, stroke: 0.2pt + black)"
 
@@ -469,9 +472,20 @@ def test_contents_mark_on_projects_when_index_on():
     heading = index[index.index(_SEATED_TITLE) : index.index(_SEATED_MARK)]
     assert "[Projects <projects>]" in heading
     assert _TRAIL_MARK not in heading
-    assert _SEAT_RTL in index
+    assert _FOLLOW_RTL in index
+    assert _SEAT_RTL not in index
     assert _SEATED_TRAIL in index
     assert index.index("[Projects <projects>]") < index.index(_TRAIL_MARK)
+    board_heading = board[board.index(_SEATED_TITLE) : board.index(_SEATED_MARK)]
+    assert "padded_link(<projects>)" in board_heading
+    assert _FOLLOW_RTL in board
+    assert _SEAT_RTL not in board
+    projects = _projects(dto)
+    manifest = Manifest()
+    projects.register(manifest)
+    for page in projects.pages(manifest):
+        assert page.heading_mark is HeadingMark.FOLLOW
+        assert page.nav_links == []
     contents = next(p for p in _pages(typst) if 'weight: "bold")[Contents <index>]' in p)
     assert "padded_link(<index>" not in contents
     assert "padded_link(<projects>" in contents

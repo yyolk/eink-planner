@@ -124,20 +124,22 @@ def trail_heading(
     *,
     direction: str = "ltr",
     chip: str | None = None,
+    edge: str = "trail",
 ) -> str:
-    """Seat Contents mark and title on one header-band horizon; mark keeps its own hit."""
+    """TRAIL is 1fr opposite-ends; FOLLOW is 0.5em after the mark, own hits."""
     mark = trail_strip(manifest, heading_height, body_size, chip)
     if not title:
         return mark or ""
     if not mark:
         return title
+    spacing = "0.5em" if edge == "follow" else "1fr"
     return f"""context {{
   let seated_title = {title}
   let seated_mark = {mark}
   let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
   stack(
     dir: {direction},
-    spacing: 1fr,
+    spacing: {spacing},
     box(height: band, align(horizon + left, seated_title)),
     box(height: band, align(horizon + left, seated_mark)),
   )

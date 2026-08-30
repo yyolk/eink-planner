@@ -21,3 +21,10 @@ def test_page_data_heading_defaults():
     page = PageData(content="")
     assert page.heading_mark is HeadingMark.LEAD
     assert page.nav_links == []
+
+
+def test_heading_mark_names_follow_apart_from_trail():
+    assert HeadingMark.FOLLOW == "follow"
+    assert HeadingMark.TRAIL == "trail"
+    assert HeadingMark.LEAD == "lead"
+    assert HeadingMark.FOLLOW is not HeadingMark.TRAIL

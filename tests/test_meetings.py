@@ -7,6 +7,8 @@ import pytest
 from parch import ConfigError
 from parch.config import load
 from parch.mos.configurator import Configurator
+from parch.compose.page_data import HeadingMark
+from parch.mos.manifest import Manifest
 from parch.sections.meetings import Meetings, _NUM_COL
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
@@ -28,6 +30,7 @@ _SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
 _SEATED_TITLE = "let seated_title ="
 _SEATED_MARK = "let seated_mark ="
 _SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
+_FOLLOW_RTL = "dir: rtl,\n    spacing: 0.5em,"
 _TICK_STROKE = "stroke: (_, _) => (bottom: regular_stroke + black)"
 
 
@@ -375,9 +378,20 @@ def test_contents_mark_on_meetings_when_index_on():
     heading = index[index.index(_SEATED_TITLE) : index.index(_SEATED_MARK)]
     assert "[Meetings <meetings>]" in heading
     assert _TRAIL_MARK not in heading
-    assert _SEAT_RTL in index
+    assert _FOLLOW_RTL in index
+    assert _SEAT_RTL not in index
     assert _SEATED_TRAIL in index
     assert index.index("[Meetings <meetings>]") < index.index(_TRAIL_MARK)
+    meeting_heading = meeting[meeting.index(_SEATED_TITLE) : meeting.index(_SEATED_MARK)]
+    assert "padded_link(<meetings>)" in meeting_heading
+    assert _FOLLOW_RTL in meeting
+    assert _SEAT_RTL not in meeting
+    meetings = _meetings(dto)
+    manifest = Manifest()
+    meetings.register(manifest)
+    for page in meetings.pages(manifest):
+        assert page.heading_mark is HeadingMark.FOLLOW
+        assert page.nav_links == []
     contents = next(p for p in _pages(typst) if 'weight: "bold")[Contents <index>]' in p)
     assert "padded_link(<index>" not in contents
     assert "padded_link(<meetings>" in contents

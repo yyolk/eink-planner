@@ -47,7 +47,13 @@ class Habits:
 
     def pages(self, manifest: Manifest) -> list[PageData]:
         months = list(self._range())
-        out = [PageData(raw_typst=True, content=self._index(manifest, months))]
+        out = [
+            PageData(
+                raw_typst=True,
+                content=self._index(manifest, months),
+                heading_mark=HeadingMark.FOLLOW,
+            )
+        ]
         for month in months:
             page_id = self.month_id(month)
             out.append(
@@ -75,6 +81,7 @@ class Habits:
             f"text(size: h1, {habits_cell})",
             body_size_token(self.configurator),
             direction="rtl",
+            edge="follow",
         )
 
     def _index(self, manifest: Manifest, months: list[Month]) -> str:

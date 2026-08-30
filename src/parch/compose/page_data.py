@@ -9,10 +9,11 @@ from typing import Any
 
 
 class HeadingMark(StrEnum):
-    """Where the Contents mark sits relative to the title."""
+    """LEAD glues the mark; TRAIL is 1fr opposite-ends; FOLLOW is 0.5em after the mark."""
 
     LEAD = "lead"
     TRAIL = "trail"
+    FOLLOW = "follow"
 
 
 @dataclass

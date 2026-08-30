@@ -314,11 +314,16 @@ def test_builder_trail_and_raw_headings_call_trail_heading():
     assert "box(height: band, align(horizon + left, seated_title))" in helper
     assert "box(height: band, align(horizon + left, seated_mark))" in helper
     assert "trail_strip(" in helper
+    assert '"0.5em" if edge == "follow" else "1fr"' in helper
     builder = inspect.getsource(Builder._heading_stack)
     assert "trail_heading(" in builder
     assert "trail_strip(" not in builder
+    assert 'edge="follow"' in builder
+    assert 'edge="trail"' in builder
+    assert "HeadingMark.FOLLOW" in builder
     for cls in (Habits, Tasks, Meetings, Projects):
         heading = inspect.getsource(cls._heading)
         assert "trail_heading(" in heading
+        assert 'edge="follow"' in heading
         assert "stack(" not in heading
         assert "trail_strip(" not in heading

@@ -8,7 +8,7 @@ from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.contents_mark import body_size_token, heading_height_token, trail_heading
-from parch.compose.page_data import PageData
+from parch.compose.page_data import HeadingMark, PageData
 from parch.sections._shared import _length_mm
 
 # Match the Projects index so row capacity tracks the same geometry.
@@ -90,9 +90,21 @@ class Meetings:
         for page in range(1, self.index_page_count() + 1):
             start = (page - 1) * rpp + 1
             end = page * rpp
-            out.append(PageData(raw_typst=True, content=self._index(manifest, page, start, end)))
+            out.append(
+                PageData(
+                    raw_typst=True,
+                    content=self._index(manifest, page, start, end),
+                    heading_mark=HeadingMark.FOLLOW,
+                )
+            )
         for index in range(1, self.pages_num + 1):
-            out.append(PageData(raw_typst=True, content=self._meeting(manifest, index)))
+            out.append(
+                PageData(
+                    raw_typst=True,
+                    content=self._meeting(manifest, index),
+                    heading_mark=HeadingMark.FOLLOW,
+                )
+            )
         return out
 
     def _heading(self, manifest: Manifest, meetings_cell: str) -> str:
@@ -102,6 +114,7 @@ class Meetings:
             f"text(size: h1, {meetings_cell})",
             body_size_token(self.configurator),
             direction="rtl",
+            edge="follow",
         )
 
     def _index_meetings_cell(self, manifest: Manifest, page: int) -> str:

@@ -108,9 +108,20 @@ class Builder:
         chip = self.navigation.heading_menu_grid(page_id=page_id, nav_links=nav_links)
         height = _v(self.heading, "height")
         body = body_size_token(self.configurator)
-        if mos_right or chip or heading_mark is HeadingMark.TRAIL:
+        if mos_right or chip:
             return trail_heading(
-                self.manifest, height, title, body, direction=direction, chip=chip,
+                self.manifest, height, title, body,
+                direction=direction, chip=chip, edge="trail",
+            )
+        if heading_mark is HeadingMark.FOLLOW:
+            return trail_heading(
+                self.manifest, height, title, body,
+                direction="rtl", edge="follow",
+            )
+        if heading_mark is HeadingMark.TRAIL:
+            return trail_heading(
+                self.manifest, height, title, body,
+                direction=direction, edge="trail",
             )
         if title:
             return lead_title(self.manifest, height, title, body)

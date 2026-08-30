@@ -43,6 +43,7 @@ _SEATED_TITLE = "let seated_title ="
 _SEATED_MARK = "let seated_mark ="
 _SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
 _SEAT_LTR = "dir: ltr,\n    spacing: 1fr,"
+_FOLLOW_RTL = "dir: rtl,\n    spacing: 0.5em,"
 _HEADER_LINE = "line(start: (0%, 100%), end: (100%, 0%), stroke: regular_stroke)"
 _NAMED_MARK = "align(center + horizon, text["
 _BOX = "grid.cell(stroke: regular_stroke, [])"
@@ -280,6 +281,8 @@ def test_habit_month_pages_set_trail_mark_alone():
     habits.register(manifest)
     pages = habits.pages(manifest)
     assert pages[0].raw_typst is True
+    assert pages[0].heading_mark is HeadingMark.FOLLOW
+    assert pages[0].nav_links == []
     month_names = (
         "January",
         "February",
@@ -827,7 +830,8 @@ def test_index_heading_is_trail_strip_when_contents_on():
     heading = index[index.index(_SEATED_TITLE) : index.index(_SEATED_MARK)]
     assert "[Habits <habits>]" in heading
     assert _TRAIL_MARK not in heading
-    assert _SEAT_RTL in index
+    assert _FOLLOW_RTL in index
+    assert _SEAT_RTL not in index
     assert _SEATED_TRAIL in index
     assert index.index("[Habits <habits>]") < index.index(_TRAIL_MARK)
     assert "column-gutter: 6pt" not in heading
