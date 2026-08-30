@@ -11,7 +11,6 @@ from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.compose.page_data import PageData
 from parch.mos.pages.quarterly import Quarterly as QuarterlyPage
-from parch.sections.annual import Annual
 
 
 class Quarterly:
@@ -50,29 +49,13 @@ class Quarterly:
             )
             out.append(
                 PageData(
-                    title=self._title(manifest, page),
+                    title=page.title(),
                     content=page.content(),
                     highlight_quarters=[quarter],
                     nav_links=[],
                 )
             )
         return out
-
-    def _year(self) -> int:
-        return self.configurator.start_date().year
-
-    def _year_cell(self, manifest: Manifest) -> str:
-        return manifest.link_or_content(Annual.ID, str(self._year()))
-
-    def _title(self, manifest: Manifest, page: QuarterlyPage) -> str:
-        return f"""grid(
-  columns: (auto, auto, auto),
-  column-gutter: 6pt,
-  align: horizon,
-  text(size: h1, {self._year_cell(manifest)}),
-  text(size: h1)[/],
-  {page.title()}
-)"""
 
     def _range(self):
         return walk(self.configurator.start_date().quarter(), self.configurator.end_date().quarter())

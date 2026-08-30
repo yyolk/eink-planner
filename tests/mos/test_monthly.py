@@ -1,10 +1,11 @@
-"""Monthly pages: year / month crumb, MOS invert, unboxed days, leftover notes."""
+"""Monthly pages: January title, MOS invert, unboxed days, leftover notes."""
 
 from __future__ import annotations
 
 import shutil
 import subprocess
 
+from parch.compose.page_data import HeadingMark
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
 from parch.mos.pages.monthly import Monthly
@@ -122,12 +123,11 @@ def test_notes_are_thin_rule_plus_pattern_without_label():
     assert "rect_pattern(dotted)" in content
 
 
-def test_title_is_year_slash_month_crumb_and_kills_calendar_chip():
+def test_title_is_month_without_year_and_kills_calendar_chip():
     manifest = Manifest()
     manifest.register_source(Annual.ID)
     pages = _section().pages(manifest)
     assert len(pages) == 12
-    year_cell = manifest.link_or_content(Annual.ID, "2026")
     names = (
         "January",
         "February",
@@ -145,13 +145,16 @@ def test_title_is_year_slash_month_crumb_and_kills_calendar_chip():
     for index, page in enumerate(pages):
         month_id = f"month-2026-{index + 1:02d}-01"
         assert page.nav_links == []
+        assert page.nav_links is not None
+        assert page.heading_mark is HeadingMark.LEAD
         assert page.show_quarters is True
         assert len(page.highlight_months) == 1
         assert page.highlight_months[0].id == month_id
         assert page.highlight_quarters == []
-        assert f"text(size: h1, {year_cell})" in page.title
-        assert "text(size: h1)[/]" in page.title
-        assert f"{names[index]}<{month_id}>" in page.title
+        assert "padded_link(<annual>)" not in page.title
+        assert "2026 /" not in page.title
+        assert "text(size: h1)[/]" not in page.title
+        assert page.title == f"text(size: h1)[{names[index]}<{month_id}>]"
         assert "Calendar" not in page.title
         assert "Calendar" not in page.content
         assert "monthly_notes" not in page.content
@@ -160,14 +163,16 @@ def test_title_is_year_slash_month_crumb_and_kills_calendar_chip():
         assert "Week " not in page.content
 
 
-def test_generated_year_crumb_links_to_annual_and_inverts_only_the_month():
+def test_generated_title_is_january_without_year_and_inverts_only_the_month():
     text = omit_toml_sections(NOMAD.read_text(encoding="utf-8"), _BULKY)
     typst = _generate(parse_toml(text, source="nomad-monthly.toml"))
     pages = _month_pages(typst)
     jan = pages["january"]
     aug = pages["august"]
-    assert "padded_link(<annual>)[2026]" in jan
-    assert "text(size: h1)[/]" in jan
+    assert "padded_link(<annual>)[2026]" not in jan
+    assert "2026 /" not in jan
+    assert "text(size: h1)[/]" not in jan
+    assert "text(size: h1)[January<month-2026-01-01>]" in jan
     assert "January<month-2026-01-01>" in jan
     assert jan.count("Calendar") == 0
     assert "Calendar" not in jan
@@ -193,7 +198,7 @@ def test_six_row_august_compiles_as_one_pdf_page(tmp_path):
     crumbs = [
         page
         for page in typst.split("#pagebreak()")
-        if "text(size: h1)[/" in page and "<month-2026-" in page
+        if "text(size: h1)[" in page and "<month-2026-" in page
     ]
     assert len(crumbs) == 12
     august = next(page for page in crumbs if "August<month-2026-08-01>" in page)

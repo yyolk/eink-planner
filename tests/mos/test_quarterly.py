@@ -8,6 +8,7 @@ import subprocess
 
 import pytest
 
+from parch.compose.page_data import HeadingMark
 from parch.i18n import I18n
 from parch.toml_config import parse_toml
 from parch.mos.manifest import Manifest
@@ -123,7 +124,8 @@ def test_full_year_quarter_pages_include_all_three_months(path: Path):
             assert f"[{name}]" in page, f"Q{number} missing {name} in {path.name}"
         assert page.count("colspan:") == 3
         assert "Calendar" not in page
-        assert "text(size: h1)[/]" in page
+        assert "2026 /" not in page
+        assert "text(size: h1)[/]" not in page
         assert f"Quarter {number} <quarter-2026-{number}>" in page
         assert "[], [M], [T], [W], [T], [F], [S], [S]" in page
         assert "[W], [M], [T], [W], [T], [F], [S], [S]" not in page
@@ -154,20 +156,22 @@ def test_shipped_profiles_q3_compile_with_three_months(tmp_path):
             assert month in q3_pdf, f"{name} Q3 PDF missing {month}"
 
 
-def test_title_is_year_slash_quarter_crumb_and_kills_calendar_chip():
+def test_title_is_quarter_without_year_and_kills_calendar_chip():
     manifest = Manifest()
     manifest.register_source(Annual.ID)
     pages = _section().pages(manifest)
     assert len(pages) == 4
-    year_cell = manifest.link_or_content(Annual.ID, "2026")
     for number, page in enumerate(pages, start=1):
         assert page.nav_links == []
+        assert page.nav_links is not None
+        assert page.heading_mark is HeadingMark.LEAD
         assert page.highlight_months == []
         assert len(page.highlight_quarters) == 1
         assert page.highlight_quarters[0].number == number
-        assert f"text(size: h1, {year_cell})" in page.title
-        assert "text(size: h1)[/]" in page.title
-        assert f"Quarter {number} <quarter-2026-{number}>" in page.title
+        assert "padded_link(<annual>)" not in page.title
+        assert "2026 /" not in page.title
+        assert "text(size: h1)[/]" not in page.title
+        assert page.title == f'text(size: h1)[Quarter {number} <quarter-2026-{number}>]'
         assert "Calendar" not in page.title
         assert "Calendar" not in page.content
 
@@ -191,15 +195,16 @@ def test_week_letter_stays_off_when_little_calendar_sets_true():
     assert "[W], [M], [T], [W], [T], [F], [S], [S]" not in content
 
 
-def test_generated_year_crumb_links_to_annual():
+def test_generated_title_is_quarter_without_year():
     skip = ("monthly", "weekly", "daily", "daily_notes", "colophon", "projects", "habits", "review", "tasks", "meetings")
     text = omit_toml_sections(NOMAD.read_text(encoding="utf-8"), skip)
     typst = _generate(parse_toml(text, source="nomad-q-annual.toml"))
     pages = _quarter_pages(typst)
     q1 = pages[1]
-    assert "padded_link(<annual>)[2026]" in q1
-    assert "text(size: h1)[/]" in q1
-    assert "Quarter 1 <quarter-2026-1>" in q1
+    assert "padded_link(<annual>)[2026]" not in q1
+    assert "2026 /" not in q1
+    assert "text(size: h1)[/]" not in q1
+    assert "text(size: h1)[Quarter 1 <quarter-2026-1>]" in q1
     assert "Calendar" not in q1
     assert q1.count("Calendar") == 0
 
