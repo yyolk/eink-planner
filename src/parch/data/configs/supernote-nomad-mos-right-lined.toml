@@ -1,3 +1,6 @@
+# SuperNote Nomad MOS-right lined
+# SuperNote Nomad MOS-right sibling with house scratch pad lined.
+# Daily on-page notes stay dotted; other notes areas inherit lined from style.
 # SuperNote Nomad (A6 X2) MOS-right
 # 1404×1872 @ 300 PPI → 118.87 × 158.5 mm
 # MOS strip on the physical right; this is the left-handed writing layout
@@ -23,7 +26,7 @@ sections = [
 ]
 
 [device]
-name = "supernote-nomad-mos-right"
+name = "supernote-nomad-mos-right-lined"
 width = "118.87mm"
 height = "158.5mm"
 ppi = 300
@@ -31,6 +34,9 @@ ppi = 300
 [calendar]
 year = 2026
 week_starts = "Monday"
+
+[style]
+scratch_pad = "lined"
 
 [style.stroke]
 regular = "0.3pt"
@@ -103,7 +109,6 @@ inset = "3pt"
 
 [section.daily_notes]
 pages = 2
-pattern = "dotted"
 
 [section.projects]
 pages = 16

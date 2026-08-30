@@ -11,28 +11,70 @@ from tests.toml_fixtures import _minimal, omit_toml_sections
 from tests.helpers import base_config, load_default
 
 NOMAD = base_config("supernote-nomad")
+NOMAD_LINED = base_config("supernote-nomad-lined")
 NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
+NOMAD_MOS_RIGHT_LINED = base_config("supernote-nomad-mos-right-lined")
 MOS_LEFT = base_config("158x210-mos-left")
 MOS_LEFT_LINED = base_config("158x210-mos-left-lined")
 MOS_RIGHT = base_config("158x210-mos-right")
 MOS_RIGHT_LINED = base_config("158x210-mos-right-lined")
 SCRIBE = base_config("kindle-scribe")
+SCRIBE_LINED = base_config("kindle-scribe-lined")
 SCRIBE_MOS_RIGHT = base_config("kindle-scribe-mos-right")
+SCRIBE_MOS_RIGHT_LINED = base_config("kindle-scribe-mos-right-lined")
+
+_SHIPPED = [
+    NOMAD,
+    NOMAD_LINED,
+    NOMAD_MOS_RIGHT,
+    NOMAD_MOS_RIGHT_LINED,
+    MOS_LEFT,
+    MOS_LEFT_LINED,
+    MOS_RIGHT,
+    MOS_RIGHT_LINED,
+    SCRIBE,
+    SCRIBE_LINED,
+    SCRIBE_MOS_RIGHT,
+    SCRIBE_MOS_RIGHT_LINED,
+]
+_NOMAD = {NOMAD, NOMAD_LINED, NOMAD_MOS_RIGHT, NOMAD_MOS_RIGHT_LINED}
+_NOMAD_SECTIONS = [
+    "cover",
+    "index",
+    "annual",
+    "quarterly",
+    "monthly",
+    "weekly",
+    "daily",
+    "daily_notes",
+    "projects",
+    "habits",
+    "review",
+    "tasks",
+    "meetings",
+    "colophon",
+]
+_LINED = {
+    MOS_LEFT_LINED,
+    MOS_RIGHT_LINED,
+    NOMAD_LINED,
+    NOMAD_MOS_RIGHT_LINED,
+    SCRIBE_LINED,
+    SCRIBE_MOS_RIGHT_LINED,
+}
 
 
-@pytest.mark.parametrize("path", [NOMAD, NOMAD_MOS_RIGHT, MOS_LEFT, MOS_LEFT_LINED, MOS_RIGHT, MOS_RIGHT_LINED, SCRIBE, SCRIBE_MOS_RIGHT])
+@pytest.mark.parametrize("path", _SHIPPED)
 def test_parse_shipped_toml_profiles(path: Path):
     dto = load(path)
     assert dto["chase"] == "mos"
     assert "debug" not in dto
     cfg = Configurator(dto)
     names = [section["name"] for section in cfg.enabled_sections()]
-    expected = ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
-    if path == NOMAD:
-        expected = expected + ["projects"]
-    if path in {NOMAD, NOMAD_MOS_RIGHT}:
-        expected = expected + ["habits", "review", "tasks", "meetings"]
-    expected = expected + ["colophon"]
+    if path in _NOMAD:
+        expected = list(_NOMAD_SECTIONS)
+    else:
+        expected = ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "colophon"]
     assert names == expected
 
 
@@ -108,26 +150,32 @@ def test_mos_right_daily_track_flip():
     assert schedule["to"] == 20
 
 
-def test_nomad_projects_pages_and_card_rows():
-    dto = load(NOMAD)
+@pytest.mark.parametrize("path", sorted(_NOMAD, key=lambda p: p.name))
+def test_nomad_projects_pages_and_card_rows(path: Path):
+    dto = load(path)
     projects = next(s for s in dto["planner"]["sections"] if s["name"] == "projects")
     assert projects["params"]["pages"] == 16
     assert projects["params"]["card_rows"] == 5
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
-    assert "projects" in names
-    assert names[-1] == "colophon"
-    assert names[-2] == "meetings"
-    assert names[-3] == "tasks"
-    assert names[-4] == "review"
-    assert names[-5] == "habits"
+    assert names == _NOMAD_SECTIONS
+    assert names.index("projects") == names.index("daily_notes") + 1
+    assert names.index("habits") == names.index("projects") + 1
 
 
-def test_lined_scratch_pad():
-    dto = load(MOS_LEFT_LINED)
-    assert dto["planner"]["params"]["scratch_pad"] == "lined"
+def _daily_notes_params(dto):
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")
-    notes = next(c for c in daily["params"]["right_column"] if c["class"] == "notes")
-    assert notes["params"]["pattern"] == "dotted"
+    for col in ("left_column", "right_column"):
+        for comp in daily["params"].get(col) or []:
+            if comp["class"] == "notes":
+                return comp["params"]
+    raise AssertionError("daily notes component missing")
+
+
+@pytest.mark.parametrize("path", sorted(_LINED, key=lambda p: p.name))
+def test_lined_scratch_pad(path: Path):
+    dto = load(path)
+    assert dto["planner"]["params"]["scratch_pad"] == "lined"
+    assert _daily_notes_params(dto)["pattern"] == "dotted"
     extra = next(s for s in dto["planner"]["sections"] if s["name"] == "daily_notes")
     assert extra["params"]["pattern"] == "lined"
 

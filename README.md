@@ -51,13 +51,17 @@ MOS-left is the right-handed writing layout (nav opposite the writing hand). MOS
 | Profile | Device | Writing hand |
 | --- | --- | --- |
 | `supernote-nomad` | SuperNote Nomad (A6 X2) | right |
+| `supernote-nomad-lined` | SuperNote Nomad lined | right |
 | `supernote-nomad-mos-right` | SuperNote Nomad | left |
+| `supernote-nomad-mos-right-lined` | SuperNote Nomad lined | left |
 | `158x210-mos-left` | 158×210 | right |
 | `158x210-mos-left-lined` | 158×210 lined | right |
 | `158x210-mos-right` | 158×210 | left |
 | `158x210-mos-right-lined` | 158×210 lined | left |
 | `kindle-scribe` | Kindle Scribe | right |
+| `kindle-scribe-lined` | Kindle Scribe lined | right |
 | `kindle-scribe-mos-right` | Kindle Scribe | left |
+| `kindle-scribe-mos-right-lined` | Kindle Scribe lined | left |
 
 ## Development
 

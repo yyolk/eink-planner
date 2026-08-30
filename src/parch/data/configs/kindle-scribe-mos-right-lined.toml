@@ -1,5 +1,8 @@
-# SuperNote Nomad (A6 X2) MOS-right
-# 1404×1872 @ 300 PPI → 118.87 × 158.5 mm
+# Kindle Scribe MOS-right lined
+# Kindle Scribe MOS-right sibling with house scratch pad lined.
+# Daily on-page notes stay dotted; other notes areas inherit lined from style.
+# Kindle Scribe MOS-right
+# 1860×2480 @ 300 PPI → 157.48 × 209.97 mm
 # MOS strip on the physical right; this is the left-handed writing layout
 # (nav opposite the writing hand).
 # left/right under daily are physical column tracks.
@@ -14,58 +17,56 @@ sections = [
   "weekly",
   "daily",
   "daily_notes",
-  "projects",
-  "habits",
-  "review",
-  "tasks",
-  "meetings",
   "colophon",
 ]
 
 [device]
-name = "supernote-nomad-mos-right"
-width = "118.87mm"
-height = "158.5mm"
+name = "kindle-scribe-mos-right-lined"
+width = "157.48mm"
+height = "209.97mm"
 ppi = 300
 
 [calendar]
 year = 2026
 week_starts = "Monday"
 
+[style]
+scratch_pad = "lined"
+
 [style.stroke]
-regular = "0.3pt"
-thick = "0.6pt"
+regular = "0.4pt"
+thick = "0.8pt"
 
 [style.type]
-body = "8pt"
-h1 = "8mm"
+body = "10pt"
+h1 = "10mm"
 
 [style.margin]
-top = "8mm"
+top = "5mm"
 bottom = "0mm"
-left = "4mm"
+left = "5mm"
 right = "0mm"
 
 [style.gutter]
-column = "8pt"
+column = "10pt"
 
 # [mos] → Months on the Side (vertical side menu navigation)
 # side_menu left|right is the physical side of the MOS strip
 [mos]
 side_menu = "right"
-side_menu_width = "8mm"
+side_menu_width = "10mm"
 reverse_months_quarters = true
 menu_rotate = "270deg"
-column_gutter = "1.5mm"
-row_gutter = "1.5mm"
+column_gutter = "2mm"
+row_gutter = "2mm"
 
 [section.cover]
 title = "2026"
-font_size = "36pt"
+font_size = "48pt"
 
 [section.annual]
 show_month_name = true
-row_gutter = "4pt"
+row_gutter = "5pt"
 
 [section.quarterly]
 months_column = "right"
@@ -74,22 +75,22 @@ show_month_name = true
 [section.monthly]
 week_placement = "right"
 week_label_rotation = "90deg"
-daily_cell_height = "16mm"
+daily_cell_height = "2.5cm"
 
 [section.weekly]
-column_gutter = "4pt"
+column_gutter = "5pt"
 
 [section.daily]
 # column tracks are left-to-right, so notes stay 5fr and schedule stays 3fr
 columns = ["5fr", "3fr"]
-item_spacing = "4mm"
+item_spacing = "5mm"
 
 [section.daily.left.priorities]
 count = 5
 
 [section.daily.left.notes]
 pattern = "dotted"
-title_height = "4mm"
+title_height = "5mm"
 
 [section.daily.right.schedule]
 hour_from = 8
@@ -99,18 +100,7 @@ trailing_half_hour = true
 
 [section.daily.right.little_calendar]
 week_placement = "right"
-inset = "3pt"
+inset = "5pt"
 
 [section.daily_notes]
 pages = 2
-pattern = "dotted"
-
-[section.projects]
-pages = 16
-card_rows = 5
-
-[section.habits]
-habit_columns = 4
-
-[section.meetings]
-index_pages = 1
