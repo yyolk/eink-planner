@@ -1,8 +1,9 @@
-"""Daily notes: overflow behind More, year chip, paper MOS, no Calendar."""
+"""Daily notes: overflow behind More, TRAIL mark, paper MOS, no Calendar."""
 
 from __future__ import annotations
 
 
+from parch.compose.page_data import HeadingMark
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
 from parch.sections.annual import Annual
@@ -13,6 +14,16 @@ from tests.helpers import base_config, load_default, make_configurator
 from tests.toml_fixtures import omit_toml_sections
 
 NOMAD = base_config("supernote-nomad")
+NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
+
+_MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
+_MARK_FLUSH = "padded_link(padding: 0pt, <index>"
+_TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
+_SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
+_SEATED_TITLE = "let seated_title ="
+_SEATED_MARK = "let seated_mark ="
+_SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
+_SEAT_LTR = "dir: ltr,\n    spacing: 1fr,"
 
 _BULKY = (
     "colophon",
@@ -75,14 +86,15 @@ def _register_jan1(manifest: Manifest, pages: int = 2) -> Manifest:
     return manifest
 
 
-def test_nav_links_are_year_chip_not_calendar():
+def test_nav_links_empty_trail_not_year_chip_or_calendar():
     manifest = _register_jan1(Manifest())
     section = _section()
     pages = section.pages(manifest)
     assert len(pages) == 8
     for note, page in zip(section._range(), pages, strict=True):
-        assert page.nav_links == [(Annual.ID, "2026")]
-        assert page.nav_links != []
+        assert page.nav_links == []
+        assert page.nav_links is not None
+        assert page.heading_mark is HeadingMark.TRAIL
         assert page.highlight_months == [note.day.month()]
         assert len(page.highlight_months) == 1
         assert page.highlight_quarters == []
@@ -95,6 +107,8 @@ def test_nav_links_are_year_chip_not_calendar():
         weekday = _i18n().t(f"weekday.full.{note.day.weekday_name}")
         assert f"[*{weekday}*]" in page.title
         assert "Week " in page.title
+        assert "1/2" not in page.title
+        assert "2/2" not in page.title
 
 
 def test_highlight_months_is_this_days_month_only():
@@ -120,6 +134,8 @@ def test_heading_keeps_day_weekday_and_week_n():
     assert "2026 /" not in title
     assert "text(size: h1)[/]" not in title
     assert "Calendar" not in title
+    assert "1/2" not in title
+    assert "0.85em" not in title
 
 
 def test_calendar_appears_nowhere_on_title_or_content():
@@ -156,21 +172,21 @@ def test_no_notes_schedule_priorities_or_little_cal():
     assert "$square.stroked$" not in blob
 
 
-def test_pages_two_have_quiet_fractions_linking_siblings():
+def test_pages_two_omit_fraction():
     manifest = _register_jan1(Manifest(), pages=2)
     pages = _section(pages=2).pages(manifest)
     p1, p2 = pages[0], pages[1]
-    assert "1/2" in p1.title
-    assert "2/2" in p2.title
-    assert "padded_link(<daily-note-2026-01-01-page-2>)[1/2]" in p1.title
-    assert "padded_link(<daily-note-2026-01-01-page-1>)[2/2]" in p2.title
-    assert "text(size: 0.85em, padded_link(<daily-note-2026-01-01-page-2>)[1/2])" in p1.title
-    assert "text(size: 0.85em, padded_link(<daily-note-2026-01-01-page-1>)[2/2])" in p2.title
-    assert "1/1" not in p1.title
-    assert "1/1" not in p2.title
-    assert "3/2" not in p1.title
-    assert "page-3" not in p1.title
-    assert "page-3" not in p2.title
+    for title in (p1.title, p2.title):
+        assert "1/2" not in title
+        assert "2/2" not in title
+        assert "1/1" not in title
+        assert "0.85em" not in title
+        assert "padded_link(<daily-note-2026-01-01-page-2>)[1/2]" not in title
+        assert "padded_link(<daily-note-2026-01-01-page-1>)[2/2]" not in title
+        assert "[*Thursday*]" in title
+        assert "padded_link(<2026W01>)[Week 1]" in title
+    assert "text(size: h1)[1 <daily-note-2026-01-01-page-1>]" in p1.title
+    assert "text(size: h1)[1 <daily-note-2026-01-01-page-2>]" in p2.title
     assert "1/2" not in p1.content
     assert "2/2" not in p2.content
 
@@ -190,20 +206,31 @@ def test_pages_one_omits_fraction():
     assert "padded_link(<2026W01>)[Week 1]" in title
 
 
-def test_generated_year_chip_links_to_annual_and_inverts_january_only():
+def test_generated_trail_mark_alone_and_inverts_january_only():
     text = omit_toml_sections(NOMAD.read_text(encoding="utf-8"), _BULKY)
     typst = _generate(parse_toml(text, source="nomad-daily-notes.toml"))
     pages = _note_pages(typst)
     p1 = pages["p1"]
     p2 = pages["p2"]
-    assert "padded_link(<annual>, [2026])" in p1
+    assert "padded_link(<annual>, [2026])" not in p1
     assert "grid.cell(fill: black, text(white)[#padded_link(<annual>, [2026])])" not in p1
+    assert _TRAIL_MARK in p1
+    assert _MARK_FLUSH in p1
+    assert p1.count(_MARK_RULE) == 5
+    assert p1.index("1 <daily-note-2026-01-01-page-1>") < p1.index(_TRAIL_MARK)
+    heading = p1[p1.index(_SEATED_TITLE) : p1.index(_SEATED_MARK)]
+    assert "1 <daily-note-2026-01-01-page-1>" in heading
+    assert _SEAT_RTL in p1
+    assert _SEATED_TRAIL in p1
+    assert "column-gutter: 6pt" not in heading
     assert "text(size: h1)[1 <daily-note-2026-01-01-page-1>]" in p1
     assert "padded_link(<2026-01-01>)" in p1
     assert "[*Thursday*]" in p1
     assert "Week 1" in p1
     assert "2026 /" not in p1
     assert "text(size: h1)[/]" not in p1
+    assert "1/2" not in p1
+    assert "2/2" not in p2
     assert p1.count("Calendar") == 0
     assert "Calendar" not in p1
     assert "Calendar" not in p2
@@ -212,10 +239,8 @@ def test_generated_year_chip_links_to_annual_and_inverts_january_only():
     assert "[Priorities]" not in p1
     assert "Top priorities" not in p1
     assert "rect_pattern(dotted)" in p1
-    assert "padded_link(<daily-note-2026-01-01-page-2>)[1/2]" in p1
-    assert "text(size: 0.85em, padded_link(<daily-note-2026-01-01-page-2>)[1/2])" in p1
-    assert "padded_link(<daily-note-2026-01-01-page-1>)[2/2]" in p2
-    assert "text(size: 0.85em, padded_link(<daily-note-2026-01-01-page-1>)[2/2])" in p2
+    assert "padded_link(<daily-note-2026-01-01-page-2>)[1/2]" not in p1
+    assert "padded_link(<daily-note-2026-01-01-page-1>)[2/2]" not in p2
     assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in p1
     assert "table.cell([#padded_link(<quarter-2026-1>)[Q1]])" in p1
     assert "table.cell(fill: black, text(white)[#padded_link(<quarter-" not in p1
@@ -223,3 +248,26 @@ def test_generated_year_chip_links_to_annual_and_inverts_january_only():
     assert "Jan" in p1 and "Dec" in p1
     assert p1.count("table.cell(fill: black") == 1
     assert p2.count("table.cell(fill: black") == 1
+
+
+def test_generated_mos_right_trail_mark_alone_left_of_q1():
+    text = omit_toml_sections(NOMAD_MOS_RIGHT.read_text(encoding="utf-8"), _BULKY)
+    typst = _generate(parse_toml(text, source="nomad-mos-right-daily-notes.toml"))
+    pages = _note_pages(typst)
+    p1 = pages["p1"]
+    assert "padded_link(<annual>, [2026])" not in p1
+    assert _TRAIL_MARK in p1
+    assert p1.count(_MARK_RULE) == 5
+    assert p1.index("1 <daily-note-2026-01-01-page-1>") < p1.index(_TRAIL_MARK)
+    heading = p1[p1.index(_SEATED_TITLE) : p1.index(_SEATED_MARK)]
+    assert "1 <daily-note-2026-01-01-page-1>" in heading
+    assert _SEAT_LTR in p1
+    assert _SEATED_TRAIL in p1
+    assert "column-gutter: 6pt" not in heading
+    assert "2026 /" not in p1
+    assert "text(size: h1)[/]" not in p1
+    assert "1/2" not in p1
+    assert p1.count("Calendar") == 0
+    assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in p1
+    assert "table.cell([#padded_link(<quarter-2026-1>)[Q1]])" in p1
+    assert p1.count("table.cell(fill: black") == 1

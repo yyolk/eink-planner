@@ -457,14 +457,7 @@
           ))
         )
       })),
-        grid(
-        columns: (auto, auto, auto),
-        column-gutter: 6pt,
-        align: horizon,
-        text(size: h1, padded_link(<annual>)[2026]),
-        text(size: h1)[/],
         text(size: h1)[January<month-2026-01-01>]
-      )
       )),
         grid(
         columns: 1fr,
@@ -653,14 +646,7 @@
           ))
         )
       })),
-        grid(
-        columns: (auto, auto, auto),
-        column-gutter: 6pt,
-        align: horizon,
-        text(size: h1, padded_link(<annual>)[2026]),
-        text(size: h1)[/],
-        text(size: h1)[Week 1 <2026W01>]
-      )
+        text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4]
       )),
         grid(
         columns: (1fr, 1fr, 1fr),
@@ -1073,14 +1059,7 @@
           ))
         )
       })),
-        grid(
-        columns: (auto, auto, auto),
-        column-gutter: 6pt,
-        align: horizon,
-        text(size: h1, padded_link(<annual>)[2026]),
-        text(size: h1)[/],
         text(size: h1)[January<month-2026-01-01>]
-      )
       )),
         grid(
         columns: 1fr,
@@ -1269,14 +1248,7 @@
           ))
         )
       })),
-        grid(
-        columns: (auto, auto, auto),
-        column-gutter: 6pt,
-        align: horizon,
-        text(size: h1, padded_link(<annual>)[2026]),
-        text(size: h1)[/],
-        text(size: h1)[Week 1 <2026W01>]
-      )
+        text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4]
       )),
         grid(
         columns: (1fr, 1fr, 1fr),

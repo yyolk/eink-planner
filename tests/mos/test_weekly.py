@@ -1,4 +1,4 @@
-"""Weekly pages: year / Week N crumb, paper MOS, per-cell pattern."""
+"""Weekly pages: Week N + range title, paper MOS, per-cell pattern."""
 
 from __future__ import annotations
 
@@ -13,6 +13,10 @@ from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.helpers import base_config, load_default, make_configurator, make_week
 from tests.toml_fixtures import omit_toml_sections
+
+_EN_DASH = "–"
+_W01_RANGE = f"Dec 29 {_EN_DASH} Jan 4"
+_W28_RANGE = f"Jul 6 {_EN_DASH} 12"
 
 NOMAD = base_config("supernote-nomad")
 
@@ -166,12 +170,11 @@ def test_pattern_switches():
     assert "rect_pattern(dotted)" not in lined
 
 
-def test_title_is_year_slash_week_crumb_and_kills_calendar_chip():
+def test_title_is_week_and_range_without_year_and_kills_calendar_chip():
     manifest = Manifest()
     manifest.register_source(Annual.ID)
     section = _section()
     pages = section.pages(manifest)
-    year_cell = manifest.link_or_content(Annual.ID, "2026")
     first = pages[0]
     assert first.nav_links == []
     assert first.heading_mark is HeadingMark.LEAD
@@ -180,38 +183,44 @@ def test_title_is_year_slash_week_crumb_and_kills_calendar_chip():
     assert first.highlight_months[0].id == "month-2026-01-01"
     assert first.highlight_months[0].name == "january"
     assert first.highlight_quarters == []
-    assert f"text(size: h1, {year_cell})" in first.title
-    assert "text(size: h1)[/]" in first.title
-    assert "Week 1 <2026W01>" in first.title
+    assert "padded_link(<annual>)" not in first.title
+    assert "text(size: h1)[/]" not in first.title
+    assert "2026 /" not in first.title
+    assert f"Week 1 <2026W01> #h(0.6em) {_W01_RANGE}" in first.title
     assert "Calendar" not in first.title
     assert "Calendar" not in first.content
     for week, page in zip(section._weeks(), pages, strict=True):
         thursday = next(day for day in week.days() if day.weekday_name == "thursday")
+        days = week.days()
+        rng = section.range_label(days[0], days[-1])
         assert page.nav_links == []
         assert page.highlight_months == [thursday.month()]
         assert len(page.highlight_months) == 1
         assert page.highlight_quarters == []
         assert page.show_quarters is True
+        assert page.heading_mark is HeadingMark.LEAD
         assert "Calendar" not in page.title
-        assert "text(size: h1)[/]" in page.title
-        assert "Week " in page.title
-        assert f"text(size: h1, {year_cell})" in page.title
+        assert "text(size: h1)[/]" not in page.title
+        assert "2026 /" not in page.title
+        assert f"Week {week.number} <{week.id}> #h(0.6em) {rng}" in page.title
 
 
-def test_generated_year_crumb_links_to_annual_and_inverts_thursday_month():
+def test_generated_week_title_is_range_and_inverts_thursday_month():
     text = omit_toml_sections(NOMAD.read_text(encoding="utf-8"), _BULKY)
     typst = _generate(parse_toml(text, source="nomad-weekly.toml"))
     pages = _week_pages(typst)
     w01 = pages["w01"]
     w28 = pages["w28"]
-    assert "padded_link(<annual>)[2026]" in w01
-    assert "text(size: h1)[/]" in w01
-    assert "Week 1 <2026W01>" in w01
+    assert "padded_link(<annual>)[2026]" not in w01
+    assert "text(size: h1)[/]" not in w01
+    assert "2026 /" not in w01
+    assert f"Week 1 <2026W01> #h(0.6em) {_W01_RANGE}" in w01
     heading = w01[w01.index("columns: (auto, auto)") : w01.index("Week 1 <2026W01>")]
     assert "columns: (auto, auto)" in heading
     assert "column-gutter: 6pt" in heading
     assert "pad(right: 3mm" not in heading
-    assert heading.index("line(length: 0.844em") < heading.index("padded_link(<annual>)[2026]")
+    assert "line(length: 0.844em" in heading
+    assert "padded_link(<annual>)[2026]" not in heading
     assert w01.count("Calendar") == 0
     assert "Calendar" not in w01
     assert "Monday 29" in w01
@@ -233,7 +242,7 @@ def test_generated_year_crumb_links_to_annual_and_inverts_thursday_month():
     assert "table.cell(fill: black, text(white)[#padded_link(<month-2025-12-01>)" not in w01
     assert "Q1" in w01 and "Q4" in w01
     assert w01.count("table.cell(fill: black") == 1
-    assert "Week 28 <2026W28>" in w28
+    assert f"Week 28 <2026W28> #h(0.6em) {_W28_RANGE}" in w28
     assert "Monday 6" in w28
     assert w28.count("Calendar") == 0
     assert w28.count("rect_pattern(dotted)") == 8

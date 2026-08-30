@@ -8,6 +8,8 @@ import pytest
 from parch import ConfigError
 from parch.config import load
 from parch.mos.configurator import Configurator
+from parch.compose.page_data import HeadingMark
+from parch.mos.manifest import Manifest
 from parch.sections.review import Review
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
@@ -17,6 +19,13 @@ from tests.helpers import base_config, load_default
 
 NOMAD = base_config("supernote-nomad")
 _EN_DASH = "–"
+_MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
+_TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
+_SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
+_SEATED_TITLE = "let seated_title ="
+_SEATED_MARK = "let seated_mark ="
+_SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
+_FOLLOW_RTL = "dir: rtl,\n    spacing: 0.5em,"
 
 # 2026, Monday week start: Jan 1 is Thursday.
 # Walk is start.beginning_of_month().beginning_of_week() through
@@ -122,7 +131,7 @@ def test_short_january_is_one_index_and_five_weeks():
     assert typst.count("#pagebreak()") == 5  # 1 index + 5 weeks - 1
 
 
-def test_index_year_links_to_annual_and_week_crumb_links_back():
+def test_index_title_is_review_and_week_links_back():
     dto = parse_toml(
         _minimal(
             enable=["annual", "review"],
@@ -134,21 +143,37 @@ show_month_name = true
     )
     typst = _generate(short_january(dto))
     index = _index_page(typst)
-    assert "padded_link(<annual>)" in index
+    assert "padded_link(<annual>)" not in index
+    assert "2026 /" not in index
+    assert "text(size: h1)[/]" not in index
+    assert "text(size: h1, [Review <review>])" in index
     week = _week_page(typst, "2026W01")
     assert "padded_link(<review>)" in week
     assert "padded_link(<review-2>)" not in week
+    assert "padded_link(<annual>)" not in week
     labels = set(_LABEL_DEF.findall(typst))
     links = set(_PADDED_LINK.findall(typst))
     assert {"review", "review-2026W01", "annual"} <= labels
-    assert {"review", "review-2026W01", "annual"} <= links
+    assert {"review", "review-2026W01"} <= links
+    assert "annual" not in set(_PADDED_LINK.findall(index + week))
 
 
-def test_year_is_plain_when_annual_omitted():
+def test_header_is_review_without_year_when_contents_off():
     dto = parse_toml(_minimal(enable=["review"], sections=""), source="no-annual.toml")
     typst = _generate(short_january(dto))
-    assert "padded_link(<annual>)" not in typst
-    assert "2026" in typst
+    index = _index_page(typst)
+    week = _week_page(typst, "2026W01")
+    for page in (index, week):
+        assert "padded_link(<annual>)" not in page
+        assert "2026 /" not in page
+        assert "text(size: h1)[/]" not in page
+        assert "pad(right: 3mm" not in page
+        assert "padded_link(<index>" not in page
+        assert "column-gutter: 6pt" not in page
+        assert "columns: (auto, auto)" not in page
+    assert "text(size: h1, [Review <review>])" in index
+    assert "stack(" not in index
+    assert "padded_link(<review>)" in week
     assert "<review>" in typst
 
 
@@ -186,7 +211,9 @@ def test_index_range_wording_same_month_cross_month_cross_year():
     assert f"Jan 5 {_EN_DASH} 11" in index  # same month
     assert f"Jan 26 {_EN_DASH} Feb 1" in index  # cross month
     assert "2025" not in index
-    assert "2026" in index  # year in the crumb only
+    assert "2026 /" not in index
+    assert "text(size: h1)[/]" not in index
+    assert "text(size: h1, [Review <review>])" in index
     assert "2025-" not in index
 
 
@@ -218,7 +245,9 @@ def test_weeks_per_page_paginates_index_ids_and_crumb_targets():
     assert f"Jan 12 {_EN_DASH} Feb 1" in page2
     for page in (page1, page2):
         assert "[Review <" in page
-        assert "2026" in page
+        assert "2026 /" not in page
+        assert "text(size: h1)[/]" not in page
+        assert "padded_link(<annual>)" not in page
         assert "Q4" not in page
         assert "→" not in page
     w1 = _week_page(typst, "2026W01")
@@ -537,4 +566,46 @@ def test_review_invalid_pattern_rejected():
             _minimal(enable=["review"], sections='[section.review]\npattern = "grid"\n'),
             source="grid.toml",
         )
+
+
+def test_contents_mark_on_review_when_index_on():
+    dto = parse_toml(
+        _minimal(enable=["index", "review"], sections=""),
+        source="mark.toml",
+    )
+    typst = _generate(short_january(dto))
+    index = _index_page(typst)
+    week = _week_page(typst, "2026W01")
+    assert _TRAIL_MARK in index
+    assert _TRAIL_MARK in week
+    assert index.count(_MARK_RULE) == 5
+    assert week.count(_MARK_RULE) == 5
+    for page in (index, week):
+        assert "column-gutter: 6pt" not in page
+        assert "columns: (auto, auto)" not in page
+        assert "2026 /" not in page
+        assert "text(size: h1)[/]" not in page
+        assert "padded_link(<annual>)" not in page
+    assert "text(size: h1, [Review <review>])" in index
+    assert "padded_link(<review>)" in week
+    heading = index[index.index(_SEATED_TITLE) : index.index(_SEATED_MARK)]
+    assert "[Review <review>]" in heading
+    assert _TRAIL_MARK not in heading
+    assert _FOLLOW_RTL in index
+    assert _SEAT_RTL not in index
+    assert _SEATED_TRAIL in index
+    assert index.index("[Review <review>]") < index.index(_TRAIL_MARK)
+    week_heading = week[week.index(_SEATED_TITLE) : week.index(_SEATED_MARK)]
+    assert "padded_link(<review>)" in week_heading
+    assert _FOLLOW_RTL in week
+    assert _SEAT_RTL not in week
+    contents = next(p for p in _pages(typst) if 'weight: "bold")[Contents <index>]' in p)
+    assert "padded_link(<index>" not in contents
+    assert "padded_link(<review>" in contents
+    review = _review(dto)
+    manifest = Manifest()
+    review.register(manifest)
+    for page in review.pages(manifest):
+        assert page.heading_mark is HeadingMark.LEAD
+        assert page.raw_typst is True
 
