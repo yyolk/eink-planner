@@ -9,8 +9,8 @@ from parch import __version__
 from parch.config import StrictDict, _to_plain
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
-from parch.mos.contents_mark import body_size_token, contents_mark, heading_height_token, lead_title
-from parch.compose.page_data import PageData
+from parch.mos.contents_mark import body_size_token, contents_mark, heading_height_token, trail_heading
+from parch.compose.page_data import HeadingMark, PageData
 from parch.sections.annual import Annual
 
 DEFAULT_TITLE = "About this notebook"
@@ -127,22 +127,28 @@ class Colophon:
     def pages(self, manifest) -> list[PageData]:
         return [PageData(raw_typst=True, content=self._content(manifest))]
 
+    def _heading(self, manifest) -> str:
+        """FOLLOW seat: five-bar then the name at 0.5em, own hit."""
+        title = _escape(self.title)
+        return trail_heading(
+            manifest,
+            heading_height_token(self.configurator),
+            f'text(size: h1, weight: "bold")[{title} <colophon>]',
+            body_size_token(self.configurator),
+            direction="rtl",
+            edge=HeadingMark.FOLLOW,
+        )
+
     def _content(self, manifest=None) -> str:
         device = _escape(self._device_label())
         year_cell = self._year_cell(manifest)
         version = _escape(__version__)
-        title = _escape(self.title)
         dumped = drop_empty_tables(self._config_text()) if self.dump else ""
         parts: list[str] = []
         body = body_size_token(self.configurator)
         heading = heading_height_token(self.configurator)
         mark = contents_mark(manifest, heading, body, face="h1")
-        titled = lead_title(
-            manifest,
-            heading,
-            f'text(size: h1, weight: "bold")[{title} <colophon>]',
-            body,
-        )
+        titled = self._heading(manifest)
         if dumped.strip():
             # Page setup first so Typst does not break between the list and the dump.
             parts.append(self._dump_pagination(mark))

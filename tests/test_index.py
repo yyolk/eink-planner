@@ -310,6 +310,7 @@ def test_builder_trail_and_raw_headings_call_trail_heading():
 
     from parch.mos.builder import Builder
     from parch.mos.contents_mark import trail_heading
+    from parch.sections.colophon import Colophon
     from parch.sections.habits import Habits
     from parch.sections.meetings import Meetings
     from parch.sections.projects import Projects
@@ -327,10 +328,11 @@ def test_builder_trail_and_raw_headings_call_trail_heading():
     assert "trail_strip(" not in builder
     assert "edge=HeadingMark.FOLLOW" in builder
     assert "edge=HeadingMark.TRAIL" in builder
-    for cls in (Habits, Tasks, Meetings, Projects):
+    for cls in (Habits, Tasks, Meetings, Projects, Colophon):
         heading = inspect.getsource(cls._heading)
         assert "trail_heading(" in heading
         assert "edge=HeadingMark.FOLLOW" in heading
+        assert "lead_title" not in heading
         assert "heading_mark=HeadingMark.FOLLOW" not in inspect.getsource(cls.pages)
         assert "stack(" not in heading
         assert "trail_strip(" not in heading
