@@ -9,7 +9,7 @@ from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.navigation import NavLink, Navigation
-from parch.mos.page_data import PageData
+from parch.compose.page_data import PageData
 from parch.mos.contents_mark import body_size_token, lead_title, trail_strip
 from parch.mos.preamble import Preamble
 

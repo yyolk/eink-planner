@@ -162,7 +162,7 @@ def device_profile_to_dto(profile: DeviceProfile) -> dict[str, Any]:
     end_date = f"{year:04d}-12-{last_day:02d}"
 
     return {
-        "template": "mos",
+        "chase": "mos",
         "device": profile.device.name,
         "document": {
             "layout": {

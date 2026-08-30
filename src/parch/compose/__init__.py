@@ -3,9 +3,11 @@
 from parch.compose.manifest import Manifest
 from parch.compose.page_data import PageData
 from parch.compose.protocols import Chase, Section
+from parch.compose.coordinator import Coordinator
 
 __all__ = [
     "Chase",
+    "Coordinator",
     "Manifest",
     "PageData",
     "Section",

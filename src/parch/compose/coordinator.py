@@ -1,4 +1,4 @@
-"""compose: resolve each section from SECTIONS, fill the manifest, wrap pages through chase."""
+"""compose root: sections from SECTIONS; pages through chase."""
 
 from __future__ import annotations
 
@@ -7,9 +7,10 @@ from typing import Any
 from parch import ConfigError
 from parch.config import StrictDict, _to_plain
 from parch.i18n import I18n
+from parch.compose.manifest import Manifest
 from parch.mos.chase import CHASES
 from parch.mos.configurator import Configurator
-from parch.mos.manifest import Manifest
+from parch.sections import SECTIONS
 
 
 class Coordinator:
@@ -39,8 +40,6 @@ class Coordinator:
         return self.chase.document()
 
     def _section(self, dto: Any):
-        from parch.sections import SECTIONS  # late: sections/__init__ importing MOS pages still runs mos/__init__
-
         if isinstance(dto, StrictDict):
             klass_name = dto["class"]
             section_name = dto["name"]

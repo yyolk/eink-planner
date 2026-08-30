@@ -11,7 +11,7 @@ from parch.i18n import I18n
 from parch.mos.components.little_calendar import LittleCalendar
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.mos.page_data import PageData
+from parch.compose.page_data import PageData
 
 
 class Annual:
