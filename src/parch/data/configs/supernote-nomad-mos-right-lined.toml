@@ -17,6 +17,7 @@ sections = [
   "weekly",
   "daily",
   "daily_notes",
+  "projects",
   "habits",
   "review",
   "tasks",

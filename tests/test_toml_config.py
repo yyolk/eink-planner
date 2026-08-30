@@ -37,13 +37,23 @@ _SHIPPED = [
     SCRIBE_MOS_RIGHT,
     SCRIBE_MOS_RIGHT_LINED,
 ]
-_NOMAD_WITH_PROJECTS = {NOMAD, NOMAD_LINED}
-_NOMAD_WITH_EXTRAS = {
-    NOMAD,
-    NOMAD_LINED,
-    NOMAD_MOS_RIGHT,
-    NOMAD_MOS_RIGHT_LINED,
-}
+_NOMAD = {NOMAD, NOMAD_LINED, NOMAD_MOS_RIGHT, NOMAD_MOS_RIGHT_LINED}
+_NOMAD_SECTIONS = [
+    "cover",
+    "index",
+    "annual",
+    "quarterly",
+    "monthly",
+    "weekly",
+    "daily",
+    "daily_notes",
+    "projects",
+    "habits",
+    "review",
+    "tasks",
+    "meetings",
+    "colophon",
+]
 _LINED = {
     MOS_LEFT_LINED,
     MOS_RIGHT_LINED,
@@ -61,12 +71,10 @@ def test_parse_shipped_toml_profiles(path: Path):
     assert "debug" not in dto
     cfg = Configurator(dto)
     names = [section["name"] for section in cfg.enabled_sections()]
-    expected = ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
-    if path in _NOMAD_WITH_PROJECTS:
-        expected = expected + ["projects"]
-    if path in _NOMAD_WITH_EXTRAS:
-        expected = expected + ["habits", "review", "tasks", "meetings"]
-    expected = expected + ["colophon"]
+    if path in _NOMAD:
+        expected = list(_NOMAD_SECTIONS)
+    else:
+        expected = ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "colophon"]
     assert names == expected
 
 
@@ -142,18 +150,16 @@ def test_mos_right_daily_track_flip():
     assert schedule["to"] == 20
 
 
-def test_nomad_projects_pages_and_card_rows():
-    dto = load(NOMAD)
+@pytest.mark.parametrize("path", sorted(_NOMAD, key=lambda p: p.name))
+def test_nomad_projects_pages_and_card_rows(path: Path):
+    dto = load(path)
     projects = next(s for s in dto["planner"]["sections"] if s["name"] == "projects")
     assert projects["params"]["pages"] == 16
     assert projects["params"]["card_rows"] == 5
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
-    assert "projects" in names
-    assert names[-1] == "colophon"
-    assert names[-2] == "meetings"
-    assert names[-3] == "tasks"
-    assert names[-4] == "review"
-    assert names[-5] == "habits"
+    assert names == _NOMAD_SECTIONS
+    assert names.index("projects") == names.index("daily_notes") + 1
+    assert names.index("habits") == names.index("projects") + 1
 
 
 def _daily_notes_params(dto):
