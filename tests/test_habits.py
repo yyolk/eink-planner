@@ -255,9 +255,10 @@ def _assert_heading_pair(title: str, name: str = "January") -> None:
     assert "spacing: 1fr" not in title
     assert "dir: ltr" in title
     assert "spacing: 0.5em" in title
-    assert "width: 100% - 3mm - 0.844em" in title
-    assert "align(bottom + left" in title
-    assert "height: 100%" in title
+    assert "width: 90%" in title
+    assert "width: 100%" not in title
+    assert "height: 100%" not in title
+    assert "align(horizon + left" in title
     assert "padded_link(<habits>)" in title
     assert needle in title
     assert title.index("padded_link(<habits>)") < title.index(needle)
@@ -624,7 +625,8 @@ def test_habit_month_follows_side_menu_dates_stay_left():
         assert "grid.cell(inset: (x: 2mm), align: horizon + right, [#[Thu 1]])" in page
         heading = page[page.index("stack(") : page.index("Thu 1")]
         assert "dir: ttb" not in heading
-        assert "align(bottom + left" in heading
+        assert "width: 90%" in heading
+        assert "align(horizon + left" in heading
         assert heading.index("padded_link(<habits>)") < heading.index("January<habits-january>")
 
     monthly = """[section.monthly]
@@ -833,9 +835,10 @@ def test_index_heading_is_trail_strip_when_contents_on():
     pair = month_heading[month_heading.index("dir: ltr") : month_heading.index("January<habits-january>")]
     assert _TRAIL_MARK not in pair
     assert _MARK_RULE not in pair
-    assert "align(bottom + left" in month_heading
-    assert "width: 100% - 3mm - 0.844em" in month_heading
-    assert "height: 100%" in month_heading
+    assert "width: 90%" in month_heading
+    assert "align(horizon + left" in month_heading
+    assert "height: 100%" not in month_heading
+    assert "align(bottom + left" not in month_heading
     assert "spacing: 0.5em" in month_heading
     assert month.index("January<habits-january>") < month.index(_TRAIL_MARK)
     assert month.index(_TRAIL_MARK) < month.index("Thu 1")
@@ -871,9 +874,10 @@ def test_mos_right_month_mark_trails_alone_left_of_rail():
     pair = heading[heading.index("dir: ltr") : heading.index("January<habits-january>")]
     assert _TRAIL_MARK not in pair
     assert _MARK_RULE not in pair
-    assert "align(bottom + left" in heading
-    assert "width: 100% - 3mm - 0.844em" in heading
-    assert "height: 100%" in heading
+    assert "width: 90%" in heading
+    assert "align(horizon + left" in heading
+    assert "height: 100%" not in heading
+    assert "align(bottom + left" not in heading
     assert "spacing: 0.5em" in heading
     assert 'bottom-edge: "descender"' in heading
     assert "inset: (bottom: 0.25em)" in heading
