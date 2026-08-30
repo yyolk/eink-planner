@@ -133,12 +133,13 @@ def trail_heading(
         return mark or ""
     if not mark:
         return title
-    if edge is HeadingMark.FOLLOW:
-        spacing = "0.5em"
-    elif edge is HeadingMark.TRAIL:
-        spacing = "1fr"
-    else:
-        raise ValueError(f"trail_heading edge must be TRAIL or FOLLOW, not {edge!r}")
+    match edge:
+        case HeadingMark.FOLLOW:
+            spacing = "0.5em"
+        case HeadingMark.TRAIL:
+            spacing = "1fr"
+        case _:
+            raise ValueError(f"trail_heading edge must be TRAIL or FOLLOW, not {edge!r}")
     return f"""context {{
   let seated_title = {title}
   let seated_mark = {mark}
