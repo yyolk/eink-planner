@@ -3,6 +3,9 @@ from pathlib import Path
 import pytest
 
 from parch.cli import build_parser, generate_cmd, preview_svg_cmd, samples_dest
+from parch.config import load
+from parch.mos.configurator import Configurator
+from parch.mos.preamble import Preamble
 from parch.services.compile import Compile, CompileError
 from parch.services.preview_svg import (
     DEFAULT_SCALE,
@@ -12,6 +15,7 @@ from parch.services.preview_svg import (
     preview_svg,
     scale_svg,
 )
+from tests.helpers import base_config
 
 REPO = __import__("pathlib").Path(__file__).resolve().parents[1]
 
@@ -186,6 +190,56 @@ def test_sample_page_numbers_missing_label():
 
     with pytest.raises(ValueError, match="contents"):
         sample_page_numbers("cover only", year=2026, week_id="2026W01", jan1="2026-01-01")
+
+
+def _rect_pattern_helper(typst: str) -> str:
+    start = typst.index("#let rect_pattern(pattern)")
+    end = typst.index("#let dotted_centered")
+    return typst[start:end]
+
+
+def test_rect_pattern_helper_stamps_tiles_not_fill():
+    typst = Preamble(Configurator(load(base_config("158x210-mos-left")))).generate()
+    helper = _rect_pattern_helper(typst)
+    assert "fill: pattern" not in helper
+    assert "tiling(" not in helper
+    assert "layout(size =>" in helper
+    assert "place(" in helper
+    assert "for iy in range(rows)" in helper
+    assert "box(width: cell, height: cell, pattern)" in helper
+    assert "clip: true" in helper
+    assert "here().position()" in helper
+    assert "#let rect_pattern(pattern) = rect(" in typst
+    assert "#let dotted = place(" in typst
+    assert "#let lined = place(" in typst
+    assert "rect_pattern(dotted)" in typst
+    assert "PageData" not in typst
+    assert "heading_mark" not in typst
+    assert "trail_heading" not in typst
+
+
+def test_large_rect_pattern_svg_stamps_dots_not_pattern_paint(tmp_path):
+    src = tmp_path / "index.typst"
+    src.write_text(
+        Preamble(Configurator(load(base_config("158x210-mos-left")))).generate()
+        + "\n#rect_pattern(dotted)\n",
+        encoding="utf-8",
+    )
+    paths = Compile().compile_svg(
+        tmp_path,
+        pages=[1],
+        dest_pattern="preview-{p}.svg",
+        tools_dir=REPO / ".tools",
+    )
+    raw = paths[0].read_text(encoding="utf-8")
+    out = preview_svg(raw, scale=DEFAULT_SCALE, crop=False)
+    assert "<pattern" not in raw
+    assert 'fill="url(#' not in raw
+    assert "<pattern" not in out
+    assert 'fill="url(#' not in out
+    assert 'viewBox="0 0 447.874015748 595.275590551"' in raw
+    dots = raw.count("0.399685039")
+    assert dots >= 100, f"expected stamped dots, found {dots}"
 
 
 def test_compile_svg_tiny_two_pages_py(tmp_path, monkeypatch):

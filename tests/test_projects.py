@@ -559,7 +559,12 @@ pages = 1
     assert "#let dotted =" in typst
     assert "dx: 0.5pt" in typst
     assert "dy: regular_height - 0.3mm" in typst
-    assert "#let rect_pattern(pattern) = rect(" in typst
+    helper_start = typst.index("#let rect_pattern(pattern)")
+    helper_end = typst.index("#let dotted_centered")
+    helper = typst[helper_start:helper_end]
+    assert "#let rect_pattern(pattern) = rect(" in helper
+    assert "fill: pattern" not in helper
+    assert "layout(size =>" in helper
     assert "rect_pattern_centered(dotted_centered)" not in typst
     assert "#let scratch_pad = rect_pattern(dotted)" in typst
     pages = _pages(typst)
