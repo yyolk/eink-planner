@@ -10,7 +10,7 @@ from parch.config import StrictDict, _to_plain
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.contents_mark import body_size_token, contents_mark, heading_height_token, lead_title
-from parch.mos.page_data import PageData
+from parch.compose.page_data import PageData
 from parch.sections.annual import Annual
 
 DEFAULT_TITLE = "About this notebook"

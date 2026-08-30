@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
-from parch.mos.page_data import PageData
+from parch.compose.page_data import PageData
 
 
 def _escape(text: str) -> str:

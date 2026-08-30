@@ -7,9 +7,9 @@ from typing import Any
 from parch import ConfigError
 from parch.config import StrictDict, _to_plain
 from parch.i18n import I18n
+from parch.compose.manifest import Manifest
 from parch.mos.chase import CHASES
 from parch.mos.configurator import Configurator
-from parch.mos.manifest import Manifest
 from parch.sections import SECTIONS
 
 

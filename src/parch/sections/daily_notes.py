@@ -7,7 +7,7 @@ from parch.calendar.dated_note import DatedNote
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.mos.page_data import PageData
+from parch.compose.page_data import PageData
 from parch.sections.annual import Annual
 
 
