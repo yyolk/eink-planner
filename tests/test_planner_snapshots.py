@@ -5,7 +5,7 @@ import pytest
 from parch import __version__
 from parch.config import load
 from parch.mos.builder import Builder
-from parch.mos.coordinator import Coordinator
+from parch.compose.coordinator import Coordinator
 from tests.helpers import base_config, load_default
 from tests.toml_fixtures import short_january
 

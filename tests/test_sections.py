@@ -3,7 +3,7 @@ import pytest
 from parch import ConfigError
 from parch.config import load
 from parch.sections import SECTIONS
-from parch.mos.coordinator import Coordinator
+from parch.compose.coordinator import Coordinator
 from tests.helpers import base_config, load_default
 
 _OLD_COMPONENTS = {

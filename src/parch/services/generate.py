@@ -1,14 +1,14 @@
-"""Select a chase from template and compose Typst; Coordinator fills the manifest from each section."""
+"""Select a chase and compose Typst; Coordinator fills the manifest from each section."""
 
 from __future__ import annotations
 
 from typing import Any
 
 from parch import ConfigError
+from parch.compose.coordinator import Coordinator
 from parch.config import StrictDict
 from parch.i18n import I18n
 from parch.mos.chase import CHASES
-from parch.mos.coordinator import Coordinator
 
 
 class Generate:
@@ -17,10 +17,10 @@ class Generate:
 
     def generate(self, data: StrictDict | dict[str, Any]) -> str:
         dto = data if isinstance(data, StrictDict) else StrictDict(data)
-        return self._select_planner(dto).generate()
+        return self._select_chase(dto).generate()
 
-    def _select_planner(self, dto: StrictDict) -> Coordinator:
-        name = dto.get("template", "mos")
+    def _select_chase(self, dto: StrictDict) -> Coordinator:
+        name = dto.get("chase", "mos")
         if not isinstance(name, str) or name not in CHASES:
             raise ConfigError(f"unknown chase: {name}")
         return Coordinator(dto, i18n=self.i18n, chase_name=name)

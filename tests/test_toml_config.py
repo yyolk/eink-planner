@@ -23,7 +23,7 @@ SCRIBE_MOS_RIGHT = base_config("kindle-scribe-mos-right")
 @pytest.mark.parametrize("path", [NOMAD, NOMAD_MOS_RIGHT, MOS_LEFT, MOS_LEFT_LINED, MOS_RIGHT, MOS_RIGHT_LINED, SCRIBE, SCRIBE_MOS_RIGHT])
 def test_parse_shipped_toml_profiles(path: Path):
     dto = load(path)
-    assert dto["template"] == "mos"
+    assert dto["chase"] == "mos"
     assert "debug" not in dto
     cfg = Configurator(dto)
     names = [section["name"] for section in cfg.enabled_sections()]
