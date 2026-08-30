@@ -36,9 +36,21 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # actions/checkout is a shallow master-only clone. Bare
+          # --force-with-lease with no remote-tracking ref treats the bot
+          # branch as "must not exist" and rejects with "stale info".
+          # Fetch the tip (ok if missing) and pass that ref as the lease
+          # so the check does not depend on remote.origin.fetch mapping.
           git switch -C chore/readme-preview-svgs
           git commit -m "Regenerate 158×210 README preview SVGs."
-          git push --force-with-lease origin chore/readme-preview-svgs
+          if git fetch --depth=1 origin \
+               +refs/heads/chore/readme-preview-svgs:refs/remotes/origin/chore/readme-preview-svgs; then
+            git push --force-with-lease=refs/heads/chore/readme-preview-svgs:refs/remotes/origin/chore/readme-preview-svgs \
+              origin chore/readme-preview-svgs
+          else
+            echo "no origin/chore/readme-preview-svgs yet"
+            git push origin chore/readme-preview-svgs
+          fi
           existing="$(gh pr list --head chore/readme-preview-svgs --state open --json number --jq '.[0].number // empty')"
           if [ -n "$existing" ]; then
             echo "updated PR #$existing"
