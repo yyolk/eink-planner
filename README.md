@@ -13,7 +13,7 @@ Yearly planner PDFs for e-ink, a Python port of [Vitaliy Kudryk’s LYP](https:/
 
 ## Install
 
-Needs [uv](https://docs.astral.sh/uv/) and Python 3.12+.
+Needs [uv](https://docs.astral.sh/uv/) and Python 3.14+.
 
 ```shell
 uv tool install parch

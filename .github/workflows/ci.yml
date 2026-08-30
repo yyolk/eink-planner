@@ -12,6 +12,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
         with:
+          python-version: "3.14.7"
           cache-suffix: cli
       - name: Install poppler-utils
         run: sudo apt-get update && sudo apt-get install -y poppler-utils
@@ -28,6 +29,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
         with:
+          python-version: "3.14.7"
           cache-suffix: typst-native
       - name: Install poppler-utils
         run: sudo apt-get update && sudo apt-get install -y poppler-utils

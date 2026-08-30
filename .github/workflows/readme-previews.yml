@@ -22,6 +22,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.14.7"
       - run: uv sync --group dev
       - name: Regenerate 158×210 sample SVGs
         run: uv run parch proof 158x210-mos-left --samples
