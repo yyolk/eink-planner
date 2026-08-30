@@ -141,6 +141,7 @@ cover
 #pagebreak()
 text(size: h1, weight: "bold")[Contents <index>]
 About this notebook
+padded_link(<2026W01>, box(width: 100%, height: 100%, align(horizon + left, [Weeks])))
 #pagebreak()
 text(size: h1)[2026<annual>]
 padded_link(<index>)

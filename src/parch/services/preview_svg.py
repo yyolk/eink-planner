@@ -222,14 +222,23 @@ def _first_page(chunks: list[str], needle: str, name: str) -> int:
     raise ValueError(f"no {name} page matching {needle!r}")
 
 
+def _first_dest(chunks: list[str], label: str, name: str) -> int:
+    """First page whose destination is ``<label>`` (``>]`` or a helper after)."""
+    dest = re.compile(rf"<{re.escape(label)}>(?:\s|\])")
+    for i, chunk in enumerate(chunks, start=1):
+        haystack = _PADDED_LINK.sub("", chunk)
+        if dest.search(haystack):
+            return i
+    raise ValueError(f"no {name} page matching '<{label}>'")
+
+
 def sample_page_numbers(typst: str, *, year: int, week_id: str, jan1: str) -> dict[str, int]:
     """1-based pages for the README 158×210 samples, from Typst labels.
 
     Destinations attach the label inside ``[...]``. Quarterly and monthly
     titles still glue ``>]`` to the id. Weekly titles may put a helper
-    (``#h(...)`` + range) between the label and ``]``, so Week 1 is the
-    destination ``<week.id>`` after padded links are stripped — not a
-    leftover ``padded_link`` and not a required ``>]``.
+    (``#h(...)`` + range) between the label and ``]``, so Week 1 is that
+    destination — not a leftover ``padded_link(<week.id>, box(...))``.
     """
     chunks = typst.split("#pagebreak()")
     if not chunks:
@@ -240,7 +249,7 @@ def sample_page_numbers(typst: str, *, year: int, week_id: str, jan1: str) -> di
         "annual": _first_page(chunks, "<annual>]", "annual"),
         "quarterly-q1": _first_page(chunks, f"<quarter-{year}-1>]", "quarterly"),
         "monthly-jan": _first_page(chunks, f"<month-{jan1}>]", "monthly"),
-        "weekly-w01": _first_page(chunks, f"<{week_id}>", "weekly"),
+        "weekly-w01": _first_dest(chunks, week_id, "weekly"),
         "daily-jan1": _first_page(chunks, f"text(size: h1)[1 <{jan1}>]", "daily"),
         "notes-jan1": _first_page(chunks, f"<daily-note-{jan1}-page-1>]", "daily notes"),
         "colophon": _first_page(chunks, "<colophon>]", "colophon"),
