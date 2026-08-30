@@ -72,7 +72,7 @@ def _pages(typst: str) -> list[str]:
 
 def _index_page(typst: str) -> str:
     for page in _pages(typst):
-        if "<habits>" in page and "rotate(" not in page:
+        if "[Habits <habits>]" in page and "rotate(" not in page:
             return page
     raise AssertionError("no Habits index page")
 
@@ -242,14 +242,29 @@ def test_habit_month_pages_set_trail_mark_alone():
     habits.register(manifest)
     pages = habits.pages(manifest)
     assert pages[0].raw_typst is True
-    for page in pages[1:]:
+    month_names = (
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    )
+    for page, name in zip(pages[1:], month_names, strict=True):
         assert page.heading_mark is HeadingMark.TRAIL
         assert page.nav_links == []
         assert page.show_quarters is False
-        assert "January<habits-january>" in page.title or "February" in (page.title or "")
-        assert "2026 /" not in (page.title or "")
-        assert "text(size: h1)[/]" not in (page.title or "")
-        assert "padded_link(<habits>)" in (page.title or "")
+        title = page.title or ""
+        assert f"{name}<habits-{name.lower()}>" in title
+        assert "2026 /" not in title
+        assert "text(size: h1)[/]" not in title
+        assert "padded_link(<habits>)" in title
 
 
 def test_grid_uses_stroke_boxes_horizontal_names_and_thin_day_rules():
@@ -543,15 +558,14 @@ def test_habit_month_follows_side_menu_dates_stay_left():
     right_grid = right_jan[right_jan.index("columns: (auto, 1fr") :]
     assert "Thu 1" in right_grid
     assert "Mon 5" in right_grid
-    assert right_grid.index("Thu 1") < right_grid.index(
-        "grid.cell(stroke: regular_stroke, [])"
-    )
+    assert "columns: (auto, 1fr, 1fr, 1fr, 1fr)" in right_jan
+    thu = right_grid.index("Thu 1")
+    assert right_grid.index(_BOX, thu) > thu
     right_june = _mos_page(right_typst, "June<habits-june>", "rotate(")
     june_grid = right_june[right_june.index("columns: (auto, 1fr") :]
     assert "Mon 1" in june_grid
-    assert june_grid.index("Mon 1") < june_grid.index(
-        "grid.cell(stroke: regular_stroke, [])"
-    )
+    mon = june_grid.index("Mon 1")
+    assert june_grid.index(_BOX, mon) > mon
 
     left = parse_toml(_minimal(enable=["habits"], sections=""), source="habits-mos-left.toml")
     left_jan = _mos_page(_generate(left), "January<habits-january>", "rotate(")
@@ -559,9 +573,8 @@ def test_habit_month_follows_side_menu_dates_stay_left():
     assert "columns: (1fr, 8mm)" not in left_jan
     left_grid = left_jan[left_jan.index("columns: (auto, 1fr") :]
     assert "Thu 1" in left_grid
-    assert left_grid.index("Thu 1") < left_grid.index(
-        "grid.cell(stroke: regular_stroke, [])"
-    )
+    left_thu = left_grid.index("Thu 1")
+    assert left_grid.index(_BOX, left_thu) > left_thu
 
     monthly = """[section.monthly]
 week_placement = "left"
