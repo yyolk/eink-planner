@@ -11,9 +11,8 @@ from parch.calendar.week import Week
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.mos.contents_mark import body_size_token, heading_height_token, lead_title
-from parch.compose.page_data import PageData
-from parch.sections.annual import Annual
+from parch.mos.contents_mark import body_size_token, heading_height_token, trail_heading
+from parch.compose.page_data import HeadingMark, PageData
 from parch.sections._shared import _REVIEW_LINED
 
 _INDEX_LEFT_INSET = "4mm"
@@ -121,12 +120,6 @@ class Review:
     def _index_count(self, n_weeks: int) -> int:
         return len(self._page_sizes(n_weeks))
 
-    def _year(self) -> int:
-        return self.configurator.start_date().year
-
-    def _year_cell(self, manifest: Manifest) -> str:
-        return manifest.link_or_content(Annual.ID, str(self._year()))
-
     def range_label(self, first: Day, last: Day) -> str:
         first_month = self.i18n.t(f"months.short.{first.month().name}")
         last_month = self.i18n.t(f"months.short.{last.month().name}")
@@ -188,6 +181,16 @@ class Review:
   []
 )"""
 
+    def _heading(self, manifest: Manifest, review_cell: str) -> str:
+        return trail_heading(
+            manifest,
+            heading_height_token(self.configurator),
+            f"text(size: h1, {review_cell})",
+            body_size_token(self.configurator),
+            direction="rtl",
+            edge=HeadingMark.FOLLOW,
+        )
+
     def _index(self, manifest: Manifest, weeks: list[Week], page_index: int) -> str:
         page_id = self.index_id(page_index)
         body = self._index_body(manifest, weeks)
@@ -197,21 +200,12 @@ class Review:
         else:
             quiet = "[]"
         review_cell = f"[{self.i18n.t('review')} <{page_id}>]"
-        breadcrumb = f"""grid(
-  columns: (auto, auto, 1fr),
-  column-gutter: 6pt,
-  align: horizon,
-  text(size: h1, {self._year_cell(manifest)}),
-  text(size: h1)[/],
-  text(size: h1, {review_cell})
-)"""
-        breadcrumb = lead_title(manifest, heading_height_token(self.configurator), breadcrumb, body_size_token(self.configurator))
         return f"""#grid(
   columns: 1fr,
   rows: (auto, auto, 1fr),
   row-gutter: {_INDEX_ROW_GUTTER},
   inset: (left: {_INDEX_LEFT_INSET}, bottom: {_INDEX_BOTTOM_INSET}),
-  {breadcrumb},
+  {self._heading(manifest, review_cell)},
   {quiet},
   {body}
 )"""
@@ -220,17 +214,7 @@ class Review:
         days = week.days()
         rng = self.range_label(days[0], days[-1])
         page_id = self.week_page_id(week)
-        year_cell = self._year_cell(manifest)
         review_cell = manifest.link_or_content(index_page_id, self.i18n.t("review"))
-        breadcrumb = f"""grid(
-  columns: (auto, auto, 1fr),
-  column-gutter: 6pt,
-  align: horizon,
-  text(size: h1, {year_cell}),
-  text(size: h1)[/],
-  text(size: h1, {review_cell})
-)"""
-        breadcrumb = lead_title(manifest, heading_height_token(self.configurator), breadcrumb, body_size_token(self.configurator))
         week_line = f"[{week.number} <{page_id}> #h(0.6em) #text(size: 0.85em)[{rng}]]"
         cells = ", ".join(self._day_cell(manifest, day) for day in days)
         day_strip = f"""stack(
@@ -256,7 +240,7 @@ class Review:
   rows: (auto, auto, auto, 1fr),
   row-gutter: {_INDEX_ROW_GUTTER},
   inset: (left: {_INDEX_LEFT_INSET}, bottom: {_INDEX_BOTTOM_INSET}),
-  {breadcrumb},
+  {self._heading(manifest, review_cell)},
   {week_line},
   {day_strip},
   {field}
