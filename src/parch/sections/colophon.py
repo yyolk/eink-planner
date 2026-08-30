@@ -292,6 +292,7 @@ class Colophon:
         bottom = self._margin_side("bottom")
         left = self._margin_side("left")
         return f"""#set page(
+  foreground: none,
   header: none,
   margin: (
     top: {inset},
@@ -302,11 +303,11 @@ class Colophon:
 )"""
 
     def _dump_pagination(self, manifest) -> str:
-        # One per-page header for the dump span. Typst evaluates
-        # page(header: context) every page; a #show around here().page()
-        # would freeze on page 1 and drop FOLLOW. Pad by margin.top so
-        # FOLLOW sits in page 1's band. Top is inset + h1 so the dump
-        # stays below. Restore after the end label.
+        # page.foreground + place(top) paints in page coordinates; the
+        # page-header slot left FOLLOW off-canvas. here().page() lives
+        # in the foreground context so it is not frozen on page 1. Pad by
+        # margin.top; body top is inset + h1 so the dump stays below.
+        # Restore after the end label.
         state_name = self._dump_state_name()
         end_label = self._dump_end_label()
         first = self._heading(manifest, labeled=True)
@@ -317,29 +318,23 @@ class Colophon:
         left = self._margin_side("left")
         return f"""#context {{ state("{state_name}", 0).update(here().page()) }}
 #set page(
-  header-ascent: 100%,
   margin: (
     top: {inset} + h1,
     right: {right},
     bottom: {bottom},
     left: {left},
   ),
-  header: context {{
+  foreground: context {{
     let start-page = state("{state_name}", 0).final()
     let cur = here().page()
     let hits = query(<{end_label}>)
     let last = if hits.len() > 0 {{ hits.first().location().page() }} else {{ cur }}
     if cur >= start-page and cur <= last {{
-      block(
-        width: 100%,
-        height: {inset} + h1,
-        inset: (top: {inset}),
-        if cur == start-page {{
-          {first}
-        }} else {{
-          {more}
-        }}
-      )
+      place(top + left, pad(top: {inset}, if cur == start-page {{
+        {first}
+      }} else {{
+        {more}
+      }}))
     }}
   }},
 )"""
