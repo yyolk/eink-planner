@@ -269,7 +269,7 @@ class TasksSection(StrictModel):
 
 
 class HabitsSection(StrictModel):
-    habit_columns: StrictInt = 6
+    habit_columns: StrictInt = 4
     names: list[str] = []
 
     @model_validator(mode="after")
