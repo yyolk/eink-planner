@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from parch.i18n import I18n
-from parch.mos.configurator import Configurator
+
+if TYPE_CHECKING:
+    from parch.mos.configurator import Configurator
 
 
 @dataclass(frozen=True)
