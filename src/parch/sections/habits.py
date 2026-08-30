@@ -142,8 +142,8 @@ class Habits:
     def _seated_month_label(self, month: Month) -> str:
         full = self.i18n.t(f"months.full.{month.name}")
         return (
-            "grid.cell(inset: (top: 0.25em), "
-            f'text(size: h1, top-edge: "cap-height")[{full}<{self.month_id(month)}>])'
+            "text(size: h1, box(inset: (top: 0.25em), "
+            f'text(top-edge: "cap-height")[{full}<{self.month_id(month)}>]))'
         )
 
     def _month_title(self, manifest: Manifest, month: Month) -> str:
