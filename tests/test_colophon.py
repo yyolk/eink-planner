@@ -535,9 +535,12 @@ def test_two_dump_colophons_use_unique_start_and_end():
     assert "cur > start-page" in ca
     pagination = inspect.getsource(Colophon._dump_pagination)
     assert "self._heading(" in pagination
+    assert "labeled=False" in pagination
     assert "lead_title" not in pagination
     assert "margin" not in pagination
     assert "header-ascent" not in pagination
+    assert "<colophon>" not in a._dump_pagination(None)
+    assert ca.count("<colophon>") == 1
 
 
 def test_dump_continuation_header_is_follow_seat_without_nums():
@@ -563,6 +566,28 @@ def test_dump_continuation_header_is_follow_seat_without_nums():
     heading = content[content.index(_SEATED_TITLE) : content.index(_SEATED_MARK)]
     assert DEFAULT_TITLE in heading
     assert _MARK_RULE not in heading
+    header = colo._dump_pagination(manifest)
+    assert "<colophon>" not in header
+    assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + "]" in header
+    assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + " <colophon>]" not in header
+    assert content.count("<colophon>") == 1
+    assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + " <colophon>]" in content
+
+
+def test_dump_pagination_heading_omits_colophon_label():
+    colo = _colophon_with_dump(dump=True)
+    manifest = Manifest()
+    manifest.register_source("index")
+    header = colo._dump_pagination(manifest)
+    body = colo._heading(manifest)
+    assert "<colophon>" not in header
+    assert "<colophon>" in body
+    assert header.count(_FOLLOW_RTL) == 1
+    assert body.count(_FOLLOW_RTL) == 1
+    assert "column-gutter: 6pt" not in header
+    assert "0.85em" not in header
+    content = colo.pages(manifest)[0].content
+    assert content.count("<colophon>") == 1
 
 
 def test_colophon_last_default_does_not_dump(tmp_path):

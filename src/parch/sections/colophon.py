@@ -127,13 +127,14 @@ class Colophon:
     def pages(self, manifest) -> list[PageData]:
         return [PageData(raw_typst=True, content=self._content(manifest))]
 
-    def _heading(self, manifest) -> str:
+    def _heading(self, manifest, *, labeled: bool = True) -> str:
         """FOLLOW seat: five-bar then the name at 0.5em, own hit."""
         title = _escape(self.title)
+        hit = f"[{title} <colophon>]" if labeled else f"[{title}]"
         return trail_heading(
             manifest,
             heading_height_token(self.configurator),
-            f'text(size: h1, weight: "bold")[{title} <colophon>]',
+            f'text(size: h1, weight: "bold"){hit}',
             body_size_token(self.configurator),
             direction="rtl",
             edge=HeadingMark.FOLLOW,
@@ -288,7 +289,7 @@ class Colophon:
         # start/end. Continuation uses the same FOLLOW seat as page 1.
         state_name = self._dump_state_name()
         end_label = self._dump_end_label()
-        heading = self._heading(manifest)
+        heading = self._heading(manifest, labeled=False)
         return f"""#context {{ state("{state_name}", 0).update(here().page()) }}
 #set page(header: context {{
   let start-page = state("{state_name}", 0).final()
