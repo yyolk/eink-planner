@@ -39,7 +39,7 @@ class Coordinator:
         return self.chase.document()
 
     def _section(self, dto: Any):
-        from parch.sections import SECTIONS  # late: sections/__init__ imports MOS classes
+        from parch.sections import SECTIONS  # late: sections/__init__ importing MOS pages still runs mos/__init__
 
         if isinstance(dto, StrictDict):
             klass_name = dto["class"]

@@ -12,8 +12,8 @@ from parch.i18n import I18n
 from parch.toml_config import parse_toml
 from parch.mos.manifest import Manifest
 from parch.mos.pages.quarterly import Quarterly
-from parch.mos.sections.annual import Annual
-from parch.mos.sections.quarterly import Quarterly as QuarterlySection
+from parch.sections.annual import Annual
+from parch.sections.quarterly import Quarterly as QuarterlySection
 from parch.services.generate import Generate
 from tests.helpers import base_config, load_default, make_configurator, make_quarter
 from tests.test_toml_omit_sections import compile_pdf

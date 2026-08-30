@@ -8,8 +8,8 @@ from parch.calendar.week import Week
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.page_data import PageData
-from parch.mos.sections.annual import Annual
-from parch.mos.sections._shared import _length_mm
+from parch.sections.annual import Annual
+from parch.sections._shared import _length_mm
 
 _INDEX_LEFT_INSET = "4mm"
 _INDEX_BOTTOM_INSET = "4mm"

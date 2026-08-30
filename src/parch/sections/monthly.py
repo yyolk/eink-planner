@@ -1,4 +1,4 @@
-"""One page per quarter."""
+"""One page per month."""
 
 from __future__ import annotations
 
@@ -10,49 +10,48 @@ from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.page_data import PageData
-from parch.mos.pages.quarterly import Quarterly as QuarterlyPage
-from parch.mos.sections.annual import Annual
+from parch.mos.pages.monthly import Monthly as MonthlyPage
+from parch.sections.annual import Annual
 
 
-class Quarterly:
+class Monthly:
     def __init__(
         self,
         section_name: str,
         i18n: I18n,
         configurator: Configurator,
-        months_column: str,
+        month_params: dict[str, Any],
         pattern: str = "dotted",
-        **other: Any,
+        **_rest: Any,
     ) -> None:
         self.section_name = section_name
         self.i18n = i18n
         self.configurator = configurator
-        self.months_column = str(months_column).lstrip(":").lower()
+        if isinstance(month_params, StrictDict):
+            month_params = month_params.to_plain()
+        self.month_params = _to_plain(month_params)
         self.pattern = pattern
-        base = configurator.dig("planner", "params", "little_calendar") or {}
-        extra = other.get("little_calendar") or {}
-        self.little_calendar = {**_plain(base), **_plain(extra)}
 
     def register(self, manifest: Manifest) -> None:
-        for quarter in self._range():
-            manifest.register_source(quarter.id)
+        for month in self._range():
+            manifest.register_source(month.id)
 
     def pages(self, manifest: Manifest) -> list[PageData]:
         out = []
-        for quarter in self._range():
-            page = QuarterlyPage(
+        for month in self._range():
+            page = MonthlyPage(
                 i18n=self.i18n,
                 manifest=manifest,
-                quarter=quarter,
-                months_column=self.months_column,
-                little_calendar=self.little_calendar,
+                month=month,
+                month_params=self.month_params,
                 pattern=self.pattern,
             )
             out.append(
                 PageData(
                     title=self._title(manifest, page),
                     content=page.content(),
-                    highlight_quarters=[quarter],
+                    highlight_months=[month],
+                    highlight_quarters=[],
                     nav_links=[],
                 )
             )
@@ -64,7 +63,7 @@ class Quarterly:
     def _year_cell(self, manifest: Manifest) -> str:
         return manifest.link_or_content(Annual.ID, str(self._year()))
 
-    def _title(self, manifest: Manifest, page: QuarterlyPage) -> str:
+    def _title(self, manifest: Manifest, page: MonthlyPage) -> str:
         return f"""grid(
   columns: (auto, auto, auto),
   column-gutter: 6pt,
@@ -75,12 +74,4 @@ class Quarterly:
 )"""
 
     def _range(self):
-        return walk(self.configurator.start_date().quarter(), self.configurator.end_date().quarter())
-
-
-def _plain(value: Any) -> dict:
-    if isinstance(value, StrictDict):
-        return value.to_plain()
-    if isinstance(value, dict):
-        return _to_plain(value)
-    return {}
+        return walk(self.configurator.start_date().month(), self.configurator.end_date().month())

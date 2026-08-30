@@ -12,7 +12,7 @@ from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.contents_mark import body_size_token, heading_height_token, lead_title
 from parch.mos.page_data import PageData
-from parch.mos.sections.annual import Annual
+from parch.sections.annual import Annual
 
 _INDEX_LEFT_INSET = "4mm"
 _INDEX_BOTTOM_INSET = "4mm"

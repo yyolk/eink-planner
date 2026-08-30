@@ -9,7 +9,7 @@ from parch import __version__
 from parch.config import StrictDict, _to_plain
 from parch.mos.contents_mark import body_size_token, contents_mark, heading_height_token, lead_title
 from parch.mos.page_data import PageData
-from parch.mos.sections.annual import Annual
+from parch.sections.annual import Annual
 
 DEFAULT_TITLE = "About this notebook"
 
