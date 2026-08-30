@@ -13,7 +13,7 @@ from parch.mos.components.months_menu import MonthsMenu
 from parch.mos.components.quarters_menu import QuartersMenu
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.mos.sections.annual import Annual
+from parch.sections.annual import Annual
 
 
 @dataclass(frozen=True)

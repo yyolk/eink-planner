@@ -8,7 +8,7 @@ import pytest
 from parch import ConfigError
 from parch.config import load
 from parch.mos.configurator import Configurator
-from parch.mos.sections.review import Review
+from parch.sections.review import Review
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf

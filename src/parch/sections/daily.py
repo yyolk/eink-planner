@@ -10,7 +10,7 @@ from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.page_data import PageData
 from parch.mos.pages.daily import Daily as DailyPage
-from parch.mos.sections.annual import Annual
+from parch.sections.annual import Annual
 
 
 class Daily:

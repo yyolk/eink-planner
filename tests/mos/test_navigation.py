@@ -3,7 +3,7 @@ from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.navigation import Navigation
-from parch.mos.sections.annual import Annual
+from parch.sections.annual import Annual
 
 
 def _i18n() -> I18n:

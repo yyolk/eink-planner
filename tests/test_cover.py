@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from parch.mos.sections.cover_plain import CoverPlain
+from parch.sections.cover_plain import CoverPlain
 
 
 def _typst(name: str, font_size: str = "36pt") -> str:

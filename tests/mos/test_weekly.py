@@ -6,8 +6,8 @@ from __future__ import annotations
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
 from parch.mos.pages.weekly import Weekly
-from parch.mos.sections.annual import Annual
-from parch.mos.sections.weekly import Weekly as WeeklySection
+from parch.sections.annual import Annual
+from parch.sections.weekly import Weekly as WeeklySection
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.helpers import base_config, load_default, make_configurator, make_week
