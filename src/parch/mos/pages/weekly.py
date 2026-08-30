@@ -56,6 +56,6 @@ class Weekly:
   columns: 1fr,
   rows: (auto, 1fr),
   grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", {header})),
-  grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern({self.pattern}))
+  box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern({self.pattern}))
 )"""
 

@@ -52,8 +52,8 @@ _HEADER_CELL = (
 )
 
 _WRITING_PATTERN = (
-    "grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), "
-    "rect_pattern("
+    "box(width: 100%, height: 100%, clip: true, "
+    "inset: (top: 0.25em, bottom: 0.25em), rect_pattern("
 )
 
 
@@ -151,7 +151,10 @@ def test_writing_field_clips_and_insets_pattern():
     content = _page("2025-12-29").content()
     assert content.count(_WRITING_PATTERN) == 8
     assert f"{_WRITING_PATTERN}dotted)" in content
-    assert "grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))" in content
+    assert (
+        "box(width: 100%, height: 100%, clip: true, "
+        "inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))"
+    ) in content
     assert content.count("rect_pattern(dotted)") == 8
 
 
