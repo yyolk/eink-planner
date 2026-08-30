@@ -139,6 +139,13 @@ class Habits:
         full = self.i18n.t(f"months.full.{month.name}")
         return f"text(size: h1)[{full}<{self.month_id(month)}>]"
 
+    def _seated_month_label(self, month: Month) -> str:
+        full = self.i18n.t(f"months.full.{month.name}")
+        return (
+            "grid.cell(inset: (top: 0.25em), "
+            f'text(size: h1, top-edge: "cap-height")[{full}<{self.month_id(month)}>])'
+        )
+
     def _month_title(self, manifest: Manifest, month: Month) -> str:
         habits_cell = manifest.link_or_content(self.ID, self.i18n.t("habits"))
         habits = f"text(size: h1, {habits_cell})"
@@ -179,7 +186,7 @@ class Habits:
   columns: 1fr,
   rows: (auto, 1fr),
   align: horizon + left,
-  {self._month_label(month)},
+  {self._seated_month_label(month)},
   {grid}
 )"""
 

@@ -276,6 +276,9 @@ def test_habit_month_pages_set_trail_mark_alone():
         assert "padded_link(<habits>)" in title
         assert f"{name}<habits-{name.lower()}>" in content
         assert f"{name}<habits-{name.lower()}>" not in title
+        assert 'inset: (top: 0.25em)' in content
+        assert 'top-edge: "cap-height"' in content
+        assert 'top-edge: "cap-height"' not in title
 
 
 def test_mos_right_month_title_stacks_habits_above_january():
@@ -293,7 +296,11 @@ def test_mos_right_month_title_stacks_habits_above_january():
     assert "dir: ttb" in title
     assert title.index("padded_link(<habits>)") < title.index("January<habits-january>")
     assert "column-gutter: 6pt" not in title
+    assert 'inset: (top: 0.25em)' not in title
+    assert 'top-edge: "cap-height"' not in title
     assert "January<habits-january>" not in january.content
+    assert 'inset: (top: 0.25em)' not in january.content
+    assert 'top-edge: "cap-height"' not in january.content
 
 
 def test_grid_uses_stroke_boxes_horizontal_names_and_thin_day_rules():
@@ -798,6 +805,11 @@ def test_index_heading_is_trail_strip_when_contents_on():
     assert "padded_link(<habits>)" in month_heading
     assert month.index(_TRAIL_MARK) < month.index("January<habits-january>")
     assert month.index("January<habits-january>") < month.index("Thu 1")
+    assert 'inset: (top: 0.25em)' in month
+    assert 'top-edge: "cap-height"' in month
+    seat = month[month.index("January<habits-january>") - 120 : month.index("January<habits-january>")]
+    assert 'inset: (top: 0.25em)' in seat
+    assert 'top-edge: "cap-height"' in seat
     assert "padded_link(<habits>)" in month
     assert "2026 /" not in month
     assert "text(size: h1)[/]" not in month
@@ -823,6 +835,8 @@ def test_mos_right_month_mark_trails_alone_left_of_rail():
     assert "column-gutter: 6pt" not in heading
     assert heading.index("padded_link(<habits>)") < heading.index("January<habits-january>")
     assert heading.index("dir: ttb") < heading.index("January<habits-january>")
+    assert 'top-edge: "cap-height"' not in heading
+    assert 'inset: (top: 0.25em)' not in heading
     assert "padded_link(<habits>)" in month
     assert "2026 /" not in month
     assert ", [Habits])" not in month
