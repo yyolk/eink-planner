@@ -106,7 +106,7 @@ class Builder:
         height = _v(self.heading, "height")
         body = body_size_token(self.configurator)
         trailing = trail_strip(self.manifest, height, body, chip)
-        if mos_right or chip or (trailing and page_id == "annual"):
+        if mos_right or chip or (trailing and page_id in ("annual", "daily")):
             parts = [p for p in (title, trailing) if p]
         elif title:
             parts = [lead_title(self.manifest, height, title, body)]

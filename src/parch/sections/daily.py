@@ -10,10 +10,11 @@ from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.compose.page_data import PageData
 from parch.mos.pages.daily import Daily as DailyPage
-from parch.sections.annual import Annual
 
 
 class Daily:
+    ID = "daily"
+
     def __init__(self, section_name: str, i18n: I18n, configurator: Configurator, **params: Any) -> None:
         self.section_name = section_name
         self.i18n = i18n
@@ -26,7 +27,6 @@ class Daily:
 
     def pages(self, manifest: Manifest) -> list[PageData]:
         out = []
-        year = str(self.configurator.start_date().year)
         for day in self._range():
             page = DailyPage(
                 i18n=self.i18n,
@@ -39,9 +39,10 @@ class Daily:
                 PageData(
                     title=page.title(),
                     content=page.content(),
+                    page_id=self.ID,
                     highlight_months=[day.month()],
                     highlight_quarters=[],
-                    nav_links=[(Annual.ID, year)],
+                    nav_links=[],
                 )
             )
         return out

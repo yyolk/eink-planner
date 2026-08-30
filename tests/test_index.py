@@ -250,13 +250,32 @@ def test_mos_left_annual_mark_is_trail_strip_sibling():
     assert page.count(_MARK_RULE) == 5
 
 
-def test_daily_year_chip_sits_beside_lead_title():
+def test_daily_mark_is_trail_strip_alone():
     typst = _generate(load(NOMAD))
     page = next(p for p in _pages(typst) if "1 <2026-01-01>" in p)
     title_at = page.index("1 <2026-01-01>")
-    mark_at = page.index(_MARK_LINK)
-    chip_at = page.index("[2026]")
-    assert title_at < mark_at < chip_at
+    mark_at = page.index(_MARK_FLUSH)
+    trail_at = page.index("pad(right: 3mm")
+    assert title_at < trail_at <= mark_at
+    heading = page[page.index("stack(") : mark_at]
+    assert "dir: rtl" in heading
+    assert "column-gutter: 6pt" not in heading
+    assert "padded_link(<annual>, [2026])" not in page
+    assert page.count(_MARK_RULE) == 5
+
+
+def test_mos_right_daily_mark_is_trail_strip_alone():
+    typst = _generate(load(NOMAD_MOS_RIGHT))
+    page = next(p for p in _pages(typst) if "1 <2026-01-01>" in p)
+    title_at = page.index("1 <2026-01-01>")
+    mark_at = page.index(_MARK_FLUSH)
+    trail_at = page.index("pad(right: 3mm")
+    assert title_at < trail_at <= mark_at
+    heading = page[page.index("stack(") : mark_at]
+    assert "dir: ltr" in heading
+    assert "column-gutter: 6pt" not in heading
+    assert "padded_link(<annual>, [2026])" not in page
+    assert page.count(_MARK_RULE) == 5
 
 
 def test_mos_right_habits_mark_sits_next_to_strip():
