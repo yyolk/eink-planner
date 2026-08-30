@@ -51,11 +51,11 @@ class Weekly:
         return f"grid.cell(colspan: 2, {self._cell(header)})"
 
     def _cell(self, header: str) -> str:
-        """Seat the day-label rule under the font descender."""
+        """Seat the day-label rule under the descender; clip the pattern to the writing field."""
         return f"""grid(
   columns: 1fr,
   rows: (auto, 1fr),
   grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", {header})),
-  rect_pattern({self.pattern})
+  box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern({self.pattern}))
 )"""
 

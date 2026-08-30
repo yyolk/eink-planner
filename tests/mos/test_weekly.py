@@ -51,6 +51,11 @@ _HEADER_CELL = (
     'inset: (bottom: 0.25em), text(bottom-edge: "descender", '
 )
 
+_WRITING_PATTERN = (
+    "box(width: 100%, height: 100%, clip: true, "
+    "inset: (top: 0.25em, bottom: 0.25em), rect_pattern("
+)
+
 
 def _i18n() -> I18n:
     return load_default()
@@ -142,9 +147,21 @@ def test_per_cell_pattern_keeps_white_gutters():
     assert "grid.cell(colspan: 2," in content
 
 
+def test_writing_field_clips_and_insets_pattern():
+    content = _page("2025-12-29").content()
+    assert content.count(_WRITING_PATTERN) == 8
+    assert f"{_WRITING_PATTERN}dotted)" in content
+    assert (
+        "box(width: 100%, height: 100%, clip: true, "
+        "inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))"
+    ) in content
+    assert content.count("rect_pattern(dotted)") == 8
+
+
 def test_pattern_switches():
     lined = _page("2025-12-29", pattern="lined").content()
     assert lined.count("rect_pattern(lined)") == 8
+    assert lined.count(f"{_WRITING_PATTERN}lined)") == 8
     assert "rect_pattern(dotted)" not in lined
 
 
@@ -200,6 +217,8 @@ def test_generated_year_crumb_links_to_annual_and_inverts_thursday_month():
     assert "grid.cell(stroke: (bottom: thick_stroke" not in w01
     assert "grid.cell(colspan: 3, rect_pattern" not in w01
     assert w01.count("rect_pattern(dotted)") == 8
+    assert w01.count(_WRITING_PATTERN) == 8
+    assert f"{_WRITING_PATTERN}dotted)" in w01
     assert "[Notes]" in w01
     assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in w01
     assert "table.cell([#padded_link(<quarter-2026-1>)[Q1]])" in w01
