@@ -36,6 +36,13 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # actions/checkout is a shallow master-only clone. --force-with-lease
+          # with no remote-tracking ref treats the bot branch as "must not exist"
+          # and rejects with "stale info" when origin already has it. Fetch the
+          # tip (ok if missing) so the lease matches origin, then overwrite.
+          git fetch --depth=1 origin \
+            +refs/heads/chore/readme-preview-svgs:refs/remotes/origin/chore/readme-preview-svgs \
+            || echo "no origin/chore/readme-preview-svgs yet"
           git switch -C chore/readme-preview-svgs
           git commit -m "Regenerate 158×210 README preview SVGs."
           git push --force-with-lease origin chore/readme-preview-svgs
