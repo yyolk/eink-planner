@@ -52,22 +52,27 @@ def _page_index(typst: str, label: str) -> int:
     )
 
 
+def _column_ink(pixels, width: int, height: int, x0_frac: float, x1_frac: float) -> int:
+    x0, x1 = int(width * x0_frac), int(width * x1_frac)
+    y0, y1 = int(height * 0.32), int(height * 0.90)
+    return sum(
+        1
+        for y in range(y0, y1)
+        for x in range(x0, x1)
+        if pixels[x, y] <= 64
+    )
+
+
 def _assert_three_dotted_columns(png: Path) -> None:
     with Image.open(png) as src:
         width, height = src.size
         gray = src.convert("L")
         pixels = gray.load()
-    y0 = int(height * 0.28)
-    y1 = int(height * 0.92)
-    col_ink = []
-    for frac in _COL_FRACS:
-        x = int(width * frac)
-        hits = sum(1 for y in range(y0, y1) if pixels[x, y] <= 64)
-        col_ink.append(hits)
-        assert hits > 8, (frac, hits)
-        assert hits < (y1 - y0) * 0.35, (frac, hits)
-    # Columns are peers — house dots, not one fat done-column of ticks.
-    assert max(col_ink) - min(col_ink) < max(12, int(max(col_ink) * 0.55)), col_ink
+    # House dots sit on a regular_height lattice — sample a band, not one x.
+    bands = ((0.08, 0.32), (0.38, 0.62), (0.68, 0.92))
+    col_ink = [_column_ink(pixels, width, height, a, b) for a, b in bands]
+    assert all(n > 80 for n in col_ink), col_ink
+    assert max(col_ink) - min(col_ink) <= max(20, int(max(col_ink) * 0.15)), col_ink
     for frac in _COL_FRACS:
         try:
             cards = card_interior_lines(png, int(width * frac))
