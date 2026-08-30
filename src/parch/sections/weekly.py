@@ -22,9 +22,9 @@ class Weekly:
         self.section_name = section_name
         self.i18n = ctx.i18n
         self.configurator = ctx.configurator
-        self.weekday_start = configurator.weekday_start()
-        self.first_week_day = configurator.start_date().beginning_of_month().beginning_of_week()
-        self.last_week_day = configurator.end_date().end_of_month().end_of_week()
+        self.weekday_start = self.configurator.weekday_start()
+        self.first_week_day = self.configurator.start_date().beginning_of_month().beginning_of_week()
+        self.last_week_day = self.configurator.end_date().end_of_month().end_of_week()
         self.column_gutter = column_gutter
         self.pattern = pattern
 
