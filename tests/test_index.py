@@ -171,9 +171,10 @@ def test_omit_index_has_no_contents_and_no_mark():
 def test_index_on_cover_has_no_mark():
     typst = _generate(load(NOMAD))
     cover = _cover_page(typst)
-    assert _MARK_LINK not in cover
     assert _MARK_RULE not in cover
-    assert "<index>" not in cover
+    assert _MARK_FLUSH not in cover
+    assert "padded_link(<index>," not in cover
+    assert "padded_link(<index>)[2026]" in cover
 
 
 def test_contents_page_has_no_back_link_mark():
