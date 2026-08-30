@@ -35,6 +35,13 @@ def test_format_command_joins_argv():
     assert "file with space.toml" in joined
 
 
+def test_format_command_uses_basename_when_argv0_is_a_path():
+    uv = "/home/box/.cache/uv/archive-v0/abc123/bin/parch"
+    assert format_command([uv, "press", "-w", "out", "nomad.toml"]) == "parch press -w out nomad.toml"
+    assert format_command(["/usr/bin/parch", "press", "nomad.toml"]) == "parch press nomad.toml"
+    assert format_command(["parch", "press", "nomad.toml"]) == "parch press nomad.toml"
+
+
 def test_git_head_this_repo():
     sha = git_head(REPO)
     if sha is None:

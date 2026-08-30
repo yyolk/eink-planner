@@ -507,6 +507,8 @@ def test_drop_empty_tables_keeps_quoted_and_dotted_keys():
 
 
 def test_two_dump_colophons_use_unique_start_and_end():
+    import inspect
+
     a = _colophon_with_dump(dump=True)
     b = _colophon_with_dump(dump=True)
     ca = a.pages(None)[0].content
@@ -523,9 +525,44 @@ def test_two_dump_colophons_use_unique_start_and_end():
     assert "<colophon-end>" not in ca
     assert "header:" in ca
     assert DEFAULT_TITLE in ca
-    # continuation title + quiet 1/N stay in the header
-    assert 'align(left, text(size: h1, weight: "bold")[' + DEFAULT_TITLE + "])" in ca
-    assert "0.85em" in ca
+    # continuation is the FOLLOW heading; dump continuing is the signal
+    assert "0.85em" not in ca
+    assert "column-gutter: 6pt" not in ca
+    assert "nums" not in ca
+    assert "/#(last" not in ca
+    assert 'align(left, text(size: h1, weight: "bold")[' + DEFAULT_TITLE + "])" not in ca
+    assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + " <colophon>]" in ca
+    assert "cur > start-page" in ca
+    pagination = inspect.getsource(Colophon._dump_pagination)
+    assert "self._heading(" in pagination
+    assert "lead_title" not in pagination
+    assert "margin" not in pagination
+    assert "header-ascent" not in pagination
+
+
+def test_dump_continuation_header_is_follow_seat_without_nums():
+    colo = _colophon_with_dump(dump=True)
+    manifest = Manifest()
+    manifest.register_source("index")
+    colo.register(manifest)
+    content = colo.pages(manifest)[0].content
+    assert "header:" in content
+    assert _FOLLOW_RTL in content
+    assert _SEATED_TITLE in content
+    assert _SEATED_MARK in content
+    assert content.count(_MARK_RULE) == 10
+    assert content.count(_SEATED_TITLE) == 2
+    assert "column-gutter: 6pt" not in content
+    assert "0.85em" not in content
+    assert "nums" not in content
+    assert "/#(last" not in content
+    assert "align(right" not in content
+    assert "cur > start-page" in content
+    assert colo._dump_end_label() in content
+    assert colo._dump_state_name() in content
+    heading = content[content.index(_SEATED_TITLE) : content.index(_SEATED_MARK)]
+    assert DEFAULT_TITLE in heading
+    assert _MARK_RULE not in heading
 
 
 def test_colophon_last_default_does_not_dump(tmp_path):
@@ -668,6 +705,8 @@ def test_command_sha_dump_together():
         assert token not in content
     assert "header:" in content
     assert DEFAULT_TITLE in content
+    assert "0.85em" not in content
+    assert "column-gutter: 6pt" not in content
 
 
 def test_default_still_omits_command_sha_dump():

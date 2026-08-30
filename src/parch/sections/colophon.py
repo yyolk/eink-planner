@@ -9,7 +9,7 @@ from parch import __version__
 from parch.config import StrictDict, _to_plain
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
-from parch.mos.contents_mark import body_size_token, contents_mark, heading_height_token, trail_heading
+from parch.mos.contents_mark import body_size_token, heading_height_token, trail_heading
 from parch.compose.page_data import HeadingMark, PageData
 from parch.sections.annual import Annual
 
@@ -145,13 +145,10 @@ class Colophon:
         version = _escape(__version__)
         dumped = drop_empty_tables(self._config_text()) if self.dump else ""
         parts: list[str] = []
-        body = body_size_token(self.configurator)
-        heading = heading_height_token(self.configurator)
-        mark = contents_mark(manifest, heading, body, face="h1")
         titled = self._heading(manifest)
         if dumped.strip():
             # Page setup first so Typst does not break between the list and the dump.
-            parts.append(self._dump_pagination(mark))
+            parts.append(self._dump_pagination(manifest))
         if self.command or self.sha:
             parts.append(_MONO_HELPER)
         parts.append(self._facts_block(titled, device, year_cell, version))
@@ -284,46 +281,22 @@ class Colophon:
     def _dump_end_label(self) -> str:
         return f"colophon-end-{self._dump_uid()}"
 
-    def _dump_pagination(self, mark: str = "") -> str:
-        # Quiet 1/N only when the dump actually paginates. Header is empty on
-        # a single page and after this instance's end label so later MOS pages
-        # stay put when dump is mid-book. Unique state/label per instance so
-        # two dump colophons do not share start/end. 1/N lives in the header
-        # (shipped devices use a 0mm bottom margin, so a footer is clipped).
-        # Continuation pages repeat the same title so a mid-table dump is
-        # never untitled.
-        title = _escape(self.title)
+    def _dump_pagination(self, manifest) -> str:
+        # Header is empty on the first dump page (body already has the heading)
+        # and after this instance's end label so later MOS pages stay put.
+        # Unique state/label per instance so two dump colophons do not share
+        # start/end. Continuation uses the same FOLLOW seat as page 1.
         state_name = self._dump_state_name()
         end_label = self._dump_end_label()
-        if mark:
-            continuation = f"""grid(
-        columns: (auto, 1fr, auto),
-        column-gutter: 6pt,
-        align: horizon,
-        {mark},
-        align(left, text(size: h1, weight: "bold")[{title}]),
-        align(right + horizon, nums),
-      )"""
-        else:
-            continuation = f"""grid(
-        columns: (1fr, auto),
-        column-gutter: 1em,
-        align(left, text(size: h1, weight: "bold")[{title}]),
-        align(right + horizon, nums),
-      )"""
+        heading = self._heading(manifest)
         return f"""#context {{ state("{state_name}", 0).update(here().page()) }}
 #set page(header: context {{
   let start-page = state("{state_name}", 0).final()
   let cur = here().page()
   let hits = query(<{end_label}>)
   let last = if hits.len() > 0 {{ hits.first().location().page() }} else {{ cur }}
-  if last > start-page and cur <= last {{
-    let nums = text(size: 0.85em)[#(cur - start-page + 1)/#(last - start-page + 1)]
-    if cur > start-page {{
-      {continuation}
-    }} else {{
-      align(right, nums)
-    }}
+  if last > start-page and cur > start-page and cur <= last {{
+    {heading}
   }}
 }})"""
 
