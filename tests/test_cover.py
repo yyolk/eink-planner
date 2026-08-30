@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
+from parch.config import StrictDict
+from parch.mos.configurator import Configurator
 from parch.sections.cover_plain import CoverPlain
-from tests.helpers import compose_ctx
+from tests.helpers import load_default
 
 
 def _typst(name: str, font_size: str = "36pt") -> str:
-    pages = CoverPlain("cover", compose_ctx(), name, font_size).pages(None)
+    pages = CoverPlain(
+        "cover",
+        i18n=load_default(),
+        configurator=Configurator(StrictDict({})),
+        name=name,
+        font_size=font_size,
+    ).pages(None)
     assert len(pages) == 1
     assert pages[0].raw_typst is True
     return pages[0].content

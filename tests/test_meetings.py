@@ -14,7 +14,7 @@ from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf
 from tests.toml_fixtures import _minimal, short_january
-from tests.helpers import base_config, compose_ctx, load_default
+from tests.helpers import base_config, load_default
 
 NOMAD = base_config("supernote-nomad")
 
@@ -39,7 +39,8 @@ def _meetings(dto, index_pages: int | None = None) -> Meetings:
         params["index_pages"] = index_pages
     return Meetings(
         section_name="meetings",
-        ctx=compose_ctx(configurator=Configurator(dto)),
+        i18n=load_default(),
+        configurator=Configurator(dto),
         index_pages=params.get("index_pages", Meetings.DEFAULT_INDEX_PAGES),
     )
 

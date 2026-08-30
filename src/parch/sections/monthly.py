@@ -5,8 +5,9 @@ from __future__ import annotations
 from typing import Any
 
 from parch.calendar import walk
-from parch.compose.ctx import ComposeCtx
 from parch.config import StrictDict, _to_plain
+from parch.i18n import I18n
+from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.page_data import PageData
 from parch.mos.pages.monthly import Monthly as MonthlyPage
@@ -17,13 +18,14 @@ class Monthly:
     def __init__(
         self,
         section_name: str,
-        ctx: ComposeCtx,
+        i18n: I18n,
+        configurator: Configurator,
         month_params: dict[str, Any],
         pattern: str = "dotted",
     ) -> None:
         self.section_name = section_name
-        self.i18n = ctx.i18n
-        self.configurator = ctx.configurator
+        self.i18n = i18n
+        self.configurator = configurator
         if isinstance(month_params, StrictDict):
             month_params = month_params.to_plain()
         self.month_params = _to_plain(month_params)

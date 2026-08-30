@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import math
 
-from parch.compose.ctx import ComposeCtx
+from parch.i18n import I18n
+from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.contents_mark import body_size_token, heading_height_token, lead_title
 from parch.mos.page_data import PageData
@@ -32,12 +33,13 @@ class Meetings:
     def __init__(
         self,
         section_name: str,
-        ctx: ComposeCtx,
+        i18n: I18n,
+        configurator: Configurator,
         index_pages: int = DEFAULT_INDEX_PAGES,
     ) -> None:
         self.section_name = section_name
-        self.i18n = ctx.i18n
-        self.configurator = ctx.configurator
+        self.i18n = i18n
+        self.configurator = configurator
         self.index_pages_num = int(index_pages)
         self.pages_num = self.rows_per_index_page() * self.index_pages_num
 

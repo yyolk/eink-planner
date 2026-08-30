@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from parch.calendar.week import Week
-from parch.compose.ctx import ComposeCtx
+from parch.i18n import I18n
+from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.page_data import PageData
 from parch.sections.annual import Annual
@@ -33,10 +34,9 @@ _HUMAN = {
 class Index:
     ID = "index"
 
-    def __init__(self, section_name: str, ctx: ComposeCtx) -> None:
+    def __init__(self, section_name: str, i18n: I18n, configurator: Configurator) -> None:
         self.section_name = section_name
-        self.ctx = ctx
-        self.configurator = ctx.configurator
+        self.configurator = configurator
 
     def register(self, manifest: Manifest) -> None:
         manifest.register_source(self.ID)

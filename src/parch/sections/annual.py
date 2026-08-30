@@ -6,9 +6,10 @@ import math
 from typing import Any
 
 from parch.calendar import walk
-from parch.compose.ctx import ComposeCtx
 from parch.config import StrictDict, _to_plain
+from parch.i18n import I18n
 from parch.mos.components.little_calendar import LittleCalendar
+from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.page_data import PageData
 
@@ -19,13 +20,14 @@ class Annual:
     def __init__(
         self,
         section_name: str,
-        ctx: ComposeCtx,
+        i18n: I18n,
+        configurator: Configurator,
         row_gutter: str = "5pt",
         **other: Any,
     ) -> None:
         self.section_name = section_name
-        self.i18n = ctx.i18n
-        self.configurator = ctx.configurator
+        self.i18n = i18n
+        self.configurator = configurator
         base = self.configurator.dig("planner", "params", "little_calendar") or {}
         extra = other.get("little_calendar") or {}
         self.little_calendar = {**_plain(base), **_plain(extra)}

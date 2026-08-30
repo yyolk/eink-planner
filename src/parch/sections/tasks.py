@@ -8,7 +8,8 @@ from __future__ import annotations
 from parch.calendar import walk
 from parch.calendar.day import Day
 from parch.calendar.week import Week
-from parch.compose.ctx import ComposeCtx
+from parch.i18n import I18n
+from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.contents_mark import body_size_token, heading_height_token, lead_title
 from parch.mos.page_data import PageData
@@ -31,12 +32,13 @@ class Tasks:
     def __init__(
         self,
         section_name: str,
-        ctx: ComposeCtx,
+        i18n: I18n,
+        configurator: Configurator,
         weeks_per_page: int = DEFAULT_WEEKS_PER_PAGE,
     ) -> None:
         self.section_name = section_name
-        self.i18n = ctx.i18n
-        self.configurator = ctx.configurator
+        self.i18n = i18n
+        self.configurator = configurator
         self.weeks_per_page = int(weeks_per_page)
         self.weekday_start = self.configurator.weekday_start()
         self.first_week_day = self.configurator.start_date().beginning_of_month().beginning_of_week()
