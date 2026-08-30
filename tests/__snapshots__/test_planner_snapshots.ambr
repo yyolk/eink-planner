@@ -200,11 +200,9 @@
     'colophon': '''
       #block[
         #set par(spacing: 0em)
-        #grid(
-        columns: (auto, auto),
-        column-gutter: 6pt,
-        align: horizon,
-        padded_link(<index>, text(size: h1, context {
+        #context {
+        let seated_title = text(size: h1, weight: "bold")[About this notebook <colophon>]
+        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
         let cap = 0.7em.to-absolute()
         let gap = (cap - 5 * thick_stroke) / 4
         box(
@@ -220,9 +218,15 @@
             line(length: 0.844em, stroke: thick_stroke + black),
           ))
         )
-      })),
-        text(size: h1, weight: "bold")[About this notebook <colophon>]
-      )
+      })))
+        let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
+        stack(
+          dir: rtl,
+          spacing: 0.5em,
+          box(height: band, align(horizon + left, seated_title)),
+          box(height: band, align(horizon + left, seated_mark)),
+        )
+      }
         #v(1em)
         #context grid(
           columns: (measure(text(weight: "bold")[Version]).width, 1fr),
@@ -812,11 +816,9 @@
     'colophon': '''
       #block[
         #set par(spacing: 0em)
-        #grid(
-        columns: (auto, auto),
-        column-gutter: 6pt,
-        align: horizon,
-        padded_link(<index>, text(size: h1, context {
+        #context {
+        let seated_title = text(size: h1, weight: "bold")[About this notebook <colophon>]
+        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
         let cap = 0.7em.to-absolute()
         let gap = (cap - 5 * thick_stroke) / 4
         box(
@@ -832,9 +834,15 @@
             line(length: 0.844em, stroke: thick_stroke + black),
           ))
         )
-      })),
-        text(size: h1, weight: "bold")[About this notebook <colophon>]
-      )
+      })))
+        let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
+        stack(
+          dir: rtl,
+          spacing: 0.5em,
+          box(height: band, align(horizon + left, seated_title)),
+          box(height: band, align(horizon + left, seated_mark)),
+        )
+      }
         #v(1em)
         #context grid(
           columns: (measure(text(weight: "bold")[Version]).width, 1fr),

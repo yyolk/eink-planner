@@ -9,8 +9,10 @@ from pathlib import Path
 import pytest
 
 from parch import ConfigError, __version__
+from parch.compose.page_data import HeadingMark
 from parch.config import StrictDict, load
 from parch.mos.configurator import Configurator
+from parch.mos.manifest import Manifest
 from parch.provenance import apply_provenance, collect_provenance
 from parch.sections.colophon import DEFAULT_TITLE, Colophon, drop_empty_tables
 from parch.services.generate import Generate
@@ -28,6 +30,10 @@ NOMAD = base_config("supernote-nomad")
 
 _BUILD_LOG = ("Command", "Git commit", "SHA-256", "Config path", "Config")
 _THEME = ('lang: "toml"', "syntaxes:", "theme:")
+_MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
+_FOLLOW_RTL = "dir: rtl,\n    spacing: 0.5em,"
+_SEATED_TITLE = "let seated_title ="
+_SEATED_MARK = "let seated_mark ="
 
 
 def _generate(dto: StrictDict) -> str:
@@ -108,12 +114,27 @@ title = "Again"
         )
 
 
+def test_colophon_heading_uses_trail_heading_follow_not_lead_title():
+    import inspect
+
+    heading = inspect.getsource(Colophon._heading)
+    assert "trail_heading(" in heading
+    assert "edge=HeadingMark.FOLLOW" in heading
+    assert "lead_title" not in heading
+    assert "lead_title" not in inspect.getsource(Colophon._content)
+    assert "lead_title" not in inspect.getsource(Colophon)
+    assert "heading_mark=HeadingMark.FOLLOW" not in inspect.getsource(Colophon.pages)
+    assert "stack(" not in heading
+    assert "trail_strip(" not in heading
+
+
 def test_colophon_is_raw_without_mos_chrome():
     colo = Colophon(section_name="colophon", i18n=load_default(), configurator=Configurator(StrictDict({})))
     pages = colo.pages(None)
     assert len(pages) == 1
     assert pages[0].raw_typst is True
     assert pages[0].page_id is None
+    assert pages[0].heading_mark is HeadingMark.LEAD
     content = pages[0].content
     assert "Calendar" not in content
     assert "side_menu" not in content
@@ -197,6 +218,37 @@ font_size = "12pt"
     typst_src = _generate(_attach(short_january(load(path)), path))
     assert "padded_link(<annual>)[2026]" in typst_src
     assert "[*Year*]" in typst_src
+
+
+def test_colophon_follow_header_five_bar_and_body():
+    colo = _colophon_with_flags(device="supernote-nomad")
+    manifest = Manifest()
+    manifest.register_source("index")
+    manifest.register_source("annual")
+    colo.register(manifest)
+    page = colo.pages(manifest)[0]
+    content = page.content
+    assert page.raw_typst is True
+    assert page.heading_mark is HeadingMark.LEAD
+    assert _FOLLOW_RTL in content
+    assert _SEATED_TITLE in content
+    assert _SEATED_MARK in content
+    assert content.count(_MARK_RULE) == 5
+    assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + " <colophon>]" in content
+    heading = content[content.index(_SEATED_TITLE) : content.index(_SEATED_MARK)]
+    assert DEFAULT_TITLE in heading
+    assert _MARK_RULE not in heading
+    assert "column-gutter: 6pt" not in content
+    assert "columns: (auto, auto)" not in content
+    assert "side_menu" not in content
+    assert "[*Device*]" in content
+    assert "SuperNote Nomad" in content
+    assert "[*Year*]" in content
+    assert "[*Version*]" in content
+    assert __version__ in content
+    assert "padded_link(<annual>)[2026]" in content
+    for label in _BUILD_LOG:
+        assert f"[*{label}*]" not in content
 
 
 def test_year_is_plain_text_when_annual_omitted(tmp_path):
