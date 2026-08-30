@@ -678,44 +678,44 @@
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Monday 29])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ), grid(
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Tuesday 30])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ), grid(
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Wednesday 31])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ),
         grid(
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-01>)[Thursday 1])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ), grid(
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-02>)[Friday 2])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ), grid(
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-03>)[Saturday 3])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ),
         grid(
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-04>)[Sunday 4])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ), grid.cell(colspan: 2, grid(
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Notes])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ))
       )
       )
@@ -1301,44 +1301,44 @@
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Monday 29])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ), grid(
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Tuesday 30])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ), grid(
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Wednesday 31])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ),
         grid(
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-01>)[Thursday 1])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ), grid(
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-02>)[Friday 2])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ), grid(
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-03>)[Saturday 3])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ),
         grid(
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-04>)[Sunday 4])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ), grid.cell(colspan: 2, grid(
         columns: 1fr,
         rows: (auto, 1fr),
         grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Notes])),
-        rect_pattern(dotted)
+        grid.cell(clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
       ))
       )
       )
