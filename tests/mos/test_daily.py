@@ -7,6 +7,7 @@ from parch.calendar.dated_note import DatedNote
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
 from parch.mos.pages.daily import Daily
+from parch.compose.page_data import HeadingMark
 from parch.sections.daily import Daily as DailySection
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
@@ -115,6 +116,7 @@ def test_nav_links_empty_not_year_chip_or_calendar():
     assert len(pages) == 4
     for day, page in zip(section._range(), pages, strict=True):
         assert page.nav_links == []
+        assert page.heading_mark is HeadingMark.TRAIL
         assert page.page_id == DailySection.ID
         assert page.highlight_months == [day.month()]
         assert len(page.highlight_months) == 1

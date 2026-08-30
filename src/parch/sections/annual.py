@@ -11,7 +11,7 @@ from parch.i18n import I18n
 from parch.mos.components.little_calendar import LittleCalendar
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.compose.page_data import PageData
+from parch.compose.page_data import HeadingMark, PageData
 
 
 class Annual:
@@ -43,7 +43,7 @@ class Annual:
                 title=f"text(size: h1)[{year}<{self.ID}>]",
                 content=self._content(manifest),
                 page_id=self.ID,
-                nav_links=[],
+                heading_mark=HeadingMark.TRAIL,
             )
         ]
 

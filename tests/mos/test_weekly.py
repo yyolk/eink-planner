@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 
+from parch.compose.page_data import HeadingMark
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
 from parch.mos.pages.weekly import Weekly
@@ -173,6 +174,7 @@ def test_title_is_year_slash_week_crumb_and_kills_calendar_chip():
     year_cell = manifest.link_or_content(Annual.ID, "2026")
     first = pages[0]
     assert first.nav_links == []
+    assert first.heading_mark is HeadingMark.LEAD
     assert first.show_quarters is True
     assert len(first.highlight_months) == 1
     assert first.highlight_months[0].id == "month-2026-01-01"
@@ -205,6 +207,11 @@ def test_generated_year_crumb_links_to_annual_and_inverts_thursday_month():
     assert "padded_link(<annual>)[2026]" in w01
     assert "text(size: h1)[/]" in w01
     assert "Week 1 <2026W01>" in w01
+    heading = w01[w01.index("stack(") : w01.index("Week 1 <2026W01>")]
+    assert "columns: (auto, auto)" in heading
+    assert "column-gutter: 6pt" in heading
+    assert "pad(right: 3mm" not in heading
+    assert heading.index("line(length: 0.844em") < heading.index("padded_link(<annual>)[2026]")
     assert w01.count("Calendar") == 0
     assert "Calendar" not in w01
     assert "Monday 29" in w01
