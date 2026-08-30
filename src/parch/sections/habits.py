@@ -8,29 +8,19 @@ from parch.calendar.month import Month
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.mos.contents_mark import body_size_token, heading_height_token, lead_title
-from parch.compose.page_data import PageData
-from parch.sections.annual import Annual
+from parch.mos.contents_mark import body_size_token, heading_height_token, trail_strip
+from parch.compose.page_data import HeadingMark, PageData
 
 _INDEX_LEFT_INSET = "4mm"
 _INDEX_BOTTOM_INSET = "4mm"
 _INDEX_ROW_GUTTER = "3mm"
-_HEADER_ROW = "16mm"
-_HABIT_HEADER = """grid.cell(
-  inset: 0pt,
-  stroke: regular_stroke,
-  box(
-    width: 100%,
-    height: 100%,
-    place(line(start: (0%, 100%), end: (100%, 0%), stroke: regular_stroke))
-  )
-)"""
+_HEADER_ROW = "regular_height"
 _BOX = "grid.cell(stroke: regular_stroke, [])"
 
 
 class Habits:
     ID = "habits"
-    DEFAULT_COLUMNS = 6
+    DEFAULT_COLUMNS = 4
 
     def __init__(
         self,
@@ -70,6 +60,7 @@ class Habits:
                     month_link_id=self.month_id,
                     show_quarters=False,
                     nav_links=[],
+                    heading_mark=HeadingMark.TRAIL,
                 )
             )
         return out
@@ -77,11 +68,22 @@ class Habits:
     def _range(self):
         return walk(self.configurator.start_date().month(), self.configurator.end_date().month())
 
-    def _year(self) -> int:
-        return self.configurator.start_date().year
-
-    def _year_cell(self, manifest: Manifest) -> str:
-        return manifest.link_or_content(Annual.ID, str(self._year()))
+    def _heading(self, manifest: Manifest, habits_cell: str) -> str:
+        title = f"text(size: h1, {habits_cell})"
+        mark = trail_strip(
+            manifest,
+            heading_height_token(self.configurator),
+            body_size_token(self.configurator),
+            chip=None,
+        )
+        if not mark:
+            return title
+        return f"""stack(
+  dir: ltr,
+  spacing: 1fr,
+  {mark},
+  {title}
+)"""
 
     def _index(self, manifest: Manifest, months: list[Month]) -> str:
         n = len(months)
@@ -111,7 +113,6 @@ class Habits:
     columns: 1fr,
     rows: ({", ".join(["1fr"] * n)}),
     align: horizon + left,
-    stroke: (bottom: regular_stroke),
     inset: (x: 4pt, y: 0pt),
 {",\n".join(rows)}
   )
@@ -119,39 +120,41 @@ class Habits:
         else:
             body = "[]"
         habits_cell = f"[{self.i18n.t('habits')} <{self.ID}>]"
-        breadcrumb = f"""grid(
-  columns: (auto, auto, 1fr),
-  column-gutter: 6pt,
-  align: horizon,
-  text(size: h1, {self._year_cell(manifest)}),
-  text(size: h1)[/],
-  text(size: h1, {habits_cell})
-)"""
-        breadcrumb = lead_title(manifest, heading_height_token(self.configurator), breadcrumb, body_size_token(self.configurator))
         return f"""#grid(
   columns: 1fr,
   rows: (auto, 1fr),
   row-gutter: {_INDEX_ROW_GUTTER},
   inset: (left: {_INDEX_LEFT_INSET}, bottom: {_INDEX_BOTTOM_INSET}),
-  {breadcrumb},
+  {self._heading(manifest, habits_cell)},
   {body}
 )"""
 
-    def _month_title(self, manifest: Manifest, month: Month) -> str:
-        year = str(month.day.year)
-        year_cell = manifest.link_or_content(Annual.ID, year)
-        habits_cell = manifest.link_or_content(self.ID, self.i18n.t("habits"))
+    def _mos_right(self) -> bool:
+        return (
+            self.configurator.dig_bang("planner", "params", "mos_layout")["side_menu_position"]
+            == "right"
+        )
+
+    def _month_label(self, month: Month) -> str:
         full = self.i18n.t(f"months.full.{month.name}")
-        page_id = self.month_id(month)
-        return f"""grid(
-  columns: (auto, auto, auto, auto, auto),
-  column-gutter: 6pt,
-  align: horizon,
-  text(size: h1, {year_cell}),
-  text(size: h1)[/],
-  text(size: h1, {habits_cell}),
-  text(size: h1)[/],
-  text(size: h1)[{full}<{page_id}>]
+        return f"text(size: h1)[{full}<{self.month_id(month)}>]"
+
+    def _seated_month_label(self, month: Month) -> str:
+        full = self.i18n.t(f"months.full.{month.name}")
+        return (
+            "text(size: h1, box(inset: (top: 0.25em), "
+            f'text(top-edge: "cap-height")[{full}<{self.month_id(month)}>]))'
+        )
+
+    def _month_title(self, manifest: Manifest, month: Month) -> str:
+        habits_cell = manifest.link_or_content(self.ID, self.i18n.t("habits"))
+        habits = f"text(size: h1, {habits_cell})"
+        if not self._mos_right():
+            return habits
+        return f"""stack(
+  dir: ttb,
+  {habits},
+  {self._month_label(month)}
 )"""
 
     def _month_grid(self, manifest: Manifest, month: Month) -> str:
@@ -162,17 +165,13 @@ class Habits:
         padded = (list(self.names) + [""] * n_habits)[:n_habits]
         headers = ["[]"] + [_habit_header(name) for name in padded]
         cells = [", ".join(headers)]
-        rule = f"grid.cell(colspan: {1 + n_habits}, inset: 0pt, fill: black, [])"
         for day in days:
             row = [self._date_label(manifest, day)]
             row.extend([_BOX] * n_habits)
             cells.append(", ".join(row))
             row_sizes.append("1fr")
-            if day.weekday_name == "friday":
-                cells.append(rule)
-                row_sizes.append("0.4mm")
         rows = ", ".join(row_sizes)
-        return f"""grid(
+        grid = f"""grid(
   columns: ({cols}),
   rows: ({rows}),
   align: horizon,
@@ -180,6 +179,15 @@ class Habits:
   column-gutter: 0pt,
   row-gutter: 0pt,
   {",\n  ".join(cells)}
+)"""
+        if self._mos_right():
+            return grid
+        return f"""grid(
+  columns: 1fr,
+  rows: (auto, 1fr),
+  align: horizon + left,
+  {self._seated_month_label(month)},
+  {grid}
 )"""
 
     def _date_label(self, manifest: Manifest, day: Day) -> str:
@@ -200,19 +208,14 @@ def _escape_typst(text: str) -> str:
 
 def _habit_header(name: str) -> str:
     if not name:
-        return _HABIT_HEADER
+        return _BOX
     label = _escape_typst(name)
     return (
         "grid.cell(\n"
         "  inset: 0pt,\n"
         "  stroke: regular_stroke,\n"
-        "  box(\n"
-        "    width: 100%,\n"
-        "    height: 100%,\n"
-        "    clip: true,\n"
-        "    align(center + horizon, text["
+        "  align(center + horizon, text["
         + label
         + "])\n"
-        "  )\n"
         ")"
     )

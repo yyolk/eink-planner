@@ -109,7 +109,7 @@ pages = 16
 card_rows = 5
 
 [section.habits]
-habit_columns = 6
+habit_columns = 4
 
 [section.meetings]
 index_pages = 1
