@@ -150,10 +150,36 @@ def _little_params(ctx: _Ctx, extra: Any) -> dict[str, Any]:
     return {**_plain(base), **_plain(extra)}
 
 
+def _cover_dest(ctx: _Ctx) -> str | None:
+    """Contents if that source is on, else Annual."""
+    if ctx.manifest.source("index"):
+        return "index"
+    if ctx.manifest.source("annual"):
+        return "annual"
+    return None
+
+
 def _cover(ctx: _Ctx, params: dict[str, Any]) -> list[Page]:
     name = str(params.get("name", "Planner"))
     font_size = parse(params.get("font_size", "36pt"))
-    body = Box(child=Text(name, size=font_size), align="center")
+    lines = [line for line in name.split("\n") if line.strip()]
+    dest = _cover_dest(ctx)
+    if not lines:
+        child: Node | None = None
+    else:
+        year: Node = maybe_link(ctx.manifest, dest, Text(lines[0], size=font_size))
+        extras = [
+            Text(line, size=Length(font_size.value * 0.45, font_size.unit))
+            for line in lines[1:]
+        ]
+        if extras:
+            child = Col(
+                children=[year, *extras],
+                gap=Length(font_size.value * 0.12, font_size.unit),
+            )
+        else:
+            child = year
+    body = Box(child=child, align="center")
     return [ctx.framed(body, page_id=None, title=None, chrome=False)]
 
 

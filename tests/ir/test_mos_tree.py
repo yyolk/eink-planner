@@ -1,7 +1,7 @@
-from parch.config import load
+from parch.config import StrictDict, load
 from parch.i18n import I18n
 from parch.ir.mos import build_planner
-from parch.ir.nodes import Anchor, Link, collect_anchors, collect_links, walk
+from parch.ir.nodes import Anchor, Link, Text, collect_anchors, collect_links, walk
 from parch.compose.coordinator import Coordinator
 from tests.helpers import base_config
 from tests.toml_fixtures import short_january
@@ -111,3 +111,43 @@ def test_nomad_registers_extra_sections_and_chrome_flags():
             )
         ):
             assert page.chrome is False, page.id
+
+def _cover_links(doc):
+    return [n.target_id for n in walk(doc.pages[0].body) if isinstance(n, Link)]
+
+
+def _omit(dto, *names):
+    data = dto.to_plain()
+    for section in data["planner"]["sections"]:
+        if section["name"] in names:
+            section["enabled"] = False
+    return StrictDict(data)
+
+
+def test_cover_year_taps_index_when_present():
+    doc = build_planner(_short_dto(), _i18n())
+    assert _cover_links(doc) == ["index"]
+    year = next(n for n in walk(doc.pages[0].body) if isinstance(n, Link))
+    assert isinstance(year.child, Text) and year.child.text == "2026"
+
+
+def test_cover_year_taps_annual_when_index_absent():
+    doc = build_planner(_omit(_short_dto(), "index"), _i18n())
+    assert _cover_links(doc) == ["annual"]
+
+
+def test_cover_year_stays_plain_without_doors():
+    doc = build_planner(_omit(_short_dto(), "index", "annual"), _i18n())
+    assert _cover_links(doc) == []
+    assert any(isinstance(n, Text) and n.text == "2026" for n in walk(doc.pages[0].body))
+
+
+def test_cover_only_first_line_is_the_door():
+    data = _short_dto().to_plain()
+    data["planner"]["sections"][0]["params"]["name"] = "2026\n\nPlanner"
+    doc = build_planner(StrictDict(data), _i18n())
+    links = [n for n in walk(doc.pages[0].body) if isinstance(n, Link)]
+    assert len(links) == 1
+    assert links[0].target_id == "index"
+    assert isinstance(links[0].child, Text) and links[0].child.text == "2026"
+    assert any(isinstance(n, Text) and n.text == "Planner" for n in walk(doc.pages[0].body))
