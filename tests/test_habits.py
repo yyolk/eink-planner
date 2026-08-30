@@ -247,13 +247,15 @@ def _assert_heading_pair(title: str, name: str = "January") -> None:
     """Habits then January on one left-aligned line, descender seated."""
     needle = f"{name}<habits-{name.lower()}>"
     assert "dir: ttb" not in title
+    assert _TRAIL_MARK not in title
+    assert _MARK_RULE not in title
     assert "column-gutter: 6pt" not in title
     assert "text(size: h1)[/]" not in title
     assert "2026 /" not in title
     assert "spacing: 1fr" not in title
     assert "dir: ltr" in title
     assert "spacing: 0.5em" in title
-    assert "width: 100%" in title
+    assert "width: 100% - 3mm - 0.844em" in title
     assert "align(bottom + left" in title
     assert "height: 100%" in title
     assert "padded_link(<habits>)" in title
@@ -828,8 +830,11 @@ def test_index_heading_is_trail_strip_when_contents_on():
     assert "January<habits-january>" in month_heading
     assert "padded_link(<habits>)" in month_heading
     assert month_heading.index("padded_link(<habits>)") < month_heading.index("January<habits-january>")
+    pair = month_heading[month_heading.index("dir: ltr") : month_heading.index("January<habits-january>")]
+    assert _TRAIL_MARK not in pair
+    assert _MARK_RULE not in pair
     assert "align(bottom + left" in month_heading
-    assert "width: 100%" in month_heading
+    assert "width: 100% - 3mm - 0.844em" in month_heading
     assert "height: 100%" in month_heading
     assert "spacing: 0.5em" in month_heading
     assert month.index("January<habits-january>") < month.index(_TRAIL_MARK)
@@ -863,8 +868,11 @@ def test_mos_right_month_mark_trails_alone_left_of_rail():
     assert "dir: ttb" not in heading
     assert "column-gutter: 6pt" not in heading
     assert heading.index("padded_link(<habits>)") < heading.index("January<habits-january>")
+    pair = heading[heading.index("dir: ltr") : heading.index("January<habits-january>")]
+    assert _TRAIL_MARK not in pair
+    assert _MARK_RULE not in pair
     assert "align(bottom + left" in heading
-    assert "width: 100%" in heading
+    assert "width: 100% - 3mm - 0.844em" in heading
     assert "height: 100%" in heading
     assert "spacing: 0.5em" in heading
     assert 'bottom-edge: "descender"' in heading

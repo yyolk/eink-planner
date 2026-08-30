@@ -134,7 +134,7 @@ class Habits:
         full = self.i18n.t(f"months.full.{month.name}")
         page_id = self.month_id(month)
         return f"""box(
-  width: 100%,
+  width: 100% - 3mm - 0.844em,
   height: 100%,
   inset: (bottom: 0.25em),
   align(bottom + left, stack(
