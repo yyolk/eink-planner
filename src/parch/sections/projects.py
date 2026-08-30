@@ -7,9 +7,8 @@ import math
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.mos.contents_mark import body_size_token, heading_height_token, lead_title
+from parch.mos.contents_mark import body_size_token, heading_height_token, trail_strip
 from parch.compose.page_data import PageData
-from parch.sections.annual import Annual
 from parch.sections._shared import _length_mm
 
 # Match the index page chrome in `_index` so row capacity tracks the layout.
@@ -20,8 +19,6 @@ _ROW_HEIGHT = "2 * regular_height"
 _ROW_HEIGHT_MULT = 2
 # Two figures share an x, like Review week numbers. Write-in is the 1fr paper.
 _NUM_COL = "2em"
-# Fat cards: sentence + two wrap lines on Nomad-sized 5-row boards.
-_CARD_BASELINES = 3
 
 
 class Projects:
@@ -99,22 +96,22 @@ class Projects:
             out.append(PageData(raw_typst=True, content=self._board(manifest, index)))
         return out
 
-    def _year(self) -> int:
-        return self.configurator.start_date().year
-
-    def _year_cell(self, manifest: Manifest) -> str:
-        return manifest.link_or_content(Annual.ID, str(self._year()))
-
-    def _breadcrumb(self, manifest: Manifest, projects_cell: str) -> str:
-        crumb = f"""grid(
-  columns: (auto, auto, 1fr),
-  column-gutter: 6pt,
-  align: horizon,
-  text(size: h1, {self._year_cell(manifest)}),
-  text(size: h1)[/],
-  text(size: h1, {projects_cell})
+    def _heading(self, manifest: Manifest, projects_cell: str) -> str:
+        title = f"text(size: h1, {projects_cell})"
+        mark = trail_strip(
+            manifest,
+            heading_height_token(self.configurator),
+            body_size_token(self.configurator),
+            chip=None,
+        )
+        if not mark:
+            return title
+        return f"""stack(
+  dir: ltr,
+  spacing: 1fr,
+  {mark},
+  {title}
 )"""
-        return lead_title(manifest, heading_height_token(self.configurator), crumb, body_size_token(self.configurator))
 
     def _index_projects_cell(self, manifest: Manifest, page: int) -> str:
         label = self.i18n.t("projects")
@@ -125,17 +122,24 @@ class Projects:
 
     def _index_row(self, manifest: Manifest, index: int) -> str:
         bid = self.board_id(index)
-        number = f"[{index}]"
-        hit = f"box(width: 100%, height: 100%, align(horizon + left, {number}))"
+        inner = (
+            "grid(\n"
+            f"      columns: ({_NUM_COL}, 1fr),\n"
+            "      rows: 1fr,\n"
+            "      align: horizon + left,\n"
+            "      inset: 0pt,\n"
+            f"      [{index}],\n"
+            "      []\n"
+            "    )"
+        )
+        band = f"box(width: 100%, height: 100%, {inner})"
         if manifest.source(bid):
-            # Number cell only — write-in paper stays unlinkable.
-            hit = f"padded_link(<{bid}>, {hit})"
+            band = f"padded_link(<{bid}>, {band})"
         return (
             "  grid.cell(\n"
             "    align: horizon + left,\n"
-            f"    {hit}\n"
-            "  ),\n"
-            "  []"
+            f"    {band}\n"
+            "  )"
         )
 
     def _index(self, manifest: Manifest, page: int, start: int, end: int) -> str:
@@ -145,9 +149,9 @@ class Projects:
             # Fixed 2×-regular_height rows. Leftover last pages keep the same
             # height (white below) — never 1fr-fatten a short leftover.
             body = f"""grid(
-  columns: ({_NUM_COL}, 1fr),
+  columns: 1fr,
   rows: ({", ".join([_ROW_HEIGHT] * n)}),
-  align: horizon,
+  align: horizon + left,
   stroke: (bottom: regular_stroke),
   inset: (x: 4pt, y: 2pt),
 {",\n".join(rows)}
@@ -159,23 +163,8 @@ class Projects:
   rows: (auto, 1fr),
   row-gutter: {_INDEX_ROW_GUTTER},
   inset: (left: {_INDEX_LEFT_INSET}, bottom: {_INDEX_BOTTOM_INSET}),
-  {self._breadcrumb(manifest, self._index_projects_cell(manifest, page))},
+  {self._heading(manifest, self._index_projects_cell(manifest, page))},
   {body}
-)"""
-
-    def _card(self) -> str:
-        # Explicit lines at 1/4, 2/4, 3/4 of the inner box. A 1fr cell
-        # bottom-stroke sits on the frame and rounds to 2px on Nomad.
-        lines = "\n    ".join(
-            f"place(dy: {frac} * size.height, line(length: size.width, stroke: 0.2pt + black))"
-            for frac in ("1/4", "2/4", "3/4")
-        )
-        return f"""grid.cell(
-  stroke: regular_stroke + black,
-  inset: (x: 3pt, y: 4pt),
-  layout(size => {{
-    {lines}
-  }})
 )"""
 
     def _board(self, manifest: Manifest, index: int) -> str:
@@ -184,22 +173,13 @@ class Projects:
         doing = self.i18n.t("doing")
         done = self.i18n.t("done")
         bid = self.board_id(index)
-        n = self.pages_num
-        header = f"""grid(
-  columns: (1fr, auto),
-  column-gutter: 6pt,
+        projects_cell = manifest.link_or_content(self.board_index_id(index), projects)
+        name_line = f"""grid(
+  columns: 1fr,
   align: horizon,
   grid.cell(stroke: (bottom: regular_stroke), []),
-  text(size: 0.85em)[{index}/{n} <{bid}>]
 )"""
-        card = self._card()
-        cards = ",\n    ".join([card] * self.card_rows)
-        column = f"""grid(
-  columns: 1fr,
-  rows: ({", ".join(["1fr"] * self.card_rows)}),
-  row-gutter: 2mm,
-    {cards}
-)"""
+        quiet = f"text(size: 0.85em)[{index}]"
         kanban = f"""grid(
   columns: (1fr, 1fr, 1fr),
   rows: (auto, 1fr),
@@ -208,16 +188,18 @@ class Projects:
   align(center)[*{todo}*],
   align(center)[*{doing}*],
   align(center)[*{done}*],
-  {column},
-  {column},
-  {column}
+  rect_pattern(dotted),
+  rect_pattern(dotted),
+  rect_pattern(dotted)
 )"""
-        return f"""#grid(
+        return f"""#[] <{bid}>
+#grid(
   columns: 1fr,
-  rows: (auto, auto, 1fr),
+  rows: (auto, auto, auto, 1fr),
   row-gutter: 2.5mm,
   inset: (left: 4mm, bottom: 4mm),
-  {self._breadcrumb(manifest, manifest.link_or_content(self.board_index_id(index), projects))},
-  {header},
+  {self._heading(manifest, projects_cell)},
+  {quiet},
+  {name_line},
   {kanban}
 )"""
