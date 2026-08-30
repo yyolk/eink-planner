@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
-
+from parch.compose.ctx import ComposeCtx
 from parch.mos.page_data import PageData
 
 
@@ -17,8 +16,9 @@ def _escape(text: str) -> str:
 
 
 class CoverPlain:
-    def __init__(self, section_name: str, name: str, font_size: str, **_rest: Any) -> None:
+    def __init__(self, section_name: str, ctx: ComposeCtx, name: str, font_size: str) -> None:
         self.section_name = section_name
+        self.ctx = ctx
         self.name = name
         self.font_size = font_size
 

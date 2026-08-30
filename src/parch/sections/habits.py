@@ -2,13 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from parch.calendar import walk
 from parch.calendar.day import Day
 from parch.calendar.month import Month
-from parch.i18n import I18n
-from parch.mos.configurator import Configurator
+from parch.compose.ctx import ComposeCtx
 from parch.mos.manifest import Manifest
 from parch.mos.contents_mark import body_size_token, heading_height_token, lead_title
 from parch.mos.page_data import PageData
@@ -37,15 +34,13 @@ class Habits:
     def __init__(
         self,
         section_name: str,
-        i18n: I18n,
-        configurator: Configurator,
+        ctx: ComposeCtx,
         habit_columns: int = DEFAULT_COLUMNS,
         names: list[str] | None = None,
-        **_rest: Any,
     ) -> None:
         self.section_name = section_name
-        self.i18n = i18n
-        self.configurator = configurator
+        self.i18n = ctx.i18n
+        self.configurator = ctx.configurator
         self.habit_columns = int(habit_columns)
         self.names = list(names) if names else []
 

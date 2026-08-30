@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from parch import ConfigError
+from parch.compose.ctx import ComposeCtx
 from parch.config import StrictDict, _to_plain
 from parch.i18n import I18n
 from parch.mos.chase import CHASES
@@ -16,6 +17,7 @@ class Coordinator:
     def __init__(self, dto: StrictDict | dict[str, Any], i18n: I18n, chase_name: str = "mos") -> None:
         self.i18n = i18n
         self.configurator = Configurator(dto)
+        self.ctx = ComposeCtx(i18n=self.i18n, configurator=self.configurator)
         self.manifest = Manifest()
         if chase_name not in CHASES:
             raise ConfigError(f"unknown chase: {chase_name}")
@@ -55,9 +57,7 @@ class Coordinator:
             raise ConfigError(f"unknown section: {klass_name}")
         return klass(
             section_name=section_name,
-            i18n=self.i18n,
-            manifest=self.manifest,
-            configurator=self.configurator,
+            ctx=self.ctx,
             **_normalize_keys(params),
         )
 

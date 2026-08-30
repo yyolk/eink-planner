@@ -1,7 +1,7 @@
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
 from parch.sections.annual import Annual
-from tests.helpers import make_configurator
+from tests.helpers import compose_ctx, make_configurator
 
 MONTHS = (
     "january",
@@ -46,8 +46,7 @@ def _i18n() -> I18n:
 def _annual(start_date: str = "2026-01-01", end_date: str = "2026-12-31") -> Annual:
     return Annual(
         section_name="annual",
-        i18n=_i18n(),
-        configurator=make_configurator(start_date=start_date, end_date=end_date),
+        ctx=compose_ctx(i18n=_i18n(), configurator=make_configurator(start_date=start_date, end_date=end_date)),
         little_calendar=LITTLE,
     )
 

@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from parch.calendar import walk
 from parch.calendar.week import Week
-from parch.i18n import I18n
-from parch.mos.configurator import Configurator
+from parch.compose.ctx import ComposeCtx
 from parch.mos.manifest import Manifest
 from parch.mos.page_data import PageData
 from parch.mos.pages.weekly import Weekly as WeeklyPage
@@ -18,18 +15,16 @@ class Weekly:
     def __init__(
         self,
         section_name: str,
-        i18n: I18n,
-        configurator: Configurator,
+        ctx: ComposeCtx,
         column_gutter: str,
         pattern: str = "dotted",
-        **_rest: Any,
     ) -> None:
         self.section_name = section_name
-        self.i18n = i18n
-        self.configurator = configurator
-        self.weekday_start = configurator.weekday_start()
-        self.first_week_day = configurator.start_date().beginning_of_month().beginning_of_week()
-        self.last_week_day = configurator.end_date().end_of_month().end_of_week()
+        self.i18n = ctx.i18n
+        self.configurator = ctx.configurator
+        self.weekday_start = self.configurator.weekday_start()
+        self.first_week_day = self.configurator.start_date().beginning_of_month().beginning_of_week()
+        self.last_week_day = self.configurator.end_date().end_of_month().end_of_week()
         self.column_gutter = column_gutter
         self.pattern = pattern
 

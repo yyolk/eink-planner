@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from parch.sections.cover_plain import CoverPlain
+from tests.helpers import compose_ctx
 
 
 def _typst(name: str, font_size: str = "36pt") -> str:
-    pages = CoverPlain("cover", name, font_size).pages(None)
+    pages = CoverPlain("cover", compose_ctx(), name, font_size).pages(None)
     assert len(pages) == 1
     assert pages[0].raw_typst is True
     return pages[0].content

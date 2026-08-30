@@ -9,7 +9,7 @@ from parch.sections.annual import Annual
 from parch.sections.daily_notes import DailyNotes
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
-from tests.helpers import base_config, load_default, make_configurator
+from tests.helpers import base_config, compose_ctx, load_default, make_configurator
 from tests.toml_fixtures import omit_toml_sections
 
 NOMAD = base_config("supernote-nomad")
@@ -45,8 +45,7 @@ def _section(
 ) -> DailyNotes:
     return DailyNotes(
         section_name="daily_notes",
-        i18n=_i18n(),
-        configurator=make_configurator(start_date=start_date, end_date=end_date),
+        ctx=compose_ctx(i18n=_i18n(), configurator=make_configurator(start_date=start_date, end_date=end_date)),
         pages=pages,
         pattern=pattern,
     )
