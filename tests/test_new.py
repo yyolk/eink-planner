@@ -14,6 +14,21 @@ from tests.helpers import base_config
 NOMAD = base_config("supernote-nomad")
 
 
+@pytest.mark.parametrize(
+    "stem",
+    ["supernote-nomad-lined", "kindle-scribe-mos-right-lined"],
+)
+def test_new_from_lined_siblings(tmp_path, stem):
+    out = tmp_path / f"{stem}.toml"
+    rc = main(["new", "--from", stem, "--yes", "-o", str(out)])
+    assert rc == 0
+    data = tomllib.loads(out.read_text(encoding="utf-8"))
+    assert data["device"]["name"] == stem
+    assert data["style"]["scratch_pad"] == "lined"
+    assert "pattern" not in data["section"]["daily_notes"]
+    load(out)
+
+
 def test_new_yes_year(tmp_path, capsys):
     out = tmp_path / "mine.toml"
     rc = main(

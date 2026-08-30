@@ -11,16 +11,50 @@ from tests.toml_fixtures import _minimal, omit_toml_sections
 from tests.helpers import base_config, load_default
 
 NOMAD = base_config("supernote-nomad")
+NOMAD_LINED = base_config("supernote-nomad-lined")
 NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
+NOMAD_MOS_RIGHT_LINED = base_config("supernote-nomad-mos-right-lined")
 MOS_LEFT = base_config("158x210-mos-left")
 MOS_LEFT_LINED = base_config("158x210-mos-left-lined")
 MOS_RIGHT = base_config("158x210-mos-right")
 MOS_RIGHT_LINED = base_config("158x210-mos-right-lined")
 SCRIBE = base_config("kindle-scribe")
+SCRIBE_LINED = base_config("kindle-scribe-lined")
 SCRIBE_MOS_RIGHT = base_config("kindle-scribe-mos-right")
+SCRIBE_MOS_RIGHT_LINED = base_config("kindle-scribe-mos-right-lined")
+
+_SHIPPED = [
+    NOMAD,
+    NOMAD_LINED,
+    NOMAD_MOS_RIGHT,
+    NOMAD_MOS_RIGHT_LINED,
+    MOS_LEFT,
+    MOS_LEFT_LINED,
+    MOS_RIGHT,
+    MOS_RIGHT_LINED,
+    SCRIBE,
+    SCRIBE_LINED,
+    SCRIBE_MOS_RIGHT,
+    SCRIBE_MOS_RIGHT_LINED,
+]
+_NOMAD_WITH_PROJECTS = {NOMAD, NOMAD_LINED}
+_NOMAD_WITH_EXTRAS = {
+    NOMAD,
+    NOMAD_LINED,
+    NOMAD_MOS_RIGHT,
+    NOMAD_MOS_RIGHT_LINED,
+}
+_LINED = {
+    MOS_LEFT_LINED,
+    MOS_RIGHT_LINED,
+    NOMAD_LINED,
+    NOMAD_MOS_RIGHT_LINED,
+    SCRIBE_LINED,
+    SCRIBE_MOS_RIGHT_LINED,
+}
 
 
-@pytest.mark.parametrize("path", [NOMAD, NOMAD_MOS_RIGHT, MOS_LEFT, MOS_LEFT_LINED, MOS_RIGHT, MOS_RIGHT_LINED, SCRIBE, SCRIBE_MOS_RIGHT])
+@pytest.mark.parametrize("path", _SHIPPED)
 def test_parse_shipped_toml_profiles(path: Path):
     dto = load(path)
     assert dto["chase"] == "mos"
@@ -28,9 +62,9 @@ def test_parse_shipped_toml_profiles(path: Path):
     cfg = Configurator(dto)
     names = [section["name"] for section in cfg.enabled_sections()]
     expected = ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
-    if path == NOMAD:
+    if path in _NOMAD_WITH_PROJECTS:
         expected = expected + ["projects"]
-    if path in {NOMAD, NOMAD_MOS_RIGHT}:
+    if path in _NOMAD_WITH_EXTRAS:
         expected = expected + ["habits", "review", "tasks", "meetings"]
     expected = expected + ["colophon"]
     assert names == expected
@@ -122,12 +156,20 @@ def test_nomad_projects_pages_and_card_rows():
     assert names[-5] == "habits"
 
 
-def test_lined_scratch_pad():
-    dto = load(MOS_LEFT_LINED)
-    assert dto["planner"]["params"]["scratch_pad"] == "lined"
+def _daily_notes_params(dto):
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")
-    notes = next(c for c in daily["params"]["right_column"] if c["class"] == "notes")
-    assert notes["params"]["pattern"] == "dotted"
+    for col in ("left_column", "right_column"):
+        for comp in daily["params"].get(col) or []:
+            if comp["class"] == "notes":
+                return comp["params"]
+    raise AssertionError("daily notes component missing")
+
+
+@pytest.mark.parametrize("path", sorted(_LINED, key=lambda p: p.name))
+def test_lined_scratch_pad(path: Path):
+    dto = load(path)
+    assert dto["planner"]["params"]["scratch_pad"] == "lined"
+    assert _daily_notes_params(dto)["pattern"] == "dotted"
     extra = next(s for s in dto["planner"]["sections"] if s["name"] == "daily_notes")
     assert extra["params"]["pattern"] == "lined"
 

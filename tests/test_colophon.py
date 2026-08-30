@@ -364,9 +364,13 @@ def test_generate_cmd_attaches_provenance_but_page_stays_quiet(tmp_path, monkeyp
 def test_shipped_profiles_include_colophon_where_shipped():
     include = {
         "supernote-nomad.toml",
+        "supernote-nomad-lined.toml",
         "supernote-nomad-mos-right.toml",
+        "supernote-nomad-mos-right-lined.toml",
         "kindle-scribe.toml",
+        "kindle-scribe-lined.toml",
         "kindle-scribe-mos-right.toml",
+        "kindle-scribe-mos-right-lined.toml",
         "158x210-mos-left.toml",
         "158x210-mos-left-lined.toml",
         "158x210-mos-right.toml",

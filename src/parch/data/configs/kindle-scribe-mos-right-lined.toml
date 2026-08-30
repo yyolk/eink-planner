@@ -1,0 +1,106 @@
+# Kindle Scribe MOS-right lined
+# Kindle Scribe MOS-right sibling with house scratch pad lined.
+# Daily on-page notes stay dotted; other notes areas inherit lined from style.
+# Kindle Scribe MOS-right
+# 1860×2480 @ 300 PPI → 157.48 × 209.97 mm
+# MOS strip on the physical right; this is the left-handed writing layout
+# (nav opposite the writing hand).
+# left/right under daily are physical column tracks.
+# columns = ["5fr", "3fr"] so notes stay wide and schedule stays narrow.
+
+sections = [
+  "cover",
+  "index",
+  "annual",
+  "quarterly",
+  "monthly",
+  "weekly",
+  "daily",
+  "daily_notes",
+  "colophon",
+]
+
+[device]
+name = "kindle-scribe-mos-right-lined"
+width = "157.48mm"
+height = "209.97mm"
+ppi = 300
+
+[calendar]
+year = 2026
+week_starts = "Monday"
+
+[style]
+scratch_pad = "lined"
+
+[style.stroke]
+regular = "0.4pt"
+thick = "0.8pt"
+
+[style.type]
+body = "10pt"
+h1 = "10mm"
+
+[style.margin]
+top = "5mm"
+bottom = "0mm"
+left = "5mm"
+right = "0mm"
+
+[style.gutter]
+column = "10pt"
+
+# [mos] → Months on the Side (vertical side menu navigation)
+# side_menu left|right is the physical side of the MOS strip
+[mos]
+side_menu = "right"
+side_menu_width = "10mm"
+reverse_months_quarters = true
+menu_rotate = "270deg"
+column_gutter = "2mm"
+row_gutter = "2mm"
+
+[section.cover]
+title = "2026"
+font_size = "48pt"
+
+[section.annual]
+show_month_name = true
+row_gutter = "5pt"
+
+[section.quarterly]
+months_column = "right"
+show_month_name = true
+
+[section.monthly]
+week_placement = "right"
+week_label_rotation = "90deg"
+daily_cell_height = "2.5cm"
+
+[section.weekly]
+column_gutter = "5pt"
+
+[section.daily]
+# column tracks are left-to-right, so notes stay 5fr and schedule stays 3fr
+columns = ["5fr", "3fr"]
+item_spacing = "5mm"
+
+[section.daily.left.priorities]
+count = 5
+
+[section.daily.left.notes]
+pattern = "dotted"
+title_height = "5mm"
+
+[section.daily.right.schedule]
+hour_from = 8
+hour_to = 20
+time_format = "%k"
+trailing_half_hour = true
+
+[section.daily.right.little_calendar]
+week_placement = "right"
+inset = "5pt"
+
+[section.daily_notes]
+pages = 2
