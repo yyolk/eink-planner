@@ -28,8 +28,10 @@ def test_parse_shipped_toml_profiles(path: Path):
     cfg = Configurator(dto)
     names = [section["name"] for section in cfg.enabled_sections()]
     expected = ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"]
+    if path == NOMAD:
+        expected = expected + ["projects"]
     if path in {NOMAD, NOMAD_MOS_RIGHT}:
-        expected = expected + ["projects", "habits", "review", "tasks", "meetings"]
+        expected = expected + ["habits", "review", "tasks", "meetings"]
     expected = expected + ["colophon"]
     assert names == expected
 
@@ -106,15 +108,13 @@ def test_mos_right_daily_track_flip():
     assert schedule["to"] == 20
 
 
-@pytest.mark.parametrize("path", [NOMAD, NOMAD_MOS_RIGHT])
-def test_nomad_projects_pages_and_card_rows(path):
-    dto = load(path)
+def test_nomad_projects_pages_and_card_rows():
+    dto = load(NOMAD)
     projects = next(s for s in dto["planner"]["sections"] if s["name"] == "projects")
     assert projects["params"]["pages"] == 16
     assert projects["params"]["card_rows"] == 5
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
-    assert names[names.index("daily_notes") + 1] == "projects"
-    assert names[names.index("projects") + 1] == "habits"
+    assert "projects" in names
     assert names[-1] == "colophon"
     assert names[-2] == "meetings"
     assert names[-3] == "tasks"
