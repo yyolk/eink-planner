@@ -155,7 +155,7 @@ padding
 #pagebreak()
 text(size: h1)[January<month-2026-01-01>]
 #pagebreak()
-text(size: h1)[Week 1 <2026W01>]
+text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4]
 #pagebreak()
 text(size: h1)[1 <2026-01-01>]
 padded_link(<daily-note-2026-01-01-page-1>)
