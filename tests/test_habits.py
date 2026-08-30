@@ -243,6 +243,31 @@ daily_cell_height = "16mm"
     assert "grid.cell(fill: black, text(white)[#padded_link(<habits-january>, [Habits])])" not in habit_jan
 
 
+def _assert_heading_pair(title: str, name: str = "January") -> None:
+    """Habits then January on one left-aligned line, descender seated."""
+    needle = f"{name}<habits-{name.lower()}>"
+    assert "dir: ttb" not in title
+    assert _TRAIL_MARK not in title
+    assert _MARK_RULE not in title
+    assert "column-gutter: 6pt" not in title
+    assert "text(size: h1)[/]" not in title
+    assert "2026 /" not in title
+    assert "spacing: 1fr" not in title
+    assert "dir: ltr" in title
+    assert "spacing: 0.5em" in title
+    assert "width: 90%" in title
+    assert "width: 100%" not in title
+    assert "height: 100%" not in title
+    assert "align(horizon + left" in title
+    assert "padded_link(<habits>)" in title
+    assert needle in title
+    assert title.index("padded_link(<habits>)") < title.index(needle)
+    assert 'bottom-edge: "descender"' in title
+    assert "inset: (bottom: 0.25em)" in title
+    assert 'top-edge: "cap-height"' not in title
+    assert "inset: (top: 0.25em)" not in title
+
+
 def test_habit_month_pages_set_trail_mark_alone():
     dto = parse_toml(_minimal(enable=["habits"], sections=""), source="trail.toml")
     habits = _habits(dto)
@@ -270,18 +295,14 @@ def test_habit_month_pages_set_trail_mark_alone():
         assert page.show_quarters is False
         title = page.title or ""
         content = page.content
-        assert "2026 /" not in title
-        assert "text(size: h1)[/]" not in title
-        assert "column-gutter: 6pt" not in title
-        assert "padded_link(<habits>)" in title
-        assert f"{name}<habits-{name.lower()}>" in content
-        assert f"{name}<habits-{name.lower()}>" not in title
-        assert 'inset: (top: 0.25em)' in content
-        assert 'top-edge: "cap-height"' in content
-        assert 'top-edge: "cap-height"' not in title
+        _assert_heading_pair(title, name)
+        assert f"{name}<habits-{name.lower()}>" not in content
+        assert 'bottom-edge: "descender"' not in content
+        assert "inset: (x: 2mm)" in content
+        assert "align: horizon + right" in content
 
 
-def test_mos_right_month_title_stacks_habits_above_january():
+def test_mos_right_month_title_is_the_same_heading_pair():
     dto = parse_toml(
         _minimal(enable=["habits"], mos=_RIGHT_MOS, sections=""),
         source="trail-right.toml",
@@ -293,14 +314,13 @@ def test_mos_right_month_title_stacks_habits_above_january():
     title = january.title or ""
     assert january.heading_mark is HeadingMark.TRAIL
     assert january.nav_links == []
-    assert "dir: ttb" in title
-    assert title.index("padded_link(<habits>)") < title.index("January<habits-january>")
-    assert "column-gutter: 6pt" not in title
-    assert 'inset: (top: 0.25em)' not in title
-    assert 'top-edge: "cap-height"' not in title
+    _assert_heading_pair(title)
     assert "January<habits-january>" not in january.content
-    assert 'inset: (top: 0.25em)' not in january.content
-    assert 'top-edge: "cap-height"' not in january.content
+    assert 'bottom-edge: "descender"' not in january.content
+    assert "inset: (x: 2mm)" in january.content
+    left = parse_toml(_minimal(enable=["habits"], sections=""), source="trail-left.toml")
+    left_jan = _habits(left).pages(manifest)[1]
+    assert left_jan.title == january.title
 
 
 def test_grid_uses_stroke_boxes_horizontal_names_and_thin_day_rules():
@@ -601,6 +621,13 @@ def test_habit_month_follows_side_menu_dates_stay_left():
     assert "Thu 1" in left_grid
     left_thu = left_grid.index("Thu 1")
     assert left_grid.index(_BOX, left_thu) > left_thu
+    for page in (right_jan, left_jan):
+        assert "grid.cell(inset: (x: 2mm), align: horizon + right, [#[Thu 1]])" in page
+        heading = page[page.index("stack(") : page.index("Thu 1")]
+        assert "dir: ttb" not in heading
+        assert "width: 90%" in heading
+        assert "align(horizon + left" in heading
+        assert heading.index("padded_link(<habits>)") < heading.index("January<habits-january>")
 
     monthly = """[section.monthly]
 week_placement = "left"
@@ -750,25 +777,25 @@ def test_january_has_thin_day_rules_and_four_columns():
         assert _BOX_FRIDAY not in page
         assert "bottom: thick_stroke" not in page
         assert 'text(weight: "bold")' not in page
-        assert page.count("align(horizon + right,") == 31
+        assert page.count("grid.cell(inset: (x: 2mm), align: horizon + right,") == 31
         assert "colspan:" not in page
         assert "0.4mm" not in page
         assert _HEADER_LINE not in page
     for day in (2, 9, 16, 23, 30):
-        assert f"align(horizon + right, [#[Fri {day}]])" in january
+        assert f"grid.cell(inset: (x: 2mm), align: horizon + right, [#[Fri {day}]])" in january
         assert (
             f"grid.cell(stroke: (rest: regular_stroke, bottom: thick_stroke), "
             f"align(horizon + right, [#[Fri {day}]]))"
         ) not in january
     for day in (4, 11, 18, 25):
-        assert f"align(horizon + right, [#[Fri {day}]])" in december
+        assert f"grid.cell(inset: (x: 2mm), align: horizon + right, [#[Fri {day}]])" in december
         assert (
             f"grid.cell(stroke: (rest: regular_stroke, bottom: thick_stroke), "
             f"align(horizon + right, [#[Fri {day}]]))"
         ) not in december
-    assert "align(horizon + right, [#[Sat 3]])" in january
-    assert "align(horizon + right, [#[Sun 4]])" in january
-    assert "align(horizon + right, [#[Mon 5]])" in january
+    assert "grid.cell(inset: (x: 2mm), align: horizon + right, [#[Sat 3]])" in january
+    assert "grid.cell(inset: (x: 2mm), align: horizon + right, [#[Sun 4]])" in january
+    assert "grid.cell(inset: (x: 2mm), align: horizon + right, [#[Mon 5]])" in january
     assert "Thu 1" in january
     assert "columns: (auto, 1fr, 1fr, 1fr, 1fr)" in january
     assert "columns: (auto, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" not in january
@@ -800,16 +827,26 @@ def test_index_heading_is_trail_strip_when_contents_on():
     assert "column-gutter: 6pt" not in heading
     month_heading = month[month.index("stack(") : month.index(_TRAIL_MARK)]
     assert "dir: rtl" in month_heading
+    assert "dir: ttb" not in month_heading
     assert "column-gutter: 6pt" not in month_heading
-    assert "January<habits-january>" not in month_heading
+    assert "January<habits-january>" in month_heading
     assert "padded_link(<habits>)" in month_heading
-    assert month.index(_TRAIL_MARK) < month.index("January<habits-january>")
-    assert month.index("January<habits-january>") < month.index("Thu 1")
-    assert 'inset: (top: 0.25em)' in month
-    assert 'top-edge: "cap-height"' in month
-    seat = month[month.index("January<habits-january>") - 120 : month.index("January<habits-january>")]
-    assert 'inset: (top: 0.25em)' in seat
-    assert 'top-edge: "cap-height"' in seat
+    assert month_heading.index("padded_link(<habits>)") < month_heading.index("January<habits-january>")
+    pair = month_heading[month_heading.index("dir: ltr") : month_heading.index("January<habits-january>")]
+    assert _TRAIL_MARK not in pair
+    assert _MARK_RULE not in pair
+    assert "width: 90%" in month_heading
+    assert "align(horizon + left" in month_heading
+    assert "height: 100%" not in month_heading
+    assert "align(bottom + left" not in month_heading
+    assert "spacing: 0.5em" in month_heading
+    assert month.index("January<habits-january>") < month.index(_TRAIL_MARK)
+    assert month.index(_TRAIL_MARK) < month.index("Thu 1")
+    assert 'bottom-edge: "descender"' in month_heading
+    assert "inset: (bottom: 0.25em)" in month_heading
+    assert 'top-edge: "cap-height"' not in month
+    assert "inset: (top: 0.25em)" not in month
+    assert "grid.cell(inset: (x: 2mm), align: horizon + right, [#[Thu 1]])" in month
     assert "padded_link(<habits>)" in month
     assert "2026 /" not in month
     assert "text(size: h1)[/]" not in month
@@ -831,12 +868,22 @@ def test_mos_right_month_mark_trails_alone_left_of_rail():
     assert month.index("January<habits-january>") < month.index(_TRAIL_MARK)
     heading = month[month.index("stack(") : month.index(_TRAIL_MARK)]
     assert "dir: ltr" in heading
-    assert "dir: ttb" in heading
+    assert "dir: ttb" not in heading
     assert "column-gutter: 6pt" not in heading
     assert heading.index("padded_link(<habits>)") < heading.index("January<habits-january>")
-    assert heading.index("dir: ttb") < heading.index("January<habits-january>")
+    pair = heading[heading.index("dir: ltr") : heading.index("January<habits-january>")]
+    assert _TRAIL_MARK not in pair
+    assert _MARK_RULE not in pair
+    assert "width: 90%" in heading
+    assert "align(horizon + left" in heading
+    assert "height: 100%" not in heading
+    assert "align(bottom + left" not in heading
+    assert "spacing: 0.5em" in heading
+    assert 'bottom-edge: "descender"' in heading
+    assert "inset: (bottom: 0.25em)" in heading
     assert 'top-edge: "cap-height"' not in heading
-    assert 'inset: (top: 0.25em)' not in heading
+    assert "inset: (top: 0.25em)" not in heading
+    assert "grid.cell(inset: (x: 2mm), align: horizon + right, [#[Thu 1]])" in month
     assert "padded_link(<habits>)" in month
     assert "2026 /" not in month
     assert ", [Habits])" not in month

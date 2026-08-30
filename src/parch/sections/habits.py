@@ -129,32 +129,19 @@ class Habits:
   {body}
 )"""
 
-    def _mos_right(self) -> bool:
-        return (
-            self.configurator.dig_bang("planner", "params", "mos_layout")["side_menu_position"]
-            == "right"
-        )
-
-    def _month_label(self, month: Month) -> str:
-        full = self.i18n.t(f"months.full.{month.name}")
-        return f"text(size: h1)[{full}<{self.month_id(month)}>]"
-
-    def _seated_month_label(self, month: Month) -> str:
-        full = self.i18n.t(f"months.full.{month.name}")
-        return (
-            "text(size: h1, box(inset: (top: 0.25em), "
-            f'text(top-edge: "cap-height")[{full}<{self.month_id(month)}>]))'
-        )
-
     def _month_title(self, manifest: Manifest, month: Month) -> str:
         habits_cell = manifest.link_or_content(self.ID, self.i18n.t("habits"))
-        habits = f"text(size: h1, {habits_cell})"
-        if not self._mos_right():
-            return habits
-        return f"""stack(
-  dir: ttb,
-  {habits},
-  {self._month_label(month)}
+        full = self.i18n.t(f"months.full.{month.name}")
+        page_id = self.month_id(month)
+        return f"""box(
+  width: 90%,
+  inset: (bottom: 0.25em),
+  align(horizon + left, stack(
+    dir: ltr,
+    spacing: 0.5em,
+    text(size: h1, bottom-edge: "descender", {habits_cell}),
+    text(size: h1, bottom-edge: "descender")[{full}<{page_id}>]
+  ))
 )"""
 
     def _month_grid(self, manifest: Manifest, month: Month) -> str:
@@ -171,7 +158,7 @@ class Habits:
             cells.append(", ".join(row))
             row_sizes.append("1fr")
         rows = ", ".join(row_sizes)
-        grid = f"""grid(
+        return f"""grid(
   columns: ({cols}),
   rows: ({rows}),
   align: horizon,
@@ -180,20 +167,11 @@ class Habits:
   row-gutter: 0pt,
   {",\n  ".join(cells)}
 )"""
-        if self._mos_right():
-            return grid
-        return f"""grid(
-  columns: 1fr,
-  rows: (auto, 1fr),
-  align: horizon + left,
-  {self._seated_month_label(month)},
-  {grid}
-)"""
 
     def _date_label(self, manifest: Manifest, day: Day) -> str:
         short = self.i18n.t(f"weekday.short.{day.weekday_name}")
         linked = manifest.link_or_content(day.id, f"{short} {day.month_day}")
-        return f"align(horizon + right, [#{linked}])"
+        return f"grid.cell(inset: (x: 2mm), align: horizon + right, [#{linked}])"
 
 
 def _escape_typst(text: str) -> str:
