@@ -532,19 +532,24 @@ def test_two_dump_colophons_use_unique_start_and_end():
     assert "/#(last" not in ca
     assert 'align(left, text(size: h1, weight: "bold")[' + DEFAULT_TITLE + "])" not in ca
     assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + " <colophon>]" in ca
-    assert "cur > start-page" in ca
+    assert "header: context" in ca
+    assert "cur == start-page" in ca
     pagination = inspect.getsource(Colophon._dump_pagination)
     assert "self._heading(" in pagination
     assert "labeled=False" in pagination
+    assert "labeled=True" in pagination
     assert "lead_title" not in pagination
+    assert "#show: rest" not in pagination
     assert '"8mm"' not in pagination
     assert '"5mm"' not in pagination
     header = a._dump_pagination(None)
-    assert "<colophon>" not in header
+    assert "header: context" in header
+    assert "#show: rest" not in header
     assert "header-ascent: 100%" in header
     assert "inset: (top:" in header
     assert "page.margin.top" in header
     assert "page.margin.top + h1" in header
+    assert header.count("<colophon>") == 1
     assert ca.count("<colophon>") == 1
 
 
@@ -555,6 +560,8 @@ def test_dump_continuation_header_is_follow_seat_without_nums():
     colo.register(manifest)
     content = colo.pages(manifest)[0].content
     assert "header:" in content
+    assert "header: context" in content
+    assert "#show: rest" not in content
     assert _FOLLOW_RTL in content
     assert _SEATED_TITLE in content
     assert _SEATED_MARK in content
@@ -565,18 +572,20 @@ def test_dump_continuation_header_is_follow_seat_without_nums():
     assert "nums" not in content
     assert "/#(last" not in content
     assert "align(right" not in content
-    assert "cur > start-page" in content
+    assert "cur == start-page" in content
     assert colo._dump_end_label() in content
     assert colo._dump_state_name() in content
     heading = content[content.index(_SEATED_TITLE) : content.index(_SEATED_MARK)]
     assert DEFAULT_TITLE in heading
     assert _MARK_RULE not in heading
     header = colo._dump_pagination(manifest)
-    assert "<colophon>" not in header
+    assert "header: context" in header
+    assert "here().page()" in header[header.index("header: context") :]
+    assert _FOLLOW_RTL in header
     assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + "]" in header
-    assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + " <colophon>]" not in header
+    assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + " <colophon>]" in header
+    assert header.count("<colophon>") == 1
     assert content.count("<colophon>") == 1
-    assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + " <colophon>]" in content
 
 
 def test_dump_pagination_heading_omits_colophon_label():
@@ -584,11 +593,13 @@ def test_dump_pagination_heading_omits_colophon_label():
     manifest = Manifest()
     manifest.register_source("index")
     header = colo._dump_pagination(manifest)
-    body = colo._heading(manifest)
-    assert "<colophon>" not in header
-    assert "<colophon>" in body
-    assert header.count(_FOLLOW_RTL) == 1
-    assert body.count(_FOLLOW_RTL) == 1
+    first = colo._heading(manifest, labeled=True)
+    more = colo._heading(manifest, labeled=False)
+    assert "<colophon>" in first
+    assert "<colophon>" not in more
+    assert header.count("<colophon>") == 1
+    assert "if cur == start-page" in header
+    assert header.count(_FOLLOW_RTL) == 2
     assert "column-gutter: 6pt" not in header
     assert "0.85em" not in header
     assert "header-ascent: 100%" in header
@@ -596,6 +607,7 @@ def test_dump_pagination_heading_omits_colophon_label():
     assert "page.margin.top" in header
     content = colo.pages(manifest)[0].content
     assert content.count("<colophon>") == 1
+    assert "#show: rest" not in header
 
 
 def test_dump_pagination_seats_follow_below_profile_margin_top():
@@ -603,6 +615,10 @@ def test_dump_pagination_seats_follow_below_profile_margin_top():
 
     source = inspect.getsource(Colophon._dump_pagination)
     assert "labeled=False" in source
+    assert "labeled=True" in source
+    assert "header: context" in source
+    assert "#show: rest" not in source
+    assert "here().page()" in source[source.index("header: context") :]
     assert '"8mm"' not in source
     assert '"5mm"' not in source
     nomad = Colophon(
@@ -629,6 +645,8 @@ def test_dump_pagination_seats_follow_below_profile_margin_top():
     assert "inset: (top: 8mm)" in n
     assert "8mm + h1" in n
     assert "header-ascent: 100%" in n
+    assert "header: context" in n
+    assert "#show: rest" not in n
     assert "inset: (top: 5mm)" in s
     assert "5mm + h1" in s
     assert "8mm" not in s

@@ -146,17 +146,18 @@ class Colophon:
         version = _escape(__version__)
         dumped = drop_empty_tables(self._config_text()) if self.dump else ""
         parts: list[str] = []
-        titled = self._heading(manifest)
         if dumped.strip():
             # Page setup first so Typst does not break between the list and the dump.
             parts.append(self._dump_pagination(manifest))
         if self.command or self.sha:
             parts.append(_MONO_HELPER)
+        titled = None if dumped.strip() else self._heading(manifest)
         parts.append(self._facts_block(titled, device, year_cell, version))
         if dumped.strip():
             parts.append("#v(1em)")
             parts.append(f"#raw(block: true, {typst_string(dumped)})")
             parts.append(f"#[] <{self._dump_end_label()}>")
+            parts.append(self._dump_restore())
         return "\n".join(parts)
 
     def _enabled_width_labels(self) -> list[str]:
@@ -185,7 +186,7 @@ class Colophon:
             "    )"
         )
 
-    def _facts_block(self, titled: str, device: str, year_cell: str, version: str) -> str:
+    def _facts_block(self, titled: str | None, device: str, year_cell: str, version: str) -> str:
         rows = [
             f"      [*Device*], [{device}],",
             f"      [*Year*], {year_cell},",
@@ -202,11 +203,10 @@ class Colophon:
             "    align: horizon,",
             *rows,
         ]
-        inner = [
-            "  #set par(spacing: 0em)",
-            f"  #{titled}",
-            "  #v(1em)",
-        ]
+        inner = ["  #set par(spacing: 0em)"]
+        if titled:
+            inner.append(f"  #{titled}")
+        inner.append("  #v(1em)")
         label_let = self._label_width_let()
         if label_let:
             inner.append("  #context {")
@@ -286,47 +286,63 @@ class Colophon:
         raw = self._lookup("document", "layout", "margin", side)
         return str(raw) if raw else f"page.margin.{side}"
 
-    def _dump_pagination(self, manifest) -> str:
-        # Header is empty on the first dump page (body already has the heading)
-        # and after this instance's end label so later MOS pages stay put.
-        # Unique state/label per instance so two dump colophons do not share
-        # start/end. The header slot paints at y=0; pad by margin.top so
-        # FOLLOW sits in page 1's band. Continuation top grows by h1 so
-        # the dump does not run under the heading.
-        state_name = self._dump_state_name()
-        end_label = self._dump_end_label()
-        heading = self._heading(manifest, labeled=False)
+    def _dump_restore(self) -> str:
         inset = self._margin_side("top")
         right = self._margin_side("right")
         bottom = self._margin_side("bottom")
         left = self._margin_side("left")
-        cont = "last > start-page and cur > start-page and cur <= last"
+        return f"""#set page(
+  header: none,
+  margin: (
+    top: {inset},
+    right: {right},
+    bottom: {bottom},
+    left: {left},
+  ),
+)"""
+
+    def _dump_pagination(self, manifest) -> str:
+        # One per-page header for the dump span. Typst evaluates
+        # page(header: context) every page; a #show around here().page()
+        # would freeze on page 1 and drop FOLLOW. Pad by margin.top so
+        # FOLLOW sits in page 1's band. Top is inset + h1 so the dump
+        # stays below. Restore after the end label.
+        state_name = self._dump_state_name()
+        end_label = self._dump_end_label()
+        first = self._heading(manifest, labeled=True)
+        more = self._heading(manifest, labeled=False)
+        inset = self._margin_side("top")
+        right = self._margin_side("right")
+        bottom = self._margin_side("bottom")
+        left = self._margin_side("left")
         return f"""#context {{ state("{state_name}", 0).update(here().page()) }}
-#show: rest => context {{
-  let start-page = state("{state_name}", 0).final()
-  let cur = here().page()
-  let hits = query(<{end_label}>)
-  let last = if hits.len() > 0 {{ hits.first().location().page() }} else {{ cur }}
-  let extra = if {cont} {{ h1 }} else {{ 0pt }}
-  set page(
-    header-ascent: 100%,
-    margin: (
-      top: {inset} + extra,
-      right: {right},
-      bottom: {bottom},
-      left: {left},
-    ),
-    header: if {cont} {{
+#set page(
+  header-ascent: 100%,
+  margin: (
+    top: {inset} + h1,
+    right: {right},
+    bottom: {bottom},
+    left: {left},
+  ),
+  header: context {{
+    let start-page = state("{state_name}", 0).final()
+    let cur = here().page()
+    let hits = query(<{end_label}>)
+    let last = if hits.len() > 0 {{ hits.first().location().page() }} else {{ cur }}
+    if cur >= start-page and cur <= last {{
       block(
         width: 100%,
         height: {inset} + h1,
         inset: (top: {inset}),
-        {heading}
+        if cur == start-page {{
+          {first}
+        }} else {{
+          {more}
+        }}
       )
-    }},
-  )
-  rest
-}}"""
+    }}
+  }},
+)"""
 
     def _provenance(self) -> dict[str, Any]:
         cfg = self.configurator
