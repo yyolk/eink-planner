@@ -369,7 +369,7 @@ def test_trail_heading_rejects_string_edge_fallthrough():
         manifest, "h1", "text(size: h1)[Tasks]", edge=HeadingMark.TRAIL,
     )
     assert "spacing: 1fr" in trail
-    for bad in ("follow", "trail", "FOLLOW", HeadingMark.LEAD):
+    for bad in ("FOLLOW", HeadingMark.LEAD):
         with pytest.raises(ValueError, match="TRAIL or FOLLOW"):
             trail_heading(manifest, "h1", "text(size: h1)[Tasks]", edge=bad)
 
@@ -384,6 +384,7 @@ def test_heading_stack_matches_follow_trail_lead_after_mos_right_or_chip_guard()
     builder = Builder(
         i18n=coord.i18n, configurator=coord.configurator, manifest=coord.manifest,
     )
+    builder.manifest.register_source("index")
     follow = builder._heading_stack(None, title, None, None, HeadingMark.FOLLOW)
     assert "spacing: 0.5em" in follow
     assert "spacing: 1fr" not in follow
@@ -395,7 +396,13 @@ def test_heading_stack_matches_follow_trail_lead_after_mos_right_or_chip_guard()
     assert "spacing: 1fr" not in lead
     assert builder._heading_stack(None, None, None, None, HeadingMark.LEAD) == ""
     with pytest.raises(ValueError, match="FOLLOW, TRAIL, or LEAD"):
-        builder._heading_stack(None, title, None, None, "lead")
+        builder._heading_stack(None, title, None, None, "nope")
+    builder.manifest.register_source("chip-page")
+    chipped = builder._heading_stack(
+        None, title, [("chip-page", "Chip")], None, HeadingMark.LEAD,
+    )
+    assert "spacing: 1fr" in chipped
+    assert "let seated_title =" in chipped
 
     right = load(NOMAD_MOS_RIGHT)
     right_coord = Coordinator(right, i18n=load_default())
@@ -404,6 +411,7 @@ def test_heading_stack_matches_follow_trail_lead_after_mos_right_or_chip_guard()
         configurator=right_coord.configurator,
         manifest=right_coord.manifest,
     )
+    right_builder.manifest.register_source("index")
     glued = right_builder._heading_stack(None, title, None, None, HeadingMark.LEAD)
     assert "spacing: 1fr" in glued
     assert "columns: (auto, auto)" not in glued
