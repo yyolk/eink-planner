@@ -111,17 +111,17 @@ class Builder:
         if mos_right or chip:
             return trail_heading(
                 self.manifest, height, title, body,
-                direction=direction, chip=chip, edge="trail",
+                direction=direction, chip=chip, edge=HeadingMark.TRAIL,
             )
         if heading_mark is HeadingMark.FOLLOW:
             return trail_heading(
                 self.manifest, height, title, body,
-                direction="rtl", edge="follow",
+                direction="rtl", edge=HeadingMark.FOLLOW,
             )
         if heading_mark is HeadingMark.TRAIL:
             return trail_heading(
                 self.manifest, height, title, body,
-                direction=direction, edge="trail",
+                direction=direction, edge=HeadingMark.TRAIL,
             )
         if title:
             return lead_title(self.manifest, height, title, body)

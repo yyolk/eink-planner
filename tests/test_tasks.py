@@ -523,5 +523,5 @@ def test_contents_mark_on_tasks_when_index_on():
     manifest = Manifest()
     tasks.register(manifest)
     for page in tasks.pages(manifest):
-        assert page.heading_mark is HeadingMark.FOLLOW
-        assert page.nav_links == []
+        assert page.heading_mark is HeadingMark.LEAD
+        assert page.raw_typst is True

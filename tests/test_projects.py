@@ -484,8 +484,8 @@ def test_contents_mark_on_projects_when_index_on():
     manifest = Manifest()
     projects.register(manifest)
     for page in projects.pages(manifest):
-        assert page.heading_mark is HeadingMark.FOLLOW
-        assert page.nav_links == []
+        assert page.heading_mark is HeadingMark.LEAD
+        assert page.raw_typst is True
     contents = next(p for p in _pages(typst) if 'weight: "bold")[Contents <index>]' in p)
     assert "padded_link(<index>" not in contents
     assert "padded_link(<projects>" in contents

@@ -90,21 +90,9 @@ class Meetings:
         for page in range(1, self.index_page_count() + 1):
             start = (page - 1) * rpp + 1
             end = page * rpp
-            out.append(
-                PageData(
-                    raw_typst=True,
-                    content=self._index(manifest, page, start, end),
-                    heading_mark=HeadingMark.FOLLOW,
-                )
-            )
+            out.append(PageData(raw_typst=True, content=self._index(manifest, page, start, end)))
         for index in range(1, self.pages_num + 1):
-            out.append(
-                PageData(
-                    raw_typst=True,
-                    content=self._meeting(manifest, index),
-                    heading_mark=HeadingMark.FOLLOW,
-                )
-            )
+            out.append(PageData(raw_typst=True, content=self._meeting(manifest, index)))
         return out
 
     def _heading(self, manifest: Manifest, meetings_cell: str) -> str:
@@ -114,7 +102,7 @@ class Meetings:
             f"text(size: h1, {meetings_cell})",
             body_size_token(self.configurator),
             direction="rtl",
-            edge="follow",
+            edge=HeadingMark.FOLLOW,
         )
 
     def _index_meetings_cell(self, manifest: Manifest, page: int) -> str:

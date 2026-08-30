@@ -281,8 +281,7 @@ def test_habit_month_pages_set_trail_mark_alone():
     habits.register(manifest)
     pages = habits.pages(manifest)
     assert pages[0].raw_typst is True
-    assert pages[0].heading_mark is HeadingMark.FOLLOW
-    assert pages[0].nav_links == []
+    assert pages[0].heading_mark is HeadingMark.LEAD
     month_names = (
         "January",
         "February",

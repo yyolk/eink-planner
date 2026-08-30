@@ -63,13 +63,7 @@ class Tasks:
         chunks = self._chunks(weeks)
         out: list[PageData] = []
         for index, chunk in enumerate(chunks):
-            out.append(
-                PageData(
-                    raw_typst=True,
-                    content=self._index(manifest, chunk, index),
-                    heading_mark=HeadingMark.FOLLOW,
-                )
-            )
+            out.append(PageData(raw_typst=True, content=self._index(manifest, chunk, index)))
         for index, chunk in enumerate(chunks):
             parent = self.index_id(index)
             for week in chunk:
@@ -77,7 +71,6 @@ class Tasks:
                     PageData(
                         raw_typst=True,
                         content=self._week_page(manifest, week, parent),
-                        heading_mark=HeadingMark.FOLLOW,
                     )
                 )
         return out
@@ -188,7 +181,7 @@ class Tasks:
             f"text(size: h1, {tasks_cell})",
             body_size_token(self.configurator),
             direction="rtl",
-            edge="follow",
+            edge=HeadingMark.FOLLOW,
         )
 
     def _index(self, manifest: Manifest, weeks: list[Week], page_index: int) -> str:
