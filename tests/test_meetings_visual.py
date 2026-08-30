@@ -45,7 +45,7 @@ def _page_index(typst: str, label: str) -> int:
     )
 
 
-def test_nomad_index_numbers_left_no_arrows_year_present(tmp_path):
+def test_nomad_index_numbers_left_no_arrows(tmp_path):
     pdf, typst = _meetings_pdf(tmp_path)
     page = _page_index(typst, "meetings")
     png = raster_page(pdf, page, tmp_path / "index.png", dpi=_DPI)
@@ -56,7 +56,7 @@ def test_nomad_index_numbers_left_no_arrows_year_present(tmp_path):
     box = ink_bbox(png)
     assert box is not None
     x0, y0, x1, y1 = box
-    # Year + numbers sit toward the left; write-in paper is empty.
+    # Numbers sit toward the left; write-in paper is empty. No year chip.
     assert x0 < width * 0.22, box
     assert y0 < height * 0.20, box
     # 16x1fr bands eat leftover height; last rule sits near the page bottom.
@@ -83,14 +83,14 @@ def test_nomad_index_numbers_left_no_arrows_year_present(tmp_path):
     assert not thick, thick
 
 
-def test_nomad_meeting_notes_lined_topics_have_gutter(tmp_path):
+def test_nomad_meeting_notes_dotted_topics_have_ticks(tmp_path):
     pdf, typst = _meetings_pdf(tmp_path)
     page = _page_index(typst, "meeting-1")
     png = raster_page(pdf, page, tmp_path / "meeting.png", dpi=_DPI)
     bands = full_width_bands(png, x0_frac=0.10, coverage=0.70)
-    thin = [b for b in bands if b[2] <= 2]
-    # Notes field is Review-style lined paper: many thin black horizontals.
-    assert len(thin) >= 12, thin
+    thick = [b for b in bands if b[2] >= 4]
+    # House-dot notes and tick baselines: no boxed table frame.
+    assert not thick, thick
     with Image.open(png) as src:
         width, height = src.size
         gray = src.convert("L")

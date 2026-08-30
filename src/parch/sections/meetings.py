@@ -7,10 +7,9 @@ import math
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.mos.contents_mark import body_size_token, heading_height_token, lead_title
+from parch.mos.contents_mark import body_size_token, heading_height_token, trail_strip
 from parch.compose.page_data import PageData
-from parch.sections.annual import Annual
-from parch.sections._shared import _REVIEW_LINED, _length_mm
+from parch.sections._shared import _length_mm
 
 # Match the Projects index so row capacity tracks the same geometry.
 _INDEX_LEFT_INSET = "4mm"
@@ -96,22 +95,22 @@ class Meetings:
             out.append(PageData(raw_typst=True, content=self._meeting(manifest, index)))
         return out
 
-    def _year(self) -> int:
-        return self.configurator.start_date().year
-
-    def _year_cell(self, manifest: Manifest) -> str:
-        return manifest.link_or_content(Annual.ID, str(self._year()))
-
-    def _breadcrumb(self, manifest: Manifest, meetings_cell: str) -> str:
-        crumb = f"""grid(
-  columns: (auto, auto, 1fr),
-  column-gutter: 6pt,
-  align: horizon,
-  text(size: h1, {self._year_cell(manifest)}),
-  text(size: h1)[/],
-  text(size: h1, {meetings_cell})
+    def _heading(self, manifest: Manifest, meetings_cell: str) -> str:
+        title = f"text(size: h1, {meetings_cell})"
+        mark = trail_strip(
+            manifest,
+            heading_height_token(self.configurator),
+            body_size_token(self.configurator),
+            chip=None,
+        )
+        if not mark:
+            return title
+        return f"""stack(
+  dir: ltr,
+  spacing: 1fr,
+  {mark},
+  {title}
 )"""
-        return lead_title(manifest, heading_height_token(self.configurator), crumb, body_size_token(self.configurator))
 
     def _index_meetings_cell(self, manifest: Manifest, page: int) -> str:
         label = self.i18n.t("meetings")
@@ -122,17 +121,24 @@ class Meetings:
 
     def _index_row(self, manifest: Manifest, index: int) -> str:
         mid = self.meeting_id(index)
-        number = f"[{index}]"
-        hit = f"box(width: 100%, height: 100%, align(horizon + left, {number}))"
+        inner = (
+            "grid(\n"
+            f"      columns: ({_NUM_COL}, 1fr),\n"
+            "      rows: 1fr,\n"
+            "      align: horizon + left,\n"
+            "      inset: 0pt,\n"
+            f"      [{index}],\n"
+            "      []\n"
+            "    )"
+        )
+        band = f"box(width: 100%, height: 100%, {inner})"
         if manifest.source(mid):
-            # Number cell only — write-in paper stays unlinkable.
-            hit = f"padded_link(<{mid}>, {hit})"
+            band = f"padded_link(<{mid}>, {band})"
         return (
             "  grid.cell(\n"
             "    align: horizon + left,\n"
-            f"    {hit}\n"
-            "  ),\n"
-            "  []"
+            f"    {band}\n"
+            "  )"
         )
 
     def _index(self, manifest: Manifest, page: int, start: int, end: int) -> str:
@@ -141,9 +147,9 @@ class Meetings:
             rows = [self._index_row(manifest, index) for index in range(start, end + 1)]
             # Every index is full (rpp * index_pages), so 1fr bands eat leftover height.
             body = f"""grid(
-  columns: ({_NUM_COL}, 1fr),
+  columns: 1fr,
   rows: ({", ".join(["1fr"] * n)}),
-  align: horizon,
+  align: horizon + left,
   stroke: (bottom: regular_stroke + black),
   inset: (x: 4pt, y: 2pt),
 {",\n".join(rows)}
@@ -155,60 +161,63 @@ class Meetings:
   rows: (auto, 1fr),
   row-gutter: {_INDEX_ROW_GUTTER},
   inset: (left: {_INDEX_LEFT_INSET}, bottom: {_INDEX_BOTTOM_INSET}),
-  {self._breadcrumb(manifest, self._index_meetings_cell(manifest, page))},
+  {self._heading(manifest, self._index_meetings_cell(manifest, page))},
   {body}
 )"""
 
     def _ticked_lines(self, n: int) -> str:
-        cells = ",\n    ".join(["[], []"] * n)
+        cells = ",\n    ".join(
+            ["box(height: regular_height, align(horizon, [$square.stroked$]))"] * n
+        )
         rows = ", ".join(["regular_height"] * n)
         return f"""grid(
-  columns: (regular_height, 1fr),
+  columns: 1fr,
   rows: ({rows}),
-  stroke: regular_stroke + black,
+  stroke: (_, _) => (bottom: regular_stroke + black),
   inset: 0pt,
     {cells}
 )"""
 
-    def _heading(self, key: str) -> str:
+    def _label(self, key: str) -> str:
         return f"[{self.i18n.t(key)}]"
 
     def _meeting(self, manifest: Manifest, index: int) -> str:
         meetings = self.i18n.t("meetings")
         mid = self.meeting_id(index)
-        n = self.pages_num
+        meetings_cell = manifest.link_or_content(self.board_index_id(index), meetings)
         name_line = f"""grid(
-  columns: (1fr, {_DATE_COL}, auto),
+  columns: (1fr, {_DATE_COL}),
   column-gutter: 6pt,
   align: horizon,
   grid.cell(stroke: (bottom: regular_stroke + black), []),
   grid.cell(stroke: (bottom: regular_stroke + black), []),
-  text(size: 0.85em)[{index}/{n} <{mid}>]
 )"""
         topics = f"""grid(
   columns: 1fr,
   rows: (auto, auto),
   row-gutter: 1.5mm,
-  {self._heading("topics")},
+  {self._label("topics")},
   {self._ticked_lines(_TOPIC_LINES)}
 )"""
         actions = f"""grid(
   columns: 1fr,
   rows: (auto, auto),
   row-gutter: 1.5mm,
-  {self._heading("action_items")},
+  {self._label("action_items")},
   {self._ticked_lines(_ACTION_LINES)}
 )"""
-        prefix = f"#let review_lined = {_REVIEW_LINED}\n"
-        return f"""{prefix}#grid(
+        quiet = f"text(size: 0.85em)[{index}]"
+        return f"""#[] <{mid}>
+#grid(
   columns: 1fr,
-  rows: (auto, auto, auto, auto, 1fr, auto),
+  rows: (auto, auto, auto, auto, auto, 1fr, auto),
   row-gutter: 2.5mm,
   inset: (left: {_INDEX_LEFT_INSET}, bottom: {_INDEX_BOTTOM_INSET}),
-  {self._breadcrumb(manifest, manifest.link_or_content(self.board_index_id(index), meetings))},
+  {self._heading(manifest, meetings_cell)},
+  {quiet},
   {name_line},
   {topics},
-  {self._heading("notes")},
-  rect_pattern(review_lined),
+  {self._label("notes")},
+  rect_pattern(dotted),
   {actions}
 )"""

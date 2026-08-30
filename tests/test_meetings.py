@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import re
-
 import pytest
 
 from parch import ConfigError
@@ -24,6 +22,10 @@ width = "118.87mm"
 height = "158.5mm"
 ppi = 300"""
 
+_MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
+_TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
+_TICK_STROKE = "stroke: (_, _) => (bottom: regular_stroke + black)"
+
 
 def _generate(dto) -> str:
     return Generate(i18n=load_default()).generate(dto)
@@ -43,6 +45,26 @@ def _meetings(dto, index_pages: int | None = None) -> Meetings:
         configurator=Configurator(dto),
         index_pages=params.get("index_pages", Meetings.DEFAULT_INDEX_PAGES),
     )
+
+
+def _pages(typst: str) -> list[str]:
+    return typst.split("#pagebreak()")
+
+
+def _index_page(typst: str, page_id: str = "meetings") -> str:
+    needle = f"[Meetings <{page_id}>]"
+    for page in _pages(typst):
+        if needle in page:
+            return page
+    raise AssertionError(f"no Meetings index page {page_id}")
+
+
+def _meeting_page(typst: str, index: int = 1) -> str:
+    marker = f"#[] <meeting-{index}>"
+    for page in _pages(typst):
+        if marker in page:
+            return page
+    raise AssertionError(f"no meeting page {index}")
 
 
 def test_omit_index_pages_defaults_to_one_full_index():
@@ -69,7 +91,7 @@ def test_omit_index_pages_defaults_to_one_full_index():
     assert "→" not in typst
 
 
-def test_index_number_is_the_only_meeting_link():
+def test_index_row_is_the_meeting_link():
     dto = parse_toml(
         _minimal(
             enable=["annual", "meetings"],
@@ -85,25 +107,19 @@ index_pages = 1
     meetings = _meetings(dto)
     n = meetings.pages_num
     typst = _generate(dto)
-    pages = typst.split("#pagebreak()")
-    index = next(page for page in pages if "<meetings>" in page)
+    index = _index_page(typst)
     assert "→" not in index
     assert f"columns: ({_NUM_COL}, 1fr)" in index
     assert "rows: (" + ", ".join(["1fr"] * n) + ")" in index
     for i in (1, n):
-        assert f"padded_link(<meeting-{i}>," in index
+        assert f"padded_link(<meeting-{i}>, box(width: 100%, height: 100%" in index
         assert f"padded_link(<meeting-{i}>, [])" not in index
         assert f"padded_link(<meeting-{i}>)[]" not in index
-    assert re.search(
-        r"padded_link\(<meeting-1>, box\(width: 100%, height: 100%",
-        index,
-    )
-    assert index.count("[]") >= n
     assert "padded_link(<meetings>)" in typst
-    assert "padded_link(<annual>)" in typst
+    assert "padded_link(<annual>)" not in index
     labels = set(_LABEL_DEF.findall(typst))
     links = set(_PADDED_LINK.findall(typst))
-    expected = {"meetings", "annual"} | {f"meeting-{i}" for i in range(1, n + 1)}
+    expected = {"meetings"} | {f"meeting-{i}" for i in range(1, n + 1)}
     assert expected <= labels
     assert expected <= links
 
@@ -114,7 +130,7 @@ def test_no_arrows_title_date_assigned_due_or_mos():
         source="chrome.toml",
     )
     typst = _generate(dto)
-    meeting = next(page for page in typst.split("#pagebreak()") if "<meeting-1>" in page)
+    meeting = _meeting_page(typst)
     assert "→" not in typst
     assert "TITLE" not in typst
     assert "DATE" not in typst
@@ -125,7 +141,7 @@ def test_no_arrows_title_date_assigned_due_or_mos():
     assert "grid.cell(fill: black" not in meeting
 
 
-def test_year_links_to_annual_and_meetings_crumb_returns_to_listing():
+def test_header_is_meetings_without_year():
     dto = parse_toml(
         _minimal(
             enable=["annual", "meetings"],
@@ -136,27 +152,40 @@ show_month_name = true
 index_pages = 1
 """,
         ),
-        source="crumb.toml",
+        source="header.toml",
     )
     typst = _generate(dto)
-    pages = typst.split("#pagebreak()")
-    n = _meetings(dto).pages_num
-    meeting = next(page for page in pages if f"1/{n} <meeting-1>" in page)
-    assert "padded_link(<annual>)" in meeting
+    index = _index_page(typst)
+    meeting = _meeting_page(typst)
+    for page in (index, meeting):
+        assert "padded_link(<annual>)" not in page
+        assert "2026 /" not in page
+        assert "text(size: h1)[/]" not in page
+        assert "1/16" not in page
+    assert "text(size: h1, [Meetings <meetings>])" in index
     assert "padded_link(<meetings>)" in meeting
     assert "padded_link(<meetings-2>)" not in meeting
+    assert "text(size: 0.85em)[1]" in meeting
+    assert "#[] <meeting-1>" in meeting
 
 
-def test_year_is_plain_when_annual_omitted():
-    dto = parse_toml(
-        _minimal(enable=["meetings"], sections="[section.meetings]\nindex_pages = 1\n"),
-        source="no-annual.toml",
-    )
+def test_header_is_meetings_when_annual_omitted():
+    dto = parse_toml(_minimal(enable=["meetings"], sections="[section.meetings]\nindex_pages = 1\n"), source="no-annual.toml")
     typst = _generate(dto)
-    assert "padded_link(<annual>)" not in typst
-    assert "2026" in typst
+    index = _index_page(typst)
+    meeting = _meeting_page(typst)
+    for page in (index, meeting):
+        assert "padded_link(<annual>)" not in page
+        assert "2026 /" not in page
+        assert "text(size: h1)[/]" not in page
+        assert "pad(right: 3mm" not in page
+        assert "padded_link(<index>" not in page
+        assert "columns: (auto, auto)" not in page
+    assert "column-gutter: 6pt" not in index
+    assert "text(size: h1, [Meetings <meetings>])" in index
+    assert "stack(" not in index
+    assert "padded_link(<meetings>)" in meeting
     assert "<meetings>" in typst
-    assert "padded_link(<meetings>)" in typst
 
 
 def test_locale_strings_and_line_counts():
@@ -173,15 +202,20 @@ def test_locale_strings_and_line_counts():
     assert "Due by" not in typst
     assert "rows: (" + ", ".join(["regular_height"] * 4) + ")" in typst
     assert "rows: (" + ", ".join(["regular_height"] * 5) + ")" in typst
-    assert "rect_pattern(review_lined)" in typst
-    assert "#let review_lined =" in typst
-    assert "regular_stroke + black" in typst
-    n = _meetings(dto).pages_num
-    meeting = next(page for page in typst.split("#pagebreak()") if f"1/{n} <meeting-1>" in page)
+    assert "rect_pattern(dotted)" in typst
+    assert "rect_pattern(review_lined)" not in typst
+    assert "#let review_lined =" not in typst
+    meeting = _meeting_page(typst)
     assert meeting.count("rows: (" + ", ".join(["regular_height"] * 4) + ")") == 1
     assert meeting.count("rows: (" + ", ".join(["regular_height"] * 5) + ")") == 1
-    assert meeting.count("rect_pattern(review_lined)") == 1
-    assert "columns: (regular_height, 1fr)" in meeting
+    assert meeting.count("rect_pattern(dotted)") == 1
+    assert "$square.stroked$" in meeting
+    assert meeting.count("$square.stroked$") == 9
+    assert _TICK_STROKE in meeting
+    assert "columns: (regular_height, 1fr)" not in meeting
+    assert "stroke: regular_stroke + black" not in meeting
+    assert "1/16" not in meeting
+    assert "text(size: 0.85em)[1]" in meeting
 
 
 def test_unknown_key_on_section_meetings_raises():
@@ -263,7 +297,7 @@ index_pages = 2
     assert full in typst
     assert leftover not in typst
     assert typst.count(full) == 2
-    pages = typst.split("#pagebreak()")
+    pages = _pages(typst)
     first = next(page for page in pages if "<meetings>" in page and "<meetings-2>" not in page)
     second = next(page for page in pages if "<meetings-2>" in page)
     assert full in first
@@ -271,12 +305,16 @@ index_pages = 2
     assert leftover not in first
     assert leftover not in second
     assert "→" not in second
-    board_late = next(page for page in pages if "17/32 <meeting-17>" in page)
+    board_late = _meeting_page(typst, 17)
     assert "padded_link(<meetings-2>)" in board_late
     assert "padded_link(<meetings>)" not in board_late
-    first_meeting = next(page for page in pages if "1/32 <meeting-1>" in page)
+    assert "text(size: 0.85em)[17]" in board_late
+    assert "17/32" not in board_late
+    first_meeting = _meeting_page(typst, 1)
     assert "padded_link(<meetings>)" in first_meeting
     assert "padded_link(<meetings-2>)" not in first_meeting
+    assert "text(size: 0.85em)[1]" in first_meeting
+    assert "1/32" not in first_meeting
     assert typst.count("2 * regular_height") == 0
 
 
@@ -292,12 +330,51 @@ def test_nomad_default_is_one_index_page():
     assert "<meeting-1>" in typst
     assert "<meeting-16>" in typst
     assert "<meeting-17>" not in typst
-    assert "padded_link(<annual>)" in typst
-    index = next(page for page in typst.split("#pagebreak()") if "[Meetings <meetings>]" in page)
+    index = _index_page(typst)
+    meeting = _meeting_page(typst)
     assert "→" not in index
     assert f"columns: ({_NUM_COL}, 1fr)" in index
     assert "rows: (" + ", ".join(["1fr"] * 16) + ")" in index
     assert "2 * regular_height" not in index
+    assert "padded_link(<annual>)" not in index
+    assert "padded_link(<annual>)" not in meeting
+    assert "2026 /" not in index
+    assert "2026 /" not in meeting
+    assert "1/16" not in meeting
+    assert "text(size: 0.85em)[1]" in meeting
+    assert (
+        "padded_link(<meeting-1>, box(width: 100%, height: 100%"
+        in index
+    )
+
+
+def test_contents_mark_on_meetings_when_index_on():
+    dto = parse_toml(
+        _minimal(enable=["index", "meetings"], sections=""),
+        source="mark.toml",
+    )
+    typst = _generate(dto)
+    index = _index_page(typst)
+    meeting = _meeting_page(typst)
+    assert _TRAIL_MARK in index
+    assert _TRAIL_MARK in meeting
+    assert index.count(_MARK_RULE) == 5
+    assert meeting.count(_MARK_RULE) == 5
+    for page in (index, meeting):
+        assert "columns: (auto, auto)" not in page
+        assert "2026 /" not in page
+        assert "text(size: h1)[/]" not in page
+        assert "padded_link(<annual>)" not in page
+    assert "column-gutter: 6pt" not in index
+    assert "text(size: h1, [Meetings <meetings>])" in index
+    assert "padded_link(<meetings>)" in meeting
+    heading = index[index.index("stack(") : index.index("[Meetings <meetings>]")]
+    assert "dir: ltr" in heading
+    assert "spacing: 1fr" in heading
+    assert _TRAIL_MARK in heading
+    contents = next(p for p in _pages(typst) if 'weight: "bold")[Contents <index>]' in p)
+    assert "padded_link(<index>" not in contents
+    assert "padded_link(<meetings>" in contents
 
 
 def test_tiny_cover_annual_meetings_compiles(tmp_path):
