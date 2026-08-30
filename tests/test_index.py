@@ -27,6 +27,7 @@ _SEATED_TITLE = "let seated_title ="
 _SEATED_MARK = "let seated_mark ="
 _SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
 _SEAT_LTR = "dir: ltr,\n    spacing: 1fr,"
+_FOLLOW_RTL = "dir: rtl,\n    spacing: 0.5em,"
 
 
 def _generate(dto) -> str:
@@ -210,10 +211,17 @@ def test_annual_has_no_calendar_chip_and_links_to_index():
 def test_colophon_has_mark_and_unchanged_facts():
     typst = _generate(load(NOMAD))
     page = _colophon_page(typst)
-    assert _MARK_LINK in page
+    assert _MARK_FLUSH in page
     assert _MARK_RULE in page
-    assert page.index("columns: (auto, auto)") < page.index(_MARK_LINK)
-    assert page.index(_MARK_LINK) < page.index("[About this notebook <colophon>]")
+    assert page.count(_MARK_RULE) == 5
+    assert _FOLLOW_RTL in page
+    assert _SEATED_TRAIL in page
+    heading = page[page.index(_SEATED_TITLE) : page.index(_SEATED_MARK)]
+    assert "[About this notebook <colophon>]" in heading
+    assert _MARK_FLUSH not in heading
+    assert page.index("[About this notebook <colophon>]") < page.index(_MARK_FLUSH)
+    assert "column-gutter: 6pt" not in page
+    assert "columns: (auto, auto)" not in page
     assert "[*Device*]" in page
     assert "[*Year*]" in page
     assert "[*Version*]" in page
