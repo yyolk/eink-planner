@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from parch.compose.ctx import ComposeCtx
+from parch.i18n import I18n
+from parch.mos.configurator import Configurator
 from parch.mos.page_data import PageData
 
 
@@ -16,9 +17,8 @@ def _escape(text: str) -> str:
 
 
 class CoverPlain:
-    def __init__(self, section_name: str, ctx: ComposeCtx, name: str, font_size: str) -> None:
+    def __init__(self, section_name: str, i18n: I18n, configurator: Configurator, name: str, font_size: str) -> None:
         self.section_name = section_name
-        self.ctx = ctx
         self.name = name
         self.font_size = font_size
 

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from parch.calendar import walk
 from parch.calendar.dated_note import DatedNote
-from parch.compose.ctx import ComposeCtx
+from parch.i18n import I18n
+from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.page_data import PageData
 from parch.sections.annual import Annual
@@ -14,13 +15,14 @@ class DailyNotes:
     def __init__(
         self,
         section_name: str,
-        ctx: ComposeCtx,
+        i18n: I18n,
+        configurator: Configurator,
         pages: int,
         pattern: str = "dotted",
     ) -> None:
         self.section_name = section_name
-        self.i18n = ctx.i18n
-        self.configurator = ctx.configurator
+        self.i18n = i18n
+        self.configurator = configurator
         self.pages_num = int(pages)
         self.pattern = pattern
 

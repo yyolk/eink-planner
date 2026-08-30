@@ -12,7 +12,7 @@ from parch.sections.annual import Annual
 from parch.sections.monthly import Monthly as MonthlySection
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
-from tests.helpers import base_config, compose_ctx, load_default, make_configurator, make_month
+from tests.helpers import base_config, load_default, make_configurator, make_month
 from tests.test_toml_omit_sections import compile_pdf
 from tests.toml_fixtures import omit_toml_sections
 
@@ -57,7 +57,8 @@ def _page(yyyy_mm: str, week_placement: str = "left") -> Monthly:
 def _section() -> MonthlySection:
     return MonthlySection(
         section_name="monthly",
-        ctx=compose_ctx(i18n=_i18n(), configurator=make_configurator()),
+        i18n=_i18n(),
+        configurator=make_configurator(),
         month_params=_MONTH_PARAMS,
     )
 

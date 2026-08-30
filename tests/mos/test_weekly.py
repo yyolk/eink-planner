@@ -10,7 +10,7 @@ from parch.sections.annual import Annual
 from parch.sections.weekly import Weekly as WeeklySection
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
-from tests.helpers import base_config, compose_ctx, load_default, make_configurator, make_week
+from tests.helpers import base_config, load_default, make_configurator, make_week
 from tests.toml_fixtures import omit_toml_sections
 
 NOMAD = base_config("supernote-nomad")
@@ -64,7 +64,8 @@ def _page(date_str: str, pattern: str = "dotted", manifest: Manifest | None = No
 def _section() -> WeeklySection:
     return WeeklySection(
         section_name="weekly",
-        ctx=compose_ctx(i18n=_i18n(), configurator=make_configurator()),
+        i18n=_i18n(),
+        configurator=make_configurator(),
         column_gutter="4pt",
     )
 

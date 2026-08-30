@@ -11,7 +11,7 @@ from parch.sections.annual import Annual
 from parch.sections.daily import Daily as DailySection
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
-from tests.helpers import base_config, compose_ctx, load_default, make_configurator, make_day
+from tests.helpers import base_config, load_default, make_configurator, make_day
 from tests.toml_fixtures import omit_toml_sections
 
 NOMAD = base_config("supernote-nomad")
@@ -70,7 +70,8 @@ def _page(date_str: str, manifest: Manifest | None = None, **overrides) -> Daily
 def _section(start_date: str = "2026-01-01", end_date: str = "2026-01-04") -> DailySection:
     return DailySection(
         section_name="daily",
-        ctx=compose_ctx(i18n=_i18n(), configurator=make_configurator(start_date=start_date, end_date=end_date)),
+        i18n=_i18n(),
+        configurator=make_configurator(start_date=start_date, end_date=end_date),
         columns_width="(3fr, 5fr)",
         items_spacing="4mm",
         left_column=_LEFT,
