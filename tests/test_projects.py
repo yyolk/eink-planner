@@ -15,7 +15,7 @@ from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf
 from tests.toml_fixtures import _minimal, short_january
-from tests.helpers import base_config, load_default
+from tests.helpers import base_config, compose_ctx, load_default
 
 NOMAD = base_config("supernote-nomad")
 
@@ -37,8 +37,7 @@ def _projects(dto, pages: int | None = None) -> Projects:
         params["pages"] = pages
     return Projects(
         section_name="projects",
-        i18n=load_default(),
-        configurator=Configurator(dto),
+        ctx=compose_ctx(configurator=Configurator(dto)),
         pages=params.get("pages", Projects.DEFAULT_PAGES),
         card_rows=params.get("card_rows", Projects.CARDS),
     )

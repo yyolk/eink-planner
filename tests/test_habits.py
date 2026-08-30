@@ -13,7 +13,7 @@ from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf
 from tests.toml_fixtures import _minimal, short_january
-from tests.helpers import base_config, load_default
+from tests.helpers import base_config, compose_ctx, load_default
 
 
 def _habit_header_src(name: str) -> str:
@@ -48,8 +48,7 @@ def _habits(dto) -> Habits:
             break
     return Habits(
         section_name="habits",
-        i18n=load_default(),
-        configurator=Configurator(dto),
+        ctx=compose_ctx(configurator=Configurator(dto)),
         habit_columns=params.get("habit_columns", Habits.DEFAULT_COLUMNS),
         names=params.get("names"),
     )

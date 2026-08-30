@@ -15,7 +15,7 @@ from parch.mos.pages.quarterly import Quarterly
 from parch.sections.annual import Annual
 from parch.sections.quarterly import Quarterly as QuarterlySection
 from parch.services.generate import Generate
-from tests.helpers import base_config, load_default, make_configurator, make_quarter
+from tests.helpers import base_config, compose_ctx, load_default, make_configurator, make_quarter
 from tests.test_toml_omit_sections import compile_pdf
 from tests.toml_fixtures import omit_toml_sections
 
@@ -51,8 +51,7 @@ def _page(date_str: str, months_column: str = "left") -> Quarterly:
 def _section() -> QuarterlySection:
     return QuarterlySection(
         section_name="quarterly",
-        i18n=_i18n(),
-        configurator=make_configurator(),
+        ctx=compose_ctx(i18n=_i18n(), configurator=make_configurator()),
         months_column="left",
         little_calendar=_little_calendar(),
     )

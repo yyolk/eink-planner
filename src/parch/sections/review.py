@@ -5,13 +5,10 @@ Raw Typst only — no MOS chrome. Sibling of Habits, not a second weekly planner
 
 from __future__ import annotations
 
-from typing import Any
-
 from parch.calendar import walk
 from parch.calendar.day import Day
 from parch.calendar.week import Week
-from parch.i18n import I18n
-from parch.mos.configurator import Configurator
+from parch.compose.ctx import ComposeCtx
 from parch.mos.manifest import Manifest
 from parch.mos.contents_mark import body_size_token, heading_height_token, lead_title
 from parch.mos.page_data import PageData
@@ -36,15 +33,13 @@ class Review:
     def __init__(
         self,
         section_name: str,
-        i18n: I18n,
-        configurator: Configurator,
+        ctx: ComposeCtx,
         weeks_per_page: int = DEFAULT_WEEKS_PER_PAGE,
         pattern: str = "lined",
-        **_rest: Any,
     ) -> None:
         self.section_name = section_name
-        self.i18n = i18n
-        self.configurator = configurator
+        self.i18n = ctx.i18n
+        self.configurator = ctx.configurator
         self.weeks_per_page = int(weeks_per_page)
         self.pattern = pattern
         self.weekday_start = configurator.weekday_start()

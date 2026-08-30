@@ -21,7 +21,7 @@ from tests.test_toml_omit_sections import (
     compile_pdf,
 )
 from tests.toml_fixtures import _minimal, short_january
-from tests.helpers import base_config, load_default
+from tests.helpers import base_config, compose_ctx, load_default
 
 REPO = Path(__file__).resolve().parents[1]
 NOMAD = base_config("supernote-nomad")
@@ -51,7 +51,7 @@ def _colo_kwargs(device: str | None = None, **prov) -> dict:
         data["device"] = device
     if prov:
         data["planner"] = {"params": {"provenance": prov}}
-    return {"section_name": "colophon", "configurator": StrictDict(data) if data else None}
+    return {"section_name": "colophon", "ctx": compose_ctx(configurator=StrictDict(data) if data else None)}
 
 
 def test_empty_colophon_body_is_valid():
@@ -105,7 +105,7 @@ title = "Again"
 
 
 def test_colophon_is_raw_without_mos_chrome():
-    colo = Colophon(section_name="colophon")
+    colo = Colophon(section_name="colophon", ctx=compose_ctx())
     pages = colo.pages(None)
     assert len(pages) == 1
     assert pages[0].raw_typst is True
@@ -350,7 +350,7 @@ def _colophon_with_flags(
     )
     return Colophon(
         section_name="colophon",
-        configurator=cfg,
+        ctx=compose_ctx(configurator=cfg),
         dump=dump,
         command=command,
         sha=sha,
@@ -584,13 +584,13 @@ def test_command_and_sha_join_same_grid_after_version():
 
 
 def test_command_true_missing_provenance_still_emits_empty_row():
-    content = Colophon(section_name="colophon", command=True).pages(None)[0].content
+    content = Colophon(section_name="colophon", ctx=compose_ctx(), command=True).pages(None)[0].content
     assert "[*Command*]" in content
     assert "colo-mono(" in content
 
 
 def test_sha_true_missing_provenance_still_emits_empty_row():
-    content = Colophon(section_name="colophon", sha=True).pages(None)[0].content
+    content = Colophon(section_name="colophon", ctx=compose_ctx(), sha=True).pages(None)[0].content
     assert "[*SHA-256*]" in content
     assert "colo-mono(" in content
 

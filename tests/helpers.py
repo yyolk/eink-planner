@@ -10,6 +10,7 @@ from parch.calendar.day import Day
 from parch.calendar.month import Month
 from parch.calendar.quarter import Quarter
 from parch.calendar.week import Week
+from parch.compose.ctx import ComposeCtx
 from parch.config import StrictDict
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
@@ -49,6 +50,20 @@ def make_month(yyyy_mm: str, weekday_start: str = "monday") -> Month:
 
 def make_quarter(date_str: str, weekday_start: str = "monday") -> Quarter:
     return Quarter(weekday_start=weekday_start, day=make_day(date_str, weekday_start))
+
+
+def compose_ctx(
+    i18n: I18n | None = None,
+    configurator: Configurator | StrictDict | dict | None = None,
+) -> ComposeCtx:
+    """ComposeCtx for section constructors; dummy configurator when omitted."""
+    if configurator is None:
+        cfg = Configurator(StrictDict({}))
+    elif isinstance(configurator, Configurator):
+        cfg = configurator
+    else:
+        cfg = Configurator(configurator)
+    return ComposeCtx(i18n=i18n or load_default(), configurator=cfg)
 
 
 def make_configurator(

@@ -6,6 +6,7 @@ import re
 from typing import Any
 
 from parch import __version__
+from parch.compose.ctx import ComposeCtx
 from parch.config import StrictDict, _to_plain
 from parch.mos.contents_mark import body_size_token, contents_mark, heading_height_token, lead_title
 from parch.mos.page_data import PageData
@@ -104,16 +105,16 @@ class Colophon:
     def __init__(
         self,
         section_name: str,
+        ctx: ComposeCtx,
         title: str | None = None,
-        configurator: Any = None,
         dump: bool | None = None,
         command: bool | None = None,
         sha: bool | None = None,
-        **_rest: Any,
     ) -> None:
         self.section_name = section_name
+        self.ctx = ctx
+        self.configurator = ctx.configurator
         self.title = title or DEFAULT_TITLE
-        self.configurator = configurator
         self.dump = bool(dump)
         self.command = bool(command)
         self.sha = bool(sha)
