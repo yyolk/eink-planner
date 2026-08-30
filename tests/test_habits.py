@@ -45,6 +45,14 @@ _BOX_FRIDAY = "grid.cell(stroke: (rest: regular_stroke, bottom: thick_stroke), [
 _WEEK_RULE = "grid.cell(colspan:"
 _JAN_DAYS = 31
 _DEFAULT_COLUMNS = 4
+_RIGHT_MOS = """[mos]
+side_menu = "right"
+side_menu_width = "10mm"
+reverse_months_quarters = true
+menu_rotate = "270deg"
+column_gutter = "1.5mm"
+row_gutter = "1.5mm"
+"""
 
 
 def _generate(dto) -> str:
@@ -261,10 +269,31 @@ def test_habit_month_pages_set_trail_mark_alone():
         assert page.nav_links == []
         assert page.show_quarters is False
         title = page.title or ""
-        assert f"{name}<habits-{name.lower()}>" in title
+        content = page.content
         assert "2026 /" not in title
         assert "text(size: h1)[/]" not in title
+        assert "column-gutter: 6pt" not in title
         assert "padded_link(<habits>)" in title
+        assert f"{name}<habits-{name.lower()}>" in content
+        assert f"{name}<habits-{name.lower()}>" not in title
+
+
+def test_mos_right_month_title_stacks_habits_above_january():
+    dto = parse_toml(
+        _minimal(enable=["habits"], mos=_RIGHT_MOS, sections=""),
+        source="trail-right.toml",
+    )
+    habits = _habits(dto)
+    manifest = Manifest()
+    habits.register(manifest)
+    january = habits.pages(manifest)[1]
+    title = january.title or ""
+    assert january.heading_mark is HeadingMark.TRAIL
+    assert january.nav_links == []
+    assert "dir: ttb" in title
+    assert title.index("padded_link(<habits>)") < title.index("January<habits-january>")
+    assert "column-gutter: 6pt" not in title
+    assert "January<habits-january>" not in january.content
 
 
 def test_grid_uses_stroke_boxes_horizontal_names_and_thin_day_rules():
@@ -525,16 +554,6 @@ def test_named_headers_compile(tmp_path):
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
 
 
-_RIGHT_MOS = """[mos]
-side_menu = "right"
-side_menu_width = "10mm"
-reverse_months_quarters = true
-menu_rotate = "270deg"
-column_gutter = "1.5mm"
-row_gutter = "1.5mm"
-"""
-
-
 def _mos_page(typst: str, *needles: str, exclude: str | None = None) -> str:
     for page in typst.split("#pagebreak()"):
         if all(needle in page for needle in needles) and (
@@ -772,9 +791,13 @@ def test_index_heading_is_trail_strip_when_contents_on():
     assert "spacing: 1fr" in heading
     assert _TRAIL_MARK in heading
     assert "column-gutter: 6pt" not in heading
-    assert month.index("January<habits-january>") < month.index(_TRAIL_MARK)
     month_heading = month[month.index("stack(") : month.index(_TRAIL_MARK)]
     assert "dir: rtl" in month_heading
+    assert "column-gutter: 6pt" not in month_heading
+    assert "January<habits-january>" not in month_heading
+    assert "padded_link(<habits>)" in month_heading
+    assert month.index(_TRAIL_MARK) < month.index("January<habits-january>")
+    assert month.index("January<habits-january>") < month.index("Thu 1")
     assert "padded_link(<habits>)" in month
     assert "2026 /" not in month
     assert "text(size: h1)[/]" not in month
@@ -796,6 +819,10 @@ def test_mos_right_month_mark_trails_alone_left_of_rail():
     assert month.index("January<habits-january>") < month.index(_TRAIL_MARK)
     heading = month[month.index("stack(") : month.index(_TRAIL_MARK)]
     assert "dir: ltr" in heading
+    assert "dir: ttb" in heading
+    assert "column-gutter: 6pt" not in heading
+    assert heading.index("padded_link(<habits>)") < heading.index("January<habits-january>")
+    assert heading.index("dir: ttb") < heading.index("January<habits-january>")
     assert "padded_link(<habits>)" in month
     assert "2026 /" not in month
     assert ", [Habits])" not in month

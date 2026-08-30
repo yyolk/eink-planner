@@ -129,16 +129,25 @@ class Habits:
   {body}
 )"""
 
+    def _mos_right(self) -> bool:
+        return (
+            self.configurator.dig_bang("planner", "params", "mos_layout")["side_menu_position"]
+            == "right"
+        )
+
+    def _month_label(self, month: Month) -> str:
+        full = self.i18n.t(f"months.full.{month.name}")
+        return f"text(size: h1)[{full}<{self.month_id(month)}>]"
+
     def _month_title(self, manifest: Manifest, month: Month) -> str:
         habits_cell = manifest.link_or_content(self.ID, self.i18n.t("habits"))
-        full = self.i18n.t(f"months.full.{month.name}")
-        page_id = self.month_id(month)
-        return f"""grid(
-  columns: (auto, auto),
-  column-gutter: 6pt,
-  align: horizon,
-  text(size: h1, {habits_cell}),
-  text(size: h1)[{full}<{page_id}>]
+        habits = f"text(size: h1, {habits_cell})"
+        if not self._mos_right():
+            return habits
+        return f"""stack(
+  dir: ttb,
+  {habits},
+  {self._month_label(month)}
 )"""
 
     def _month_grid(self, manifest: Manifest, month: Month) -> str:
@@ -155,7 +164,7 @@ class Habits:
             cells.append(", ".join(row))
             row_sizes.append("1fr")
         rows = ", ".join(row_sizes)
-        return f"""grid(
+        grid = f"""grid(
   columns: ({cols}),
   rows: ({rows}),
   align: horizon,
@@ -163,6 +172,15 @@ class Habits:
   column-gutter: 0pt,
   row-gutter: 0pt,
   {",\n  ".join(cells)}
+)"""
+        if self._mos_right():
+            return grid
+        return f"""grid(
+  columns: 1fr,
+  rows: (auto, 1fr),
+  align: horizon + left,
+  {self._month_label(month)},
+  {grid}
 )"""
 
     def _date_label(self, manifest: Manifest, day: Day) -> str:
