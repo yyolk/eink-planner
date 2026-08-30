@@ -46,6 +46,11 @@ OLD_W01_DAYS = (
     "Sunday,  4",
 )
 
+_HEADER_CELL = (
+    "grid.cell(stroke: (bottom: regular_stroke + black), "
+    'inset: (bottom: 0.25em), text(bottom-edge: "descender", '
+)
+
 
 def _i18n() -> I18n:
     return load_default()
@@ -103,13 +108,25 @@ def test_headers_link_to_daily_when_registered():
     manifest = Manifest()
     manifest.register_source("2025-12-29")
     content = _page("2025-12-29", manifest=manifest).content()
-    assert "padded_link(<2025-12-29>)[Monday 29]" in content
+    assert f"{_HEADER_CELL}padded_link(<2025-12-29>)[Monday 29])" in content
 
 
 def test_thin_black_rule_not_thick_stroke():
     content = _page("2025-12-29").content()
     assert "thick_stroke" not in content
     assert content.count("regular_stroke + black") == 8
+
+
+def test_header_rule_sits_under_descenders():
+    content = _page("2025-12-29").content()
+    assert content.count(_HEADER_CELL) == 8
+    assert f"{_HEADER_CELL}[Monday 29])" in content
+    assert f"{_HEADER_CELL}[Notes])" in content
+    assert "rows: (auto, 1fr)" in content
+    assert "stroke: (left:" not in content
+    assert "stroke: (right:" not in content
+    assert "stroke: (top:" not in content
+    assert "stroke: regular_stroke + black)" not in content
 
 
 def test_per_cell_pattern_keeps_white_gutters():
@@ -175,6 +192,8 @@ def test_generated_year_crumb_links_to_annual_and_inverts_thursday_month():
     assert "Calendar" not in w01
     assert "Monday 29" in w01
     assert "Thursday 1" in w01
+    assert w01.count(_HEADER_CELL) == 8
+    assert f"{_HEADER_CELL}[Notes])" in w01
     assert "Monday, 29" not in w01
     assert "Thursday,  1" not in w01
     assert w01.count("line(length: 0.844em, stroke: thick_stroke + black)") == 5
