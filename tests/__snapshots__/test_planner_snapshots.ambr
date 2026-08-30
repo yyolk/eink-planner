@@ -290,11 +290,7 @@
         [*Thursday*],
         padded_link(<2026W01>)[Week 1]
       ),
-      grid(
-        columns: (auto, auto),
-        column-gutter: 6pt,
-        align: horizon,
-        padded_link(<index>, text(size: h1, context {
+      pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
         let cap = 0.7em.to-absolute()
         let gap = (cap - 5 * thick_stroke) / 4
         box(
@@ -310,16 +306,7 @@
             line(length: 0.844em, stroke: thick_stroke + black),
           ))
         )
-      })),
-        grid(
-        rows: 10mm,
-        columns: 1,
-        inset: 7pt,
-      
-        stroke: (x, y)  => if x > 0 { ( left: regular_stroke ) },
-        padded_link(<annual>, [2026])
-      )
-      )
+      })))
       )),
         grid(
         columns: (3fr, 5fr),
@@ -913,11 +900,7 @@
         [*Thursday*],
         padded_link(<2026W01>)[Week 1]
       ),
-      grid(
-        columns: (auto, auto),
-        column-gutter: 6pt,
-        align: horizon,
-        padded_link(<index>, text(size: h1, context {
+      pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
         let cap = 0.7em.to-absolute()
         let gap = (cap - 5 * thick_stroke) / 4
         box(
@@ -933,16 +916,7 @@
             line(length: 0.844em, stroke: thick_stroke + black),
           ))
         )
-      })),
-        grid(
-        rows: 8mm,
-        columns: 1,
-        inset: 7pt,
-      
-        stroke: (x, y)  => if x > 0 { ( left: regular_stroke ) },
-        padded_link(<annual>, [2026])
-      )
-      )
+      })))
       )),
         grid(
         columns: (3fr, 5fr),
