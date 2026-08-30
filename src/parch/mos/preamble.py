@@ -1,4 +1,4 @@
-"""Typst document preamble (page size, strokes, tilings, padded_link)."""
+"""Typst document preamble (page size, strokes, paper tiles, padded_link)."""
 
 from __future__ import annotations
 
@@ -41,33 +41,58 @@ class Preamble:
 
 #let h1 = {h1}
 
-#let dotted = tiling(
-  size: (regular_height, regular_height),
-  place(
-    dx: 0.5pt,
-    dy: regular_height - 0.3mm,
-    circle(
-      radius: 0.141mm,
-      fill: black
-    )
-  ),
-)
-
-#let lined = tiling(
-  size: (regular_height, regular_height),
-  place(
-    line(
-      start: (0%, regular_height - 0.15mm),
-      end: (100%, regular_height - 0.15mm),
-      stroke: regular_stroke + luma(130)
-    ),
+#let dotted = place(
+  dx: 0.5pt,
+  dy: regular_height - 0.3mm,
+  circle(
+    radius: 0.141mm,
+    fill: black
   )
 )
 
+#let lined = place(
+  line(
+    start: (0%, regular_height - 0.15mm),
+    end: (100%, regular_height - 0.15mm),
+    stroke: regular_stroke + luma(130)
+  )
+)
+
+// House paper is placed tiles, not a tiling fill. Typst SVG of
+// rect(fill: tiling) is one userSpaceOnUse pattern on a huge path;
+// GitHub/resvg drop that paint and leave the field white.
+// Outer rect keeps the old 100% cell size. Tiles sit on the same
+// page lattice as userSpaceOnUse (origin at 0,0).
 #let rect_pattern(pattern) = rect(
   width: 100%,
   height: 100%,
-  fill: pattern
+  stroke: none,
+  inset: 0pt,
+  context {{
+    let pos = here().position()
+    let cell = regular_height.to-absolute()
+    let ox = pos.x - cell * calc.floor(pos.x.pt() / cell.pt())
+    let oy = pos.y - cell * calc.floor(pos.y.pt() / cell.pt())
+    layout(size => {{
+      let cols = calc.ceil((size.width + ox).pt() / cell.pt())
+      let rows = calc.ceil((size.height + oy).pt() / cell.pt())
+      box(width: size.width, height: size.height, clip: true, {{
+        if cols == 0 or rows == 0 {{
+          none
+        }} else {{
+          for iy in range(rows) {{
+            for ix in range(cols) {{
+              place(
+                dx: cell * ix - ox,
+                dy: cell * iy - oy,
+                box(width: cell, height: cell, pattern)
+              )
+            }}
+          }}
+        }}
+      }})
+    }})
+  }}
 )
 
 #let dotted_centered = tiling(
