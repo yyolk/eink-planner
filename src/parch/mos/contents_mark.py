@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from parch.compose.page_data import HeadingMark
 from parch.mos.manifest import Manifest
 
 INDEX_ID = "index"
@@ -114,3 +115,38 @@ def trail_strip(
     if mark and not chip:
         return f"pad(right: 3mm, {mark})"
     return mark or chip
+
+
+def trail_heading(
+    manifest: Manifest | None,
+    heading_height: str,
+    title: str | None,
+    body_size: str = "8pt",
+    *,
+    direction: str = "ltr",
+    chip: str | None = None,
+    edge: HeadingMark = HeadingMark.TRAIL,
+) -> str:
+    """TRAIL is 1fr opposite-ends; FOLLOW is 0.5em after the mark, own hits."""
+    mark = trail_strip(manifest, heading_height, body_size, chip)
+    if not title:
+        return mark or ""
+    if not mark:
+        return title
+    if edge is HeadingMark.FOLLOW:
+        spacing = "0.5em"
+    elif edge is HeadingMark.TRAIL:
+        spacing = "1fr"
+    else:
+        raise ValueError(f"trail_heading edge must be TRAIL or FOLLOW, not {edge!r}")
+    return f"""context {{
+  let seated_title = {title}
+  let seated_mark = {mark}
+  let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
+  stack(
+    dir: {direction},
+    spacing: {spacing},
+    box(height: band, align(horizon + left, seated_title)),
+    box(height: band, align(horizon + left, seated_mark)),
+  )
+}}"""

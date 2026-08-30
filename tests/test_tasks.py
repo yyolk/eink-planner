@@ -8,6 +8,8 @@ import pytest
 from parch import ConfigError
 from parch.config import load
 from parch.mos.configurator import Configurator
+from parch.compose.page_data import HeadingMark
+from parch.mos.manifest import Manifest
 from parch.sections.tasks import Tasks
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
@@ -19,6 +21,11 @@ NOMAD = base_config("supernote-nomad")
 _EN_DASH = "–"
 _MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
 _TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
+_SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
+_SEATED_TITLE = "let seated_title ="
+_SEATED_MARK = "let seated_mark ="
+_SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
+_FOLLOW_RTL = "dir: rtl,\n    spacing: 0.5em,"
 _W01_TITLE = f"Week 1 #h(0.6em) Dec 29 {_EN_DASH} Jan 4"
 
 # 2026, Monday week start: Jan 1 is Thursday.
@@ -497,10 +504,24 @@ def test_contents_mark_on_tasks_when_index_on():
         assert "padded_link(<annual>)" not in page
     assert "text(size: h1, [Tasks <tasks>])" in index
     assert "padded_link(<tasks>)" in week
-    heading = index[index.index("stack(") : index.index("[Tasks <tasks>]")]
-    assert "dir: ltr" in heading
-    assert "spacing: 1fr" in heading
-    assert _TRAIL_MARK in heading
+    heading = index[index.index(_SEATED_TITLE) : index.index(_SEATED_MARK)]
+    assert "[Tasks <tasks>]" in heading
+    assert _TRAIL_MARK not in heading
+    assert _FOLLOW_RTL in index
+    assert _SEAT_RTL not in index
+    assert _SEATED_TRAIL in index
+    assert index.index("[Tasks <tasks>]") < index.index(_TRAIL_MARK)
+    week_heading = week[week.index(_SEATED_TITLE) : week.index(_SEATED_MARK)]
+    assert "padded_link(<tasks>)" in week_heading
+    assert _FOLLOW_RTL in week
+    assert _SEAT_RTL not in week
+    assert _W01_TITLE in week
     contents = next(p for p in _pages(typst) if 'weight: "bold")[Contents <index>]' in p)
     assert "padded_link(<index>" not in contents
     assert "padded_link(<tasks>" in contents
+    tasks = _tasks(dto)
+    manifest = Manifest()
+    tasks.register(manifest)
+    for page in tasks.pages(manifest):
+        assert page.heading_mark is HeadingMark.LEAD
+        assert page.raw_typst is True

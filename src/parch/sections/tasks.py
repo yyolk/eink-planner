@@ -11,8 +11,8 @@ from parch.calendar.week import Week
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.mos.contents_mark import body_size_token, heading_height_token, trail_strip
-from parch.compose.page_data import PageData
+from parch.mos.contents_mark import body_size_token, heading_height_token, trail_heading
+from parch.compose.page_data import HeadingMark, PageData
 
 _INDEX_LEFT_INSET = "4mm"
 _INDEX_BOTTOM_INSET = "4mm"
@@ -175,21 +175,14 @@ class Tasks:
 )"""
 
     def _heading(self, manifest: Manifest, tasks_cell: str) -> str:
-        title = f"text(size: h1, {tasks_cell})"
-        mark = trail_strip(
+        return trail_heading(
             manifest,
             heading_height_token(self.configurator),
+            f"text(size: h1, {tasks_cell})",
             body_size_token(self.configurator),
-            chip=None,
+            direction="rtl",
+            edge=HeadingMark.FOLLOW,
         )
-        if not mark:
-            return title
-        return f"""stack(
-  dir: ltr,
-  spacing: 1fr,
-  {mark},
-  {title}
-)"""
 
     def _index(self, manifest: Manifest, weeks: list[Week], page_index: int) -> str:
         page_id = self.index_id(page_index)

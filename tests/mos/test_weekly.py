@@ -207,7 +207,7 @@ def test_generated_year_crumb_links_to_annual_and_inverts_thursday_month():
     assert "padded_link(<annual>)[2026]" in w01
     assert "text(size: h1)[/]" in w01
     assert "Week 1 <2026W01>" in w01
-    heading = w01[w01.index("stack(") : w01.index("Week 1 <2026W01>")]
+    heading = w01[w01.index("columns: (auto, auto)") : w01.index("Week 1 <2026W01>")]
     assert "columns: (auto, auto)" in heading
     assert "column-gutter: 6pt" in heading
     assert "pad(right: 3mm" not in heading

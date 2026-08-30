@@ -141,11 +141,9 @@
       )
           )
         )
-      ), grid.cell(align: horizon, stack(
-        dir: rtl,
-        spacing: 1fr,
-        text(size: h1)[2026<annual>],
-      pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
+      ), grid.cell(align: horizon, context {
+        let seated_title = text(size: h1)[2026<annual>]
+        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
         let cap = 0.7em.to-absolute()
         let gap = (cap - 5 * thick_stroke) / 4
         box(
@@ -162,7 +160,14 @@
           ))
         )
       })))
-      )),
+        let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
+        stack(
+          dir: rtl,
+          spacing: 1fr,
+          box(height: band, align(horizon + left, seated_title)),
+          box(height: band, align(horizon + left, seated_mark)),
+        )
+      }),
         grid(
         columns: (1fr, 1fr, 1fr),
         rows: (1fr),
@@ -270,10 +275,8 @@
       )
           )
         )
-      ), grid.cell(align: horizon, stack(
-        dir: rtl,
-        spacing: 1fr,
-        grid(
+      ), grid.cell(align: horizon, context {
+        let seated_title = grid(
         columns: (auto, auto),
         rows: (3fr, 2fr),
         column-gutter: regular_column_gutter,
@@ -289,8 +292,8 @@
         ),
         [*Thursday*],
         padded_link(<2026W01>)[Week 1]
-      ),
-      pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
+      )
+        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
         let cap = 0.7em.to-absolute()
         let gap = (cap - 5 * thick_stroke) / 4
         box(
@@ -307,7 +310,14 @@
           ))
         )
       })))
-      )),
+        let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
+        stack(
+          dir: rtl,
+          spacing: 1fr,
+          box(height: band, align(horizon + left, seated_title)),
+          box(height: band, align(horizon + left, seated_mark)),
+        )
+      }),
         grid(
         columns: (3fr, 5fr),
         rows: 1fr,
@@ -422,10 +432,7 @@
       )
           )
         )
-      ), grid.cell(align: horizon, stack(
-        dir: rtl,
-        spacing: 1fr,
-        grid(
+      ), grid.cell(align: horizon, grid(
         columns: (auto, auto),
         column-gutter: 6pt,
         align: horizon,
@@ -453,7 +460,6 @@
         text(size: h1, padded_link(<annual>)[2026]),
         text(size: h1)[/],
         text(size: h1)[January<month-2026-01-01>]
-      )
       )
       )),
         grid(
@@ -622,10 +628,7 @@
       )
           )
         )
-      ), grid.cell(align: horizon, stack(
-        dir: rtl,
-        spacing: 1fr,
-        grid(
+      ), grid.cell(align: horizon, grid(
         columns: (auto, auto),
         column-gutter: 6pt,
         align: horizon,
@@ -653,7 +656,6 @@
         text(size: h1, padded_link(<annual>)[2026]),
         text(size: h1)[/],
         text(size: h1)[Week 1 <2026W01>]
-      )
       )
       )),
         grid(
@@ -751,11 +753,9 @@
       )
           )
         )
-      ), grid.cell(align: horizon, stack(
-        dir: rtl,
-        spacing: 1fr,
-        text(size: h1)[2026<annual>],
-      pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
+      ), grid.cell(align: horizon, context {
+        let seated_title = text(size: h1)[2026<annual>]
+        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
         let cap = 0.7em.to-absolute()
         let gap = (cap - 5 * thick_stroke) / 4
         box(
@@ -772,7 +772,14 @@
           ))
         )
       })))
-      )),
+        let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
+        stack(
+          dir: rtl,
+          spacing: 1fr,
+          box(height: band, align(horizon + left, seated_title)),
+          box(height: band, align(horizon + left, seated_mark)),
+        )
+      }),
         grid(
         columns: (1fr, 1fr, 1fr),
         rows: (1fr),
@@ -880,10 +887,8 @@
       )
           )
         )
-      ), grid.cell(align: horizon, stack(
-        dir: rtl,
-        spacing: 1fr,
-        grid(
+      ), grid.cell(align: horizon, context {
+        let seated_title = grid(
         columns: (auto, auto),
         rows: (3fr, 2fr),
         column-gutter: regular_column_gutter,
@@ -899,8 +904,8 @@
         ),
         [*Thursday*],
         padded_link(<2026W01>)[Week 1]
-      ),
-      pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
+      )
+        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
         let cap = 0.7em.to-absolute()
         let gap = (cap - 5 * thick_stroke) / 4
         box(
@@ -917,7 +922,14 @@
           ))
         )
       })))
-      )),
+        let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
+        stack(
+          dir: rtl,
+          spacing: 1fr,
+          box(height: band, align(horizon + left, seated_title)),
+          box(height: band, align(horizon + left, seated_mark)),
+        )
+      }),
         grid(
         columns: (3fr, 5fr),
         rows: 1fr,
@@ -1032,10 +1044,7 @@
       )
           )
         )
-      ), grid.cell(align: horizon, stack(
-        dir: rtl,
-        spacing: 1fr,
-        grid(
+      ), grid.cell(align: horizon, grid(
         columns: (auto, auto),
         column-gutter: 6pt,
         align: horizon,
@@ -1063,7 +1072,6 @@
         text(size: h1, padded_link(<annual>)[2026]),
         text(size: h1)[/],
         text(size: h1)[January<month-2026-01-01>]
-      )
       )
       )),
         grid(
@@ -1232,10 +1240,7 @@
       )
           )
         )
-      ), grid.cell(align: horizon, stack(
-        dir: rtl,
-        spacing: 1fr,
-        grid(
+      ), grid.cell(align: horizon, grid(
         columns: (auto, auto),
         column-gutter: 6pt,
         align: horizon,
@@ -1263,7 +1268,6 @@
         text(size: h1, padded_link(<annual>)[2026]),
         text(size: h1)[/],
         text(size: h1)[Week 1 <2026W01>]
-      )
       )
       )),
         grid(
