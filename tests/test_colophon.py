@@ -507,6 +507,8 @@ def test_drop_empty_tables_keeps_quoted_and_dotted_keys():
 
 
 def test_two_dump_colophons_use_unique_start_and_end():
+    import inspect
+
     a = _colophon_with_dump(dump=True)
     b = _colophon_with_dump(dump=True)
     ca = a.pages(None)[0].content
@@ -521,11 +523,144 @@ def test_two_dump_colophons_use_unique_start_and_end():
     assert b._dump_state_name() not in ca
     assert "colophon-start\"" not in ca
     assert "<colophon-end>" not in ca
-    assert "header:" in ca
+    assert "foreground:" in ca
     assert DEFAULT_TITLE in ca
-    # continuation title + quiet 1/N stay in the header
-    assert 'align(left, text(size: h1, weight: "bold")[' + DEFAULT_TITLE + "])" in ca
-    assert "0.85em" in ca
+    # continuation is the FOLLOW heading; dump continuing is the signal
+    assert "0.85em" not in ca
+    assert "column-gutter: 6pt" not in ca
+    assert "nums" not in ca
+    assert "/#(last" not in ca
+    assert 'align(left, text(size: h1, weight: "bold")[' + DEFAULT_TITLE + "])" not in ca
+    assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + " <colophon>]" in ca
+    assert "foreground: context" in ca
+    assert "place(top + left, pad(top:" in ca
+    assert "cur == start-page" in ca
+    assert "header-ascent" not in ca
+    pagination = inspect.getsource(Colophon._dump_pagination)
+    assert "self._heading(" in pagination
+    assert "labeled=False" in pagination
+    assert "labeled=True" in pagination
+    assert "lead_title" not in pagination
+    assert "#show: rest" not in pagination
+    assert "header-ascent" not in pagination
+    assert '"8mm"' not in pagination
+    assert '"5mm"' not in pagination
+    layer = a._dump_pagination(None)
+    assert "foreground: context" in layer
+    assert "place(top + left, pad(top:" in layer
+    assert "#show: rest" not in layer
+    assert "header-ascent" not in layer
+    assert "page.margin.top" in layer
+    assert "page.margin.top + h1" in layer
+    assert layer.count("<colophon>") == 1
+    assert ca.count("<colophon>") == 1
+
+
+def test_dump_continuation_header_is_follow_seat_without_nums():
+    colo = _colophon_with_dump(dump=True)
+    manifest = Manifest()
+    manifest.register_source("index")
+    colo.register(manifest)
+    content = colo.pages(manifest)[0].content
+    assert "foreground:" in content
+    assert "foreground: context" in content
+    assert "#show: rest" not in content
+    assert "header-ascent" not in content
+    assert _FOLLOW_RTL in content
+    assert _SEATED_TITLE in content
+    assert _SEATED_MARK in content
+    assert content.count(_MARK_RULE) == 10
+    assert content.count(_SEATED_TITLE) == 2
+    assert "column-gutter: 6pt" not in content
+    assert "0.85em" not in content
+    assert "nums" not in content
+    assert "/#(last" not in content
+    assert "align(right" not in content
+    assert "cur == start-page" in content
+    assert colo._dump_end_label() in content
+    assert colo._dump_state_name() in content
+    heading = content[content.index(_SEATED_TITLE) : content.index(_SEATED_MARK)]
+    assert DEFAULT_TITLE in heading
+    assert _MARK_RULE not in heading
+    layer = colo._dump_pagination(manifest)
+    assert "foreground: context" in layer
+    assert "place(top + left, pad(top:" in layer
+    assert "here().page()" in layer[layer.index("foreground: context") :]
+    assert _FOLLOW_RTL in layer
+    assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + "]" in layer
+    assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + " <colophon>]" in layer
+    assert layer.count("<colophon>") == 1
+    assert content.count("<colophon>") == 1
+
+
+def test_dump_pagination_heading_omits_colophon_label():
+    colo = _colophon_with_dump(dump=True)
+    manifest = Manifest()
+    manifest.register_source("index")
+    layer = colo._dump_pagination(manifest)
+    first = colo._heading(manifest, labeled=True)
+    more = colo._heading(manifest, labeled=False)
+    assert "<colophon>" in first
+    assert "<colophon>" not in more
+    assert layer.count("<colophon>") == 1
+    assert "if cur == start-page" in layer
+    assert layer.count(_FOLLOW_RTL) == 2
+    assert "column-gutter: 6pt" not in layer
+    assert "0.85em" not in layer
+    assert "header-ascent" not in layer
+    assert "place(top + left, pad(top:" in layer
+    assert "page.margin.top" in layer
+    content = colo.pages(manifest)[0].content
+    assert content.count("<colophon>") == 1
+    assert "#show: rest" not in layer
+
+
+def test_dump_pagination_seats_follow_below_profile_margin_top():
+    import inspect
+
+    source = inspect.getsource(Colophon._dump_pagination)
+    assert "labeled=False" in source
+    assert "labeled=True" in source
+    assert "foreground: context" in source
+    assert "place(top + left, pad(top:" in source
+    assert "#show: rest" not in source
+    assert "header-ascent" not in source
+    assert "here().page()" in source[source.index("foreground: context") :]
+    assert '"8mm"' not in source
+    assert '"5mm"' not in source
+    nomad = Colophon(
+        section_name="colophon",
+        i18n=load_default(),
+        configurator=Configurator(load(base_config("supernote-nomad"))),
+        dump=True,
+    )
+    scribe = Colophon(
+        section_name="colophon",
+        i18n=load_default(),
+        configurator=Configurator(load(base_config("kindle-scribe"))),
+        dump=True,
+    )
+    slim = Colophon(
+        section_name="colophon",
+        i18n=load_default(),
+        configurator=Configurator(load(base_config("158x210-mos-left"))),
+        dump=True,
+    )
+    n = nomad._dump_pagination(None)
+    s = scribe._dump_pagination(None)
+    x = slim._dump_pagination(None)
+    assert "pad(top: 8mm" in n
+    assert "8mm + h1" in n
+    assert "foreground: context" in n
+    assert "place(top + left, pad(top:" in n
+    assert "#show: rest" not in n
+    assert "header-ascent" not in n
+    assert "pad(top: 5mm" in s
+    assert "5mm + h1" in s
+    assert "8mm" not in s
+    assert "pad(top: 5mm" in x
+    assert "5mm + h1" in x
+    assert "8mm" not in x
 
 
 def test_colophon_last_default_does_not_dump(tmp_path):
@@ -559,6 +694,56 @@ def test_dump_true_compiles_without_syntax_theme(tmp_path):
     assert not re.search(r"\[section\.colophon\]\\n\\n", typst_src)
     pdf, stderr = compile_pdf(typst_src, tmp_path / "dump-on")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
+
+
+def test_dump_continuation_pdf_contains_about_title(tmp_path):
+    import shutil
+    import subprocess
+
+    if shutil.which("pdftotext") is None:
+        pytest.skip("pdftotext not on PATH")
+    path = tmp_path / "nomad-dump.toml"
+    path.write_text(
+        _minimal(
+            enable=["colophon"],
+            device="""[device]
+name = "supernote-nomad"
+width = "118.87mm"
+height = "158.5mm"
+ppi = 300""",
+            sections="""[section.colophon]
+dump = true
+command = true
+sha = true
+""",
+        ),
+        encoding="utf-8",
+    )
+    dto = _attach(short_january(load(path)), path, argv=["parch", "press", "-w", "out", "cfg.toml"])
+    data = dto.to_plain()
+    data["planner"]["params"]["provenance"]["config_text"] = NOMAD.read_text(encoding="utf-8")
+    typst_src = _generate(StrictDict(data))
+    assert "foreground: context" in typst_src
+    assert "place(top + left, pad(top:" in typst_src
+    assert DEFAULT_TITLE in typst_src
+    pdf, stderr = compile_pdf(typst_src, tmp_path / "nomad-dump")
+    assert pdf.is_file() and pdf.stat().st_size > 0, stderr
+    extracted = subprocess.run(
+        ["pdftotext", "-layout", str(pdf), "-"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    pages = [page for page in extracted.split("\x0c") if page.strip()]
+    assert len(pages) >= 2, extracted
+    assert DEFAULT_TITLE in pages[0]
+    assert "Device" in pages[0]
+    assert "Contents" not in pages[0]
+    later = pages[1:]
+    assert any("[section." in page or "[device]" in page for page in later), extracted
+    for index, page in enumerate(pages, start=1):
+        assert DEFAULT_TITLE in page, f"page {index} missing title\n{page}"
+
 
 def test_colophon_command_parses():
     dto = parse_toml(
@@ -666,8 +851,11 @@ def test_command_sha_dump_together():
     assert "year = 2026" in content
     for token in _THEME:
         assert token not in content
-    assert "header:" in content
+    assert "foreground:" in content
+    assert "place(top + left, pad(top:" in content
     assert DEFAULT_TITLE in content
+    assert "0.85em" not in content
+    assert "column-gutter: 6pt" not in content
 
 
 def test_default_still_omits_command_sha_dump():

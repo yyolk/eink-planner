@@ -19,7 +19,10 @@ def config_sha256(path: str | Path) -> str:
 
 def format_command(argv: list[str]) -> str:
     """Shell-join the real argv (``parch press ...``)."""
-    return shlex.join(str(part) for part in argv)
+    parts = [str(part) for part in argv]
+    if parts:
+        parts[0] = Path(parts[0]).name
+    return shlex.join(parts)
 
 
 def git_head(start: Path) -> str | None:
