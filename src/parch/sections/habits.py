@@ -8,7 +8,7 @@ from parch.calendar.month import Month
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.mos.contents_mark import body_size_token, heading_height_token, trail_strip
+from parch.mos.contents_mark import body_size_token, heading_height_token, trail_heading
 from parch.compose.page_data import HeadingMark, PageData
 
 _INDEX_LEFT_INSET = "4mm"
@@ -69,21 +69,13 @@ class Habits:
         return walk(self.configurator.start_date().month(), self.configurator.end_date().month())
 
     def _heading(self, manifest: Manifest, habits_cell: str) -> str:
-        title = f"text(size: h1, {habits_cell})"
-        mark = trail_strip(
+        return trail_heading(
             manifest,
             heading_height_token(self.configurator),
+            f"text(size: h1, {habits_cell})",
             body_size_token(self.configurator),
-            chip=None,
+            direction="rtl",
         )
-        if not mark:
-            return title
-        return f"""stack(
-  dir: ltr,
-  spacing: 1fr,
-  {mark},
-  {title}
-)"""
 
     def _index(self, manifest: Manifest, months: list[Month]) -> str:
         n = len(months)

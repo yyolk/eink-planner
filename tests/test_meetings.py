@@ -24,6 +24,10 @@ ppi = 300"""
 
 _MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
 _TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
+_SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
+_SEATED_TITLE = "let seated_title ="
+_SEATED_MARK = "let seated_mark ="
+_SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
 _TICK_STROKE = "stroke: (_, _) => (bottom: regular_stroke + black)"
 
 
@@ -368,10 +372,12 @@ def test_contents_mark_on_meetings_when_index_on():
     assert "column-gutter: 6pt" not in index
     assert "text(size: h1, [Meetings <meetings>])" in index
     assert "padded_link(<meetings>)" in meeting
-    heading = index[index.index("stack(") : index.index("[Meetings <meetings>]")]
-    assert "dir: ltr" in heading
-    assert "spacing: 1fr" in heading
-    assert _TRAIL_MARK in heading
+    heading = index[index.index(_SEATED_TITLE) : index.index(_SEATED_MARK)]
+    assert "[Meetings <meetings>]" in heading
+    assert _TRAIL_MARK not in heading
+    assert _SEAT_RTL in index
+    assert _SEATED_TRAIL in index
+    assert index.index("[Meetings <meetings>]") < index.index(_TRAIL_MARK)
     contents = next(p for p in _pages(typst) if 'weight: "bold")[Contents <index>]' in p)
     assert "padded_link(<index>" not in contents
     assert "padded_link(<meetings>" in contents

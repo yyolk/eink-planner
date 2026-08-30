@@ -19,6 +19,10 @@ NOMAD = base_config("supernote-nomad")
 _EN_DASH = "–"
 _MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
 _TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
+_SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
+_SEATED_TITLE = "let seated_title ="
+_SEATED_MARK = "let seated_mark ="
+_SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
 _W01_TITLE = f"Week 1 #h(0.6em) Dec 29 {_EN_DASH} Jan 4"
 
 # 2026, Monday week start: Jan 1 is Thursday.
@@ -497,10 +501,12 @@ def test_contents_mark_on_tasks_when_index_on():
         assert "padded_link(<annual>)" not in page
     assert "text(size: h1, [Tasks <tasks>])" in index
     assert "padded_link(<tasks>)" in week
-    heading = index[index.index("stack(") : index.index("[Tasks <tasks>]")]
-    assert "dir: ltr" in heading
-    assert "spacing: 1fr" in heading
-    assert _TRAIL_MARK in heading
+    heading = index[index.index(_SEATED_TITLE) : index.index(_SEATED_MARK)]
+    assert "[Tasks <tasks>]" in heading
+    assert _TRAIL_MARK not in heading
+    assert _SEAT_RTL in index
+    assert _SEATED_TRAIL in index
+    assert index.index("[Tasks <tasks>]") < index.index(_TRAIL_MARK)
     contents = next(p for p in _pages(typst) if 'weight: "bold")[Contents <index>]' in p)
     assert "padded_link(<index>" not in contents
     assert "padded_link(<tasks>" in contents

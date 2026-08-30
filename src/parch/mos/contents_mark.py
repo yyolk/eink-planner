@@ -114,3 +114,31 @@ def trail_strip(
     if mark and not chip:
         return f"pad(right: 3mm, {mark})"
     return mark or chip
+
+
+def trail_heading(
+    manifest: Manifest | None,
+    heading_height: str,
+    title: str | None,
+    body_size: str = "8pt",
+    *,
+    direction: str = "ltr",
+    chip: str | None = None,
+) -> str:
+    """Seat Contents mark and title on one header-band horizon; mark keeps its own hit."""
+    mark = trail_strip(manifest, heading_height, body_size, chip)
+    if not title:
+        return mark or ""
+    if not mark:
+        return title
+    return f"""context {{
+  let seated_title = {title}
+  let seated_mark = {mark}
+  let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
+  stack(
+    dir: {direction},
+    spacing: 1fr,
+    box(height: band, align(horizon + left, seated_title)),
+    box(height: band, align(horizon + left, seated_mark)),
+  )
+}}"""

@@ -7,7 +7,7 @@ import math
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.mos.contents_mark import body_size_token, heading_height_token, trail_strip
+from parch.mos.contents_mark import body_size_token, heading_height_token, trail_heading
 from parch.compose.page_data import PageData
 from parch.sections._shared import _length_mm
 
@@ -97,21 +97,13 @@ class Projects:
         return out
 
     def _heading(self, manifest: Manifest, projects_cell: str) -> str:
-        title = f"text(size: h1, {projects_cell})"
-        mark = trail_strip(
+        return trail_heading(
             manifest,
             heading_height_token(self.configurator),
+            f"text(size: h1, {projects_cell})",
             body_size_token(self.configurator),
-            chip=None,
+            direction="rtl",
         )
-        if not mark:
-            return title
-        return f"""stack(
-  dir: ltr,
-  spacing: 1fr,
-  {mark},
-  {title}
-)"""
 
     def _index_projects_cell(self, manifest: Manifest, page: int) -> str:
         label = self.i18n.t("projects")

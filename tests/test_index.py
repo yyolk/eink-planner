@@ -17,6 +17,11 @@ _TOC_TITLE = 'weight: "bold")[Contents <index>]'
 _MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
 _MARK_LINK = "padded_link(<index>"
 _MARK_FLUSH = "padded_link(padding: 0pt, <index>"
+_SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
+_SEATED_TITLE = "let seated_title ="
+_SEATED_MARK = "let seated_mark ="
+_SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
+_SEAT_LTR = "dir: ltr,\n    spacing: 1fr,"
 
 
 def _generate(dto) -> str:
@@ -240,9 +245,11 @@ def test_mos_left_annual_mark_is_trail_strip_sibling():
     title_at = page.index("2026<annual>")
     mark_at = page.index(_MARK_FLUSH)
     assert title_at < mark_at
-    heading = page[page.index("stack(") : mark_at]
-    assert "dir: rtl" in heading
+    heading = page[page.index(_SEATED_TITLE) : page.index(_SEATED_MARK)]
+    assert "2026<annual>" in heading
     assert "columns: (auto, auto)" not in heading
+    assert _SEAT_RTL in page
+    assert _SEATED_TRAIL in page
     assert "padded_link(<annual>, [Calendar])" not in page
     assert "[Calendar]" not in page
     for label in ("Q1", "Q2", "Q3", "Q4"):
@@ -257,8 +264,10 @@ def test_daily_mark_is_trail_strip_alone():
     mark_at = page.index(_MARK_FLUSH)
     trail_at = page.index("pad(right: 3mm")
     assert title_at < trail_at <= mark_at
-    heading = page[page.index("stack(") : mark_at]
-    assert "dir: rtl" in heading
+    heading = page[page.index(_SEATED_TITLE) : page.index(_SEATED_MARK)]
+    assert "1 <2026-01-01>" in heading
+    assert _SEAT_RTL in page
+    assert _SEATED_TRAIL in page
     assert "column-gutter: 6pt" not in heading
     assert "padded_link(<annual>, [2026])" not in page
     assert page.count(_MARK_RULE) == 5
@@ -271,8 +280,10 @@ def test_mos_right_daily_mark_is_trail_strip_alone():
     mark_at = page.index(_MARK_FLUSH)
     trail_at = page.index("pad(right: 3mm")
     assert title_at < trail_at <= mark_at
-    heading = page[page.index("stack(") : mark_at]
-    assert "dir: ltr" in heading
+    heading = page[page.index(_SEATED_TITLE) : page.index(_SEATED_MARK)]
+    assert "1 <2026-01-01>" in heading
+    assert _SEAT_LTR in page
+    assert _SEATED_TRAIL in page
     assert "column-gutter: 6pt" not in heading
     assert "padded_link(<annual>, [2026])" not in page
     assert page.count(_MARK_RULE) == 5
@@ -286,3 +297,28 @@ def test_mos_right_habits_mark_sits_next_to_strip():
     strip_at = page.index("rowspan: 2")
     assert title_at < mark_at < strip_at
     assert page[mark_at:strip_at].count("padded_link") == 1
+    assert _SEATED_TRAIL in page
+
+
+def test_builder_trail_and_raw_headings_call_trail_heading():
+    import inspect
+
+    from parch.mos.builder import Builder
+    from parch.mos.contents_mark import trail_heading
+    from parch.sections.habits import Habits
+    from parch.sections.meetings import Meetings
+    from parch.sections.projects import Projects
+    from parch.sections.tasks import Tasks
+
+    helper = inspect.getsource(trail_heading)
+    assert "box(height: band, align(horizon + left, seated_title))" in helper
+    assert "box(height: band, align(horizon + left, seated_mark))" in helper
+    assert "trail_strip(" in helper
+    builder = inspect.getsource(Builder._heading_stack)
+    assert "trail_heading(" in builder
+    assert "trail_strip(" not in builder
+    for cls in (Habits, Tasks, Meetings, Projects):
+        heading = inspect.getsource(cls._heading)
+        assert "trail_heading(" in heading
+        assert "stack(" not in heading
+        assert "trail_strip(" not in heading

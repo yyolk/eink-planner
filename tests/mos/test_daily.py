@@ -20,6 +20,11 @@ NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
 _MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
 _MARK_FLUSH = "padded_link(padding: 0pt, <index>"
 _TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
+_SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
+_SEATED_TITLE = "let seated_title ="
+_SEATED_MARK = "let seated_mark ="
+_SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
+_SEAT_LTR = "dir: ltr,\n    spacing: 1fr,"
 
 _BULKY = (
     "colophon",
@@ -240,8 +245,10 @@ def test_generated_contents_mark_alone_and_inverts_january_only():
     assert _MARK_FLUSH in jan1
     assert jan1.count(_MARK_RULE) == 5
     assert jan1.index("1 <2026-01-01>") < jan1.index(_TRAIL_MARK)
-    heading = jan1[jan1.index("stack(") : jan1.index(_TRAIL_MARK)]
-    assert "dir: rtl" in heading
+    heading = jan1[jan1.index(_SEATED_TITLE) : jan1.index(_SEATED_MARK)]
+    assert "1 <2026-01-01>" in heading
+    assert _SEAT_RTL in jan1
+    assert _SEATED_TRAIL in jan1
     assert "column-gutter: 6pt" not in heading
     assert "text(size: h1)[1 <2026-01-01>]" in jan1
     assert "[*Thursday*]" in jan1
@@ -276,8 +283,10 @@ def test_generated_mos_right_contents_mark_alone_left_of_q1():
     assert _TRAIL_MARK in jan1
     assert jan1.count(_MARK_RULE) == 5
     assert jan1.index("1 <2026-01-01>") < jan1.index(_TRAIL_MARK)
-    heading = jan1[jan1.index("stack(") : jan1.index(_TRAIL_MARK)]
-    assert "dir: ltr" in heading
+    heading = jan1[jan1.index(_SEATED_TITLE) : jan1.index(_SEATED_MARK)]
+    assert "1 <2026-01-01>" in heading
+    assert _SEAT_LTR in jan1
+    assert _SEATED_TRAIL in jan1
     assert "column-gutter: 6pt" not in heading
     assert "2026 /" not in jan1
     assert "text(size: h1)[/]" not in jan1

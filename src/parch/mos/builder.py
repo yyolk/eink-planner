@@ -10,7 +10,7 @@ from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.navigation import NavLink, Navigation
 from parch.compose.page_data import HeadingMark, PageData
-from parch.mos.contents_mark import body_size_token, lead_title, trail_strip
+from parch.mos.contents_mark import body_size_token, lead_title, trail_heading
 from parch.mos.preamble import Preamble
 
 
@@ -108,19 +108,13 @@ class Builder:
         chip = self.navigation.heading_menu_grid(page_id=page_id, nav_links=nav_links)
         height = _v(self.heading, "height")
         body = body_size_token(self.configurator)
-        trailing = trail_strip(self.manifest, height, body, chip)
         if mos_right or chip or heading_mark is HeadingMark.TRAIL:
-            parts = [p for p in (title, trailing) if p]
-        elif title:
-            parts = [lead_title(self.manifest, height, title, body)]
-        else:
-            parts = []
-        joined = ",\n".join(parts)
-        return f"""stack(
-  dir: {direction},
-  spacing: 1fr,
-  {joined}
-)"""
+            return trail_heading(
+                self.manifest, height, title, body, direction=direction, chip=chip,
+            )
+        if title:
+            return lead_title(self.manifest, height, title, body)
+        return ""
 
 
 def _v(mapping, key: str):
