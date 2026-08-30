@@ -17,6 +17,9 @@ from tests.helpers import base_config, load_default
 
 NOMAD = base_config("supernote-nomad")
 _EN_DASH = "–"
+_MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
+_TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
+_W01_TITLE = f"Week 1 #h(0.6em) Dec 29 {_EN_DASH} Jan 4"
 
 # 2026, Monday week start: Jan 1 is Thursday.
 # Full year: Dec 29 2025 – Jan 3 2027 → 53 ISO weeks.
@@ -106,7 +109,7 @@ def test_short_january_is_one_index_and_five_weeks():
     assert typst.count("#pagebreak()") == 5  # 1 index + 5 weeks - 1
 
 
-def test_index_year_links_to_annual_and_week_crumb_links_back():
+def test_index_title_is_tasks_and_week_links_back():
     dto = parse_toml(
         _minimal(
             enable=["annual", "tasks"],
@@ -118,22 +121,39 @@ show_month_name = true
     )
     typst = _generate(short_january(dto))
     index = _index_page(typst)
-    assert "padded_link(<annual>)" in index
+    assert "padded_link(<annual>)" not in index
+    assert "2026 /" not in index
+    assert "text(size: h1)[/]" not in index
+    assert "text(size: h1, [Tasks <tasks>])" in index
     week = _week_page(typst, "2026W01")
     assert "padded_link(<tasks>)" in week
     assert "padded_link(<tasks-2>)" not in week
+    assert "padded_link(<annual>)" not in week
     labels = set(_LABEL_DEF.findall(typst))
     links = set(_PADDED_LINK.findall(typst))
     assert {"tasks", "tasks-2026W01", "annual"} <= labels
-    assert {"tasks", "tasks-2026W01", "annual"} <= links
+    assert {"tasks", "tasks-2026W01"} <= links
+    assert "annual" not in set(_PADDED_LINK.findall(index + week))
 
 
-def test_year_is_plain_when_annual_omitted():
+def test_header_is_tasks_without_year_when_contents_off():
     dto = parse_toml(_minimal(enable=["tasks"], sections=""), source="no-annual.toml")
     typst = _generate(short_january(dto))
-    assert "padded_link(<annual>)" not in typst
-    assert "2026" in typst
-    assert "<tasks>" in typst
+    index = _index_page(typst)
+    week = _week_page(typst, "2026W01")
+    for page in (index, week):
+        assert "padded_link(<annual>)" not in page
+        assert "2026 /" not in page
+        assert "text(size: h1)[/]" not in page
+        assert "pad(right: 3mm" not in page
+        assert "padded_link(<index>" not in page
+        assert "column-gutter: 6pt" not in page
+        assert "columns: (auto, auto)" not in page
+    assert "text(size: h1, [Tasks <tasks>])" in index
+    assert "stack(" not in index
+    assert "padded_link(<tasks>)" in week
+    assert _W01_TITLE in week
+    assert "<tasks-2026W01>" in typst
 
 
 def test_index_is_raw_typst_full_band_no_arrows_no_invert():
@@ -141,6 +161,9 @@ def test_index_is_raw_typst_full_band_no_arrows_no_invert():
     typst = _generate(short_january(dto))
     index = _index_page(typst)
     assert "rotate(" not in index
+    assert "2026 /" not in index
+    assert "padded_link(<annual>)" not in index
+    assert "column-gutter: 6pt" not in index
     assert "→" not in index
     assert "grid.cell(fill: black" not in index
     assert "text(white)" not in index
@@ -172,8 +195,9 @@ def test_index_range_wording_same_month_cross_month_cross_year():
     assert f"Jan 5 {_EN_DASH} 11" in index
     assert f"Jan 26 {_EN_DASH} Feb 1" in index
     assert "2025" not in index
-    assert "2026" in index
+    assert "2026 /" not in index
     assert "2025-" not in index
+    assert "<tasks-2026W01>" in index
 
 
 def test_weeks_per_page_paginates_index_ids_and_crumb_targets():
@@ -195,7 +219,9 @@ def test_weeks_per_page_paginates_index_ids_and_crumb_targets():
     assert "<tasks-2026W05>" in page2
     for page in (page1, page2):
         assert "[Tasks <" in page
-        assert "2026" in page
+        assert "2026 /" not in page
+        assert "text(size: h1)[/]" not in page
+        assert "padded_link(<annual>)" not in page
         assert "Q4" not in page
         assert "→" not in page
     w1 = _week_page(typst, "2026W01")
@@ -263,6 +289,8 @@ def test_week_page_is_raw_typst_ticked_not_mos():
     assert "prompt" not in week.lower()
     assert "Week 1" in week
     assert f"Dec 29 {_EN_DASH} Jan 4" in week
+    assert _W01_TITLE in week
+    assert "padded_link(<2026W01>)" not in week
     assert "text(size: 0.85em)" in week
     assert "luma(" not in week
     # do not box the writing column
@@ -335,7 +363,8 @@ column_gutter = "4pt"
     assert "tasks-2026W01" in labels
     assert "tasks" in labels
     week = _week_page(typst, "2026W01")
-    assert "padded_link(<2026W01>)[Week 1]" in week
+    assert f"padded_link(<2026W01>)[{_W01_TITLE}]" in week
+    assert "padded_link(<tasks>)" in week
     assert "padded_link(<tasks-2026W01>" in _index_page(typst)
     assert "padded_link(<2026W01>" not in _index_page(typst)
 
@@ -456,9 +485,22 @@ def test_contents_mark_on_tasks_when_index_on():
     typst = _generate(short_january(dto))
     index = _index_page(typst)
     week = _week_page(typst, "2026W01")
-    assert "padded_link(<index>" in index
-    assert "padded_link(<index>" in week
-    assert "line(length: 0.844em, stroke: thick_stroke + black)" in index
+    assert _TRAIL_MARK in index
+    assert _TRAIL_MARK in week
+    assert index.count(_MARK_RULE) == 5
+    assert week.count(_MARK_RULE) == 5
+    for page in (index, week):
+        assert "column-gutter: 6pt" not in page
+        assert "columns: (auto, auto)" not in page
+        assert "2026 /" not in page
+        assert "text(size: h1)[/]" not in page
+        assert "padded_link(<annual>)" not in page
+    assert "text(size: h1, [Tasks <tasks>])" in index
+    assert "padded_link(<tasks>)" in week
+    heading = index[index.index("stack(") : index.index("[Tasks <tasks>]")]
+    assert "dir: ltr" in heading
+    assert "spacing: 1fr" in heading
+    assert _TRAIL_MARK in heading
     contents = next(p for p in _pages(typst) if 'weight: "bold")[Contents <index>]' in p)
     assert "padded_link(<index>" not in contents
     assert "padded_link(<tasks>" in contents

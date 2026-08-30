@@ -11,9 +11,8 @@ from parch.calendar.week import Week
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.mos.contents_mark import body_size_token, heading_height_token, lead_title
+from parch.mos.contents_mark import body_size_token, heading_height_token, trail_strip
 from parch.compose.page_data import PageData
-from parch.sections.annual import Annual
 
 _INDEX_LEFT_INSET = "4mm"
 _INDEX_BOTTOM_INSET = "4mm"
@@ -117,12 +116,6 @@ class Tasks:
     def _index_count(self, n_weeks: int) -> int:
         return len(self._page_sizes(n_weeks))
 
-    def _year(self) -> int:
-        return self.configurator.start_date().year
-
-    def _year_cell(self, manifest: Manifest) -> str:
-        return manifest.link_or_content(Annual.ID, str(self._year()))
-
     def range_label(self, first: Day, last: Day) -> str:
         first_month = self.i18n.t(f"months.short.{first.month().name}")
         last_month = self.i18n.t(f"months.short.{last.month().name}")
@@ -181,21 +174,22 @@ class Tasks:
   []
 )"""
 
-    def _crumb(self, manifest: Manifest, tasks_cell: str) -> str:
-        breadcrumb = f"""grid(
-  columns: (auto, auto, 1fr),
-  column-gutter: 6pt,
-  align: horizon,
-  text(size: h1, {self._year_cell(manifest)}),
-  text(size: h1)[/],
-  text(size: h1, {tasks_cell})
-)"""
-        return lead_title(
+    def _heading(self, manifest: Manifest, tasks_cell: str) -> str:
+        title = f"text(size: h1, {tasks_cell})"
+        mark = trail_strip(
             manifest,
             heading_height_token(self.configurator),
-            breadcrumb,
             body_size_token(self.configurator),
+            chip=None,
         )
+        if not mark:
+            return title
+        return f"""stack(
+  dir: ltr,
+  spacing: 1fr,
+  {mark},
+  {title}
+)"""
 
     def _index(self, manifest: Manifest, weeks: list[Week], page_index: int) -> str:
         page_id = self.index_id(page_index)
@@ -206,7 +200,7 @@ class Tasks:
   rows: (auto, 1fr),
   row-gutter: {_INDEX_ROW_GUTTER},
   inset: (left: {_INDEX_LEFT_INSET}, bottom: {_INDEX_BOTTOM_INSET}),
-  {self._crumb(manifest, tasks_cell)},
+  {self._heading(manifest, tasks_cell)},
   {body}
 )"""
 
@@ -216,8 +210,9 @@ class Tasks:
         page_id = self.week_page_id(week)
         tasks_cell = manifest.link_or_content(index_page_id, self.i18n.t("tasks"))
         week_label = f"{self.i18n.t('week_name')} {week.number}"
-        week_cell = manifest.link_or_content(week.id, week_label)
-        quiet = f"text(size: 0.85em)[#{week_cell} #h(0.6em) {rng}]"
+        week_title = f"{week_label} #h(0.6em) {rng}"
+        week_cell = manifest.link_or_content(week.id, week_title)
+        quiet = f"text(size: 0.85em)[#{week_cell}]"
         cells = ", ".join(self._day_cell(manifest, day) for day in days)
         day_strip = f"""grid(
   columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
@@ -232,7 +227,7 @@ class Tasks:
   rows: (auto, auto, auto, 1fr),
   row-gutter: {_INDEX_ROW_GUTTER},
   inset: (left: {_INDEX_LEFT_INSET}, bottom: {_INDEX_BOTTOM_INSET}),
-  {self._crumb(manifest, tasks_cell)},
+  {self._heading(manifest, tasks_cell)},
   {quiet},
   {day_strip},
   {_TASK_FIELD}
