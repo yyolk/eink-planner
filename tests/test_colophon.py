@@ -537,9 +537,14 @@ def test_two_dump_colophons_use_unique_start_and_end():
     assert "self._heading(" in pagination
     assert "labeled=False" in pagination
     assert "lead_title" not in pagination
-    assert "margin" not in pagination
-    assert "header-ascent" not in pagination
-    assert "<colophon>" not in a._dump_pagination(None)
+    assert '"8mm"' not in pagination
+    assert '"5mm"' not in pagination
+    header = a._dump_pagination(None)
+    assert "<colophon>" not in header
+    assert "header-ascent: 100%" in header
+    assert "inset: (top:" in header
+    assert "page.margin.top" in header
+    assert "page.margin.top + h1" in header
     assert ca.count("<colophon>") == 1
 
 
@@ -586,8 +591,50 @@ def test_dump_pagination_heading_omits_colophon_label():
     assert body.count(_FOLLOW_RTL) == 1
     assert "column-gutter: 6pt" not in header
     assert "0.85em" not in header
+    assert "header-ascent: 100%" in header
+    assert "inset: (top:" in header
+    assert "page.margin.top" in header
     content = colo.pages(manifest)[0].content
     assert content.count("<colophon>") == 1
+
+
+def test_dump_pagination_seats_follow_below_profile_margin_top():
+    import inspect
+
+    source = inspect.getsource(Colophon._dump_pagination)
+    assert "labeled=False" in source
+    assert '"8mm"' not in source
+    assert '"5mm"' not in source
+    nomad = Colophon(
+        section_name="colophon",
+        i18n=load_default(),
+        configurator=Configurator(load(base_config("supernote-nomad"))),
+        dump=True,
+    )
+    scribe = Colophon(
+        section_name="colophon",
+        i18n=load_default(),
+        configurator=Configurator(load(base_config("kindle-scribe"))),
+        dump=True,
+    )
+    slim = Colophon(
+        section_name="colophon",
+        i18n=load_default(),
+        configurator=Configurator(load(base_config("158x210-mos-left"))),
+        dump=True,
+    )
+    n = nomad._dump_pagination(None)
+    s = scribe._dump_pagination(None)
+    x = slim._dump_pagination(None)
+    assert "inset: (top: 8mm)" in n
+    assert "8mm + h1" in n
+    assert "header-ascent: 100%" in n
+    assert "inset: (top: 5mm)" in s
+    assert "5mm + h1" in s
+    assert "8mm" not in s
+    assert "inset: (top: 5mm)" in x
+    assert "5mm + h1" in x
+    assert "8mm" not in x
 
 
 def test_colophon_last_default_does_not_dump(tmp_path):

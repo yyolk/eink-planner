@@ -282,24 +282,51 @@ class Colophon:
     def _dump_end_label(self) -> str:
         return f"colophon-end-{self._dump_uid()}"
 
+    def _margin_side(self, side: str) -> str:
+        raw = self._lookup("document", "layout", "margin", side)
+        return str(raw) if raw else f"page.margin.{side}"
+
     def _dump_pagination(self, manifest) -> str:
         # Header is empty on the first dump page (body already has the heading)
         # and after this instance's end label so later MOS pages stay put.
         # Unique state/label per instance so two dump colophons do not share
-        # start/end. Continuation uses the same FOLLOW seat as page 1.
+        # start/end. The header slot paints at y=0; pad by margin.top so
+        # FOLLOW sits in page 1's band. Continuation top grows by h1 so
+        # the dump does not run under the heading.
         state_name = self._dump_state_name()
         end_label = self._dump_end_label()
         heading = self._heading(manifest, labeled=False)
+        inset = self._margin_side("top")
+        right = self._margin_side("right")
+        bottom = self._margin_side("bottom")
+        left = self._margin_side("left")
+        cont = "last > start-page and cur > start-page and cur <= last"
         return f"""#context {{ state("{state_name}", 0).update(here().page()) }}
-#set page(header: context {{
+#show: rest => context {{
   let start-page = state("{state_name}", 0).final()
   let cur = here().page()
   let hits = query(<{end_label}>)
   let last = if hits.len() > 0 {{ hits.first().location().page() }} else {{ cur }}
-  if last > start-page and cur > start-page and cur <= last {{
-    {heading}
-  }}
-}})"""
+  let extra = if {cont} {{ h1 }} else {{ 0pt }}
+  set page(
+    header-ascent: 100%,
+    margin: (
+      top: {inset} + extra,
+      right: {right},
+      bottom: {bottom},
+      left: {left},
+    ),
+    header: if {cont} {{
+      block(
+        width: 100%,
+        height: {inset} + h1,
+        inset: (top: {inset}),
+        {heading}
+      )
+    }},
+  )
+  rest
+}}"""
 
     def _provenance(self) -> dict[str, Any]:
         cfg = self.configurator
