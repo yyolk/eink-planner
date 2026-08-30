@@ -4,7 +4,15 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import Any
+
+
+class HeadingMark(StrEnum):
+    """Where the Contents mark sits relative to the title."""
+
+    LEAD = "lead"
+    TRAIL = "trail"
 
 
 @dataclass
@@ -16,9 +24,10 @@ class PageData:
     highlight_months: list[Any] = field(default_factory=list)
     highlight_quarters: list[Any] = field(default_factory=list)
     month_link_id: Callable[[Any], str] | None = None
-    nav_links: list[tuple[str, str]] | None = None
+    nav_links: list[tuple[str, str]] = field(default_factory=list)
     show_quarters: bool = True
     heading_dir: str | None = None
+    heading_mark: HeadingMark = HeadingMark.LEAD
 
     def raw_typst_q(self) -> bool:
         return self.raw_typst

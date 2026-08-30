@@ -1,3 +1,4 @@
+from parch.compose.page_data import HeadingMark
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
 from parch.sections.annual import Annual
@@ -56,6 +57,8 @@ def test_title_is_year_with_annual_label_not_calendar():
     pages = _annual().pages(Manifest())
     assert len(pages) == 1
     assert pages[0].title == "text(size: h1)[2026<annual>]"
+    assert pages[0].heading_mark is HeadingMark.TRAIL
+    assert pages[0].nav_links == []
     assert "Calendar" not in pages[0].title
     other = _annual(start_date="2025-01-01", end_date="2025-12-31").pages(Manifest())
     assert other[0].title == "text(size: h1)[2025<annual>]"

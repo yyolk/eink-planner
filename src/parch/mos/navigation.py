@@ -13,7 +13,6 @@ from parch.mos.components.months_menu import MonthsMenu
 from parch.mos.components.quarters_menu import QuartersMenu
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.sections.annual import Annual
 
 
 @dataclass(frozen=True)
@@ -97,15 +96,12 @@ class Navigation:
   {", ".join(links)}
 )"""
 
-    def _candidate_links(self) -> list[NavLink]:
-        return [NavLink(id=Annual.ID, label="Calendar")]
-
     def _coerce_nav_links(
         self, nav_links: list[tuple[str, str] | NavLink] | None
     ) -> list[NavLink]:
-        if nav_links is None:
-            return self._candidate_links()
         out: list[NavLink] = []
+        if not nav_links:
+            return out
         for item in nav_links:
             if isinstance(item, NavLink):
                 out.append(item)

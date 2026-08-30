@@ -77,13 +77,22 @@ def test_heading_menu_omitted_when_annual_unregistered():
 def test_heading_menu_highlights_annual_page():
     nav = _nav()
     nav.manifest.register_source(Annual.ID)
-    on_annual = nav.heading_menu_grid(page_id=Annual.ID)
+    links = [(Annual.ID, "Calendar")]
+    on_annual = nav.heading_menu_grid(page_id=Annual.ID, nav_links=links)
     assert on_annual is not None
     assert "grid.cell(fill: black, text(white)[#padded_link(<annual>, [Calendar])])" in on_annual
-    other = nav.heading_menu_grid(page_id="monthly-2026-01")
+    other = nav.heading_menu_grid(page_id="monthly-2026-01", nav_links=links)
     assert other is not None
     assert "padded_link(<annual>, [Calendar])" in other
     assert "fill: black" not in other
+
+
+def test_heading_menu_omitted_nav_links_is_no_chip_when_annual_registered():
+    nav = _nav()
+    nav.manifest.register_source(Annual.ID)
+    assert nav.heading_menu_grid(page_id=Annual.ID) is None
+    assert nav.heading_menu_grid(page_id="monthly-2026-01") is None
+    assert nav.heading_menu_grid(page_id=Annual.ID, nav_links=[]) is None
 
 
 def test_heading_menu_uses_page_nav_links():

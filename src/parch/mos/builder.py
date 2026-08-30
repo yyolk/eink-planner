@@ -9,7 +9,7 @@ from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.navigation import NavLink, Navigation
-from parch.compose.page_data import PageData
+from parch.compose.page_data import HeadingMark, PageData
 from parch.mos.contents_mark import body_size_token, lead_title, trail_strip
 from parch.mos.preamble import Preamble
 
@@ -49,6 +49,7 @@ class Builder:
             nav_links=page_spec.nav_links,
             show_quarters=page_spec.show_quarters,
             heading_dir=page_spec.heading_dir,
+            heading_mark=page_spec.heading_mark,
         )
         return f"""#grid(
   columns: ({self._heading_columns()}),
@@ -76,6 +77,7 @@ class Builder:
         nav_links: list[tuple[str, str] | NavLink] | None = None,
         show_quarters: bool = True,
         heading_dir: str | None = None,
+        heading_mark: HeadingMark = HeadingMark.LEAD,
     ) -> str:
         row = [
             self.navigation.side_menu_cell(
@@ -84,7 +86,7 @@ class Builder:
                 month_link_id=month_link_id,
                 show_quarters=show_quarters,
             ),
-            f"grid.cell(align: {_v(self.heading, 'align')}, {self._heading_stack(page_id, title, nav_links, heading_dir)})",
+            f"grid.cell(align: {_v(self.heading, 'align')}, {self._heading_stack(page_id, title, nav_links, heading_dir, heading_mark)})",
         ]
         if _v(self.mos_layout, "side_menu_position") == "right":
             row.reverse()
@@ -96,6 +98,7 @@ class Builder:
         title: str | None,
         nav_links: list[tuple[str, str] | NavLink] | None = None,
         heading_dir: str | None = None,
+        heading_mark: HeadingMark = HeadingMark.LEAD,
     ) -> str:
         mos_right = _v(self.mos_layout, "side_menu_position") == "right"
         if heading_dir is None:
@@ -106,7 +109,7 @@ class Builder:
         height = _v(self.heading, "height")
         body = body_size_token(self.configurator)
         trailing = trail_strip(self.manifest, height, body, chip)
-        if mos_right or chip or (trailing and page_id in ("annual", "daily")):
+        if mos_right or chip or heading_mark is HeadingMark.TRAIL:
             parts = [p for p in (title, trailing) if p]
         elif title:
             parts = [lead_title(self.manifest, height, title, body)]

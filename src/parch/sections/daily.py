@@ -8,7 +8,7 @@ from parch.calendar import walk
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
-from parch.compose.page_data import PageData
+from parch.compose.page_data import HeadingMark, PageData
 from parch.mos.pages.daily import Daily as DailyPage
 
 
@@ -42,7 +42,7 @@ class Daily:
                     page_id=self.ID,
                     highlight_months=[day.month()],
                     highlight_quarters=[],
-                    nav_links=[],
+                    heading_mark=HeadingMark.TRAIL,
                 )
             )
         return out
