@@ -49,7 +49,6 @@ _JAN_DAYS = 31
 _DEFAULT_COLUMNS = 4
 _RIGHT_MOS = """[mos]
 side_menu = "right"
-side_menu_width = "10mm"
 reverse_months_quarters = true
 menu_rotate = "270deg"
 column_gutter = "1.5mm"

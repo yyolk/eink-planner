@@ -41,33 +41,34 @@ class Monthly:
         calendar = self._calendar()
         return f"""grid(
   columns: 1fr,
-  rows: (auto, auto, 1fr),
-
+  rows: (1fr, 1fr),
+  grid.hline(y: 1, stroke: regular_stroke + black),
   {calendar},
-  grid.hline(stroke: regular_stroke + black),
   rect_pattern({self.pattern})
 )"""
 
     def _calendar(self) -> str:
         if self.week_placement == "none":
-            return f"""grid(
+            return f"""block(
+    width: 100%,
+    height: 1fr,
+    grid(
     stroke: regular_stroke,
     columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
-    rows: ({self._rows()}),
+    rows: {self._rows()},
 
     {self._heading()},
     {self._day_cells()}
-  )"""
+  ))"""
         return f"""month_weeks({self.side},
-    rows: ({self._rows()}),
+    rows: {self._rows()},
     {self._heading()},
     {self._day_cells()}
   )"""
 
     def _rows(self) -> str:
-        head = ["regular_height"]
-        body = [str(self.month_params["daily_cell_height"])] * len(self._month_in_weeks())
-        return ", ".join(head + body)
+        n = len(self._month_in_weeks())
+        return f"(regular_height,) + (1fr,) * {n}"
 
     def _heading(self) -> str:
         weeks = self._month_in_weeks()

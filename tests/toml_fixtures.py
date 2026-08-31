@@ -29,7 +29,6 @@ h1 = "8mm"
 column = "8pt\"""",
         "mos": """[mos]
 side_menu = "left"
-side_menu_width = "8mm"
 reverse_months_quarters = true
 menu_rotate = "270deg"
 column_gutter = "1.5mm"

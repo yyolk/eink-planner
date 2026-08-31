@@ -143,7 +143,6 @@ def device_profile_to_dto(profile: DeviceProfile) -> dict[str, Any]:
     mos = profile.mos
     mos_layout = {
         "side_menu_position": mos.side_menu,
-        "side_menu_width": mos.side_menu_width,
         "column_gutter": mos.column_gutter,
         "row_gutter": mos.row_gutter,
         "menu_rotate": mos.menu_rotate,
