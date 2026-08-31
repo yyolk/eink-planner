@@ -1,10 +1,8 @@
-# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
-language: en-US
+# CodeRabbit repo config disabled.
+# Left in place only to turn off request-changes gating and automatic
+# reviews so other agents (Cursor Cloud, etc.) are not fighting CR comments.
+# Delete this file later if you also uninstall the GitHub App.
 reviews:
-  profile: chill
-  request_changes_workflow: true
+  request_changes_workflow: false
   auto_review:
-    enabled: true
-    drafts: false
-    base_branches:
-      - master
+    enabled: false
