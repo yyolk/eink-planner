@@ -81,10 +81,13 @@ def test_january_keeps_full_weekdays_and_five_body_rows():
     content = _page("2026-01").content()
     assert "month_weeks(left," in content
     well = content[content.index("month_weeks(") : content.index("grid.hline")]
-    assert "rows: (regular_height, 16mm, 16mm, 16mm, 16mm, 16mm)" in well
+    assert "rows: (regular_height,) + (1fr,) * 5" in well
+    assert "16mm" not in well
+    assert "(1fr,) * 6" not in well
     assert "columns: (regular_height" not in well
     assert "stroke:" not in well
-    assert "rows: (auto, auto, 1fr)" in content
+    assert "rows: (1fr, auto, 1fr)" in content
+    assert "rows: (auto, auto, 1fr)" not in content
     assert "[], align(center + horizon)[Monday]" in content
     for name in ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"):
         assert f"align(center + horizon)[{name}]" in content
@@ -95,7 +98,7 @@ def test_january_keeps_full_weekdays_and_five_body_rows():
 def test_hand_right_still_emits_week_first():
     content = _page("2026-01", side="right").content()
     assert "month_weeks(right," in content
-    assert "rows: (regular_height, 16mm, 16mm, 16mm, 16mm, 16mm)" in content
+    assert "rows: (regular_height,) + (1fr,) * 5" in content
     assert "[], align(center + horizon)[Monday]" in content
     assert "align(center + horizon)[Sunday], []" not in content
     assert "month_weeks(left," not in content
@@ -106,7 +109,8 @@ def test_week_placement_none_is_seven_col_without_side():
     content = _page("2026-01", week_placement="none").content()
     assert "month_weeks(" not in content
     assert "columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in content
-    assert "rows: (regular_height, 16mm, 16mm, 16mm, 16mm, 16mm)" in content
+    assert "rows: (regular_height,) + (1fr,) * 5" in content
+    assert "16mm" not in content
     assert "align(center + horizon)[Monday]" in content
     assert "rotate(90deg" not in content
 
@@ -116,8 +120,9 @@ def test_august_2026_is_six_rows_on_one_page():
     content = page.content()
     weeks = page._month_in_weeks()
     assert len(weeks) == 6
-    assert "rows: (auto, auto, 1fr)" in content
-    assert "rows: (regular_height, 16mm, 16mm, 16mm, 16mm, 16mm, 16mm)" in content
+    assert "rows: (1fr, auto, 1fr)" in content
+    assert "rows: (regular_height,) + (1fr,) * 6" in content
+    assert "rows: (auto, auto, 1fr)" not in content
     assert content.count("rotate(90deg") == 6
 
 
@@ -211,7 +216,8 @@ def test_generated_title_is_january_without_year_and_inverts_only_the_month():
     assert "Q1" in jan and "Q4" in jan
     assert "August<month-2026-08-01>" in aug
     assert aug.count("rotate(90deg") == 6
-    assert "rows: (auto, auto, 1fr)" in aug
+    assert "rows: (1fr, auto, 1fr)" in aug
+    assert "rows: (regular_height,) + (1fr,) * 6" in aug
     month_slices = [page for page in typst.split("#pagebreak()") if "August<month-2026-08-01>" in page]
     assert len(month_slices) == 1
 
@@ -226,7 +232,7 @@ def test_six_row_august_compiles_as_one_pdf_page(tmp_path):
     ]
     assert len(crumbs) == 12
     august = next(page for page in crumbs if "August<month-2026-08-01>" in page)
-    assert "rows: (regular_height, 16mm, 16mm, 16mm, 16mm, 16mm, 16mm)" in august
+    assert "rows: (regular_height,) + (1fr,) * 6" in august
     pdf, stderr = compile_pdf(typst, tmp_path / "monthly-year")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
     if shutil.which("pdfinfo") is None:
