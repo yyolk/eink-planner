@@ -165,25 +165,47 @@
   body,
 )
 
+// Week cell is always first in each 8-cell row. MOS-right moves it to the end.
+#let _order_week_rows(side, cells) = if side == left {
+  cells
+} else {
+  let out = ()
+  for i in range(0, cells.len(), step: 8) {
+    let row = cells.slice(i, count: 8)
+    out += row.slice(1) + (row.at(0),)
+  }
+  out
+}
+
 // Name + weekdays are auto; week-rows are equal 1fr tracks. Never `rows: 1fr`
-// alone (5-week vs 6-week months would move the weekday rule). Columns default
-// to week + 7 days. Stroke/inset stay caller-owned.
+// alone (5-week vs 6-week months would move the weekday rule). Columns are
+// 8×1fr. Name is caller-owned (colspan 8). House owns the MOS week rail.
 #let month_grid(
+  side,
+  name,
   inset: none,
-  stroke: none,
-  columns: (1fr,) * 8,
   week-rows: 6,
   hline-stroke: none,
-  ..cells,
+  ..rows,
 ) = grid(
   align: center + horizon,
   inset: inset,
-  stroke: stroke,
-  columns: columns,
+  stroke: (x, _) => if x == (if side == left { 1 } else { 7 }) { (left: hline-stroke) },
+  columns: (1fr,) * 8,
   rows: (auto, auto) + (1fr,) * week-rows,
   grid.hline(y: 1, stroke: hline-stroke),
   grid.hline(y: 2, stroke: hline-stroke),
-  ..cells,
+  name,
+  .._order_week_rows(side, rows.pos()),
+)
+
+// Monthly-page calendar. Rows stay caller-owned (live week count). House
+// owns week-col seating. Same side token as mos_frame.
+#let month_weeks(side, rows: none, week-col: none, stroke: none, ..cells) = grid(
+  stroke: stroke,
+  columns: if side == left { (week-col,) + (1fr,) * 7 } else { (1fr,) * 7 + (week-col,) },
+  rows: rows,
+  .._order_week_rows(side, cells.pos()),
 )
 
 // Header on auto; rule sits on the descender. Clipped pattern fills the 1fr.
@@ -244,4 +266,12 @@
   grid(columns: (3fr, 5fr), rows: 1fr, column-gutter: column-gutter, hours, writing)
 } else {
   grid(columns: (5fr, 3fr), rows: 1fr, column-gutter: column-gutter, writing, hours)
+}
+
+// Parent is well_frame's 1fr body (bounded). House owns the 2fr/3fr
+// split. Same side token as mos_frame.
+#let quarter_well(side, months, pad, column-gutter: none) = if side == left {
+  grid(columns: (2fr, 3fr), rows: 1fr, column-gutter: column-gutter, months, pad)
+} else {
+  grid(columns: (3fr, 2fr), rows: 1fr, column-gutter: column-gutter, pad, months)
 }

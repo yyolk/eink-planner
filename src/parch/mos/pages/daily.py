@@ -84,6 +84,7 @@ class Daily:
             extra = {}
             if klass is LittleCalendar:
                 extra["show_week_letter"] = False
+                extra["side"] = self.side
             pieces.append(
                 klass(
                     i18n=self.i18n,

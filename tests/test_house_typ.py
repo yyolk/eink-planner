@@ -43,22 +43,30 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "mos_frame" in imported
     assert "well_frame" in imported
     assert "month_grid" in imported
+    assert "month_weeks" in imported
     assert "week_matrix" in imported
     assert "lined_well" in imported
     assert "daily_well" in imported
+    assert "quarter_well" in imported
     assert "week_cell" not in imported
+    assert "_order_week_rows" not in imported
     assert "#let link_padding =" in typst
     assert "#let rect_pattern = rect_pattern.with(regular_height: regular_height)" in typst
     assert "#let padded_link = padded_link.with(padding: link_padding)" in typst
     assert "#let contents_bars = contents_bars.with(thick_stroke: thick_stroke)" in typst
     assert "#let mos_frame = mos_frame.with(mos-width: 10mm, column-gutter: 2mm)" in typst
     assert "#let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm)" in typst
-    assert "#let month_grid = month_grid.with(week-rows: 6, hline-stroke: regular_stroke + black)" in typst
+    assert "#let month_grid = month_grid.with(hline-stroke: regular_stroke + black)" in typst
+    assert "week-rows:" not in typst
+    assert "#let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)" in typst
+    assert "month_weeks.with(rows" not in typst
     assert "#let week_matrix = week_matrix.with(regular-height: regular_height)" in typst
     assert "#let lined_well = lined_well.with(regular-height: regular_height)" in typst
     assert "#let daily_well = daily_well.with(column-gutter: regular_column_gutter)" in typst
+    assert "#let quarter_well = quarter_well.with(column-gutter: regular_column_gutter)" in typst
     assert "3fr" not in typst
     assert "5fr" not in typst
+    assert "2fr" not in typst
     assert "#let dotted = dotted(regular_height: regular_height)" in typst
     assert "#let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)" in typst
     assert "#let scratch_pad = rect_pattern(dotted)" in typst
@@ -96,6 +104,13 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let daily_well(side" not in typst
     assert "grid(columns: (3fr, 5fr)" not in typst
     assert "grid(columns: (5fr, 3fr)" not in typst
+    # month_weeks / quarter_well chrome lives in house.typ.
+    assert "#let month_weeks(side" not in typst
+    assert "#let quarter_well(side" not in typst
+    assert "grid(columns: (2fr, 3fr)" not in typst
+    assert "grid(columns: (3fr, 2fr)" not in typst
+    assert "(1fr,) * 7" not in typst
+    assert "(1fr,) * 8" not in typst
     house = house_typ_resource().read_text(encoding="utf-8")
     assert "#set page" not in house
     assert "page-width" not in house
@@ -111,8 +126,27 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "rows: (auto, auto) + (1fr,) * week-rows" in house
     assert "grid.hline(y: 1, stroke: hline-stroke)" in house
     assert "grid.hline(y: 2, stroke: hline-stroke)" in house
-    month_grid_sig = house[house.index("#let month_grid(") : house.index("..cells,")]
-    assert "side" not in month_grid_sig
+    assert "#let _order_week_rows(" in house
+    month_grid = house[house.index("#let month_grid(") : house.index("#let month_weeks(")]
+    assert month_grid.startswith(
+        "#let month_grid(\n  side,\n  name,\n  inset: none,\n  week-rows: 6,\n  hline-stroke: none,\n  ..rows,\n)"
+    )
+    assert "columns: (1fr,) * 8" in month_grid
+    assert "name," in month_grid
+    assert "_order_week_rows(side, rows.pos())" in month_grid
+    assert "if x == (if side == left { 1 } else { 7 })" in month_grid
+    assert "stroke: stroke" not in month_grid
+    assert "columns: columns" not in month_grid
+    assert "columns: none" not in month_grid
+    assert "reverse" not in month_grid
+    month_weeks = house[house.index("#let month_weeks(") : house.index("#let week_cell(")]
+    assert month_weeks.startswith(
+        "#let month_weeks(side, rows: none, week-col: none, stroke: none, ..cells) = grid(\n"
+    )
+    assert "(week-col,) + (1fr,) * 7" in month_weeks
+    assert "(1fr,) * 7 + (week-col,)" in month_weeks
+    assert "_order_week_rows(side, cells.pos())" in month_weeks
+    assert "reverse" not in month_weeks
     assert "#let week_cell(" in house
     assert "#let week_matrix(" in house
     assert "rows: (auto, 1fr)" in house
@@ -151,6 +185,16 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "..if" not in daily_well
     assert "height: auto" not in daily_well
     assert "reverse" not in daily_well
+    assert "#let quarter_well(" in house
+    quarter_well = house[house.index("#let quarter_well(") :]
+    assert quarter_well.startswith(
+        "#let quarter_well(side, months, pad, column-gutter: none) = if side == left {\n"
+        "  grid(columns: (2fr, 3fr), rows: 1fr, column-gutter: column-gutter, months, pad)\n"
+        "} else {\n"
+        "  grid(columns: (3fr, 2fr), rows: 1fr, column-gutter: column-gutter, pad, months)\n"
+        "}"
+    )
+    assert "reverse" not in quarter_well
     assert "rowspan" not in house
     assert "dir: ltr" in house
     assert "calc.max(measure(seated_title).height, measure(seated_mark).height)" in house
@@ -226,7 +270,9 @@ def test_copy_house_typ_writes_workdir(tmp_path):
     assert "#let mos_frame(" in text
     assert "#let well_frame(" in text
     assert "#let month_grid(" in text
+    assert "#let month_weeks(" in text
     assert "#let week_matrix(" in text
+    assert "#let quarter_well(" in text
     assert "#let week_cell(" in text
     assert "#let lined_well(" in text
     assert "#let daily_well(" in text

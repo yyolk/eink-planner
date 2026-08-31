@@ -10,6 +10,7 @@ from parch.mos.components.little_calendar import LittleCalendar
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.compose.page_data import HeadingMark, PageData
+from parch.sections._shared import _side_menu_position
 
 
 class Annual:
@@ -30,6 +31,7 @@ class Annual:
         extra = other.get("little_calendar") or {}
         self.little_calendar = {**_plain(base), **_plain(extra)}
         self.row_gutter = row_gutter
+        self.side = _side_menu_position(configurator)
 
     def register(self, manifest: Manifest) -> None:
         manifest.register_source(self.ID)
@@ -56,6 +58,7 @@ class Annual:
                     month=month,
                     **self.little_calendar,
                     show_week_letter=False,
+                    side=self.side,
                 ).generate()
             )
             nxt = months[i + 1] if i + 1 < len(months) else None

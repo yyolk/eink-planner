@@ -13,6 +13,14 @@ _REVIEW_LINED = """place(
 )"""
 
 
+def _side_menu_position(configurator) -> str:
+    """MOS side token for mos_frame / daily_well / month_grid."""
+    mos = configurator.dig("planner", "params", "mos_layout")
+    if mos is None:
+        return "left"
+    return mos["side_menu_position"] if "side_menu_position" in mos else "left"
+
+
 def _length_mm(token: str) -> float:
     """Parse a Typst length token (`mm` / `cm` / `pt`) into millimetres."""
     text = str(token).strip()
