@@ -14,7 +14,7 @@ NOMAD = base_config("supernote-nomad")
 
 @pytest.mark.parametrize(
     "stem",
-    ["supernote-nomad-lined", "kindle-scribe-mos-right-lined"],
+    ["supernote-nomad-lined", "kindle-scribe-lined"],
 )
 def test_new_from_lined_siblings(tmp_path, stem):
     out = tmp_path / f"{stem}.toml"
@@ -164,12 +164,14 @@ def test_new_help_lists_device_names(capsys):
     assert "Year. Also updates a year-only cover title." in out
     assert "Sections to keep, comma-separated." in out
     assert "SuperNote Nomad" in out
-    assert "SuperNote Nomad (left-handed)" in out
+    assert "SuperNote Nomad lined" in out
     assert "Kindle Scribe" in out
+    assert "Kindle Scribe lined" in out
     assert "158×210 lined" in out
-    assert "158×210 (left-handed)" in out
+    assert "left-handed" not in out
     assert "MOS-left" not in out
     assert "MOS-right" not in out
+    assert "--hand" in out
 
 
 def test_no_config_or_mos_flags():
@@ -178,6 +180,8 @@ def test_no_config_or_mos_flags():
         parser.parse_args(["config", "new"])
     with pytest.raises(SystemExit):
         parser.parse_args(["new", "--mos", "right", "--yes", "-o", "x.toml"])
+    args = parser.parse_args(["new", "--hand", "right", "--yes", "-o", "x.toml"])
+    assert args.hand == "right"
     with pytest.raises(SystemExit):
         parser.parse_args(["edit", "x.toml"])
 
@@ -200,6 +204,46 @@ def test_new_year_zero_rejected(tmp_path, capsys):
     assert "year must be between 1 and 9999" in capsys.readouterr().err
     assert not out.exists()
     assert not (tmp_path / "mine.toml.tmp.toml").exists()
+
+
+def test_new_hand_overlays_side_menu_only(tmp_path):
+    out = tmp_path / "mine.toml"
+    rc = main(
+        [
+            "new",
+            "--from",
+            "supernote-nomad",
+            "--hand",
+            "right",
+            "--yes",
+            "-o",
+            str(out),
+        ]
+    )
+    assert rc == 0
+    data = tomllib.loads(out.read_text(encoding="utf-8"))
+    assert data["mos"]["side_menu"] == "right"
+    assert data["device"]["name"] == "supernote-nomad"
+    assert data["section"]["quarterly"]["months_column"] == "left"
+    assert data["section"]["monthly"]["week_placement"] == "left"
+    assert data["section"]["daily"]["columns"] == ["3fr", "5fr"]
+    assert "left" in data["section"]["daily"]
+    assert "right" in data["section"]["daily"]
+    assert "schedule" in data["section"]["daily"]["left"]
+    assert "priorities" in data["section"]["daily"]["right"]
+    load(out)
+
+
+def test_overlay_hand_rewrites_mos_side_menu():
+    text = (
+        "[mos] # nav\n"
+        'side_menu = "left"\n'
+        'side_menu_width = "8mm"\n'
+    )
+    written = overlay_toml(text, hand="right")
+    data = tomllib.loads(written)
+    assert data["mos"]["side_menu"] == "right"
+    assert data["mos"]["side_menu_width"] == "8mm"
 
 
 def test_overlay_table_headers_allow_space_and_comment():

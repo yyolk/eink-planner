@@ -214,7 +214,7 @@ def test_py_cli_nomad_press_and_proof_page1(monkeypatch, tmp_path):
     assert _pdf_page_count(cli_pdf) == _pdf_page_count(py_pdf)
     assert cli_pdf.stat().st_size > 0 and py_pdf.stat().st_size > 0
 
-    proof_src = _write_planner(tmp_path / "proof-src", "158x210-mos-left")
+    proof_src = _write_planner(tmp_path / "proof-src", "158x210")
     proof_text = proof_src.read_text(encoding="utf-8")
     cli_proof = tmp_path / "proof-cli"
     py_proof = tmp_path / "proof-py"

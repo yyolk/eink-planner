@@ -8,12 +8,11 @@ from parch.mos.pages.daily import Daily
 from parch.compose.page_data import HeadingMark
 from parch.sections.daily import Daily as DailySection
 from parch.services.generate import Generate
-from parch.toml_config import parse_toml
+from parch.toml_config import apply_hand, parse_toml
 from tests.helpers import base_config, load_default, make_configurator, make_day
 from tests.toml_fixtures import omit_toml_sections
 
 NOMAD = base_config("supernote-nomad")
-NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
 
 _MARK_RULE = "contents_bars(size:"
 _MARK_FLUSH = "padded_link(padding: 0pt, <index>"
@@ -269,9 +268,9 @@ def test_generated_contents_mark_alone_and_inverts_january_only():
     assert jan1.count("table.cell(fill: black") == 1
 
 
-def test_generated_mos_right_contents_mark_alone_left_of_q1():
-    text = omit_toml_sections(NOMAD_MOS_RIGHT.read_text(encoding="utf-8"), _BULKY)
-    typst = _generate(parse_toml(text, source="nomad-mos-right-daily.toml"))
+def test_generated_hand_right_contents_mark_alone_left_of_q1():
+    text = omit_toml_sections(NOMAD.read_text(encoding="utf-8"), _BULKY)
+    typst = _generate(apply_hand(parse_toml(text, source="nomad-hand-right-daily.toml"), "right"))
     pages = _daily_pages(typst)
     jan1 = pages["jan1"]
     assert "padded_link(<annual>, [2026])" not in jan1

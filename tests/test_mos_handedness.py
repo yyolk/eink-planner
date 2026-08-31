@@ -5,18 +5,17 @@ from pathlib import Path
 import pytest
 
 from parch import ConfigError
+from parch.cli import generate_cmd
 from parch.config import load
 from parch.mos.configurator import Configurator
 from parch.services.generate import Generate
-from parch.toml_config import parse_toml
+from parch.toml_config import apply_hand, parse_toml
 from tests.test_toml_omit_sections import compile_pdf
 from tests.toml_fixtures import _minimal, short_january
 from tests.helpers import base_config, load_default
 
 NOMAD = base_config("supernote-nomad")
-NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
-MOS_LEFT = base_config("158x210-mos-left")
-MOS_RIGHT = base_config("158x210-mos-right")
+PAPER_158 = base_config("158x210")
 
 
 def _generate(dto) -> str:
@@ -154,7 +153,7 @@ banana = 1
         )
 
 
-@pytest.mark.parametrize("path", [NOMAD, MOS_LEFT])
+@pytest.mark.parametrize("path", [NOMAD, PAPER_158])
 def test_existing_mos_left_and_nomad_daily_still_parse(path: Path):
     dto = load(path)
     params = _daily_section(dto)["params"]
@@ -163,87 +162,122 @@ def test_existing_mos_left_and_nomad_daily_still_parse(path: Path):
     assert dto["planner"]["params"]["mos_layout"]["side_menu_position"] == "left"
 
 
-def test_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
-    dto = short_january(load(MOS_RIGHT))
+def test_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
+    dto = short_january(apply_hand(load(PAPER_158), "right"))
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["side_menu_position"] == "right"
     assert mos["side_menu_width"] == "10mm"
     assert mos["menu_rotate"] == "270deg"
-    assert mos["reverse_months_quarters_items"] is True
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
-    assert [c["class"] for c in daily["left_column"]] == ["priorities", "notes"]
-    assert [c["class"] for c in daily["right_column"]] == ["schedule", "little_calendar"]
+    assert daily["columns_width"] == "(3fr, 5fr)"
+    assert [c["class"] for c in daily["left_column"]] == ["schedule", "little_calendar"]
+    assert [c["class"] for c in daily["right_column"]] == ["priorities", "notes"]
+    quarterly = next(s for s in dto["planner"]["sections"] if s["name"] == "quarterly")["params"]
+    assert quarterly["months_column"] == "left"
+    monthly = next(s for s in dto["planner"]["sections"] if s["name"] == "monthly")["params"]["month_params"]
+    assert monthly["week_placement"] == "left"
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert names[-1] == "colophon"
     typst_src = _generate(dto)
+    assert "page-margin(right)" in typst_src
     assert "#mos_frame(\n  right," in typst_src
     assert "#mos_frame(\n  left," not in typst_src
     assert "mos-width: 10mm" in typst_src
-    pdf, stderr = compile_pdf(typst_src, tmp_path / "mos-right")
+    pdf, stderr = compile_pdf(typst_src, tmp_path / "hand-right")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
 
 
-def test_shipped_mos_right_includes_colophon():
-    dto = load(MOS_RIGHT)
+def test_shipped_158x210_includes_colophon():
+    dto = load(PAPER_158)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert names[-1] == "colophon"
     assert names == ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "colophon"]
 
 
-def test_nomad_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
-    dto = short_january(load(NOMAD_MOS_RIGHT))
+def test_nomad_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
+    dto = short_january(apply_hand(load(NOMAD), "right"))
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["side_menu_position"] == "right"
     assert mos["side_menu_width"] == "8mm"
     assert mos["menu_rotate"] == "270deg"
-    assert mos["reverse_months_quarters_items"] is True
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
-    assert daily["columns_width"] == "(5fr, 3fr)"
+    assert daily["columns_width"] == "(3fr, 5fr)"
     assert daily["items_spacing"] == "4mm"
-    assert [c["class"] for c in daily["left_column"]] == ["priorities", "notes"]
-    assert [c["class"] for c in daily["right_column"]] == ["schedule", "little_calendar"]
-    notes = daily["left_column"][1]["params"]
+    assert [c["class"] for c in daily["left_column"]] == ["schedule", "little_calendar"]
+    assert [c["class"] for c in daily["right_column"]] == ["priorities", "notes"]
+    notes = daily["right_column"][1]["params"]
     assert notes["notes_height"] == "1fr"
     assert notes["title_height"] == "4mm"
-    schedule = daily["right_column"][0]["params"]
+    schedule = daily["left_column"][0]["params"]
     assert schedule["from"] == 8
     assert schedule["to"] == 20
     assert schedule["time_format"] == "%k"
     assert schedule["trailing_30_minutes"] is True
     quarterly = next(s for s in dto["planner"]["sections"] if s["name"] == "quarterly")["params"]
-    assert quarterly["months_column"] == "right"
+    assert quarterly["months_column"] == "left"
     monthly = next(s for s in dto["planner"]["sections"] if s["name"] == "monthly")["params"]["month_params"]
-    assert monthly["week_placement"] == "right"
+    assert monthly["week_placement"] == "left"
     assert monthly["daily_cell_height"] == "16mm"
     assert monthly["week_label_rotation"] == "90deg"
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert names[-1] == "colophon"
     typst_src = _generate(dto)
+    assert "page-margin(right)" in typst_src
     assert "#mos_frame(\n  right," in typst_src
     assert "#mos_frame(\n  left," not in typst_src
     assert "mos-width: 8mm" in typst_src
     assert "rows: 1fr" in typst_src
     assert "rows: (auto, 1fr)" in typst_src
-    pdf, stderr = compile_pdf(typst_src, tmp_path / "nomad-mos-right")
+    pdf, stderr = compile_pdf(typst_src, tmp_path / "nomad-hand-right")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
 
 
-def test_shipped_nomad_mos_right_includes_colophon():
-    dto = load(NOMAD_MOS_RIGHT)
+def test_shipped_nomad_includes_colophon():
+    dto = load(NOMAD)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert names[-1] == "colophon"
     assert names == ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "tasks", "meetings", "colophon"]
 
 
-def test_shipped_mos_daily_schedule_track_stays_3fr_on_both_handedness():
-    """Schedule is 3fr on MOS-left and MOS-right; notes stay 5fr either side."""
-    left = _daily_section(load(MOS_LEFT))["params"]
+def test_shipped_mos_daily_schedule_track_stays_3fr_on_both_hands():
+    """Schedule stays 3fr left and notes 5fr right; --hand does not swap tracks."""
+    left = _daily_section(load(PAPER_158))["params"]
     assert left["columns_width"] == "(3fr, 5fr)"
     assert [c["class"] for c in left["left_column"]] == ["schedule", "little_calendar"]
     assert [c["class"] for c in left["right_column"]] == ["priorities", "notes"]
 
-    for path in (MOS_RIGHT, NOMAD_MOS_RIGHT):
-        right = _daily_section(load(path))["params"]
-        assert right["columns_width"] == "(5fr, 3fr)", path.name
-        assert [c["class"] for c in right["left_column"]] == ["priorities", "notes"]
-        assert [c["class"] for c in right["right_column"]] == ["schedule", "little_calendar"]
+    for path in (PAPER_158, NOMAD):
+        right = _daily_section(apply_hand(load(path), "right"))["params"]
+        assert right["columns_width"] == "(3fr, 5fr)", path.name
+        assert [c["class"] for c in right["left_column"]] == ["schedule", "little_calendar"]
+        assert [c["class"] for c in right["right_column"]] == ["priorities", "notes"]
+
+
+def test_press_hand_right_sets_page_margin_and_mos_frame(tmp_path, monkeypatch):
+    class _DummyCompile:
+        def compile(self, workdir, file="index.typst", **_kwargs):
+            pdf = Path(workdir) / "index.pdf"
+            pdf.write_bytes(b"%PDF-dummy")
+            return pdf
+
+    monkeypatch.setattr("parch.cli.Compile", lambda: _DummyCompile())
+    ns = type(
+        "Args",
+        (),
+        {
+            "config": str(PAPER_158),
+            "workdir": str(tmp_path / "out"),
+            "locale": "en",
+            "with_ghostscript": False,
+            "debug": False,
+            "year": None,
+            "hand": "right",
+        },
+    )()
+    assert generate_cmd(ns, argv=["parch", "press", str(PAPER_158), "--hand", "right"]) == 0
+    typst = (tmp_path / "out" / "index.typst").read_text(encoding="utf-8")
+    assert "page-margin(right)" in typst
+    assert "#mos_frame(\n  right," in typst
+    assert "page-margin(left)" not in typst
+    assert "#mos_frame(\n  left," not in typst
+    assert "columns: (3fr, 5fr)" in typst

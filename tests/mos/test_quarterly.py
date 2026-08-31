@@ -18,10 +18,9 @@ from tests.helpers import base_config, load_default, make_configurator, make_qua
 from tests.test_toml_omit_sections import compile_pdf
 from tests.toml_fixtures import omit_toml_sections
 
-MOS_LEFT = base_config("158x210-mos-left")
-MOS_RIGHT = base_config("158x210-mos-right")
+PAPER_158 = base_config("158x210")
 NOMAD = base_config("supernote-nomad")
-NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
+SCRIBE = base_config("kindle-scribe")
 
 Q1_MONTHS = ("January", "February", "March")
 Q3_MONTHS = ("July", "August", "September")
@@ -103,7 +102,7 @@ def test_months_column_right_keeps_three_month_grid():
         assert f"[{name}]" in content
 
 
-@pytest.mark.parametrize("path", [MOS_LEFT, MOS_RIGHT, NOMAD, NOMAD_MOS_RIGHT])
+@pytest.mark.parametrize("path", [PAPER_158, NOMAD, SCRIBE])
 def test_full_year_quarter_pages_include_all_three_months(path: Path):
     typst_src = _generate(_full_year_quarters(path))
     pages = _quarter_pages(typst_src)
@@ -132,7 +131,7 @@ def test_full_year_quarter_pages_include_all_three_months(path: Path):
 def test_shipped_profiles_q3_compile_with_three_months(tmp_path):
     """Compile a real 2026 Q1-Q4 set for all shipped MOS profiles so a July-only Q3 cannot slip through."""
     pdfs = []
-    for name, config in (("mos-left", MOS_LEFT), ("mos-right", MOS_RIGHT), ("nomad", NOMAD), ("nomad-mos-right", NOMAD_MOS_RIGHT)):
+    for name, config in (("158x210", PAPER_158), ("nomad", NOMAD), ("scribe", SCRIBE)):
         typst_src = _generate(_full_year_quarters(config))
         q3 = _quarter_pages(typst_src)[3]
         for month in Q3_MONTHS:

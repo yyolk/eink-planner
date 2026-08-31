@@ -48,5 +48,5 @@ jobs:
         env:
           PARCH_TYPST: py
         run: |
-          uv run parch proof 158x210-mos-left --pages 1 -w out/proof-py
+          uv run parch proof 158x210 --pages 1 -w out/proof-py
           test -s out/proof-py/preview-1.svg

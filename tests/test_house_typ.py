@@ -5,6 +5,7 @@ from pathlib import Path
 
 from parch.config import load
 from parch.mos.configurator import Configurator
+from parch.toml_config import apply_hand
 from parch.mos.preamble import (
     KNOWN_DEVICE_TYP,
     Preamble,
@@ -24,7 +25,7 @@ def _preamble_set_page(typst: str) -> str:
 
 
 def test_preamble_imports_house_and_does_not_inline_bodies():
-    typst = Preamble(Configurator(load(base_config("158x210-mos-left")))).generate()
+    typst = Preamble(Configurator(load(base_config("158x210")))).generate()
     assert '#import "158x210.typ": page-width, page-height, page-margin' in typst
     assert "#include" not in typst
     set_page = _preamble_set_page(typst)
@@ -133,7 +134,8 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
 
 
 def test_preamble_mos_right_uses_page_margin_right():
-    typst = Preamble(Configurator(load(base_config("158x210-mos-right")))).generate()
+    dto = apply_hand(load(base_config("158x210")), "right")
+    typst = Preamble(Configurator(dto)).generate()
     assert '#import "158x210.typ": page-width, page-height, page-margin' in typst
     assert "page-margin(right)" in _preamble_set_page(typst)
     assert "page-margin(left)" not in _preamble_set_page(typst)
@@ -143,7 +145,7 @@ def test_preamble_nomad_and_scribe_import_matching_device_file():
     nomad = Preamble(Configurator(load(base_config("supernote-nomad")))).generate()
     scribe = Preamble(Configurator(load(base_config("kindle-scribe")))).generate()
     lined = Preamble(Configurator(load(base_config("supernote-nomad-lined")))).generate()
-    right = Preamble(Configurator(load(base_config("kindle-scribe-mos-right")))).generate()
+    right = Preamble(Configurator(apply_hand(load(base_config("kindle-scribe")), "right"))).generate()
     assert '#import "supernote-nomad.typ": page-width, page-height, page-margin' in nomad
     assert '#import "kindle-scribe.typ": page-width, page-height, page-margin' in scribe
     assert '#import "supernote-nomad.typ": page-width, page-height, page-margin' in lined
@@ -152,10 +154,10 @@ def test_preamble_nomad_and_scribe_import_matching_device_file():
     assert "157.48" not in _preamble_set_page(scribe)
     assert "height: auto" not in nomad
     assert "height: auto" not in scribe
-    assert device_typ_filename(Configurator(load(base_config("supernote-nomad-mos-right-lined")))) == (
+    assert device_typ_filename(Configurator(load(base_config("supernote-nomad-lined")))) == (
         "supernote-nomad.typ"
     )
-    assert device_typ_filename(Configurator(load(base_config("158x210-mos-left-lined")))) == "158x210.typ"
+    assert device_typ_filename(Configurator(load(base_config("158x210-lined")))) == "158x210.typ"
 
 
 def test_device_typ_files_share_page_margin_shape():
@@ -230,6 +232,7 @@ def test_press_copies_house_typ_next_to_index(tmp_path, monkeypatch):
             "with_ghostscript": False,
             "debug": False,
             "year": None,
+            "hand": None,
         },
     )()
     assert generate_cmd(ns, argv=["parch", "press", str(path)]) == 0
@@ -292,10 +295,16 @@ def test_copy_device_typ_writes_named_file(tmp_path):
     )
 
 
-def test_twelve_toml_configs_remain():
+def test_six_toml_configs_remain():
     from importlib.resources import files
 
     configs = sorted(p.name for p in (files("parch.data") / "configs").iterdir() if str(p).endswith(".toml"))
-    assert len(configs) == 12
-    assert "supernote-nomad-lined.toml" in configs
-    assert "158x210-mos-right.toml" in configs
+    assert configs == [
+        "158x210-lined.toml",
+        "158x210.toml",
+        "kindle-scribe-lined.toml",
+        "kindle-scribe.toml",
+        "supernote-nomad-lined.toml",
+        "supernote-nomad.toml",
+    ]
+    assert not any("mos-left" in name or "mos-right" in name for name in configs)

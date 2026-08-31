@@ -1,8 +1,9 @@
-# Kindle Scribe MOS-left lined
-# Kindle Scribe MOS-left sibling with house scratch pad lined.
+# Kindle Scribe lined
+# Kindle Scribe sibling with house scratch pad lined.
 # Daily on-page notes stay dotted; other notes areas inherit lined from style.
 # Kindle Scribe
 # 1860×2480 @ 300 PPI → 157.48 × 209.97 mm
+# MOS strip side is mos.side_menu (default left). Override with --hand.
 
 sections = [
   "cover",

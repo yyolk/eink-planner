@@ -7,7 +7,7 @@ from pathlib import Path
 from parch import ConfigError, __version__
 from parch.config import load
 from parch.i18n import I18n
-from parch.toml_config import apply_debug, apply_year
+from parch.toml_config import apply_debug, apply_hand, apply_year
 from parch.provenance import apply_provenance, collect_provenance
 from parch.mos.configurator import Configurator
 from parch.mos.preamble import copy_house_typ
@@ -75,6 +75,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Overwrite an existing outfile",
     )
+    _add_hand_flag(new)
 
     press = sub.add_parser("press", help="Press a profile to PDF")
     press.add_argument("config", help="Planner profile (path or shipped stem)")
@@ -107,6 +108,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Overlay planner year (dates and cover title; not a config key)",
     )
+    _add_hand_flag(press)
 
     proof = sub.add_parser(
         "proof",
@@ -153,10 +155,20 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Overlay planner year (dates and cover title; not a config key)",
     )
+    _add_hand_flag(proof)
     new.set_defaults(run=new_cmd)
     press.set_defaults(run=generate_cmd)
     proof.set_defaults(run=preview_svg_cmd)
     return parser
+
+
+def _add_hand_flag(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--hand",
+        choices=("left", "right"),
+        default=None,
+        help="MOS strip side (default: profile mos.side_menu, or left)",
+    )
 
 
 def new_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
@@ -172,6 +184,7 @@ def new_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
         sections=args.sections,
         yes=bool(args.yes),
         force=bool(args.force),
+        hand=getattr(args, "hand", None),
     )
 
 
@@ -180,6 +193,7 @@ def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
         i18n = I18n.load_default(args.locale)
         dto = apply_debug(load(config_path), debug=bool(args.debug))
         dto = apply_year(dto, args.year)
+        dto = apply_hand(dto, getattr(args, "hand", None))
         dto = apply_provenance(
             dto,
             collect_provenance(
@@ -208,6 +222,7 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
         i18n = I18n.load_default(args.locale)
         dto = apply_debug(load(config_path), debug=bool(args.debug))
         dto = apply_year(dto, args.year)
+        dto = apply_hand(dto, getattr(args, "hand", None))
         dto = apply_provenance(
             dto,
             collect_provenance(

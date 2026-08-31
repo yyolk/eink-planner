@@ -13,23 +13,15 @@ from tests.helpers import base_config, load_default
 
 NOMAD = base_config("supernote-nomad")
 NOMAD_LINED = base_config("supernote-nomad-lined")
-NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
-NOMAD_MOS_RIGHT_LINED = base_config("supernote-nomad-mos-right-lined")
-MOS_LEFT = base_config("158x210-mos-left")
-MOS_LEFT_LINED = base_config("158x210-mos-left-lined")
-MOS_RIGHT = base_config("158x210-mos-right")
-MOS_RIGHT_LINED = base_config("158x210-mos-right-lined")
+PAPER_158 = base_config("158x210")
+PAPER_158_LINED = base_config("158x210-lined")
 SCRIBE = base_config("kindle-scribe")
 SCRIBE_LINED = base_config("kindle-scribe-lined")
-SCRIBE_MOS_RIGHT_LINED = base_config("kindle-scribe-mos-right-lined")
 
 _LINED = [
-    MOS_LEFT_LINED,
-    MOS_RIGHT_LINED,
+    PAPER_158_LINED,
     NOMAD_LINED,
-    NOMAD_MOS_RIGHT_LINED,
     SCRIBE_LINED,
-    SCRIBE_MOS_RIGHT_LINED,
 ]
 
 _STYLE_LINED = """[style]
@@ -212,7 +204,7 @@ def test_mixed_profile_typst_emits_both_rect_patterns():
     assert all("lined_well(lined)" not in page for page in extra_pages)
 
 
-@pytest.mark.parametrize("path", [NOMAD, NOMAD_MOS_RIGHT, MOS_LEFT, MOS_RIGHT, SCRIBE])
+@pytest.mark.parametrize("path", [NOMAD, PAPER_158, SCRIBE])
 def test_shipped_profiles_keep_dotted_scratch_areas(path: Path):
     dto = load(path)
     assert dto["planner"]["params"]["scratch_pad"] == "dotted"

@@ -1,6 +1,6 @@
 # SuperNote Nomad (A6 X2)
 # 1404×1872 @ 300 PPI → 118.87 × 158.5 mm
-# MOS-left default; MOS-right sibling: supernote-nomad-mos-right
+# MOS strip side is mos.side_menu (default left). Override with --hand.
 
 sections = [
   "cover",

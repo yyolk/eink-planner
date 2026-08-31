@@ -60,7 +60,7 @@ def test_preview_svg_crop_then_scale():
 def test_preview_svg_cli_defaults():
     parser = build_parser()
     args = parser.parse_args(
-        ["proof", "158x210-mos-left", "--pages", "1,2"]
+        ["proof", "158x210", "--pages", "1,2"]
     )
     assert args.command == "proof"
     assert args.run is preview_svg_cmd
@@ -72,7 +72,7 @@ def test_preview_svg_cli_defaults():
 def test_preview_svg_cli_samples():
     parser = build_parser()
     args = parser.parse_args(
-        ["proof", "158x210-mos-left", "--samples"]
+        ["proof", "158x210", "--samples"]
     )
     assert args.samples is True
     assert args.pages is None
@@ -86,7 +86,7 @@ def test_preview_svg_cli_pages_and_samples_conflict():
         parser.parse_args(
             [
                 "proof",
-                "158x210-mos-left",
+                "158x210",
                 "--pages",
                 "1,2",
                 "--samples",
@@ -97,12 +97,12 @@ def test_preview_svg_cli_pages_and_samples_conflict():
 def test_preview_svg_cli_requires_pages_or_samples():
     parser = build_parser()
     with pytest.raises(SystemExit):
-        parser.parse_args(["proof", "158x210-mos-left"])
+        parser.parse_args(["proof", "158x210"])
 
 
 def test_samples_dest_uses_config_stem():
-    assert samples_dest(Path("/repo"), "158x210-mos-left") == Path(
-        "/repo/docs/samples/158x210-mos-left"
+    assert samples_dest(Path("/repo"), "158x210") == Path(
+        "/repo/docs/samples/158x210"
     )
 
 
@@ -202,7 +202,7 @@ def _house_rect_pattern() -> str:
 def test_rect_pattern_helper_stamps_tiles_not_fill():
     house = house_typ_resource().read_text(encoding="utf-8")
     helper = _house_rect_pattern()
-    typst = Preamble(Configurator(load(base_config("158x210-mos-left")))).generate()
+    typst = Preamble(Configurator(load(base_config("158x210")))).generate()
     assert "fill: pattern" not in helper
     assert "tiling(" not in helper
     assert "layout(size =>" in helper
@@ -223,7 +223,7 @@ def test_rect_pattern_helper_stamps_tiles_not_fill():
 def test_large_rect_pattern_svg_stamps_dots_not_pattern_paint(tmp_path):
     src = tmp_path / "index.typst"
     src.write_text(
-        Preamble(Configurator(load(base_config("158x210-mos-left")))).generate()
+        Preamble(Configurator(load(base_config("158x210")))).generate()
         + "\n#rect_pattern(dotted)\n",
         encoding="utf-8",
     )

@@ -1,9 +1,8 @@
-# 158×210 MOS-left lined
-# 158×210 MOS-left sibling with house scratch pad lined.
+# 158×210 lined
+# 158×210 sibling with house scratch pad lined.
 # Daily on-page notes stay dotted; other notes areas inherit lined from style.
 # Original LYP gist MOS (Months on the Side) layout at 158 × 210 mm
-# Name is the physical MOS strip side (nav left), not which hand you write with.
-# MOS-left is the right-handed writing layout (nav opposite the writing hand).
+# MOS strip side is mos.side_menu (default left). Override with --hand.
 
 sections = [
   "cover",
@@ -18,7 +17,7 @@ sections = [
 ]
 
 [device]
-name = "158x210-mos-left-lined"
+name = "158x210-lined"
 width = "158mm"
 height = "210mm"
 ppi = 300
