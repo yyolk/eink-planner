@@ -230,12 +230,7 @@
         [*Thursday*],
         padded_link(<2026W01>)[Week 1]
       ), padded_link(padding: 0pt, <index>, contents_bars(size: h1)), spacing: 1fr, direction: ltr),
-          grid(
-        columns: (3fr, 5fr),
-        rows: 1fr,
-        column-gutter: regular_column_gutter,
-      
-        grid(
+          daily_well(left, grid(
         columns: 1fr,
         rows: (auto, 1fr),
         row-gutter: 5mm,
@@ -279,8 +274,7 @@
       padded_link(<2026W05>)[5], [26], [27], [28], [29], [30], [31], [],
       [], [], [], [], [], [], [], []
       )
-      ),
-        grid(
+      ), grid(
         columns: 1fr,
         rows: (auto, 1fr),
         row-gutter: 5mm,
@@ -303,8 +297,7 @@
         grid.cell(align: horizon + right, stroke: (bottom: regular_stroke + black), padded_link(<daily-note-2026-01-01-page-1>)[More]),
         grid.cell(colspan: 2, rect_pattern(dotted))
       )
-      )
-      ),
+      )),
         ),
       )
     ''',
@@ -381,7 +374,7 @@
       #let h1 = 10mm
       #let link_padding = 8pt
       
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, week_matrix, lined_well
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, week_matrix, lined_well, daily_well
       
       #let dotted = dotted(regular_height: regular_height)
       #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -396,6 +389,7 @@
       #let month_grid = month_grid.with(week-rows: 6, hline-stroke: regular_stroke + black)
       #let week_matrix = week_matrix.with(regular-height: regular_height)
       #let lined_well = lined_well.with(regular-height: regular_height)
+      #let daily_well = daily_well.with(column-gutter: regular_column_gutter)
     ''',
     'weekly': '''
       #mos_frame(
@@ -581,12 +575,7 @@
         [*Thursday*],
         padded_link(<2026W01>)[Week 1]
       ), padded_link(padding: 0pt, <index>, contents_bars(size: h1)), spacing: 1fr, direction: ltr),
-          grid(
-        columns: (3fr, 5fr),
-        rows: 1fr,
-        column-gutter: regular_column_gutter,
-      
-        grid(
+          daily_well(left, grid(
         columns: 1fr,
         rows: (auto, 1fr),
         row-gutter: 4mm,
@@ -630,8 +619,7 @@
       padded_link(<2026W05>)[5], [26], [27], [28], [29], [30], [31], [],
       [], [], [], [], [], [], [], []
       )
-      ),
-        grid(
+      ), grid(
         columns: 1fr,
         rows: (auto, 1fr),
         row-gutter: 4mm,
@@ -654,8 +642,7 @@
         grid.cell(align: horizon + right, stroke: (bottom: regular_stroke + black), padded_link(<daily-note-2026-01-01-page-1>)[More]),
         grid.cell(colspan: 2, rect_pattern(dotted))
       )
-      )
-      ),
+      )),
         ),
       )
     ''',
@@ -732,7 +719,7 @@
       #let h1 = 8mm
       #let link_padding = 6pt
       
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, week_matrix, lined_well
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, week_matrix, lined_well, daily_well
       
       #let dotted = dotted(regular_height: regular_height)
       #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -747,6 +734,7 @@
       #let month_grid = month_grid.with(week-rows: 6, hline-stroke: regular_stroke + black)
       #let week_matrix = week_matrix.with(regular-height: regular_height)
       #let lined_well = lined_well.with(regular-height: regular_height)
+      #let daily_well = daily_well.with(column-gutter: regular_column_gutter)
     ''',
     'weekly': '''
       #mos_frame(

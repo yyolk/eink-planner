@@ -239,7 +239,7 @@
 )
 
 // Parent is well_frame's 1fr body (bounded). House owns the 3fr/5fr
-// split. Same side token as mos_frame / page-margin.
+// split. Same side token as mos_frame.
 #let daily_well(side, hours, writing, column-gutter: none) = if side == left {
   grid(columns: (3fr, 5fr), rows: 1fr, column-gutter: column-gutter, hours, writing)
 } else {
