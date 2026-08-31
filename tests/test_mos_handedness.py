@@ -176,8 +176,9 @@ def test_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert names[-1] == "colophon"
     typst_src = _generate(dto)
-    assert "columns: (1fr, 10mm)" in typst_src
-    assert "columns: (10mm, 1fr)" not in typst_src
+    assert "#mos_frame(\n  right," in typst_src
+    assert "#mos_frame(\n  left," not in typst_src
+    assert "mos-width: 10mm" in typst_src
     pdf, stderr = compile_pdf(typst_src, tmp_path / "mos-right")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
 
@@ -218,8 +219,9 @@ def test_nomad_mos_right_generate_compiles_with_mos_on_the_right(tmp_path):
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert names[-1] == "colophon"
     typst_src = _generate(dto)
-    assert "columns: (1fr, 8mm)" in typst_src
-    assert "columns: (8mm, 1fr)" not in typst_src
+    assert "#mos_frame(\n  right," in typst_src
+    assert "#mos_frame(\n  left," not in typst_src
+    assert "mos-width: 8mm" in typst_src
     assert "rows: 1fr" in typst_src
     assert "rows: (auto, 1fr)" in typst_src
     pdf, stderr = compile_pdf(typst_src, tmp_path / "nomad-mos-right")

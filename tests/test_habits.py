@@ -602,9 +602,8 @@ def test_habit_month_follows_side_menu_dates_stay_left():
     )
     right_typst = _generate(right)
     right_jan = _mos_page(right_typst, "January<habits-january>", "rotate(")
-    assert "columns: (1fr, 10mm)" in right_jan
-    assert "columns: (10mm, 1fr)" not in right_jan
-    assert "columns: (8mm, 1fr)" not in right_jan
+    assert "#mos_frame(\n  right," in right_jan
+    assert "#mos_frame(\n  left," not in right_jan
     right_grid = right_jan[right_jan.index("columns: (auto, 1fr") :]
     assert "Thu 1" in right_grid
     assert "Mon 5" in right_grid
@@ -619,8 +618,8 @@ def test_habit_month_follows_side_menu_dates_stay_left():
 
     left = parse_toml(_minimal(enable=["habits"], sections=""), source="habits-mos-left.toml")
     left_jan = _mos_page(_generate(left), "January<habits-january>", "rotate(")
-    assert "columns: (8mm, 1fr)" in left_jan
-    assert "columns: (1fr, 8mm)" not in left_jan
+    assert "#mos_frame(\n  left," in left_jan
+    assert "#mos_frame(\n  right," not in left_jan
     left_grid = left_jan[left_jan.index("columns: (auto, 1fr") :]
     assert "Thu 1" in left_grid
     left_thu = left_grid.index("Thu 1")
@@ -652,13 +651,13 @@ daily_cell_height = "16mm"
         exclude="<habits-january>",
     )
     cal_only = _mos_page(_generate(monthly_only), "<month-2026-01-01>", "rotate(")
-    assert "columns: (1fr, 10mm)" in cal_both
-    assert "columns: (10mm, 1fr)" not in cal_both
+    assert "#mos_frame(\n  right," in cal_both
+    assert "#mos_frame(\n  left," not in cal_both
     assert "Q1" in cal_both
     assert "padded_link(<month-2026-02-01>)" in cal_both
     assert "padded_link(<habits-february>)" not in cal_both
     assert "columns: (auto, 1fr, 1fr" not in cal_both
-    assert "columns: (1fr, 10mm)" in cal_only
+    assert "#mos_frame(\n  right," in cal_only
     assert "Q1" in cal_only
     assert "padded_link(<month-2026-02-01>)" in cal_only
 
@@ -829,7 +828,7 @@ def test_index_heading_is_trail_strip_when_contents_on():
     assert _SEAT_RTL not in index
     assert _TRAIL_HEADING not in index
     assert index.index(_TRAIL_MARK) < index.index("[Habits <habits>]")
-    assert "column-gutter: 6pt" not in heading
+    assert "column-gutter: 6pt" not in index
     month_heading = month[month.index(_TRAIL_HEADING) : month.index(_TRAIL_MARK)]
     assert _SEAT_LTR in month
     assert _TRAIL_HEADING in month
