@@ -98,7 +98,7 @@ KINDLE_SCRIBE = Device(
     page_width="157.48mm",
     page_height="209.97mm",
     toolbar_edge=TOOLBAR_NONE,
-    toolbar_clearance="5mm",
+    toolbar_clearance="0mm",
     writing_clearance="5mm",
     mos_width="10mm",
     width_px=1860,
@@ -113,7 +113,7 @@ PAPER_158X210 = Device(
     page_width="158mm",
     page_height="210mm",
     toolbar_edge=TOOLBAR_NONE,
-    toolbar_clearance="5mm",
+    toolbar_clearance="0mm",
     writing_clearance="5mm",
     mos_width="10mm",
 )

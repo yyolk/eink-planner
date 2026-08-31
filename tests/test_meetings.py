@@ -14,7 +14,7 @@ from tests.test_toml_omit_sections import _LABEL_DEF, _PADDED_LINK, compile_pdf
 from tests.toml_fixtures import _minimal, short_january
 from tests.helpers import base_config, load_default
 
-NOMAD = base_config("supernote-nomad")
+NOMAD = base_config("supernote-nomad", extras=True)
 
 _NOMAD_DEVICE = """[device]
 name = "supernote-nomad"

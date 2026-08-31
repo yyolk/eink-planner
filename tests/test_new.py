@@ -8,7 +8,13 @@ from parch import ConfigError
 from parch.cli import build_parser, main
 from parch.config import load
 from parch.devices import get_device
-from parch.services.job_file import emit_job, spec_from_data, spec_from_device
+from parch.services.job_file import (
+    CANONICAL_SECTIONS,
+    DEFAULT_SECTIONS,
+    emit_job,
+    spec_from_data,
+    spec_from_device,
+)
 
 
 def test_new_yes_year(tmp_path, capsys):
@@ -33,8 +39,8 @@ def test_new_yes_year(tmp_path, capsys):
     assert data["section"]["cover"]["title"] == "2027"
     assert data["device"]["name"] == "supernote-nomad"
     assert data["style"]["scratch_pad"] == "dotted"
-    assert "cover" in data["sections"]
-    assert "colophon" in data["sections"]
+    assert data["sections"] == list(DEFAULT_SECTIONS)
+    assert "projects" not in data["sections"]
     load(out)
     assert "SuperNote Nomad" in text
 
@@ -294,16 +300,61 @@ def test_new_yes_writes_device_defaults(tmp_path):
     load(out)
 
 
-def test_scribe_and_158_defaults_omit_nomad_extras(tmp_path):
-    for device in ("kindle-scribe", "158x210"):
+def test_defaults_omit_extras_on_every_device(tmp_path):
+    extras = ("projects", "habits", "review", "tasks", "meetings")
+    for device in ("supernote-nomad", "kindle-scribe", "158x210"):
         out = tmp_path / f"{device}.toml"
         rc = main(["new", "--from", device, "--yes", "-o", str(out)])
         assert rc == 0
         data = tomllib.loads(out.read_text(encoding="utf-8"))
         assert data["device"]["name"] == device
-        assert "projects" not in data["sections"]
+        assert data["sections"] == list(DEFAULT_SECTIONS)
+        for extra in extras:
+            assert extra not in data["sections"]
+            assert extra not in data.get("section", {})
         assert data["device"]["ppi"] == get_device(device).ppi
         load(out)
+    for extra in extras:
+        assert extra in CANONICAL_SECTIONS
+
+
+def test_sections_checkbox_offers_extras_unchecked(tmp_path, monkeypatch):
+    out = tmp_path / "mine.toml"
+    extras = ("projects", "habits", "review", "tasks", "meetings")
+
+    class Capture(_FakeQuestionary):
+        def checkbox(self, message, choices=None, validate=None):
+            self.asked.append(message)
+            self.captured = list(choices or [])
+            picked = [choice.value for choice in self.captured if choice.checked]
+            return _Ask(picked)
+
+    fake = Capture(
+        {
+            "MOS side": "left",
+            "Paper": "dotted",
+            "Week rail": "omit",
+            "Hour from": 8,
+            "Hour to": 20,
+            "Priority rows": 5,
+            "Daily notes pages": 2,
+        }
+    )
+    monkeypatch.setattr("parch.services.config_file._questionary", lambda: fake)
+    monkeypatch.setattr("sys.stdin.isatty", lambda: True)
+    rc = main(["new", "--from", "supernote-nomad", "--year", "2026", "-o", str(out)])
+    assert rc == 0
+    assert "Sections" in fake.asked
+    checked = {choice.value: choice.checked for choice in fake.captured}
+    assert list(checked) == list(CANONICAL_SECTIONS)
+    for name in DEFAULT_SECTIONS:
+        assert checked[name] is True
+    for name in extras:
+        assert checked[name] is False
+    assert "Project pages" not in fake.asked
+    data = tomllib.loads(out.read_text(encoding="utf-8"))
+    assert data["sections"] == list(DEFAULT_SECTIONS)
+    load(out)
 
 
 class _Ask:

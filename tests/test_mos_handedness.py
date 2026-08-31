@@ -251,7 +251,7 @@ def test_shipped_nomad_includes_colophon():
     dto = load(NOMAD)
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert names[-1] == "colophon"
-    assert names == ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "tasks", "meetings", "colophon"]
+    assert names == ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "colophon"]
 
 
 def test_shipped_mos_daily_tracks_stay_hours_then_writing_on_both_hands():

@@ -14,6 +14,7 @@ from tests.toml_fixtures import _minimal, omit_toml_sections, short_january
 from tests.helpers import base_config, load_default
 
 NOMAD = base_config("supernote-nomad")
+NOMAD_EXTRAS = base_config("supernote-nomad", extras=True)
 
 _TOC_TITLE = 'weight: "bold")[Contents <index>]'
 _MARK_RULE = "contents_bars(size:"
@@ -100,11 +101,6 @@ def test_contents_lists_enabled_human_names_in_sections_order():
         "Months",
         "Weeks",
         "Days",
-        "Projects",
-        "Habits",
-        "Review",
-        "Tasks",
-        "Meetings",
         "About this notebook",
     ]
     positions = [page.index(name) for name in names]
@@ -121,14 +117,11 @@ def test_contents_lists_enabled_human_names_in_sections_order():
         "month-2026-01-01",
         "2026W01",
         "2026-01-01",
-        "projects",
-        "habits",
-        "review",
-        "tasks",
-        "meetings",
         "colophon",
     ):
         assert f"padded_link(<{dest}>" in page
+    for extra in ("Projects", "Habits", "Review", "Tasks", "Meetings"):
+        assert extra not in page
 
 
 def test_slim_lists_calendar_and_about_only():
@@ -146,7 +139,7 @@ def test_slim_lists_calendar_and_about_only():
 
 
 def test_fullish_list_includes_all_enabled_sections():
-    typst = _generate(load(NOMAD))
+    typst = _generate(load(NOMAD_EXTRAS))
     page = _contents_page(typst)
     for name in (
         "Quarters",
@@ -362,7 +355,7 @@ def test_mos_right_daily_mark_is_trail_strip_alone():
 
 
 def test_mos_right_habits_mark_sits_next_to_strip():
-    typst = _generate(apply_hand(load(NOMAD), "right"))
+    typst = _generate(apply_hand(load(NOMAD_EXTRAS), "right"))
     page = next(p for p in _pages(typst) if "January<habits-january>" in p)
     title_at = page.index("January<habits-january>")
     mark_at = page.index(_MARK_FLUSH)

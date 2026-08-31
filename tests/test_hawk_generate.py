@@ -1,37 +1,25 @@
-"""Hawk generate against current output: Nomad matches; Scribe/158 drop the 5mm top."""
-
-from pathlib import Path
+"""Hawk generate: compact sections on every device; none-edge clearance is 0mm."""
 
 from parch.config import load
 from parch.devices import get_device
-from parch.i18n import I18n
 from parch.models.device import device_page_margin, device_scale
 from parch.mos.configurator import Configurator
 from parch.mos.preamble import Preamble, render_device_typ
 from parch.services.generate import Generate
-from tests.helpers import base_config
+from parch.services.job_file import DEFAULT_SECTIONS
+from tests.helpers import base_config, load_default
 from tests.toml_fixtures import short_january
-
-_BASELINE = Path("/tmp/parch-hawk-baseline")
 
 
 def _generate(stem: str) -> str:
     dto = short_january(load(base_config(stem)))
-    return Generate(i18n=I18n.load_default("en")).generate(dto)
+    return Generate(i18n=load_default()).generate(dto)
 
 
-def _strip_preamble(typst: str) -> str:
-    lines = typst.splitlines(keepends=True)
-    start = 0
-    for i, line in enumerate(lines):
-        if line.startswith("#let quarter_well"):
-            start = i + 1
-            break
-    return "".join(lines[start:])
-
-
-def test_nomad_generate_matches_current_body():
+def test_nomad_keeps_top_toolbar_and_compact_sections():
     dto = load(base_config("supernote-nomad"))
+    names = [section["name"] for section in Configurator(dto).enabled_sections()]
+    assert names == list(DEFAULT_SECTIONS)
     assert dto["document"]["layout"]["margin"].to_plain() == {
         "top": "8mm",
         "bottom": "0mm",
@@ -39,17 +27,18 @@ def test_nomad_generate_matches_current_body():
         "right": "4mm",
     }
     now = _generate("supernote-nomad")
-    baseline_path = _BASELINE / "supernote-nomad-jan.typst"
-    if baseline_path.is_file():
-        baseline = baseline_path.read_text(encoding="utf-8")
-        assert _strip_preamble(now) == _strip_preamble(baseline)
+    assert "page-margin(left)" in now
+    assert "toolbar-edge" in now.split("#set page", 1)[0]
 
 
 def test_scribe_and_158_generate_bodies_match_only_toolbar_changes():
     for stem in ("kindle-scribe", "158x210"):
         dto = load(base_config(stem))
+        names = [section["name"] for section in Configurator(dto).enabled_sections()]
+        assert names == list(DEFAULT_SECTIONS)
         scale = device_scale(dto["device"])
         assert scale["toolbar_edge"] == "none"
+        assert scale["toolbar_clearance"] == "0mm"
         assert dto["document"]["layout"]["margin"].to_plain() == device_page_margin(scale)
         assert dto["document"]["layout"]["margin"]["top"] == "0mm"
         assert dto["document"]["layout"]["margin"]["right"] == scale["writing_clearance"]
@@ -69,7 +58,12 @@ def test_preamble_still_emits_page_margin_side_only():
 
 
 def test_device_typ_toolbar_edges():
-    assert "toolbar-edge = top" in render_device_typ(get_device("supernote-nomad"))
-    assert "toolbar-clearance = 8mm" in render_device_typ(get_device("supernote-nomad"))
-    assert "toolbar-edge = none" in render_device_typ(get_device("kindle-scribe"))
-    assert "toolbar-edge = none" in render_device_typ(get_device("158x210"))
+    nomad = render_device_typ(get_device("supernote-nomad"))
+    scribe = render_device_typ(get_device("kindle-scribe"))
+    paper = render_device_typ(get_device("158x210"))
+    assert "toolbar-edge = top" in nomad
+    assert "toolbar-clearance = 8mm" in nomad
+    assert "toolbar-edge = none" in scribe
+    assert "toolbar-clearance = 0mm" in scribe
+    assert "toolbar-edge = none" in paper
+    assert "toolbar-clearance = 0mm" in paper

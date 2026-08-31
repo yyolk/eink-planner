@@ -74,26 +74,6 @@
       'pages': 730,
     }),
     dict({
-      'name': 'projects',
-      'pages': 17,
-    }),
-    dict({
-      'name': 'habits',
-      'pages': 13,
-    }),
-    dict({
-      'name': 'review',
-      'pages': 57,
-    }),
-    dict({
-      'name': 'tasks',
-      'pages': 57,
-    }),
-    dict({
-      'name': 'meetings',
-      'pages': 17,
-    }),
-    dict({
       'name': 'colophon',
       'pages': 1,
     }),

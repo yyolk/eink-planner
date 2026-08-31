@@ -12,16 +12,19 @@ from parch.calendar.week import Week
 from parch.config import StrictDict
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
-from parch.services.job_file import emit_job, spec_from_device
+from parch.services.job_file import CANONICAL_SECTIONS, emit_job, spec_from_device
 
 _JOB_DIR = Path(tempfile.mkdtemp(prefix="parch-jobs-"))
 
 
-def base_config(stem: str, *, paper: str = "dotted") -> Path:
+def base_config(stem: str, *, paper: str = "dotted", extras: bool = False) -> Path:
     """Materialize the default job for a device id. Lined is paper, not a device."""
     spec = spec_from_device(stem, paper=paper)
+    if extras:
+        spec.sections = list(CANONICAL_SECTIONS)
     suffix = "" if paper == "dotted" else f"-{paper}"
-    path = _JOB_DIR / f"{spec.device_id}{suffix}.toml"
+    extra = "-extras" if extras else ""
+    path = _JOB_DIR / f"{spec.device_id}{suffix}{extra}.toml"
     path.write_text(emit_job(spec), encoding="utf-8")
     return path
 

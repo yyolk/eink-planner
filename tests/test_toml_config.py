@@ -7,6 +7,7 @@ from parch.cli import build_parser
 from parch.config import load
 from parch.models.device import DEVICE_SCALE, device_page_margin, device_scale
 from parch.mos.configurator import Configurator
+from parch.services.job_file import DEFAULT_SECTIONS
 from parch.toml_config import apply_debug, apply_hand, apply_year, load_toml, parse_toml
 from tests.toml_fixtures import _minimal, omit_toml_sections
 from tests.helpers import base_config, load_default
@@ -24,22 +25,8 @@ _DEVICES = [
     SCRIBE,
 ]
 _NOMAD = {NOMAD, NOMAD_LINED}
-_NOMAD_SECTIONS = [
-    "cover",
-    "index",
-    "annual",
-    "quarterly",
-    "monthly",
-    "weekly",
-    "daily",
-    "daily_notes",
-    "projects",
-    "habits",
-    "review",
-    "tasks",
-    "meetings",
-    "colophon",
-]
+_DEFAULT_SECTIONS = list(DEFAULT_SECTIONS)
+_EXTRAS = ("projects", "habits", "review", "tasks", "meetings")
 _LINED = {
     PAPER_158_LINED,
     NOMAD_LINED,
@@ -54,11 +41,7 @@ def test_parse_device_job_defaults(path: Path):
     assert "debug" not in dto
     cfg = Configurator(dto)
     names = [section["name"] for section in cfg.enabled_sections()]
-    if path == NOMAD:
-        expected = list(_NOMAD_SECTIONS)
-    else:
-        expected = ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "colophon"]
-    assert names == expected
+    assert names == _DEFAULT_SECTIONS
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["reverse_months_quarters"] is True
     assert "side_menu_width" not in mos
@@ -79,7 +62,7 @@ def test_parse_device_job_defaults(path: Path):
     assert "\nheight = " not in text
     assert DEVICE_SCALE["kindle-scribe"]["mos_width"] == "10mm"
     assert DEVICE_SCALE["kindle-scribe"]["toolbar_edge"] == "none"
-    assert DEVICE_SCALE["kindle-scribe"]["toolbar_clearance"] == "5mm"
+    assert DEVICE_SCALE["kindle-scribe"]["toolbar_clearance"] == "0mm"
     assert DEVICE_SCALE["supernote-nomad"]["mos_width"] == "8mm"
     assert DEVICE_SCALE["supernote-nomad"]["toolbar_edge"] == "top"
 
@@ -157,15 +140,27 @@ def test_apply_hand_right_does_not_flip_daily_tracks():
 
 
 @pytest.mark.parametrize("path", sorted(_NOMAD, key=lambda p: p.name))
-def test_nomad_projects_pages_and_card_rows(path: Path):
+def test_nomad_defaults_omit_extras(path: Path):
+    dto = load(path)
+    names = [s["name"] for s in Configurator(dto).enabled_sections()]
+    assert names == _DEFAULT_SECTIONS
+    for extra in _EXTRAS:
+        assert extra not in names
+        assert f"[section.{extra}]" not in path.read_text(encoding="utf-8")
+
+
+def test_nomad_projects_pages_and_card_rows_when_selected():
+    path = base_config("supernote-nomad", extras=True)
     dto = load(path)
     projects = next(s for s in dto["planner"]["sections"] if s["name"] == "projects")
     assert projects["params"]["pages"] == 16
     assert projects["params"]["card_rows"] == 5
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
-    assert names == _NOMAD_SECTIONS
     assert names.index("projects") == names.index("daily_notes") + 1
     assert names.index("habits") == names.index("projects") + 1
+    for extra in _EXTRAS:
+        assert extra in names
+        assert f"[section.{extra}]" in path.read_text(encoding="utf-8")
 
 
 def _daily_notes_params(dto):

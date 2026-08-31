@@ -28,9 +28,7 @@ CANONICAL_SECTIONS: tuple[str, ...] = (
     "colophon",
 )
 
-_NOMAD_SECTIONS: tuple[str, ...] = CANONICAL_SECTIONS
-
-_COMPACT_SECTIONS: tuple[str, ...] = (
+DEFAULT_SECTIONS: tuple[str, ...] = (
     "cover",
     "index",
     "annual",
@@ -103,9 +101,9 @@ class DeviceJobDefaults:
 
 
 JOB_DEFAULTS: dict[str, DeviceJobDefaults] = {
-    "supernote-nomad": DeviceJobDefaults(_NOMAD_SECTIONS, NOMAD_STYLE),
-    "kindle-scribe": DeviceJobDefaults(_COMPACT_SECTIONS, COMPACT_STYLE),
-    "158x210": DeviceJobDefaults(_COMPACT_SECTIONS, COMPACT_STYLE),
+    "supernote-nomad": DeviceJobDefaults(DEFAULT_SECTIONS, NOMAD_STYLE),
+    "kindle-scribe": DeviceJobDefaults(DEFAULT_SECTIONS, COMPACT_STYLE),
+    "158x210": DeviceJobDefaults(DEFAULT_SECTIONS, COMPACT_STYLE),
 }
 
 

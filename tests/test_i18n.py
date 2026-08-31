@@ -64,7 +64,7 @@ def test_directory_yaml_only_is_config_error(tmp_path):
 
 
 def test_generate_english_strings_match_previous_meanings():
-    dto = load(base_config("supernote-nomad"))
+    dto = load(base_config("supernote-nomad", extras=True))
     data = dto.to_plain()
     data["planner"]["params"]["end_date"] = "2026-01-07"
     typst = Generate(i18n=load_default()).generate(data)
