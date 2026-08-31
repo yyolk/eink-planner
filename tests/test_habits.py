@@ -35,11 +35,12 @@ MONTHS = (
     "december",
 )
 _MARK_RULE = "contents_bars(size:"
-_TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
+_TRAIL_MARK = "padded_link(padding: 0pt, <index>"
 _TRAIL_HEADING = "trail_heading("
+_LEAD_PAIR = "lead_pair("
 _SEAT_RTL = "spacing: 1fr, direction: rtl"
 _SEAT_LTR = "spacing: 1fr, direction: ltr"
-_FOLLOW_RTL = "spacing: 0.5em, direction: rtl"
+_FOLLOW_SPACING = "spacing: 0.5em"
 _HEADER_LINE = "line(start: (0%, 100%), end: (100%, 0%), stroke: regular_stroke)"
 _NAMED_MARK = "align(center + horizon, text["
 _BOX = "grid.cell(stroke: regular_stroke, [])"
@@ -822,16 +823,15 @@ def test_index_heading_is_trail_strip_when_contents_on():
     assert "text(size: h1)[/]" not in index
     assert "padded_link(<annual>)" not in index
     assert "text(size: h1, [Habits <habits>])" in index
-    heading = index[index.index(_TRAIL_HEADING) : index.index(_TRAIL_MARK)]
-    assert "[Habits <habits>]" in heading
-    assert _TRAIL_MARK not in heading
-    assert _FOLLOW_RTL in index
+    assert "[Habits <habits>]" in index
+    assert _LEAD_PAIR in index
+    assert _FOLLOW_SPACING in index
     assert _SEAT_RTL not in index
-    assert _TRAIL_HEADING in index
-    assert index.index("[Habits <habits>]") < index.index(_TRAIL_MARK)
+    assert _TRAIL_HEADING not in index
+    assert index.index(_TRAIL_MARK) < index.index("[Habits <habits>]")
     assert "column-gutter: 6pt" not in heading
     month_heading = month[month.index(_TRAIL_HEADING) : month.index(_TRAIL_MARK)]
-    assert _SEAT_RTL in month
+    assert _SEAT_LTR in month
     assert _TRAIL_HEADING in month
     assert "dir: ttb" not in month_heading
     assert "column-gutter: 6pt" not in month_heading
@@ -895,5 +895,5 @@ def test_mos_right_month_mark_trails_alone_left_of_rail():
     assert "2026 /" not in month
     assert ", [Habits])" not in month
     assert ", [Calendar])" not in month
-    strip_at = month.index("rowspan: 2")
-    assert month.index(_TRAIL_MARK) < strip_at
+    assert "#mos_frame(\n  right," in month
+    assert "rowspan: 2" not in month

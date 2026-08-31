@@ -23,10 +23,10 @@ height = "158.5mm"
 ppi = 300"""
 
 _MARK_RULE = "contents_bars(size:"
-_TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
-_TRAIL_HEADING = "trail_heading("
+_TRAIL_MARK = "padded_link(padding: 0pt, <index>"
+_LEAD_PAIR = "lead_pair("
 _SEAT_RTL = "spacing: 1fr, direction: rtl"
-_FOLLOW_RTL = "spacing: 0.5em, direction: rtl"
+_FOLLOW_SPACING = "spacing: 0.5em"
 _TICK_STROKE = "stroke: (_, _) => (bottom: regular_stroke + black)"
 
 
@@ -371,17 +371,17 @@ def test_contents_mark_on_meetings_when_index_on():
     assert "column-gutter: 6pt" not in index
     assert "text(size: h1, [Meetings <meetings>])" in index
     assert "padded_link(<meetings>)" in meeting
-    heading = index[index.index(_TRAIL_HEADING) : index.index(_TRAIL_MARK)]
-    assert "[Meetings <meetings>]" in heading
-    assert _TRAIL_MARK not in heading
-    assert _FOLLOW_RTL in index
+    assert "[Meetings <meetings>]" in index
+    assert _LEAD_PAIR in index
+    assert _FOLLOW_SPACING in index
     assert _SEAT_RTL not in index
-    assert _TRAIL_HEADING in index
-    assert index.index("[Meetings <meetings>]") < index.index(_TRAIL_MARK)
-    meeting_heading = meeting[meeting.index(_TRAIL_HEADING) : meeting.index(_TRAIL_MARK)]
-    assert "padded_link(<meetings>)" in meeting_heading
-    assert _FOLLOW_RTL in meeting
+    assert "trail_heading(" not in index
+    assert index.index(_TRAIL_MARK) < index.index("[Meetings <meetings>]")
+    assert "padded_link(<meetings>)" in meeting
+    assert _LEAD_PAIR in meeting
+    assert _FOLLOW_SPACING in meeting
     assert _SEAT_RTL not in meeting
+    assert "trail_heading(" not in meeting
     meetings = _meetings(dto)
     manifest = Manifest()
     meetings.register(manifest)

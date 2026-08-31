@@ -34,6 +34,8 @@ class Preamble:
         p = self.planner_params
         text_size = self.configurator.dig_bang("document", "text", "size")
         h1 = self.configurator.dig_bang("document", "text", "h1")
+        mos_layout = _v(p, "mos_layout")
+        heading = _v(p, "heading")
         return f"""#set page(
   width: {_v(d, 'width')},
   height: {_v(d, 'height')},
@@ -58,7 +60,7 @@ class Preamble:
 #let h1 = {h1}
 #let link_padding = {_v(p, 'link_padding')}
 
-#import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading
+#import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame
 
 #let dotted = dotted(regular_height: regular_height)
 #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -67,7 +69,9 @@ class Preamble:
 #let rect_pattern_centered = rect_pattern_centered.with(regular_height: regular_height)
 #let scratch_pad = rect_pattern({_v(p, 'scratch_pad')})
 #let padded_link = padded_link.with(padding: link_padding)
-#let contents_bars = contents_bars.with(thick_stroke: thick_stroke)"""
+#let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
+#let mos_frame = mos_frame.with(mos-width: {_v(mos_layout, 'side_menu_width')}, column-gutter: {_v(mos_layout, 'column_gutter')})
+#let well_frame = well_frame.with(heading-height: {_v(heading, 'height')}, row-gutter: {_v(mos_layout, 'row_gutter')})"""
 
 
 def _v(mapping, key: str):
