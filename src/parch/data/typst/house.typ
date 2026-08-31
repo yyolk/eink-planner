@@ -238,13 +238,10 @@
   rect_pattern(regular_height: regular-height, pattern),
 )
 
-// Parent is well_frame's 1fr body (bounded). One row. House owns the
-// 3fr/5fr split; MOS-left seats hours | writing, MOS-right seats
-// writing | hours. Same side token as mos_frame / page-margin.
-// Spread the pair so the if-block is two grid children, not one join.
-#let daily_well(side, hours, writing, column-gutter: 0pt) = grid(
-  columns: if side == left { (3fr, 5fr) } else { (5fr, 3fr) },
-  rows: (1fr,),
-  column-gutter: column-gutter,
-  ..if side == left { (hours, writing) } else { (writing, hours) },
-)
+// Parent is well_frame's 1fr body (bounded). House owns the 3fr/5fr
+// split. Same side token as mos_frame / page-margin.
+#let daily_well(side, hours, writing, column-gutter: none) = if side == left {
+  grid(columns: (3fr, 5fr), rows: 1fr, column-gutter: column-gutter, hours, writing)
+} else {
+  grid(columns: (5fr, 3fr), rows: 1fr, column-gutter: column-gutter, writing, hours)
+}

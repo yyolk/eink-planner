@@ -94,7 +94,8 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "rect_pattern(regular_height: regular-height, pattern)" not in typst
     # daily_well chrome (3fr/5fr seating) lives in house.typ.
     assert "#let daily_well(side" not in typst
-    assert "columns: if side == left" not in typst
+    assert "grid(columns: (3fr, 5fr)" not in typst
+    assert "grid(columns: (5fr, 3fr)" not in typst
     house = house_typ_resource().read_text(encoding="utf-8")
     assert "#set page" not in house
     assert "page-width" not in house
@@ -138,10 +139,16 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "header" not in lined_well
     assert "#let daily_well(" in house
     daily_well = house[house.index("#let daily_well(") :]
-    assert "daily_well(side, hours, writing, column-gutter: 0pt)" in daily_well
-    assert "columns: if side == left { (3fr, 5fr) } else { (5fr, 3fr) }" in daily_well
-    assert "rows: (1fr,)" in daily_well
-    assert "..if side == left { (hours, writing) } else { (writing, hours) }" in daily_well
+    assert daily_well.startswith(
+        "#let daily_well(side, hours, writing, column-gutter: none) = if side == left {\n"
+        "  grid(columns: (3fr, 5fr), rows: 1fr, column-gutter: column-gutter, hours, writing)\n"
+        "} else {\n"
+        "  grid(columns: (5fr, 3fr), rows: 1fr, column-gutter: column-gutter, writing, hours)\n"
+        "}"
+    )
+    assert "column-gutter: 0pt" not in daily_well
+    assert "rows: (1fr,)" not in daily_well
+    assert "..if" not in daily_well
     assert "height: auto" not in daily_well
     assert "reverse" not in daily_well
     assert "rowspan" not in house
