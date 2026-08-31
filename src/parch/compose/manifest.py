@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from parch.typst_emit import typst_emit
+
 
 class Manifest:
     def __init__(self) -> None:
@@ -21,9 +23,9 @@ class Manifest:
         wraps it as ``padded_link(<id>)[text]`` so call sites can drop the
         value into a grid (code) or ``#{...}`` (content) the same way.
         """
-        body = f"[{text}]"
+        body = typst_emit(t"[{text}]")
         if self.source(source_id):
-            return f"padded_link(<{source_id}>){body}"
+            return typst_emit(t"padded_link(<{source_id}>){body}")
         return body
 
     # Ruby alias source?
