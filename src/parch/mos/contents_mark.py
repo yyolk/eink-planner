@@ -129,17 +129,17 @@ def trail_heading(
 ) -> str:
     """TRAIL is 1fr opposite-ends; FOLLOW is 0.5em after the mark, own hits."""
     mark = trail_strip(manifest, heading_height, body_size, chip)
+    match edge:
+        case HeadingMark.FOLLOW if edge is HeadingMark.FOLLOW:
+            spacing = "0.5em"
+        case HeadingMark.TRAIL if edge is HeadingMark.TRAIL:
+            spacing = "1fr"
+        case _:
+            raise ValueError(f"trail_heading edge must be TRAIL or FOLLOW, not {edge!r}")
     if not title:
         return mark or ""
     if not mark:
         return title
-    match edge:
-        case HeadingMark.FOLLOW:
-            spacing = "0.5em"
-        case HeadingMark.TRAIL:
-            spacing = "1fr"
-        case _:
-            raise ValueError(f"trail_heading edge must be TRAIL or FOLLOW, not {edge!r}")
     return f"""context {{
   let seated_title = {title}
   let seated_mark = {mark}

@@ -108,6 +108,14 @@ class Builder:
         chip = self.navigation.heading_menu_grid(page_id=page_id, nav_links=nav_links)
         height = _v(self.heading, "height")
         body = body_size_token(self.configurator)
+        if (
+            heading_mark is not HeadingMark.FOLLOW
+            and heading_mark is not HeadingMark.TRAIL
+            and heading_mark is not HeadingMark.LEAD
+        ):
+            raise ValueError(
+                f"heading_mark must be FOLLOW, TRAIL, or LEAD, not {heading_mark!r}"
+            )
         if mos_right or chip:
             return trail_heading(
                 self.manifest, height, title, body,
