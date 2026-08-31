@@ -5,12 +5,35 @@ from pathlib import Path
 
 from parch.config import load
 from parch.mos.configurator import Configurator
-from parch.mos.preamble import Preamble, copy_house_typ, house_typ_resource
+from parch.mos.preamble import (
+    KNOWN_DEVICE_TYP,
+    Preamble,
+    copy_device_typ,
+    copy_house_typ,
+    device_typ_filename,
+    device_typ_resource,
+    house_typ_resource,
+)
 from tests.helpers import base_config
+
+
+def _preamble_set_page(typst: str) -> str:
+    start = typst.index("#set page")
+    end = typst.index("#set text")
+    return typst[start:end]
 
 
 def test_preamble_imports_house_and_does_not_inline_bodies():
     typst = Preamble(Configurator(load(base_config("158x210-mos-left")))).generate()
+    assert '#import "158x210.typ": page-width, page-height, page-margin' in typst
+    assert "#include" not in typst
+    set_page = _preamble_set_page(typst)
+    assert set_page == "#set page(width: page-width, height: page-height, margin: page-margin(left))\n\n"
+    assert "158mm" not in set_page
+    assert "210mm" not in set_page
+    assert "5mm" not in set_page
+    assert "0mm" not in set_page
+    assert "height: auto" not in typst
     assert '#import "house.typ"' in typst
     imported = typst[typst.index('#import "house.typ"') :].splitlines()[0]
     assert "contents_bars" in imported
@@ -66,6 +89,8 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "rect_pattern(regular_height: regular-height, pattern)" not in typst
     house = house_typ_resource().read_text(encoding="utf-8")
     assert "#set page" not in house
+    assert "page-width" not in house
+    assert "page-margin" not in house
     assert "#let contents_bars(" in house
     assert "#let lead_pair(" in house
     assert "#let lead_pair(mark, title, spacing: 6pt)" in house
@@ -107,10 +132,64 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "calc.max(measure(seated_title).height, measure(seated_mark).height)" in house
 
 
+def test_preamble_mos_right_uses_page_margin_right():
+    typst = Preamble(Configurator(load(base_config("158x210-mos-right")))).generate()
+    assert '#import "158x210.typ": page-width, page-height, page-margin' in typst
+    assert "page-margin(right)" in _preamble_set_page(typst)
+    assert "page-margin(left)" not in _preamble_set_page(typst)
+
+
+def test_preamble_nomad_and_scribe_import_matching_device_file():
+    nomad = Preamble(Configurator(load(base_config("supernote-nomad")))).generate()
+    scribe = Preamble(Configurator(load(base_config("kindle-scribe")))).generate()
+    lined = Preamble(Configurator(load(base_config("supernote-nomad-lined")))).generate()
+    right = Preamble(Configurator(load(base_config("kindle-scribe-mos-right")))).generate()
+    assert '#import "supernote-nomad.typ": page-width, page-height, page-margin' in nomad
+    assert '#import "kindle-scribe.typ": page-width, page-height, page-margin' in scribe
+    assert '#import "supernote-nomad.typ": page-width, page-height, page-margin' in lined
+    assert '#import "kindle-scribe.typ": page-width, page-height, page-margin' in right
+    assert "118.87" not in _preamble_set_page(nomad)
+    assert "157.48" not in _preamble_set_page(scribe)
+    assert "height: auto" not in nomad
+    assert "height: auto" not in scribe
+    assert device_typ_filename(Configurator(load(base_config("supernote-nomad-mos-right-lined")))) == (
+        "supernote-nomad.typ"
+    )
+    assert device_typ_filename(Configurator(load(base_config("158x210-mos-left-lined")))) == "158x210.typ"
+
+
+def test_device_typ_files_share_page_margin_shape():
+    expected = """#let page-margin(side) = (
+  top: toolbar-clearance,
+  bottom: 0mm,
+  left: if side == right { writing-clearance } else { 0mm },
+  right: if side == left { writing-clearance } else { 0mm },
+)
+"""
+    sizes = {
+        "supernote-nomad.typ": ("118.87mm", "158.5mm", "8mm", "4mm"),
+        "kindle-scribe.typ": ("157.48mm", "209.97mm", "5mm", "5mm"),
+        "158x210.typ": ("158mm", "210mm", "5mm", "5mm"),
+    }
+    assert KNOWN_DEVICE_TYP == frozenset(sizes)
+    for name, (width, height, toolbar, writing) in sizes.items():
+        text = device_typ_resource(name).read_text(encoding="utf-8")
+        assert f"#let page-width = {width}" in text
+        assert f"#let page-height = {height}" in text
+        assert f"#let toolbar-clearance = {toolbar}" in text
+        assert f"#let writing-clearance = {writing}" in text
+        assert expected in text
+        assert "height: auto" not in text
+        assert "#include" not in text
+        assert "lined" not in text
+        assert "dotted" not in text
+
+
 def test_copy_house_typ_writes_workdir(tmp_path):
     dest = copy_house_typ(tmp_path)
     assert dest == tmp_path / "house.typ"
     assert dest.is_file()
+    assert not (tmp_path / "158x210.typ").exists()
     text = dest.read_text(encoding="utf-8")
     packaged = house_typ_resource().read_text(encoding="utf-8")
     assert text == packaged
@@ -156,11 +235,18 @@ def test_press_copies_house_typ_next_to_index(tmp_path, monkeypatch):
     assert generate_cmd(ns, argv=["parch", "press", str(path)]) == 0
     workdir = tmp_path / "out"
     assert (workdir / "house.typ").is_file()
+    assert (workdir / "158x210.typ").is_file()
     index = (workdir / "index.typst").read_text(encoding="utf-8")
     assert '#import "house.typ"' in index
+    assert '#import "158x210.typ": page-width, page-height, page-margin' in index
     assert (workdir / "house.typ").read_text(encoding="utf-8") == house_typ_resource().read_text(
         encoding="utf-8"
     )
+    assert (workdir / "158x210.typ").read_text(encoding="utf-8") == device_typ_resource(
+        "158x210.typ"
+    ).read_text(encoding="utf-8")
+    assert not (workdir / "lined.typ").exists()
+    assert not (workdir / "158x210-mos-left.typ").exists()
 
 
 def test_wheel_includes_house_typ(tmp_path):
@@ -178,3 +264,38 @@ def test_wheel_includes_house_typ(tmp_path):
         names = zf.namelist()
     assert "parch/data/typst/house.typ" in names
     assert names.count("parch/data/typst/house.typ") == 1
+    for device in ("supernote-nomad.typ", "kindle-scribe.typ", "158x210.typ"):
+        assert f"parch/data/typst/{device}" in names
+        assert names.count(f"parch/data/typst/{device}") == 1
+    assert not any(name.endswith("-lined.typ") for name in names)
+    assert not any("mos-left.typ" in name or "mos-right.typ" in name for name in names)
+
+
+def test_copy_house_typ_copies_imported_device_file(tmp_path):
+    (tmp_path / "index.typst").write_text(
+        '#import "kindle-scribe.typ": page-width, page-height, page-margin\n',
+        encoding="utf-8",
+    )
+    copy_house_typ(tmp_path)
+    dest = tmp_path / "kindle-scribe.typ"
+    assert dest.is_file()
+    assert dest.read_text(encoding="utf-8") == device_typ_resource("kindle-scribe.typ").read_text(
+        encoding="utf-8"
+    )
+
+
+def test_copy_device_typ_writes_named_file(tmp_path):
+    dest = copy_device_typ(tmp_path, "supernote-nomad.typ")
+    assert dest == tmp_path / "supernote-nomad.typ"
+    assert dest.read_text(encoding="utf-8") == device_typ_resource("supernote-nomad.typ").read_text(
+        encoding="utf-8"
+    )
+
+
+def test_twelve_toml_configs_remain():
+    from importlib.resources import files
+
+    configs = sorted(p.name for p in (files("parch.data") / "configs").iterdir() if str(p).endswith(".toml"))
+    assert len(configs) == 12
+    assert "supernote-nomad-lined.toml" in configs
+    assert "158x210-mos-right.toml" in configs

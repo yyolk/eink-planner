@@ -1,11 +1,31 @@
 """Typst document preamble (page size, strokes, paper tiles, padded_link)."""
 
+import re
 from importlib.resources import files
 from pathlib import Path
 
+from parch import ConfigError
 from parch.mos.configurator import Configurator
 
 HOUSE_TYP = "house.typ"
+
+DEVICE_TYP_PREFIXES = (
+    ("supernote-nomad", "supernote-nomad.typ"),
+    ("kindle-scribe", "kindle-scribe.typ"),
+    ("158x210", "158x210.typ"),
+)
+
+DEVICE_TYP_BY_SIZE = {
+    ("118.87mm", "158.5mm"): "supernote-nomad.typ",
+    ("157.48mm", "209.97mm"): "kindle-scribe.typ",
+    ("158mm", "210mm"): "158x210.typ",
+}
+
+KNOWN_DEVICE_TYP = frozenset(name for _prefix, name in DEVICE_TYP_PREFIXES)
+
+_DEVICE_IMPORT = re.compile(
+    r'#import\s+"(supernote-nomad|kindle-scribe|158x210)\.typ"'
+)
 
 
 def house_typ_resource():
@@ -13,40 +33,69 @@ def house_typ_resource():
     return files("parch.data") / "typst" / HOUSE_TYP
 
 
-def copy_house_typ(workdir: Path) -> Path:
-    """Copy house.typ next to index.typst for relative #import."""
+def device_typ_resource(filename: str):
+    """Packaged physical-device .typ (page size and page-margin)."""
+    if filename not in KNOWN_DEVICE_TYP:
+        raise ConfigError(f"unknown device typ: {filename}")
+    return files("parch.data") / "typst" / filename
+
+
+def device_typ_filename(configurator: Configurator) -> str:
+    """One physical-device file: Nomad, Scribe, or 158×210. Not a MOS sibling."""
+    name = configurator.dig("device")
+    if name:
+        filename = _filename_for_device_name(str(name))
+        if filename:
+            return filename
+    width = configurator.dig("document", "layout", "dimensions", "width")
+    height = configurator.dig("document", "layout", "dimensions", "height")
+    if width and height:
+        key = (_norm_len(str(width)), _norm_len(str(height)))
+        if key in DEVICE_TYP_BY_SIZE:
+            return DEVICE_TYP_BY_SIZE[key]
+    raise ConfigError(
+        "unknown physical device; expected supernote-nomad, kindle-scribe, or 158x210"
+    )
+
+
+def copy_device_typ(workdir: Path, filename: str) -> Path:
+    """Copy one physical-device .typ next to index.typst for relative #import."""
+    dest = Path(workdir) / filename
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_bytes(device_typ_resource(filename).read_bytes())
+    return dest
+
+
+def copy_house_typ(workdir: Path, device_typ: str | None = None) -> Path:
+    """Copy house.typ next to index.typst for relative #import.
+
+    When *device_typ* is given, or index.typst imports a packaged device file,
+    that file is copied beside house.typ.
+    """
     dest = Path(workdir) / HOUSE_TYP
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_bytes(house_typ_resource().read_bytes())
+    name = device_typ or _imported_device_typ(Path(workdir) / "index.typst")
+    if name:
+        copy_device_typ(workdir, name)
     return dest
 
 
 class Preamble:
     def __init__(self, configurator: Configurator) -> None:
         self.configurator = configurator
-        self.dimensions = configurator.dig_bang("document", "layout", "dimensions")
-        self.margin = configurator.dig_bang("document", "layout", "margin")
         self.planner_params = configurator.dig_bang("planner", "params")
 
     def generate(self) -> str:
-        d = self.dimensions
-        m = self.margin
         p = self.planner_params
         text_size = self.configurator.dig_bang("document", "text", "size")
         h1 = self.configurator.dig_bang("document", "text", "h1")
+        device_typ = device_typ_filename(self.configurator)
         mos_layout = _v(p, "mos_layout")
         heading = _v(p, "heading")
-        return f"""#set page(
-  width: {_v(d, 'width')},
-  height: {_v(d, 'height')},
-
-  margin: (
-    top: {_v(m, 'top')},
-    right: {_v(m, 'right')},
-    bottom: {_v(m, 'bottom')},
-    left: {_v(m, 'left')},
-  )
-)
+        side = _v(mos_layout, "side_menu_position")
+        return f"""#import "{device_typ}": page-width, page-height, page-margin
+#set page(width: page-width, height: page-height, margin: page-margin({side}))
 
 #set text(
   size: {text_size}
@@ -81,3 +130,22 @@ def _v(mapping, key: str):
     if hasattr(mapping, "dig_bang"):
         return mapping[key] if key in mapping else mapping.dig_bang(key)
     return mapping[key]
+
+
+def _filename_for_device_name(name: str) -> str | None:
+    lowered = name.strip().lower()
+    for prefix, filename in DEVICE_TYP_PREFIXES:
+        if lowered == prefix or lowered.startswith(prefix + "-"):
+            return filename
+    return None
+
+
+def _norm_len(token: str) -> str:
+    return token.strip().replace(" ", "")
+
+
+def _imported_device_typ(index: Path) -> str | None:
+    if not index.is_file():
+        return None
+    match = _DEVICE_IMPORT.search(index.read_text(encoding="utf-8"))
+    return f"{match.group(1)}.typ" if match else None
