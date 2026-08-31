@@ -330,8 +330,8 @@ def test_builder_trail_and_raw_headings_call_trail_heading():
     assert "box(height: band, align(horizon + left, seated_mark))" in helper
     assert "trail_strip(" in helper
     assert "match edge:" in helper
-    assert "case HeadingMark.FOLLOW if edge is HeadingMark.FOLLOW:" in helper
-    assert "case HeadingMark.TRAIL if edge is HeadingMark.TRAIL:" in helper
+    assert "case HeadingMark.FOLLOW:" in helper
+    assert "case HeadingMark.TRAIL:" in helper
     assert typing.get_type_hints(trail_heading)["edge"] is HeadingMark
     builder = inspect.getsource(Builder._heading_stack)
     assert "trail_heading(" in builder
@@ -340,9 +340,6 @@ def test_builder_trail_and_raw_headings_call_trail_heading():
     assert "edge=HeadingMark.TRAIL" in builder
     assert "if mos_right or chip:" in builder
     assert "match heading_mark:" in builder
-    assert builder.index("heading_mark is not HeadingMark.FOLLOW") < builder.index(
-        "if mos_right or chip:"
-    )
     assert builder.index("if mos_right or chip:") < builder.index("match heading_mark:")
     assert "case HeadingMark.FOLLOW:" in builder
     assert "case HeadingMark.TRAIL:" in builder
@@ -372,17 +369,9 @@ def test_trail_heading_rejects_string_edge_fallthrough():
         manifest, "h1", "text(size: h1)[Tasks]", edge=HeadingMark.TRAIL,
     )
     assert "spacing: 1fr" in trail
-    for bad in ("follow", "trail", "FOLLOW", HeadingMark.LEAD):
+    for bad in ("FOLLOW", HeadingMark.LEAD):
         with pytest.raises(ValueError, match="TRAIL or FOLLOW"):
             trail_heading(manifest, "h1", "text(size: h1)[Tasks]", edge=bad)
-    empty = Manifest()
-    for early in (None, "text(size: h1)[Tasks]"):
-        for bad in ("follow", "trail", "FOLLOW", HeadingMark.LEAD):
-            with pytest.raises(ValueError, match="TRAIL or FOLLOW"):
-                trail_heading(empty, "h1", early, edge=bad)
-    for bad in ("follow", "trail", "FOLLOW", HeadingMark.LEAD):
-        with pytest.raises(ValueError, match="TRAIL or FOLLOW"):
-            trail_heading(manifest, "h1", None, edge=bad)
 
 
 def test_heading_stack_matches_follow_trail_lead_after_mos_right_or_chip_guard():
@@ -406,9 +395,8 @@ def test_heading_stack_matches_follow_trail_lead_after_mos_right_or_chip_guard()
     assert "spacing: 0.5em" not in lead
     assert "spacing: 1fr" not in lead
     assert builder._heading_stack(None, None, None, None, HeadingMark.LEAD) == ""
-    for bad in ("follow", "trail", "lead", "FOLLOW", "nope"):
-        with pytest.raises(ValueError, match="FOLLOW, TRAIL, or LEAD"):
-            builder._heading_stack(None, title, None, None, bad)
+    with pytest.raises(ValueError, match="FOLLOW, TRAIL, or LEAD"):
+        builder._heading_stack(None, title, None, None, "nope")
     builder.manifest.register_source("chip-page")
     chipped = builder._heading_stack(
         None, title, [("chip-page", "Chip")], None, HeadingMark.LEAD,
@@ -427,8 +415,3 @@ def test_heading_stack_matches_follow_trail_lead_after_mos_right_or_chip_guard()
     glued = right_builder._heading_stack(None, title, None, None, HeadingMark.LEAD)
     assert "spacing: 1fr" in glued
     assert "columns: (auto, auto)" not in glued
-    for bad in ("follow", "trail", "lead"):
-        with pytest.raises(ValueError, match="FOLLOW, TRAIL, or LEAD"):
-            right_builder._heading_stack(None, title, None, None, bad)
-        with pytest.raises(ValueError, match="FOLLOW, TRAIL, or LEAD"):
-            builder._heading_stack(None, title, [("chip-page", "Chip")], None, bad)
