@@ -123,9 +123,8 @@
 #let lead_pair(left, right, spacing: 6pt) = stack(
   dir: ltr,
   spacing: spacing,
-  align: horizon,
-  left,
-  right,
+  align(horizon, left),
+  align(horizon, right),
 )
 
 #let trail_heading(title, mark, spacing: none, direction: ltr) = context {
