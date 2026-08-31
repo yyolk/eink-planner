@@ -44,24 +44,7 @@ def contents_mark(
     if manifest is None or not manifest.source(INDEX_ID):
         return ""
     type_size = face or "h1"
-    bar = "line(length: 0.844em, stroke: thick_stroke + black)"
-    glyph = f"""text(size: {type_size}, context {{
-  let cap = 0.7em.to-absolute()
-  let gap = (cap - 5 * thick_stroke) / 4
-  box(
-    width: 0.844em,
-    height: cap,
-    align(horizon + left, stack(
-      dir: ttb,
-      spacing: gap,
-      {bar},
-      {bar},
-      {bar},
-      {bar},
-      {bar},
-    ))
-  )
-}})"""
+    glyph = f"contents_bars(size: {type_size})"
     if link_padding is None:
         return f"padded_link(<{INDEX_ID}>, {glyph})"
     return f"padded_link(padding: {link_padding}, <{INDEX_ID}>, {glyph})"

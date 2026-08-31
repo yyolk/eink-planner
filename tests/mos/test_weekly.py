@@ -217,7 +217,7 @@ def test_generated_week_title_is_range_and_inverts_thursday_month():
     assert "columns: (auto, auto)" in heading
     assert "column-gutter: 6pt" in heading
     assert "pad(right: 3mm" not in heading
-    assert "line(length: 0.844em" in heading
+    assert "contents_bars(size:" in heading
     assert "padded_link(<annual>)[2026]" not in heading
     assert w01.count("Calendar") == 0
     assert "Calendar" not in w01
@@ -227,7 +227,7 @@ def test_generated_week_title_is_range_and_inverts_thursday_month():
     assert f"{_HEADER_CELL}[Notes])" in w01
     assert "Monday, 29" not in w01
     assert "Thursday,  1" not in w01
-    assert w01.count("line(length: 0.844em, stroke: thick_stroke + black)") == 5
+    assert w01.count("contents_bars(size:") == 1
     assert "grid.cell(stroke: (bottom: thick_stroke" not in w01
     assert "grid.cell(colspan: 3, rect_pattern" not in w01
     assert w01.count("rect_pattern(dotted)") == 8

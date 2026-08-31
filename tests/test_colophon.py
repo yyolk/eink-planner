@@ -28,7 +28,7 @@ NOMAD = base_config("supernote-nomad")
 
 _BUILD_LOG = ("Command", "Git commit", "SHA-256", "Config path", "Config")
 _THEME = ('lang: "toml"', "syntaxes:", "theme:")
-_MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
+_MARK_RULE = "contents_bars(size:"
 _FOLLOW_RTL = "dir: rtl,\n    spacing: 0.5em,"
 _SEATED_TITLE = "let seated_title ="
 _SEATED_MARK = "let seated_mark ="
@@ -231,7 +231,7 @@ def test_colophon_follow_header_five_bar_and_body():
     assert _FOLLOW_RTL in content
     assert _SEATED_TITLE in content
     assert _SEATED_MARK in content
-    assert content.count(_MARK_RULE) == 5
+    assert content.count(_MARK_RULE) == 1
     assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + " <colophon>]" in content
     heading = content[content.index(_SEATED_TITLE) : content.index(_SEATED_MARK)]
     assert DEFAULT_TITLE in heading
@@ -571,7 +571,7 @@ def test_dump_continuation_header_is_follow_seat_without_nums():
     assert _FOLLOW_RTL in content
     assert _SEATED_TITLE in content
     assert _SEATED_MARK in content
-    assert content.count(_MARK_RULE) == 10
+    assert content.count(_MARK_RULE) == 2
     assert content.count(_SEATED_TITLE) == 2
     assert "column-gutter: 6pt" not in content
     assert "0.85em" not in content

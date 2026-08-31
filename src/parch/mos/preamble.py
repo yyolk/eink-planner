@@ -58,7 +58,7 @@ class Preamble:
 #let h1 = {h1}
 #let link_padding = {_v(p, 'link_padding')}
 
-#import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link
+#import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars
 
 #let dotted = dotted(regular_height: regular_height)
 #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -66,7 +66,8 @@ class Preamble:
 #let dotted_centered = dotted_centered(regular_height: regular_height)
 #let rect_pattern_centered = rect_pattern_centered.with(regular_height: regular_height)
 #let scratch_pad = rect_pattern({_v(p, 'scratch_pad')})
-#let padded_link = padded_link.with(padding: link_padding)"""
+#let padded_link = padded_link.with(padding: link_padding)
+#let contents_bars = contents_bars.with(thick_stroke: thick_stroke)"""
 
 
 def _v(mapping, key: str):

@@ -101,3 +101,21 @@
   inset: -padding,
   link(target)[#box(inset: padding, content)]
 )
+
+#let contents_bars(thick_stroke: none, size: none) = text(size: size, context {
+  let cap = 0.7em.to-absolute()
+  let gap = (cap - 5 * thick_stroke) / 4
+  box(
+    width: 0.844em,
+    height: cap,
+    align(horizon + left, stack(
+      dir: ttb,
+      spacing: gap,
+      line(length: 0.844em, stroke: thick_stroke + black),
+      line(length: 0.844em, stroke: thick_stroke + black),
+      line(length: 0.844em, stroke: thick_stroke + black),
+      line(length: 0.844em, stroke: thick_stroke + black),
+      line(length: 0.844em, stroke: thick_stroke + black),
+    ))
+  )
+})

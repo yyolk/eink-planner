@@ -34,7 +34,7 @@ MONTHS = (
     "november",
     "december",
 )
-_MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
+_MARK_RULE = "contents_bars(size:"
 _TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
 _SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
 _SEATED_TITLE = "let seated_title ="
@@ -818,8 +818,8 @@ def test_index_heading_is_trail_strip_when_contents_on():
     month = _month_page(typst)
     assert _TRAIL_MARK in index
     assert _TRAIL_MARK in month
-    assert index.count(_MARK_RULE) == 5
-    assert month.count(_MARK_RULE) == 5
+    assert index.count(_MARK_RULE) == 1
+    assert month.count(_MARK_RULE) == 1
     assert "2026 /" not in index
     assert "text(size: h1)[/]" not in index
     assert "padded_link(<annual>)" not in index
