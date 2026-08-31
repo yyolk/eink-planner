@@ -4,6 +4,7 @@ import tomllib
 
 import pytest
 
+from parch import ConfigError
 from parch.cli import build_parser, main
 from parch.config import load
 from parch.services.config_file import overlay_toml
@@ -183,6 +184,8 @@ def test_no_config_or_mos_flags():
     args = parser.parse_args(["new", "--hand", "right", "--yes", "-o", "x.toml"])
     assert args.hand == "right"
     with pytest.raises(SystemExit):
+        parser.parse_args(["new", "--paper", "lined", "--yes", "-o", "x.toml"])
+    with pytest.raises(SystemExit):
         parser.parse_args(["edit", "x.toml"])
 
 
@@ -355,3 +358,301 @@ def test_new_dest_parent_is_file(tmp_path, capsys):
     assert "Traceback" not in err
     assert parent.read_text(encoding="utf-8") == "keep\n"
     assert parent.is_file()
+
+
+def _nomad_text() -> str:
+    return NOMAD.read_text(encoding="utf-8")
+
+
+def test_overlay_paper_inserts_style_and_rewrites_daily_notes_pattern():
+    text = _nomad_text()
+    written = overlay_toml(text, paper="lined")
+    assert "SuperNote Nomad" in written
+    assert written.index("[device]") < written.index("[calendar]")
+    assert 'title_height = "4mm"' in written
+    assert 'daily_cell_height = "16mm"' in written
+    data = tomllib.loads(written)
+    assert data["style"]["scratch_pad"] == "lined"
+    assert data["section"]["daily_notes"]["pattern"] == "lined"
+    assert data["section"]["daily"]["right"]["notes"]["pattern"] == "dotted"
+    assert data["section"]["daily"]["right"]["notes"]["title_height"] == "4mm"
+    assert data["mos"]["reverse_months_quarters"] is True
+    assert "week_placement" not in data["section"]["monthly"]
+
+
+def test_overlay_paper_rewrites_existing_style_scratch_pad():
+    text = (
+        "[style] # house\n"
+        'scratch_pad = "dotted"\n'
+        'link_padding = "2pt"\n'
+        "\n"
+        "[style.stroke]\n"
+        'regular = "0.3pt"\n'
+        "\n"
+        "[section.daily_notes]\n"
+        "pages = 2\n"
+        'pattern = "dotted"\n'
+    )
+    written = overlay_toml(text, paper="lined")
+    assert "# house" in written
+    assert 'link_padding = "2pt"' in written
+    assert written.index("# house") < written.index("scratch_pad")
+    data = tomllib.loads(written)
+    assert data["style"]["scratch_pad"] == "lined"
+    assert data["style"]["link_padding"] == "2pt"
+    assert data["section"]["daily_notes"]["pattern"] == "lined"
+
+
+def test_overlay_week_placement_none_vs_omit():
+    text = (
+        "[section.monthly] # month\n"
+        'week_label_rotation = "90deg"\n'
+        'daily_cell_height = "16mm"\n'
+    )
+    none = overlay_toml(text, week_placement="none")
+    assert "# month" in none
+    assert 'week_label_rotation = "90deg"' in none
+    assert 'daily_cell_height = "16mm"\nweek_placement = "none"' in none
+    data = tomllib.loads(none)
+    assert data["section"]["monthly"]["week_placement"] == "none"
+
+    omitted = overlay_toml(none, week_placement="omit")
+    assert "# month" in omitted
+    data = tomllib.loads(omitted)
+    assert "week_placement" not in data["section"]["monthly"]
+    assert data["section"]["monthly"]["daily_cell_height"] == "16mm"
+
+
+def test_overlay_paper_rejects_unknown():
+    with pytest.raises(ConfigError, match="paper"):
+        overlay_toml(_nomad_text(), paper="mesh")
+
+
+def test_overlay_week_placement_omit_on_nomad_leaves_key_out():
+    written = overlay_toml(_nomad_text(), week_placement="omit")
+    data = tomllib.loads(written)
+    assert "week_placement" not in data["section"]["monthly"]
+    assert "SuperNote Nomad" in written
+
+
+def test_overlay_week_placement_rejects_left_right():
+    text = (
+        "[section.monthly]\n"
+        'week_label_rotation = "90deg"\n'
+        'daily_cell_height = "16mm"\n'
+    )
+    with pytest.raises(ConfigError, match="week_placement"):
+        overlay_toml(text, week_placement="left")
+    with pytest.raises(ConfigError, match="week_placement"):
+        overlay_toml(text, week_placement="right")
+
+
+def test_overlay_hours_and_counts_keep_neighbors():
+    text = _nomad_text()
+    written = overlay_toml(
+        text,
+        hour_from=7,
+        hour_to=19,
+        priorities_count=3,
+        daily_notes_pages=4,
+        projects_pages=8,
+        projects_card_rows=2,
+        habit_columns=6,
+        meetings_index_pages=2,
+    )
+    assert "SuperNote Nomad (A6 X2)" in written
+    assert 'time_format = "%k"' in written
+    assert "trailing_half_hour = true" in written
+    assert 'title_height = "4mm"' in written
+    assert 'daily_cell_height = "16mm"' in written
+    assert "reverse_months_quarters = true" in written
+    data = tomllib.loads(written)
+    schedule = data["section"]["daily"]["left"]["schedule"]
+    assert schedule["hour_from"] == 7
+    assert schedule["hour_to"] == 19
+    assert schedule["time_format"] == "%k"
+    assert data["section"]["daily"]["right"]["priorities"]["count"] == 3
+    assert data["section"]["daily_notes"]["pages"] == 4
+    assert data["section"]["projects"]["pages"] == 8
+    assert data["section"]["projects"]["card_rows"] == 2
+    assert data["section"]["habits"]["habit_columns"] == 6
+    assert data["section"]["meetings"]["index_pages"] == 2
+    assert data["section"]["monthly"]["daily_cell_height"] == "16mm"
+    assert data["section"]["daily"]["right"]["notes"]["title_height"] == "4mm"
+    assert "week_placement" not in data["section"]["monthly"]
+    assert "model_dump" not in written
+    assert written.count("[section.daily.left.schedule]") == 1
+
+
+def test_overlay_hours_rejects_inverted_range():
+    with pytest.raises(ConfigError, match="hour_from"):
+        overlay_toml(_nomad_text(), hour_from=20, hour_to=8)
+
+
+def test_new_yes_does_not_apply_questionary_overlays(tmp_path):
+    out = tmp_path / "mine.toml"
+    rc = main(
+        [
+            "new",
+            "--from",
+            "supernote-nomad",
+            "--year",
+            "2027",
+            "--yes",
+            "-o",
+            str(out),
+        ]
+    )
+    assert rc == 0
+    text = out.read_text(encoding="utf-8")
+    data = tomllib.loads(text)
+    assert data["calendar"]["year"] == 2027
+    assert "scratch_pad" not in data.get("style", {})
+    assert data["section"]["daily"]["left"]["schedule"]["hour_from"] == 8
+    assert data["section"]["daily"]["left"]["schedule"]["hour_to"] == 20
+    assert data["section"]["daily"]["right"]["priorities"]["count"] == 5
+    assert "week_placement" not in data["section"]["monthly"]
+    assert data["mos"]["side_menu"] == "left"
+    assert data["mos"]["reverse_months_quarters"] is True
+    assert 'title_height = "4mm"' in text
+    assert 'daily_cell_height = "16mm"' in text
+
+
+class _Ask:
+    def __init__(self, value):
+        self.value = value
+
+    def ask(self):
+        return self.value
+
+
+class _FakeQuestionary:
+    def __init__(self, answers: dict[str, object]):
+        self.answers = answers
+        self.asked: list[str] = []
+
+    class Choice:
+        def __init__(self, title, value=None, checked=False):
+            self.title = title
+            self.value = title if value is None else value
+            self.checked = checked
+
+    def select(self, message, choices=None, default=None):
+        self.asked.append(message)
+        return _Ask(self.answers[message])
+
+    def text(self, message, default=None, validate=None):
+        self.asked.append(message)
+        value = self.answers[message]
+        if validate is not None:
+            ok = validate(str(value))
+            if ok is not True:
+                raise AssertionError(ok)
+        return _Ask(str(value))
+
+    def checkbox(self, message, choices=None, validate=None):
+        self.asked.append(message)
+        return _Ask(self.answers[message])
+
+    def path(self, message):
+        self.asked.append(message)
+        return _Ask(self.answers[message])
+
+
+def test_interactive_overlays_write_without_regenerating(tmp_path, monkeypatch):
+    out = tmp_path / "mine.toml"
+    fake = _FakeQuestionary(
+        {
+            "MOS side": "right",
+            "Paper": "lined",
+            "Week rail": "none",
+            "Hour from": 7,
+            "Hour to": 18,
+            "Priority rows": 3,
+            "Daily notes pages": 4,
+            "Project pages": 8,
+            "Project card rows": 2,
+            "Habit columns": 6,
+            "Meeting index pages": 2,
+        }
+    )
+    monkeypatch.setattr("parch.services.config_file._questionary", lambda: fake)
+    monkeypatch.setattr("sys.stdin.isatty", lambda: True)
+    rc = main(
+        [
+            "new",
+            "--from",
+            "supernote-nomad",
+            "--year",
+            "2027",
+            "--sections",
+            "cover,monthly,daily,daily_notes,projects,habits,meetings,colophon",
+            "-o",
+            str(out),
+        ]
+    )
+    assert rc == 0
+    assert "title_height" not in fake.asked
+    assert "daily_cell_height" not in fake.asked
+    assert "MOS side" in fake.asked
+    assert "Paper" in fake.asked
+    text = out.read_text(encoding="utf-8")
+    assert "SuperNote Nomad" in text
+    assert text.index("[device]") < text.index("[calendar]")
+    assert 'title_height = "4mm"' in text
+    assert 'daily_cell_height = "16mm"' in text
+    assert "reverse_months_quarters = true" in text
+    data = tomllib.loads(text)
+    assert data["calendar"]["year"] == 2027
+    assert data["mos"]["side_menu"] == "right"
+    assert data["mos"]["reverse_months_quarters"] is True
+    assert data["style"]["scratch_pad"] == "lined"
+    assert data["section"]["monthly"]["week_placement"] == "none"
+    assert data["section"]["daily"]["left"]["schedule"]["hour_from"] == 7
+    assert data["section"]["daily"]["left"]["schedule"]["hour_to"] == 18
+    assert data["section"]["daily"]["right"]["priorities"]["count"] == 3
+    assert data["section"]["daily_notes"]["pages"] == 4
+    assert data["section"]["projects"]["pages"] == 8
+    assert data["section"]["projects"]["card_rows"] == 2
+    assert data["section"]["habits"]["habit_columns"] == 6
+    assert data["section"]["meetings"]["index_pages"] == 2
+    assert data["section"]["daily"]["right"]["notes"]["title_height"] == "4mm"
+    load(out)
+
+
+def test_interactive_hand_flag_skips_side_prompt(tmp_path, monkeypatch):
+    out = tmp_path / "mine.toml"
+    fake = _FakeQuestionary(
+        {
+            "Paper": "dotted",
+            "Week rail": "omit",
+            "Hour from": 8,
+            "Hour to": 20,
+            "Priority rows": 5,
+            "Daily notes pages": 2,
+        }
+    )
+    monkeypatch.setattr("parch.services.config_file._questionary", lambda: fake)
+    monkeypatch.setattr("sys.stdin.isatty", lambda: True)
+    rc = main(
+        [
+            "new",
+            "--from",
+            "supernote-nomad",
+            "--year",
+            "2027",
+            "--hand",
+            "right",
+            "--sections",
+            "cover,monthly,daily,daily_notes,colophon",
+            "-o",
+            str(out),
+        ]
+    )
+    assert rc == 0
+    assert "MOS side" not in fake.asked
+    data = tomllib.loads(out.read_text(encoding="utf-8"))
+    assert data["mos"]["side_menu"] == "right"
+    assert "week_placement" not in data["section"]["monthly"]
+    assert "projects" not in data["sections"]
+    load(out)

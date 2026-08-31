@@ -43,7 +43,7 @@ parch press supernote-nomad
 parch new --from supernote-nomad --year 2027 --yes -o mine.toml
 ```
 
-Without `--yes`, `parch new` asks for starting profile, year, sections, and output path. Sections live in the profile `sections` list. Comment a name out to disable it.
+Without `--yes`, `parch new` asks for starting profile, year, sections, and output path, then overlays MOS side, paper, week rail, hours, and counts/pages onto the copied file. Sections live in the profile `sections` list. Comment a name out to disable it.
 
 ## Devices
 
