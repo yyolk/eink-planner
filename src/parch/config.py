@@ -1,7 +1,5 @@
 """Config loading (TOML device profiles) and strict nested-dict access."""
 
-from __future__ import annotations
-
 from pathlib import Path
 from typing import Any
 

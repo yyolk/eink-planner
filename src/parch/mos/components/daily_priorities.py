@@ -1,7 +1,5 @@
 """Priorities checkbox list on the day page."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from parch.i18n import I18n

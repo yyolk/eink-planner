@@ -1,7 +1,5 @@
 """Raster check that habit day rules are even and thin."""
 
-from __future__ import annotations
-
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
 from tests.test_toml_omit_sections import compile_pdf

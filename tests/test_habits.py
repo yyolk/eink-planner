@@ -1,7 +1,5 @@
 """Habits index + per-month tracker grids."""
 
-from __future__ import annotations
-
 
 import pytest
 

@@ -1,7 +1,5 @@
 """Projects index + per-project kanban boards."""
 
-from __future__ import annotations
-
 import math
 
 import pytest

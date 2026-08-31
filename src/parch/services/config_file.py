@@ -1,7 +1,5 @@
 """Write a planner TOML by copying a shipped profile and overlaying fields."""
 
-from __future__ import annotations
-
 import os
 import re
 import sys

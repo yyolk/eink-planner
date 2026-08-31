@@ -1,7 +1,5 @@
 """Month entity — port of LYP::Entities::Calendar::Month."""
 
-from __future__ import annotations
-
 from typing import TYPE_CHECKING
 
 from parch import InternalError

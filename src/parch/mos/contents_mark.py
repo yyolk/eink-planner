@@ -1,7 +1,5 @@
 """Contents back-link mark: five house-stroke bars, sibling-cap stack."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from parch.compose.page_data import HeadingMark

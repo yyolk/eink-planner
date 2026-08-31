@@ -1,7 +1,5 @@
 """Shared TOML profile fixtures for tests."""
 
-from __future__ import annotations
-
 from parch.config import StrictDict
 
 

@@ -1,7 +1,5 @@
 """Named e-ink device presets with 1:1-on-glass page sizes."""
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 
 MM_PER_INCH = 25.4

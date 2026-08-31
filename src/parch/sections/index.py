@@ -1,7 +1,5 @@
 """Contents page (raw Typst, no MOS chrome). Optional section key ``index``."""
 
-from __future__ import annotations
-
 from parch.calendar.week import Week
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator

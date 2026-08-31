@@ -1,7 +1,5 @@
 """Short-leash Meetings raster checks; drop with tests/visual.py if design moves."""
 
-from __future__ import annotations
-
 from pathlib import Path
 
 from PIL import Image

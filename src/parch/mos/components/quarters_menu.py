@@ -1,7 +1,5 @@
 """Rotated quarters strip in the side menu."""
 
-from __future__ import annotations
-
 from collections.abc import Sequence
 
 from parch.calendar.quarter import Quarter

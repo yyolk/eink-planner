@@ -1,7 +1,5 @@
 """Section is the existing MOS contract. Chase is a target protocol."""
 
-from __future__ import annotations
-
 from typing import Protocol
 
 from parch.compose.manifest import Manifest

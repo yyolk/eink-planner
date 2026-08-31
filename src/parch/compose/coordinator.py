@@ -1,7 +1,5 @@
 """compose root: sections from SECTIONS; pages through chase."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from parch import ConfigError

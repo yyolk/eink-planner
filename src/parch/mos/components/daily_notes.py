@@ -1,7 +1,5 @@
 """Daily notes block on the day page."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from parch.calendar.dated_note import DatedNote

@@ -1,7 +1,5 @@
 """Raw Typst about page (no MOS chrome). Back of the notebook, not a build log."""
 
-from __future__ import annotations
-
 import re
 from typing import Any
 

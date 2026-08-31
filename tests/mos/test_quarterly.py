@@ -1,7 +1,5 @@
 """Quarter pages render all three months in a bounded column grid."""
 
-from __future__ import annotations
-
 from pathlib import Path
 import shutil
 import subprocess

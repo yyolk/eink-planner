@@ -1,7 +1,5 @@
 """Extra dotted note pages that follow each day."""
 
-from __future__ import annotations
-
 from parch.calendar import walk
 from parch.calendar.dated_note import DatedNote
 from parch.i18n import I18n

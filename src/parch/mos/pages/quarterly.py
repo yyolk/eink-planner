@@ -1,7 +1,5 @@
 """Quarter page: three little calendars + scratch pad."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from parch.calendar.quarter import Quarter

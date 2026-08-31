@@ -1,7 +1,5 @@
 """Weekly overview page."""
 
-from __future__ import annotations
-
 from parch.calendar.day import Day
 from parch.calendar.week import Week
 from parch.i18n import I18n

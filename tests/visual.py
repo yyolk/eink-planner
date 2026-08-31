@@ -1,7 +1,5 @@
 """Raster helpers for design checks; safe to delete with the tests that import them."""
 
-from __future__ import annotations
-
 import shutil
 import subprocess
 from pathlib import Path

@@ -1,7 +1,5 @@
 """One page per week spanning the configured month range."""
 
-from __future__ import annotations
-
 from parch.calendar import walk
 from parch.calendar.day import Day
 from parch.calendar.week import Week

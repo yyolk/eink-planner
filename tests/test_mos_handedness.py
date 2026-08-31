@@ -1,7 +1,5 @@
 """Left/right MOS (Months on the Side) handedness and unlocked daily columns."""
 
-from __future__ import annotations
-
 from pathlib import Path
 
 import pytest

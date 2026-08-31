@@ -1,7 +1,5 @@
 """Zip-backed open_resolved keeps the extracted profile alive through load."""
 
-from __future__ import annotations
-
 import importlib
 import sys
 import tomllib

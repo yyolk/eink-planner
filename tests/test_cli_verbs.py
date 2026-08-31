@@ -1,7 +1,5 @@
 """Thin dispatch smoke: press, proof, and new."""
 
-from __future__ import annotations
-
 import pytest
 
 from parch.cli import build_parser, generate_cmd, main, new_cmd, preview_svg_cmd

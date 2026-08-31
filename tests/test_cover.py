@@ -1,7 +1,5 @@
 """Unit tests for the raw Typst cover page."""
 
-from __future__ import annotations
-
 from parch.config import StrictDict
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest

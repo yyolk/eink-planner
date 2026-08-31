@@ -1,7 +1,5 @@
 """typst_emit — join a t-string as raw Typst."""
 
-from __future__ import annotations
-
 from string.templatelib import Interpolation, Template
 
 

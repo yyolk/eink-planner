@@ -4,8 +4,6 @@ Lookup keys follow the locale table shape (``week_name``, ``quarter.short``,
 ``weekday.letter.monday``). Nested lookups stay dotted.
 """
 
-from __future__ import annotations
-
 import tomllib
 from importlib.resources import as_file, files
 from pathlib import Path

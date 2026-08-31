@@ -4,8 +4,6 @@ Loaders validate underscore-key TOML via Pydantic, then this adapter
 builds the same internal DTO the generator already reads.
 """
 
-from __future__ import annotations
-
 import calendar
 import tomllib
 from pathlib import Path

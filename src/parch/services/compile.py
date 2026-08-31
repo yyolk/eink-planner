@@ -1,7 +1,5 @@
 """Compile generated Typst to PDF, installing the typst CLI if needed."""
 
-from __future__ import annotations
-
 import inspect
 import os
 import platform

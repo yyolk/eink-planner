@@ -1,7 +1,5 @@
 """Monthly pages: January title, MOS invert, unboxed days, leftover notes."""
 
-from __future__ import annotations
-
 import shutil
 import subprocess
 

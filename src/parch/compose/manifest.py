@@ -1,7 +1,5 @@
 """manifest — set of page ids for this book."""
 
-from __future__ import annotations
-
 from parch.typst_emit import typst_emit
 
 

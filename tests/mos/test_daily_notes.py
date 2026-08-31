@@ -1,7 +1,5 @@
 """Daily notes: overflow behind More, TRAIL mark, paper MOS, no Calendar."""
 
-from __future__ import annotations
-
 
 from parch.compose.page_data import HeadingMark
 from parch.i18n import I18n

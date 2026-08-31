@@ -1,7 +1,5 @@
 """Daily pages: date block, Contents mark alone, paper MOS, no year chip."""
 
-from __future__ import annotations
-
 
 from parch.calendar.dated_note import DatedNote
 from parch.i18n import I18n

@@ -1,7 +1,5 @@
 """Weekly Tasks: week index + ticked leftover pages (raw Typst, no MOS)."""
 
-from __future__ import annotations
-
 
 import pytest
 
