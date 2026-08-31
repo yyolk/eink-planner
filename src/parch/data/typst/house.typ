@@ -206,23 +206,28 @@
   .._order_week_rows(side, cells.pos()),
 )
 
-// Header on auto; rule sits on the descender. Clipped pattern fills the 1fr.
+// Header on auto; bottom inset is the rule's own thickness. Clipped
+// pattern fills the 1fr.
 // Not exported — week_matrix is the only weekly overview entry.
-#let week_cell(header, header-stroke: none, pattern: none, regular-height: none) = grid(
-  columns: 1fr,
-  rows: (auto, 1fr),
-  grid.cell(
-    stroke: (bottom: header-stroke),
-    text(bottom-edge: "descender", header),
-  ),
-  box(
-    width: 100%,
-    height: 100%,
-    clip: true,
-    inset: (top: 0.25em, bottom: 0.25em),
-    rect_pattern(regular_height: regular-height, pattern),
-  ),
-)
+#let week_cell(header, header-stroke: none, pattern: none, regular-height: none) = {
+  let gap = if header-stroke == none { 0pt } else { stroke(header-stroke).thickness }
+  grid(
+    columns: 1fr,
+    rows: (auto, 1fr),
+    grid.cell(
+      inset: (bottom: gap),
+      stroke: (bottom: header-stroke),
+      text(bottom-edge: "descender", header),
+    ),
+    box(
+      width: 100%,
+      height: 100%,
+      clip: true,
+      inset: (top: 0.25em, bottom: 0.25em),
+      rect_pattern(regular_height: regular-height, pattern),
+    ),
+  )
+}
 
 // 3×3 of equal 1fr tracks. column-gutter only (no row-gutter). Notes is
 // colspan: 2 on the eighth cell so the first column stays one vertical.
