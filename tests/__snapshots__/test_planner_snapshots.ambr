@@ -142,10 +142,7 @@
         column-gutter: regular_column_gutter,
         row-gutter: 5pt,
       
-        month_grid(
-        inset: 5pt,
-        stroke: (x, _) => if x == 1 {( left: regular_stroke + black )},
-        columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
+        month_grid(left,
         grid.cell(
           colspan: 8,
           [January]
@@ -157,7 +154,8 @@
       padded_link(<2026W03>)[3], padded_link(<2026-01-12>)[12], padded_link(<2026-01-13>)[13], padded_link(<2026-01-14>)[14], [15], [16], [17], [18],
       padded_link(<2026W04>)[4], [19], [20], [21], [22], [23], [24], [25],
       padded_link(<2026W05>)[5], [26], [27], [28], [29], [30], [31], [],
-      [], [], [], [], [], [], [], []
+      [], [], [], [], [], [], [], [],
+        inset: 5pt
       )
       ),
         ),
@@ -256,10 +254,7 @@
       grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [20]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
         box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black)))
       ),
-      month_grid(
-        inset: 5pt,
-        stroke: (x, _) => if x == 1 {( left: regular_stroke + black )},
-        columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
+      month_grid(left,
         grid.cell(
           colspan: 8,
           inset: 0pt,
@@ -272,7 +267,8 @@
       padded_link(<2026W03>)[3], padded_link(<2026-01-12>)[12], padded_link(<2026-01-13>)[13], padded_link(<2026-01-14>)[14], [15], [16], [17], [18],
       padded_link(<2026W04>)[4], [19], [20], [21], [22], [23], [24], [25],
       padded_link(<2026W05>)[5], [26], [27], [28], [29], [30], [31], [],
-      [], [], [], [], [], [], [], []
+      [], [], [], [], [], [], [], [],
+        inset: 5pt
       )
       ), grid(
         columns: 1fr,
@@ -340,11 +336,8 @@
         columns: 1fr,
         rows: (auto, auto, 1fr),
       
-        grid(
-          stroke: regular_stroke,
-          columns: (regular_height, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
+        month_weeks(left,
           rows: (regular_height, 2.5cm, 2.5cm, 2.5cm, 2.5cm, 2.5cm),
-      
           [], align(center + horizon)[Monday], align(center + horizon)[Tuesday], align(center + horizon)[Wednesday], align(center + horizon)[Thursday], align(center + horizon)[Friday], align(center + horizon)[Saturday], align(center + horizon)[Sunday],
           align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W01>)[1]]), [], [], [], grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-01>)[1]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-03>)[3]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-04>)[4]]),
       align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-05>)[5]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-06>)[6]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-07>)[7]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-08>)[8]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-09>)[9]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-10>)[10]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-11>)[11]]),
@@ -374,7 +367,7 @@
       #let h1 = 10mm
       #let link_padding = 8pt
       
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, week_matrix, lined_well, daily_well
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well
       
       #let dotted = dotted(regular_height: regular_height)
       #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -386,10 +379,12 @@
       #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
       #let mos_frame = mos_frame.with(mos-width: 10mm, column-gutter: 2mm)
       #let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm)
-      #let month_grid = month_grid.with(week-rows: 6, hline-stroke: regular_stroke + black)
+      #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
+      #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
       #let week_matrix = week_matrix.with(regular-height: regular_height)
       #let lined_well = lined_well.with(regular-height: regular_height)
       #let daily_well = daily_well.with(column-gutter: regular_column_gutter)
+      #let quarter_well = quarter_well.with(column-gutter: regular_column_gutter)
     ''',
     'weekly': '''
       #mos_frame(
@@ -487,10 +482,7 @@
         column-gutter: regular_column_gutter,
         row-gutter: 4pt,
       
-        month_grid(
-        inset: 3pt,
-        stroke: (x, _) => if x == 1 {( left: regular_stroke + black )},
-        columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
+        month_grid(left,
         grid.cell(
           colspan: 8,
           [January]
@@ -502,7 +494,8 @@
       padded_link(<2026W03>)[3], padded_link(<2026-01-12>)[12], padded_link(<2026-01-13>)[13], padded_link(<2026-01-14>)[14], [15], [16], [17], [18],
       padded_link(<2026W04>)[4], [19], [20], [21], [22], [23], [24], [25],
       padded_link(<2026W05>)[5], [26], [27], [28], [29], [30], [31], [],
-      [], [], [], [], [], [], [], []
+      [], [], [], [], [], [], [], [],
+        inset: 3pt
       )
       ),
         ),
@@ -601,10 +594,7 @@
       grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [20]))), box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black))),
         box(height: regular_height, place(bottom + left, line(length: 3mm, stroke: regular_stroke + black)))
       ),
-      month_grid(
-        inset: 3pt,
-        stroke: (x, _) => if x == 1 {( left: regular_stroke + black )},
-        columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
+      month_grid(left,
         grid.cell(
           colspan: 8,
           inset: 0pt,
@@ -617,7 +607,8 @@
       padded_link(<2026W03>)[3], padded_link(<2026-01-12>)[12], padded_link(<2026-01-13>)[13], padded_link(<2026-01-14>)[14], [15], [16], [17], [18],
       padded_link(<2026W04>)[4], [19], [20], [21], [22], [23], [24], [25],
       padded_link(<2026W05>)[5], [26], [27], [28], [29], [30], [31], [],
-      [], [], [], [], [], [], [], []
+      [], [], [], [], [], [], [], [],
+        inset: 3pt
       )
       ), grid(
         columns: 1fr,
@@ -685,11 +676,8 @@
         columns: 1fr,
         rows: (auto, auto, 1fr),
       
-        grid(
-          stroke: regular_stroke,
-          columns: (regular_height, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
+        month_weeks(left,
           rows: (regular_height, 16mm, 16mm, 16mm, 16mm, 16mm),
-      
           [], align(center + horizon)[Monday], align(center + horizon)[Tuesday], align(center + horizon)[Wednesday], align(center + horizon)[Thursday], align(center + horizon)[Friday], align(center + horizon)[Saturday], align(center + horizon)[Sunday],
           align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W01>)[1]]), [], [], [], grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-01>)[1]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-03>)[3]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-04>)[4]]),
       align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-05>)[5]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-06>)[6]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-07>)[7]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-08>)[8]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-09>)[9]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-10>)[10]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-11>)[11]]),
@@ -719,7 +707,7 @@
       #let h1 = 8mm
       #let link_padding = 6pt
       
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, week_matrix, lined_well, daily_well
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well
       
       #let dotted = dotted(regular_height: regular_height)
       #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -731,10 +719,12 @@
       #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
       #let mos_frame = mos_frame.with(mos-width: 8mm, column-gutter: 1.5mm)
       #let well_frame = well_frame.with(heading-height: 8mm, row-gutter: 1.5mm)
-      #let month_grid = month_grid.with(week-rows: 6, hline-stroke: regular_stroke + black)
+      #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
+      #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
       #let week_matrix = week_matrix.with(regular-height: regular_height)
       #let lined_well = lined_well.with(regular-height: regular_height)
       #let daily_well = daily_well.with(column-gutter: regular_column_gutter)
+      #let quarter_well = quarter_well.with(column-gutter: regular_column_gutter)
     ''',
     'weekly': '''
       #mos_frame(

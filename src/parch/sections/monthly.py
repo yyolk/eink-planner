@@ -9,6 +9,7 @@ from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.compose.page_data import PageData
 from parch.mos.pages.monthly import Monthly as MonthlyPage
+from parch.sections._shared import _side_menu_position
 
 
 class Monthly:
@@ -27,6 +28,7 @@ class Monthly:
             month_params = month_params.to_plain()
         self.month_params = _to_plain(month_params)
         self.pattern = pattern
+        self.side = _side_menu_position(configurator)
 
     def register(self, manifest: Manifest) -> None:
         for month in self._range():
@@ -41,6 +43,7 @@ class Monthly:
                 month=month,
                 month_params=self.month_params,
                 pattern=self.pattern,
+                side=self.side,
             )
             out.append(
                 PageData(

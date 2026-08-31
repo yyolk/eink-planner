@@ -36,13 +36,14 @@ def _little_calendar() -> dict:
     return {"week_placement": "left", "inset": "5pt", "show_month_name": True}
 
 
-def _page(date_str: str, months_column: str = "left") -> Quarterly:
+def _page(date_str: str, months_column: str = "left", side: str = "left") -> Quarterly:
     return Quarterly(
         i18n=_i18n(),
         manifest=Manifest(),
         quarter=make_quarter(date_str),
         months_column=months_column,
         little_calendar=_little_calendar(),
+        side=side,
     )
 
 
@@ -77,11 +78,17 @@ def _quarter_pages(typst_src: str) -> dict[int, str]:
 
 def test_q1_emits_three_equal_month_rows():
     content = _page("2026-01-01").content()
+    assert "quarter_well(left," in content
+    assert "month_grid(left," in content
     assert "rows: (1fr, 1fr, 1fr)" in content
     assert "stack(" not in content
+    assert "columns: (2fr" not in content
+    assert "columns: (3fr" not in content
+    assert content.index("rows: (1fr, 1fr, 1fr)") < content.index("rect_pattern(dotted)")
     for name in Q1_MONTHS:
         assert f"[{name}]" in content
     assert content.count("colspan:") == 3
+    assert "reverse(" not in content
 
 
 def test_q3_emits_july_august_september():
@@ -94,10 +101,24 @@ def test_q3_emits_july_august_september():
     assert content.count("colspan:") == 3
 
 
-def test_months_column_right_keeps_three_month_grid():
+def test_months_column_right_still_emits_months_then_pad():
     content = _page("2026-07-01", months_column="right").content()
-    assert content.index("rect_pattern(dotted)") < content.index("rows: (1fr, 1fr, 1fr)")
-    assert "columns: (3fr,2fr)" in content
+    assert "quarter_well(left," in content
+    assert content.index("rows: (1fr, 1fr, 1fr)") < content.index("rect_pattern(dotted)")
+    assert "columns: (3fr,2fr)" not in content
+    assert "columns: (2fr" not in content
+    for name in Q3_MONTHS:
+        assert f"[{name}]" in content
+
+
+def test_hand_right_still_emits_months_then_pad():
+    content = _page("2026-07-01", side="right").content()
+    assert "quarter_well(right," in content
+    assert "month_grid(right," in content
+    assert content.index("rows: (1fr, 1fr, 1fr)") < content.index("rect_pattern(dotted)")
+    assert "quarter_well(left," not in content
+    assert "columns: (3fr" not in content
+    assert "columns: (2fr" not in content
     for name in Q3_MONTHS:
         assert f"[{name}]" in content
 

@@ -71,6 +71,9 @@ def test_three_by_four_grid_has_three_black_quarter_row_hlines():
     # Month name/weekday rules live in house month_grid; annual owns 3 quarter-row rules.
     assert content.count("grid.hline(stroke: regular_stroke + black)") == 3
     assert content.count("month_grid(") == 12
+    assert content.count("month_grid(left,") == 12
+    assert "[], [M], [T], [W], [T], [F], [S], [S]" in content
+    assert "columns:" not in content.split("month_grid(")[1].split(")")[0]
 
 
 def test_little_calendars_omit_week_letter():

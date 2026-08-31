@@ -8,6 +8,7 @@ from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.compose.page_data import HeadingMark, PageData
 from parch.mos.pages.daily import Daily as DailyPage
+from parch.sections._shared import _side_menu_position
 
 
 class Daily:
@@ -49,10 +50,3 @@ class Daily:
 
     def _range(self):
         return walk(self.configurator.start_date(), self.configurator.end_date())
-
-
-def _side_menu_position(configurator: Configurator) -> str:
-    mos = configurator.dig("planner", "params", "mos_layout")
-    if mos is None:
-        return "left"
-    return mos["side_menu_position"] if "side_menu_position" in mos else "left"

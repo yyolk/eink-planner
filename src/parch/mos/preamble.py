@@ -109,7 +109,7 @@ class Preamble:
 #let h1 = {h1}
 #let link_padding = {_v(p, 'link_padding')}
 
-#import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, week_matrix, lined_well, daily_well
+#import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well
 
 #let dotted = dotted(regular_height: regular_height)
 #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -121,10 +121,12 @@ class Preamble:
 #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
 #let mos_frame = mos_frame.with(mos-width: {_v(mos_layout, 'side_menu_width')}, column-gutter: {_v(mos_layout, 'column_gutter')})
 #let well_frame = well_frame.with(heading-height: {_v(heading, 'height')}, row-gutter: {_v(mos_layout, 'row_gutter')})
-#let month_grid = month_grid.with(week-rows: 6, hline-stroke: regular_stroke + black)
+#let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
+#let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
 #let week_matrix = week_matrix.with(regular-height: regular_height)
 #let lined_well = lined_well.with(regular-height: regular_height)
-#let daily_well = daily_well.with(column-gutter: regular_column_gutter)"""
+#let daily_well = daily_well.with(column-gutter: regular_column_gutter)
+#let quarter_well = quarter_well.with(column-gutter: regular_column_gutter)"""
 
 
 def _v(mapping, key: str):

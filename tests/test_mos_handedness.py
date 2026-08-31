@@ -185,9 +185,19 @@ def test_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert "#mos_frame(\n  left," not in typst_src
     assert "mos-width: 10mm" in typst_src
     assert "daily_well(right," in typst_src
+    assert "month_grid(right," in typst_src
+    assert "month_weeks(right," in typst_src
+    assert "quarter_well(right," in typst_src
+    assert "month_grid(left," not in typst_src
+    assert "month_weeks(left," not in typst_src
+    assert "quarter_well(left," not in typst_src
+    assert "[], [M], [T], [W], [T], [F], [S], [S]" in typst_src
     well = typst_src[typst_src.index("daily_well(") :]
     assert well.index("right,") < well.index("[Schedule]")
     assert well.index("[Schedule]") < well.index("[Priorities]")
+    quarter = typst_src[typst_src.index("quarter_well(") :]
+    assert quarter.index("right,") < quarter.index("rows: (1fr, 1fr, 1fr)")
+    assert quarter.index("rows: (1fr, 1fr, 1fr)") < quarter.index("rect_pattern(")
     pdf, stderr = compile_pdf(typst_src, tmp_path / "hand-right")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
 

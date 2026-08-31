@@ -183,7 +183,8 @@ def test_little_calendar_omits_week_letter_and_inverts_this_page_date():
     jan1 = _page("2026-01-01").content()
     assert "[], [M], [T], [W], [T], [F], [S], [S]" in jan1
     assert "[W], [M], [T], [W], [T], [F], [S], [S]" not in jan1
-    assert "if x == 1 {( left: regular_stroke + black )}" in jan1
+    assert "month_grid(left," in jan1
+    assert "if x == 1 {( left: regular_stroke + black )}" not in jan1
     assert "grid.cell(fill: black, text(white, [1]))" in jan1
     assert "grid.cell(fill: black, text(white, [4]))" not in jan1
     jan4 = _page("2026-01-04").content()

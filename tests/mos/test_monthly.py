@@ -43,13 +43,14 @@ def _i18n() -> I18n:
     return load_default()
 
 
-def _page(yyyy_mm: str, week_placement: str = "left") -> Monthly:
+def _page(yyyy_mm: str, week_placement: str = "left", side: str = "left") -> Monthly:
     params = {**_MONTH_PARAMS, "week_placement": week_placement}
     return Monthly(
         i18n=_i18n(),
         manifest=Manifest(),
         month=make_month(yyyy_mm),
         month_params=params,
+        side=side,
     )
 
 
@@ -78,11 +79,36 @@ def _month_pages(typst_src: str) -> dict[str, str]:
 
 def test_january_keeps_full_weekdays_and_five_body_rows():
     content = _page("2026-01").content()
+    assert "month_weeks(left," in content
+    well = content[content.index("month_weeks(") : content.index("grid.hline")]
+    assert "rows: (regular_height, 16mm, 16mm, 16mm, 16mm, 16mm)" in well
+    assert "columns: (regular_height" not in well
+    assert "stroke:" not in well
     assert "rows: (auto, auto, 1fr)" in content
-    assert "rows: (regular_height, 16mm, 16mm, 16mm, 16mm, 16mm)" in content
+    assert "[], align(center + horizon)[Monday]" in content
     for name in ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"):
         assert f"align(center + horizon)[{name}]" in content
     assert "align(center + horizon)[Mon]" not in content
+    assert not hasattr(_page("2026-01"), "_with_week_column")
+
+
+def test_hand_right_still_emits_week_first():
+    content = _page("2026-01", side="right").content()
+    assert "month_weeks(right," in content
+    assert "rows: (regular_height, 16mm, 16mm, 16mm, 16mm, 16mm)" in content
+    assert "[], align(center + horizon)[Monday]" in content
+    assert "align(center + horizon)[Sunday], []" not in content
+    assert "month_weeks(left," not in content
+    assert "columns: (regular_height" not in content
+
+
+def test_week_placement_none_is_seven_col_without_side():
+    content = _page("2026-01", week_placement="none").content()
+    assert "month_weeks(" not in content
+    assert "columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in content
+    assert "rows: (regular_height, 16mm, 16mm, 16mm, 16mm, 16mm)" in content
+    assert "align(center + horizon)[Monday]" in content
+    assert "rotate(90deg" not in content
 
 
 def test_august_2026_is_six_rows_on_one_page():

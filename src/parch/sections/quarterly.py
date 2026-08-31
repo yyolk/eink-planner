@@ -9,6 +9,7 @@ from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.compose.page_data import PageData
 from parch.mos.pages.quarterly import Quarterly as QuarterlyPage
+from parch.sections._shared import _side_menu_position
 
 
 class Quarterly:
@@ -29,6 +30,7 @@ class Quarterly:
         base = self.configurator.dig("planner", "params", "little_calendar") or {}
         extra = other.get("little_calendar") or {}
         self.little_calendar = {**_plain(base), **_plain(extra)}
+        self.side = _side_menu_position(configurator)
 
     def register(self, manifest: Manifest) -> None:
         for quarter in self._range():
@@ -44,6 +46,7 @@ class Quarterly:
                 months_column=self.months_column,
                 little_calendar=self.little_calendar,
                 pattern=self.pattern,
+                side=self.side,
             )
             out.append(
                 PageData(
