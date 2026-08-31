@@ -49,6 +49,7 @@ class Navigation:
             self._quarters_menu(highlight_quarters),
             months,
         ]
+        # MOS-strip overlay. Independent of side; do not derive from side.
         if _v(self.mos_layout, "reverse_months_quarters"):
             cols.reverse()
             items.reverse()

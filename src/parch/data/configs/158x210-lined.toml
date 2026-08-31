@@ -18,8 +18,6 @@ sections = [
 
 [device]
 name = "158x210-lined"
-width = "158mm"
-height = "210mm"
 ppi = 300
 
 [calendar]
@@ -36,12 +34,6 @@ thick = "0.8pt"
 [style.type]
 body = "10pt"
 h1 = "10mm"
-
-[style.margin]
-top = "5mm"
-bottom = "0mm"
-left = "0mm"
-right = "5mm"
 
 [style.gutter]
 column = "10pt"
@@ -65,11 +57,9 @@ show_month_name = true
 row_gutter = "5pt"
 
 [section.quarterly]
-months_column = "left"
 show_month_name = true
 
 [section.monthly]
-week_placement = "left"
 week_label_rotation = "90deg"
 daily_cell_height = "2.5cm"
 
@@ -77,7 +67,6 @@ daily_cell_height = "2.5cm"
 column_gutter = "5pt"
 
 [section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "5mm"
 
 [section.daily.left.schedule]
@@ -87,7 +76,6 @@ time_format = "%k"
 trailing_half_hour = true
 
 [section.daily.left.little_calendar]
-week_placement = "left"
 inset = "5pt"
 
 [section.daily.right.priorities]

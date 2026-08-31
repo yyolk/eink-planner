@@ -21,8 +21,6 @@ sections = [
 
 [device]
 name = "supernote-nomad"
-width = "118.87mm"
-height = "158.5mm"
 ppi = 300
 
 [calendar]
@@ -36,12 +34,6 @@ thick = "0.6pt"
 [style.type]
 body = "8pt"
 h1 = "8mm"
-
-[style.margin]
-top = "8mm"
-bottom = "0mm"
-left = "0mm"
-right = "4mm"
 
 [style.gutter]
 column = "8pt"
@@ -65,11 +57,9 @@ show_month_name = true
 row_gutter = "4pt"
 
 [section.quarterly]
-months_column = "left"
 show_month_name = true
 
 [section.monthly]
-week_placement = "left"
 week_label_rotation = "90deg"
 daily_cell_height = "16mm"
 
@@ -77,7 +67,6 @@ daily_cell_height = "16mm"
 column_gutter = "4pt"
 
 [section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "4mm"
 
 [section.daily.left.schedule]
@@ -87,7 +76,6 @@ time_format = "%k"
 trailing_half_hour = true
 
 [section.daily.left.little_calendar]
-week_placement = "left"
 inset = "3pt"
 
 [section.daily.right.priorities]

@@ -21,7 +21,7 @@ def test_happy_path_mos_left():
     assert profile.section.daily is not None
     assert profile.section.daily.left is not None
     assert profile.section.daily.right is not None
-    assert profile.section.daily.columns == ["3fr", "5fr"]
+    assert "columns" not in type(profile.section.daily).model_fields
 
 
 def test_happy_path_side_menu_right_keeps_ltr_well():
@@ -36,7 +36,6 @@ column_gutter = "1.5mm"
 row_gutter = "1.5mm"
 """,
         sections="""[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "5mm"
 
 [section.daily.left.schedule]
@@ -50,7 +49,7 @@ count = 5
     profile = DeviceProfile.model_validate(tomllib.loads(text))
     assert profile.mos.side_menu == "right"
     assert profile.section.daily is not None
-    assert profile.section.daily.columns == ["3fr", "5fr"]
+    assert "columns" not in type(profile.section.daily).model_fields
     assert profile.section.daily.left is not None
     assert profile.section.daily.right is not None
     assert profile.section.daily.left.schedule is not None
@@ -100,7 +99,6 @@ def test_schedule_hour_from_not_less_than_hour_to():
     text = _minimal(
         enable=["daily"],
         sections="""[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "1mm"
 
 [section.daily.left.schedule]
@@ -115,11 +113,11 @@ count = 1
         DeviceProfile.model_validate(tomllib.loads(text))
 
 
-def test_daily_columns_length_not_two():
+def test_daily_columns_is_unknown_key():
     text = _minimal(
         enable=["daily"],
         sections="""[section.daily]
-columns = ["3fr"]
+columns = ["3fr", "5fr"]
 item_spacing = "1mm"
 
 [section.daily.left.schedule]
@@ -130,7 +128,7 @@ hour_to = 20
 count = 1
 """,
     )
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError, match="extra_forbidden"):
         DeviceProfile.model_validate(tomllib.loads(text))
 
 
@@ -151,8 +149,6 @@ def test_device_ppi_is_optional():
     text = _minimal(
         device="""[device]
 name = "x"
-width = "100mm"
-height = "120mm"
 """,
     )
     assert "ppi" not in text

@@ -20,8 +20,6 @@ NOMAD = base_config("supernote-nomad")
 
 _NOMAD_DEVICE = """[device]
 name = "supernote-nomad"
-width = "118.87mm"
-height = "158.5mm"
 ppi = 300"""
 
 _MARK_RULE = "contents_bars(size:"
@@ -343,8 +341,6 @@ def test_index_paginates_and_late_board_links_to_its_index_page():
         _minimal(
             device="""[device]
 name = "supernote-nomad"
-width = "118.87mm"
-height = "158.5mm"
 ppi = 300""",
             enable=["annual", "projects"],
             sections=f"""[section.annual]
@@ -530,7 +526,6 @@ def test_boards_use_house_dots_and_notes_pages_still_can():
         _minimal(
             enable=["daily", "daily_notes", "projects"],
             sections="""[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "4mm"
 
 [section.daily.left.schedule]

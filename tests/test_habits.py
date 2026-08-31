@@ -186,7 +186,6 @@ def test_mos_month_cells_on_habit_page_target_habit_ids():
 show_month_name = true
 
 [section.monthly]
-week_placement = "left"
 week_label_rotation = "90deg"
 daily_cell_height = "16mm"
 """,
@@ -232,7 +231,6 @@ def test_habit_month_has_no_heading_toggle():
         _minimal(
             enable=["monthly", "habits"],
             sections="""[section.monthly]
-week_placement = "left"
 week_label_rotation = "90deg"
 daily_cell_height = "16mm"
 """,
@@ -349,7 +347,6 @@ def test_day_cells_link_when_daily_exists():
         _minimal(
             enable=["daily", "habits"],
             sections="""[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "4mm"
 
 [section.daily.left.schedule]
@@ -631,7 +628,6 @@ def test_habit_month_follows_side_menu_dates_stay_left():
         assert heading.index("padded_link(<habits>)") < heading.index("January<habits-january>")
 
     monthly = """[section.monthly]
-week_placement = "left"
 week_label_rotation = "90deg"
 daily_cell_height = "16mm"
 """

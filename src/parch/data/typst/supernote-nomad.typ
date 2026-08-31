@@ -2,6 +2,7 @@
 #let page-height = 158.5mm
 #let toolbar-clearance = 8mm
 #let writing-clearance = 4mm
+#let mos-width = 8mm
 #let page-margin(side) = (
   top: toolbar-clearance,
   bottom: 0mm,

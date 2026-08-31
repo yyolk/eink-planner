@@ -34,7 +34,7 @@ def house_typ_resource():
 
 
 def device_typ_resource(filename: str):
-    """Packaged physical-device .typ (page size and page-margin)."""
+    """Packaged physical-device .typ (page size, page-margin, mos-width)."""
     if filename not in KNOWN_DEVICE_TYP:
         raise ConfigError(f"unknown device typ: {filename}")
     return files("parch.data") / "typst" / filename
@@ -94,7 +94,7 @@ class Preamble:
         mos_layout = _v(p, "mos_layout")
         heading = _v(p, "heading")
         side = _v(mos_layout, "side_menu_position")
-        return f"""#import "{device_typ}": page-width, page-height, page-margin
+        return f"""#import "{device_typ}": page-width, page-height, page-margin, mos-width
 #set page(width: page-width, height: page-height, margin: page-margin({side}))
 
 #set text(
@@ -120,11 +120,11 @@ class Preamble:
 #let padded_link = padded_link.with(padding: link_padding)
 #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
 #let trail_heading = trail_heading.with(spacing: 1fr)
-#let mos_frame = mos_frame.with(mos-width: {_v(mos_layout, 'side_menu_width')}, column-gutter: {_v(mos_layout, 'column_gutter')})
+#let mos_frame = mos_frame.with(mos-width: mos-width, column-gutter: {_v(mos_layout, 'column_gutter')})
 #let well_frame = well_frame.with(heading-height: {_v(heading, 'height')}, row-gutter: {_v(mos_layout, 'row_gutter')})
 #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
 #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
-#let week_matrix = week_matrix.with(regular-height: regular_height)
+#let week_matrix = week_matrix.with(header-stroke: regular_stroke + black, regular-height: regular_height)
 #let lined_well = lined_well.with(regular-height: regular_height)
 #let daily_well = daily_well.with(column-gutter: regular_column_gutter)
 #let quarter_well = quarter_well.with(column-gutter: regular_column_gutter)"""

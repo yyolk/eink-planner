@@ -36,12 +36,11 @@ def _little_calendar() -> dict:
     return {"week_placement": "left", "inset": "5pt", "show_month_name": True}
 
 
-def _page(date_str: str, months_column: str = "left", side: str = "left") -> Quarterly:
+def _page(date_str: str, side: str = "left") -> Quarterly:
     return Quarterly(
         i18n=_i18n(),
         manifest=Manifest(),
         quarter=make_quarter(date_str),
-        months_column=months_column,
         little_calendar=_little_calendar(),
         side=side,
     )
@@ -52,7 +51,6 @@ def _section() -> QuarterlySection:
         section_name="quarterly",
         i18n=_i18n(),
         configurator=make_configurator(),
-        months_column="left",
         little_calendar=_little_calendar(),
     )
 
@@ -99,16 +97,6 @@ def test_q3_emits_july_august_september():
     for name in Q1_MONTHS:
         assert f"[{name}]" not in content
     assert content.count("colspan:") == 3
-
-
-def test_months_column_right_still_emits_months_then_pad():
-    content = _page("2026-07-01", months_column="right").content()
-    assert "quarter_well(left," in content
-    assert content.index("rows: (1fr, 1fr, 1fr)") < content.index("rect_pattern(dotted)")
-    assert "columns: (3fr,2fr)" not in content
-    assert "columns: (2fr" not in content
-    for name in Q3_MONTHS:
-        assert f"[{name}]" in content
 
 
 def test_hand_right_still_emits_months_then_pad():
@@ -205,7 +193,6 @@ def test_week_letter_stays_off_when_little_calendar_sets_true():
         i18n=_i18n(),
         manifest=Manifest(),
         quarter=make_quarter("2026-01-01"),
-        months_column="left",
         little_calendar={**_little_calendar(), "show_week_letter": True},
     )
     content = page.content()

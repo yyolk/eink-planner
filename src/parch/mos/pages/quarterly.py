@@ -14,7 +14,6 @@ class Quarterly:
         i18n: I18n,
         manifest: Manifest,
         quarter: Quarter,
-        months_column: str,
         little_calendar: dict[str, Any],
         pattern: str = "dotted",
         side: str = "left",
@@ -22,7 +21,6 @@ class Quarterly:
         self.i18n = i18n
         self.manifest = manifest
         self.quarter = quarter
-        self.months_column = str(months_column).lstrip(":").lower()
         self.little_calendar = little_calendar
         self.pattern = pattern
         self.side = side

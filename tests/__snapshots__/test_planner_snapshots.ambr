@@ -352,7 +352,7 @@
       )
     ''',
     'preamble': '''
-      #import "158x210.typ": page-width, page-height, page-margin
+      #import "158x210.typ": page-width, page-height, page-margin, mos-width
       #set page(width: page-width, height: page-height, margin: page-margin(left))
       
       #set text(
@@ -378,11 +378,11 @@
       #let padded_link = padded_link.with(padding: link_padding)
       #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
       #let trail_heading = trail_heading.with(spacing: 1fr)
-      #let mos_frame = mos_frame.with(mos-width: 10mm, column-gutter: 2mm)
+      #let mos_frame = mos_frame.with(mos-width: mos-width, column-gutter: 2mm)
       #let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm)
       #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
       #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
-      #let week_matrix = week_matrix.with(regular-height: regular_height)
+      #let week_matrix = week_matrix.with(header-stroke: regular_stroke + black, regular-height: regular_height)
       #let lined_well = lined_well.with(regular-height: regular_height)
       #let daily_well = daily_well.with(column-gutter: regular_column_gutter)
       #let quarter_well = quarter_well.with(column-gutter: regular_column_gutter)
@@ -424,7 +424,6 @@
           lead_pair(padded_link(<index>, contents_bars(size: h1)), text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4]),
           week_matrix(
         column-gutter: 5pt,
-        header-stroke: regular_stroke + black,
         pattern: dotted,
         [Monday 29],
         [Tuesday 30],
@@ -693,7 +692,7 @@
       )
     ''',
     'preamble': '''
-      #import "supernote-nomad.typ": page-width, page-height, page-margin
+      #import "supernote-nomad.typ": page-width, page-height, page-margin, mos-width
       #set page(width: page-width, height: page-height, margin: page-margin(left))
       
       #set text(
@@ -719,11 +718,11 @@
       #let padded_link = padded_link.with(padding: link_padding)
       #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
       #let trail_heading = trail_heading.with(spacing: 1fr)
-      #let mos_frame = mos_frame.with(mos-width: 8mm, column-gutter: 1.5mm)
+      #let mos_frame = mos_frame.with(mos-width: mos-width, column-gutter: 1.5mm)
       #let well_frame = well_frame.with(heading-height: 8mm, row-gutter: 1.5mm)
       #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
       #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
-      #let week_matrix = week_matrix.with(regular-height: regular_height)
+      #let week_matrix = week_matrix.with(header-stroke: regular_stroke + black, regular-height: regular_height)
       #let lined_well = lined_well.with(regular-height: regular_height)
       #let daily_well = daily_well.with(column-gutter: regular_column_gutter)
       #let quarter_well = quarter_well.with(column-gutter: regular_column_gutter)
@@ -765,7 +764,6 @@
           lead_pair(padded_link(<index>, contents_bars(size: h1)), text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4]),
           week_matrix(
         column-gutter: 4pt,
-        header-stroke: regular_stroke + black,
         pattern: dotted,
         [Monday 29],
         [Tuesday 30],
