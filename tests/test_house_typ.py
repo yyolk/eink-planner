@@ -1,5 +1,6 @@
 """House Typst library: preamble #import, no inlined helper bodies, workdir copy."""
 
+import zipfile
 from pathlib import Path
 
 from parch.config import load
@@ -69,3 +70,20 @@ def test_press_copies_house_typ_next_to_index(tmp_path, monkeypatch):
     assert (workdir / "house.typ").read_text(encoding="utf-8") == house_typ_resource().read_text(
         encoding="utf-8"
     )
+
+
+def test_wheel_includes_house_typ(tmp_path):
+    import subprocess
+
+    result = subprocess.run(
+        ["uv", "build", "--wheel", "-o", str(tmp_path)],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr + result.stdout
+    wheels = list(tmp_path.glob("*.whl"))
+    assert wheels, result.stdout
+    with zipfile.ZipFile(wheels[0]) as zf:
+        names = zf.namelist()
+    assert "parch/data/typst/house.typ" in names
+    assert names.count("parch/data/typst/house.typ") == 1
