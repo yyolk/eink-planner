@@ -21,7 +21,7 @@ def test_happy_path_mos_left():
     assert profile.section.daily is not None
     assert profile.section.daily.left is not None
     assert profile.section.daily.right is not None
-    assert "columns" not in profile.section.daily.model_fields
+    assert "columns" not in type(profile.section.daily).model_fields
 
 
 def test_happy_path_side_menu_right_keeps_ltr_well():
@@ -49,7 +49,7 @@ count = 5
     profile = DeviceProfile.model_validate(tomllib.loads(text))
     assert profile.mos.side_menu == "right"
     assert profile.section.daily is not None
-    assert "columns" not in profile.section.daily.model_fields
+    assert "columns" not in type(profile.section.daily).model_fields
     assert profile.section.daily.left is not None
     assert profile.section.daily.right is not None
     assert profile.section.daily.left.schedule is not None
@@ -128,7 +128,7 @@ hour_to = 20
 count = 1
 """,
     )
-    with pytest.raises(ValidationError, match="unknown key"):
+    with pytest.raises(ValidationError, match="extra_forbidden"):
         DeviceProfile.model_validate(tomllib.loads(text))
 
 

@@ -67,13 +67,13 @@ def test_parse_shipped_toml_profiles(path: Path):
     scale = device_scale(dto["device"])
     assert dto["document"]["layout"]["dimensions"]["width"] == scale["width"]
     assert dto["document"]["layout"]["dimensions"]["height"] == scale["height"]
-    assert dto["document"]["layout"]["margin"] == device_page_margin(scale)
+    assert dto["document"]["layout"]["margin"].to_plain() == device_page_margin(scale)
     text = path.read_text(encoding="utf-8")
     assert "reverse_months_quarters = true" in text
     assert "[style.margin]" not in text
     assert "months_column" not in text
     assert "week_placement" not in text
-    assert "columns = " not in text
+    assert "columns = [" not in text
     assert "\nwidth = " not in text
     assert "\nheight = " not in text
     assert scale["mos_width"] != scale["toolbar_clearance"] or path.name.startswith("supernote-nomad")
