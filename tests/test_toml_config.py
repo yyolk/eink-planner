@@ -109,7 +109,7 @@ def test_mos_left_daily_columns():
     dto = load(PAPER_158)
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")
     params = daily["params"]
-    assert params["columns_width"] == "(3fr, 5fr)"
+    assert "columns_width" not in params
     assert [c["class"] for c in params["left_column"]] == ["schedule", "little_calendar"]
     assert [c["class"] for c in params["right_column"]] == ["priorities", "notes"]
     schedule = params["left_column"][0]["params"]
@@ -127,7 +127,7 @@ def test_apply_hand_right_does_not_flip_daily_tracks():
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")
     params = daily["params"]
     assert dto["planner"]["params"]["mos_layout"]["side_menu_position"] == "right"
-    assert params["columns_width"] == "(3fr, 5fr)"
+    assert "columns_width" not in params
     assert [c["class"] for c in params["left_column"]] == ["schedule", "little_calendar"]
     assert [c["class"] for c in params["right_column"]] == ["priorities", "notes"]
     schedule = params["left_column"][0]["params"]
@@ -364,7 +364,7 @@ def test_apply_hand_overlays_side_menu_only():
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["side_menu_position"] == "right"
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
-    assert daily["columns_width"] == "(3fr, 5fr)"
+    assert "columns_width" not in daily
     quarterly = next(s for s in dto["planner"]["sections"] if s["name"] == "quarterly")["params"]
     assert quarterly["months_column"] == "left"
     monthly = next(s for s in dto["planner"]["sections"] if s["name"] == "monthly")["params"]["month_params"]

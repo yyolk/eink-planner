@@ -27,16 +27,16 @@ class Daily:
         i18n: I18n,
         manifest: Manifest,
         day: Day,
-        columns_width: str,
         items_spacing: str,
+        side: str = "left",
         debug: bool = False,
         **params: Any,
     ) -> None:
         self.i18n = i18n
         self.manifest = manifest
         self.day = day
-        self.columns_width = columns_width
         self.items_spacing = items_spacing
+        self.side = side
         self.params = params
         self.debug = debug
 
@@ -65,14 +65,9 @@ class Daily:
 )"""
 
     def content(self) -> str:
-        return f"""grid(
-  columns: {self.columns_width},
-  rows: 1fr,
-  column-gutter: regular_column_gutter,
-
-  {self._column(self.params.get("left_column") or [])},
-  {self._column(self.params.get("right_column") or [])}
-)"""
+        hours = self._column(self.params.get("left_column") or [])
+        writing = self._column(self.params.get("right_column") or [])
+        return f"daily_well({self.side}, {hours}, {writing})"
 
     def _column(self, comps: list[Any]) -> str:
         pieces: list[str] = []

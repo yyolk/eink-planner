@@ -57,7 +57,6 @@ def _i18n() -> I18n:
 
 def _page(date_str: str, manifest: Manifest | None = None, **overrides) -> Daily:
     params = {
-        "columns_width": "(3fr, 5fr)",
         "items_spacing": "4mm",
         "left_column": _LEFT,
         "right_column": _RIGHT,
@@ -76,7 +75,6 @@ def _section(start_date: str = "2026-01-01", end_date: str = "2026-01-04") -> Da
         section_name="daily",
         i18n=_i18n(),
         configurator=make_configurator(start_date=start_date, end_date=end_date),
-        columns_width="(3fr, 5fr)",
         items_spacing="4mm",
         left_column=_LEFT,
         right_column=_RIGHT,
@@ -142,6 +140,27 @@ def test_highlight_months_is_this_days_month_only():
     fourth = pages[3]
     assert fourth.highlight_months[0].id == "month-2026-01-01"
     assert fourth.highlight_quarters == []
+
+
+def test_content_emits_daily_well_hours_then_writing():
+    content = _page("2026-01-01").content()
+    assert "daily_well(" in content
+    assert "daily_well(left," in content
+    well = content[content.index("daily_well(") :]
+    assert well.index("left,") < well.index("[Schedule]")
+    assert well.index("[Schedule]") < well.index("[Priorities]")
+    assert well.index("[Priorities]") < well.index("[Notes]")
+    assert "columns: (3fr, 5fr)" not in content
+    assert "columns: (5fr, 3fr)" not in content
+
+
+def test_content_hand_right_still_passes_hours_then_writing():
+    content = _page("2026-01-01", side="right").content()
+    assert "daily_well(right," in content
+    well = content[content.index("daily_well(") :]
+    assert well.index("right,") < well.index("[Schedule]")
+    assert well.index("[Schedule]") < well.index("[Priorities]")
+    assert "daily_well(left," not in content
 
 
 def test_schedule_has_no_gray_and_uses_thin_black_rules():
@@ -266,6 +285,11 @@ def test_generated_contents_mark_alone_and_inverts_january_only():
     assert "Q1" in jan1 and "Q4" in jan1
     assert "Jan" in jan1 and "Dec" in jan1
     assert jan1.count("table.cell(fill: black") == 1
+    assert "daily_well(" in jan1
+    assert "daily_well(left," in jan1
+    well = jan1[jan1.index("daily_well(") :]
+    assert well.index("left,") < well.index("[Schedule]")
+    assert well.index("[Schedule]") < well.index("[Priorities]")
 
 
 def test_generated_hand_right_contents_mark_alone_left_of_q1():
@@ -288,3 +312,9 @@ def test_generated_hand_right_contents_mark_alone_left_of_q1():
     assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in jan1
     assert "table.cell([#padded_link(<quarter-2026-1>)[Q1]])" in jan1
     assert jan1.count("table.cell(fill: black") == 1
+    assert "daily_well(" in jan1
+    assert "daily_well(right," in jan1
+    well = jan1[jan1.index("daily_well(") :]
+    assert well.index("right,") < well.index("[Schedule]")
+    assert well.index("[Schedule]") < well.index("[Priorities]")
+    assert "daily_well(left," not in jan1

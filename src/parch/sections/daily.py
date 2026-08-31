@@ -25,12 +25,14 @@ class Daily:
 
     def pages(self, manifest: Manifest) -> list[PageData]:
         out = []
+        side = _side_menu_position(self.configurator)
         for day in self._range():
             page = DailyPage(
                 i18n=self.i18n,
                 manifest=manifest,
                 day=day,
                 debug=self.configurator.debug(),
+                side=side,
                 **self.params,
             )
             out.append(
@@ -47,3 +49,10 @@ class Daily:
 
     def _range(self):
         return walk(self.configurator.start_date(), self.configurator.end_date())
+
+
+def _side_menu_position(configurator: Configurator) -> str:
+    mos = configurator.dig("planner", "params", "mos_layout")
+    if mos is None:
+        return "left"
+    return mos["side_menu_position"] if "side_menu_position" in mos else "left"
