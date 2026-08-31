@@ -30,7 +30,9 @@
 # colophon needs them), months_column, week_placement left|right,
 # section.daily.columns 3fr/5fr, side_menu_width. Do not drop
 # reverse_months_quarters.
-# --hand / later --paper stay overlays until parch new writes the file.
+# --hand stays a press/proof overlay. parch new Questionary writes
+# side_menu / paper / week_placement none|omit / hours / counts onto
+# the copied file. --paper CLI stays parked.
 
 import tomllib
 from pathlib import Path
