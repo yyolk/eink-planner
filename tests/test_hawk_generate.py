@@ -13,12 +13,6 @@ from tests.helpers import base_config
 from tests.toml_fixtures import short_january
 
 _BASELINE = Path("/tmp/parch-hawk-baseline")
-_PREAMBLE_MARKERS = (
-    '#import "device.typ"',
-    '#import "supernote-nomad.typ"',
-    '#import "kindle-scribe.typ"',
-    '#import "158x210.typ"',
-)
 
 
 def _generate(stem: str) -> str:
