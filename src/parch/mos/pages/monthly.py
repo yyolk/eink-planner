@@ -52,7 +52,7 @@ class Monthly:
         if self.week_placement == "none":
             return f"""block(
     width: 100%,
-    height: 100%,
+    height: 1fr,
     grid(
     stroke: regular_stroke,
     columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),

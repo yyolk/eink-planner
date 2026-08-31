@@ -109,7 +109,7 @@ def test_hand_right_still_emits_week_first():
 def test_week_placement_none_is_seven_col_without_side():
     content = _page("2026-01", week_placement="none").content()
     assert "month_weeks(" not in content
-    assert "block(\n    width: 100%,\n    height: 100%,\n    grid(" in content
+    assert "block(\n    width: 100%,\n    height: 1fr,\n    grid(" in content
     assert "columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in content
     assert "rows: (regular_height,) + (1fr,) * 5" in content
     assert "16mm" not in content

@@ -151,7 +151,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert month_weeks.startswith(
         "#let month_weeks(side, rows: none, week-col: none, stroke: none, ..cells) = block(\n"
         "  width: 100%,\n"
-        "  height: 100%,\n"
+        "  height: 1fr,\n"
         "  grid(\n"
     )
     assert "(week-col,) + (1fr,) * 7" in month_weeks

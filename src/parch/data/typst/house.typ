@@ -198,11 +198,11 @@
 )
 
 // Monthly-page calendar. Rows stay caller-owned (live week count). House
-// owns week-col seating. Same side token as mos_frame. Block fills the
-// outer calendar 1fr so leftover 1fr rows have height.
+// owns week-col seating. Same side token as mos_frame. Block height is
+// 1fr so leftover 1fr body rows receive the outer calendar track.
 #let month_weeks(side, rows: none, week-col: none, stroke: none, ..cells) = block(
   width: 100%,
-  height: 100%,
+  height: 1fr,
   grid(
     stroke: stroke,
     columns: if side == left { (week-col,) + (1fr,) * 7 } else { (1fr,) * 7 + (week-col,) },
