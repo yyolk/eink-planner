@@ -1,4 +1,4 @@
-"""Weekly pages: Week N + range title, paper MOS, per-cell pattern."""
+"""Weekly pages: Week N + range title, paper MOS, week_matrix emit."""
 
 
 from parch.compose.page_data import HeadingMark
@@ -49,7 +49,7 @@ OLD_W01_DAYS = (
     "Sunday,  4",
 )
 
-_HEADER_CELL = (
+_CELL_CHROME = (
     "grid.cell(stroke: (bottom: regular_stroke + black), "
     'inset: (bottom: 0.25em), text(bottom-edge: "descender", '
 )
@@ -97,6 +97,24 @@ def _week_pages(typst_src: str) -> dict[str, str]:
     return found
 
 
+def _assert_week_matrix_emit(content: str, *, gutter: str, pattern: str, notes: str = "[Notes]") -> None:
+    assert "week_matrix(" in content
+    assert f"column-gutter: {gutter}" in content
+    assert "header-stroke: regular_stroke + black" in content
+    assert f"pattern: {pattern}" in content
+    assert content.count("header-stroke:") == 1
+    assert content.count(f"pattern: {pattern}") == 1
+    assert "grid.cell" not in content
+    assert "grid.cell(colspan" not in content
+    assert "side:" not in content
+    assert _CELL_CHROME not in content
+    assert _WRITING_PATTERN not in content
+    assert "rows: (auto, 1fr)" not in content
+    assert "columns: (1fr, 1fr, 1fr)" not in content
+    assert "rows: (1fr, 1fr, 1fr)" not in content
+    assert notes in content
+
+
 def test_w01_title_keeps_week_id_for_finders():
     assert _page("2025-12-29").title() == "text(size: h1)[Week 1 <2026W01>]"
 
@@ -116,55 +134,48 @@ def test_headers_link_to_daily_when_registered():
     manifest = Manifest()
     manifest.register_source("2025-12-29")
     content = _page("2025-12-29", manifest=manifest).content()
-    assert f"{_HEADER_CELL}padded_link(<2025-12-29>)[Monday 29])" in content
+    assert "padded_link(<2025-12-29>)[Monday 29]" in content
+    assert _CELL_CHROME not in content
 
 
 def test_thin_black_rule_not_thick_stroke():
     content = _page("2025-12-29").content()
     assert "thick_stroke" not in content
-    assert content.count("regular_stroke + black") == 8
+    assert content.count("regular_stroke + black") == 1
+    assert "header-stroke: regular_stroke + black" in content
 
 
-def test_header_rule_sits_under_descenders():
+def test_eight_contents_then_notes_no_python_grid_cell():
     content = _page("2025-12-29").content()
-    assert content.count(_HEADER_CELL) == 8
-    assert f"{_HEADER_CELL}[Monday 29])" in content
-    assert f"{_HEADER_CELL}[Notes])" in content
-    assert "rows: (auto, 1fr)" in content
-    assert "stroke: (left:" not in content
-    assert "stroke: (right:" not in content
-    assert "stroke: (top:" not in content
-    assert "stroke: regular_stroke + black)" not in content
+    _assert_week_matrix_emit(content, gutter="4pt", pattern="dotted")
+    for label in W01_DAYS:
+        assert f"[{label}]" in content
+    assert content.index("[Monday 29]") < content.index("[Tuesday 30]")
+    assert content.index("[Saturday 3]") < content.index("[Sunday 4]")
+    assert content.index("[Sunday 4]") < content.index("[Notes]")
 
 
-def test_per_cell_pattern_keeps_white_gutters():
+def test_per_cell_pattern_is_house_owned():
     content = _page("2025-12-29").content()
+    _assert_week_matrix_emit(content, gutter="4pt", pattern="dotted")
     assert "grid.cell(colspan: 3, rect_pattern" not in content
     assert "colspan: 3" not in content
-    assert content.count("rect_pattern(dotted)") == 8
-    assert "columns: (1fr, 1fr, 1fr)" in content
-    assert "rows: (1fr, 1fr, 1fr)" in content
-    assert "rows: (auto, 1fr)" in content
-    assert "column-gutter: 4pt" in content
-    assert "[Notes]" in content
-    assert "grid.cell(colspan: 2," in content
+    assert "rect_pattern(dotted)" not in content
+    assert "colspan:" not in content
 
 
-def test_writing_field_clips_and_insets_pattern():
+def test_writing_field_chrome_stays_in_house():
     content = _page("2025-12-29").content()
-    assert content.count(_WRITING_PATTERN) == 8
-    assert f"{_WRITING_PATTERN}dotted)" in content
-    assert (
-        "box(width: 100%, height: 100%, clip: true, "
-        "inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))"
-    ) in content
-    assert content.count("rect_pattern(dotted)") == 8
+    assert _WRITING_PATTERN not in content
+    assert "rect_pattern(dotted)" not in content
+    assert 'bottom-edge: "descender"' not in content
 
 
 def test_pattern_switches():
     lined = _page("2025-12-29", pattern="lined").content()
-    assert lined.count("rect_pattern(lined)") == 8
-    assert lined.count(f"{_WRITING_PATTERN}lined)") == 8
+    _assert_week_matrix_emit(lined, gutter="4pt", pattern="lined")
+    assert "pattern: dotted" not in lined
+    assert "rect_pattern(lined)" not in lined
     assert "rect_pattern(dotted)" not in lined
 
 
@@ -223,16 +234,14 @@ def test_generated_week_title_is_range_and_inverts_thursday_month():
     assert "Calendar" not in w01
     assert "Monday 29" in w01
     assert "Thursday 1" in w01
-    assert w01.count(_HEADER_CELL) == 8
-    assert f"{_HEADER_CELL}[Notes])" in w01
+    _assert_week_matrix_emit(w01, gutter="4pt", pattern="dotted")
     assert "Monday, 29" not in w01
     assert "Thursday,  1" not in w01
     assert w01.count("contents_bars(size:") == 1
     assert "grid.cell(stroke: (bottom: thick_stroke" not in w01
     assert "grid.cell(colspan: 3, rect_pattern" not in w01
-    assert w01.count("rect_pattern(dotted)") == 8
-    assert w01.count(_WRITING_PATTERN) == 8
-    assert f"{_WRITING_PATTERN}dotted)" in w01
+    assert "rect_pattern(dotted)" not in w01
+    assert _WRITING_PATTERN not in w01
     assert "[Notes]" in w01
     assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in w01
     assert "table.cell([#padded_link(<quarter-2026-1>)[Q1]])" in w01
@@ -243,7 +252,8 @@ def test_generated_week_title_is_range_and_inverts_thursday_month():
     assert f"Week 28 <2026W28> #h(0.6em) {_W28_RANGE}" in w28
     assert "Monday 6" in w28
     assert w28.count("Calendar") == 0
-    assert w28.count("rect_pattern(dotted)") == 8
+    _assert_week_matrix_emit(w28, gutter="4pt", pattern="dotted")
+    assert "rect_pattern(dotted)" not in w28
     assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-07-01>)[Jul]])" in w28
     assert "table.cell([#padded_link(<quarter-2026-3>)[Q3]])" in w28
     assert "table.cell(fill: black, text(white)[#padded_link(<quarter-" not in w28

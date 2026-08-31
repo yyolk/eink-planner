@@ -390,7 +390,7 @@
       #let h1 = 10mm
       #let link_padding = 8pt
       
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, week_matrix
       
       #let dotted = dotted(regular_height: regular_height)
       #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -403,6 +403,7 @@
       #let mos_frame = mos_frame.with(mos-width: 10mm, column-gutter: 2mm)
       #let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm)
       #let month_grid = month_grid.with(week-rows: 6, hline-stroke: regular_stroke + black)
+      #let week_matrix = week_matrix.with(regular-height: regular_height)
     ''',
     'weekly': '''
       #mos_frame(
@@ -439,54 +440,18 @@
         ),
         well_frame(
           lead_pair(padded_link(<index>, contents_bars(size: h1)), text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4]),
-          grid(
-        columns: (1fr, 1fr, 1fr),
-        rows: (1fr, 1fr, 1fr),
+          week_matrix(
         column-gutter: 5pt,
-      
-        grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Monday 29])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ), grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Tuesday 30])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ), grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Wednesday 31])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ),
-        grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-01>)[Thursday 1])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ), grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-02>)[Friday 2])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ), grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-03>)[Saturday 3])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ),
-        grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-04>)[Sunday 4])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ), grid.cell(colspan: 2, grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Notes])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ))
+        header-stroke: regular_stroke + black,
+        pattern: dotted,
+        [Monday 29],
+        [Tuesday 30],
+        [Wednesday 31],
+        padded_link(<2026-01-01>)[Thursday 1],
+        padded_link(<2026-01-02>)[Friday 2],
+        padded_link(<2026-01-03>)[Saturday 3],
+        padded_link(<2026-01-04>)[Sunday 4],
+        [Notes],
       ),
         ),
       )
@@ -784,7 +749,7 @@
       #let h1 = 8mm
       #let link_padding = 6pt
       
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, week_matrix
       
       #let dotted = dotted(regular_height: regular_height)
       #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -797,6 +762,7 @@
       #let mos_frame = mos_frame.with(mos-width: 8mm, column-gutter: 1.5mm)
       #let well_frame = well_frame.with(heading-height: 8mm, row-gutter: 1.5mm)
       #let month_grid = month_grid.with(week-rows: 6, hline-stroke: regular_stroke + black)
+      #let week_matrix = week_matrix.with(regular-height: regular_height)
     ''',
     'weekly': '''
       #mos_frame(
@@ -833,54 +799,18 @@
         ),
         well_frame(
           lead_pair(padded_link(<index>, contents_bars(size: h1)), text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4]),
-          grid(
-        columns: (1fr, 1fr, 1fr),
-        rows: (1fr, 1fr, 1fr),
+          week_matrix(
         column-gutter: 4pt,
-      
-        grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Monday 29])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ), grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Tuesday 30])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ), grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Wednesday 31])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ),
-        grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-01>)[Thursday 1])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ), grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-02>)[Friday 2])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ), grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-03>)[Saturday 3])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ),
-        grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", padded_link(<2026-01-04>)[Sunday 4])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ), grid.cell(colspan: 2, grid(
-        columns: 1fr,
-        rows: (auto, 1fr),
-        grid.cell(stroke: (bottom: regular_stroke + black), inset: (bottom: 0.25em), text(bottom-edge: "descender", [Notes])),
-        box(width: 100%, height: 100%, clip: true, inset: (top: 0.25em, bottom: 0.25em), rect_pattern(dotted))
-      ))
+        header-stroke: regular_stroke + black,
+        pattern: dotted,
+        [Monday 29],
+        [Tuesday 30],
+        [Wednesday 31],
+        padded_link(<2026-01-01>)[Thursday 1],
+        padded_link(<2026-01-02>)[Friday 2],
+        padded_link(<2026-01-03>)[Saturday 3],
+        padded_link(<2026-01-04>)[Sunday 4],
+        [Notes],
       ),
         ),
       )

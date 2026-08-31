@@ -185,3 +185,46 @@
   grid.hline(y: 2, stroke: hline-stroke),
   ..cells,
 )
+
+// Header on auto; rule sits on the descender. Clipped pattern fills the 1fr.
+// Not exported — week_matrix is the only weekly overview entry.
+#let week_cell(header, header-stroke: none, pattern: none, regular-height: none) = grid(
+  columns: 1fr,
+  rows: (auto, 1fr),
+  grid.cell(
+    stroke: (bottom: header-stroke),
+    text(bottom-edge: "descender", header),
+  ),
+  box(
+    width: 100%,
+    height: 100%,
+    clip: true,
+    inset: (top: 0.25em, bottom: 0.25em),
+    rect_pattern(regular_height: regular-height, pattern),
+  ),
+)
+
+// 3×3 of equal 1fr tracks. column-gutter only (no row-gutter). Notes is
+// colspan: 2 on the eighth cell so the first column stays one vertical.
+#let week_matrix(
+  column-gutter: none,
+  header-stroke: none,
+  pattern: none,
+  regular-height: none,
+  ..contents,
+) = {
+  let headers = contents.pos()
+  let painted = headers.map(header => week_cell(
+    header,
+    header-stroke: header-stroke,
+    pattern: pattern,
+    regular-height: regular-height,
+  ))
+  grid(
+    columns: (1fr, 1fr, 1fr),
+    rows: (1fr, 1fr, 1fr),
+    column-gutter: column-gutter,
+    ..painted.slice(0, 7),
+    grid.cell(colspan: 2, painted.at(7)),
+  )
+}
