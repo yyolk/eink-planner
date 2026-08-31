@@ -366,17 +366,8 @@
       )
     ''',
     'preamble': '''
-      #set page(
-        width: 158mm,
-        height: 210mm,
-      
-        margin: (
-          top: 5mm,
-          right: 5mm,
-          bottom: 0mm,
-          left: 0mm,
-        )
-      )
+      #import "158x210.typ": page-width, page-height, page-margin
+      #set page(width: page-width, height: page-height, margin: page-margin(left))
       
       #set text(
         size: 10pt
@@ -726,17 +717,8 @@
       )
     ''',
     'preamble': '''
-      #set page(
-        width: 118.87mm,
-        height: 158.5mm,
-      
-        margin: (
-          top: 8mm,
-          right: 4mm,
-          bottom: 0mm,
-          left: 0mm,
-        )
-      )
+      #import "supernote-nomad.typ": page-width, page-height, page-margin
+      #set page(width: page-width, height: page-height, margin: page-margin(left))
       
       #set text(
         size: 8pt
