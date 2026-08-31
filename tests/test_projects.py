@@ -555,14 +555,8 @@ pages = 1
     )
     typst = _generate(dto)
     assert "#let dotted =" in typst
-    assert "dx: 0.5pt" in typst
-    assert "dy: regular_height - 0.3mm" in typst
-    helper_start = typst.index("#let rect_pattern(pattern)")
-    helper_end = typst.index("#let dotted_centered")
-    helper = typst[helper_start:helper_end]
-    assert "#let rect_pattern(pattern) = rect(" in helper
-    assert "fill: pattern" not in helper
-    assert "layout(size =>" in helper
+    assert '#import "house.typ"' in typst
+    assert "#let rect_pattern = rect_pattern.with(regular_height: regular_height)" in typst
     assert "rect_pattern_centered(dotted_centered)" not in typst
     assert "#let scratch_pad = rect_pattern(dotted)" in typst
     pages = _pages(typst)
