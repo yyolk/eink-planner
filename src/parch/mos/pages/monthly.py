@@ -39,17 +39,13 @@ class Monthly:
 
     def content(self) -> str:
         calendar = self._calendar()
-        return f"""layout(size => block(
-  width: size.width,
-  height: size.height,
-  grid(
-    columns: 1fr,
-    rows: (1fr, auto, 1fr),
-    {calendar},
-    grid.hline(stroke: regular_stroke + black),
-    rect_pattern({self.pattern})
-  )
-))"""
+        return f"""grid(
+  columns: 1fr,
+  rows: (1fr, 1fr),
+  grid.hline(y: 1, stroke: regular_stroke + black),
+  {calendar},
+  rect_pattern({self.pattern})
+)"""
 
     def _calendar(self) -> str:
         if self.week_placement == "none":

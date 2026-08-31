@@ -80,17 +80,17 @@ def _month_pages(typst_src: str) -> dict[str, str]:
 def test_january_keeps_full_weekdays_and_five_body_rows():
     content = _page("2026-01").content()
     assert "month_weeks(left," in content
-    well = content[content.index("month_weeks(") : content.index("grid.hline")]
+    well = content[content.index("month_weeks(") :]
     assert "rows: (regular_height,) + (1fr,) * 5" in well
     assert "16mm" not in well
     assert "(1fr,) * 6" not in well
     assert "columns: (regular_height" not in well
     assert "stroke:" not in well
     assert "block(" not in well
-    assert "layout(size => block(" in content
-    assert "width: size.width," in content
-    assert "height: size.height," in content
-    assert "rows: (1fr, auto, 1fr)" in content
+    assert "layout(" not in content
+    assert "grid.hline(y: 1, stroke: regular_stroke + black)" in content
+    assert "rows: (1fr, 1fr)" in content
+    assert "rows: (1fr, auto, 1fr)" not in content
     assert "rows: (auto, auto, 1fr)" not in content
     assert "[], align(center + horizon)[Monday]" in content
     for name in ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"):
@@ -118,9 +118,12 @@ def test_week_placement_none_is_seven_col_without_side():
     assert "16mm" not in content
     assert "align(center + horizon)[Monday]" in content
     assert "rotate(90deg" not in content
-    notes = content[content.index("grid.hline") :]
+    notes = content[content.index("rect_pattern") :]
     assert "block(" not in notes
     assert "rect_pattern(dotted)" in notes
+    assert "layout(" not in content
+    assert "grid.hline(y: 1, stroke: regular_stroke + black)" in content
+    assert "rows: (1fr, 1fr)" in content
 
 
 def test_august_2026_is_six_rows_on_one_page():
@@ -128,9 +131,11 @@ def test_august_2026_is_six_rows_on_one_page():
     content = page.content()
     weeks = page._month_in_weeks()
     assert len(weeks) == 6
-    assert "layout(size => block(" in content
-    assert "rows: (1fr, auto, 1fr)" in content
+    assert "layout(" not in content
+    assert "rows: (1fr, 1fr)" in content
+    assert "grid.hline(y: 1, stroke: regular_stroke + black)" in content
     assert "rows: (regular_height,) + (1fr,) * 6" in content
+    assert "rows: (1fr, auto, 1fr)" not in content
     assert "rows: (auto, auto, 1fr)" not in content
     assert content.count("rotate(90deg") == 6
 
@@ -157,10 +162,11 @@ def test_notes_are_thin_rule_plus_pattern_without_label():
     assert "monthly_notes" not in content
     assert "Notes" not in content
     assert "thick_stroke" not in content
-    assert "grid.hline(stroke: regular_stroke + black)" in content
+    assert "grid.hline(y: 1, stroke: regular_stroke + black)" in content
     assert "rect_pattern(dotted)" in content
-    notes = content[content.index("grid.hline") :]
+    notes = content[content.index("rect_pattern") :]
     assert "block(" not in notes
+    assert "layout(" not in content
 
 
 def test_title_is_month_without_year_and_kills_calendar_chip():
@@ -227,7 +233,9 @@ def test_generated_title_is_january_without_year_and_inverts_only_the_month():
     assert "Q1" in jan and "Q4" in jan
     assert "August<month-2026-08-01>" in aug
     assert aug.count("rotate(90deg") == 6
-    assert "rows: (1fr, auto, 1fr)" in aug
+    assert "rows: (1fr, 1fr)" in aug
+    assert "grid.hline(y: 1, stroke: regular_stroke + black)" in aug
+    assert "layout(" not in aug
     assert "rows: (regular_height,) + (1fr,) * 6" in aug
     month_slices = [page for page in typst.split("#pagebreak()") if "August<month-2026-08-01>" in page]
     assert len(month_slices) == 1
