@@ -412,7 +412,7 @@ def test_overlay_week_placement_none_vs_omit():
     none = overlay_toml(text, week_placement="none")
     assert "# month" in none
     assert 'week_label_rotation = "90deg"' in none
-    assert 'daily_cell_height = "16mm"' in none
+    assert 'daily_cell_height = "16mm"\nweek_placement = "none"' in none
     data = tomllib.loads(none)
     assert data["section"]["monthly"]["week_placement"] == "none"
 

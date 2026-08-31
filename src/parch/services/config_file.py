@@ -402,9 +402,10 @@ def _replace_sections(text: str, names: list[str]) -> str:
 
 
 def _append_line(block: str, line: str) -> str:
-    if block.endswith("\n"):
-        return f"{block}{line}\n"
-    return f"{block}\n{line}\n"
+    stripped = block.rstrip("\n")
+    trailing = block[len(stripped) :]
+    extra = trailing[1:] if trailing else "\n"
+    return f"{stripped}\n{line}\n{extra}"
 
 
 def _append_table(text: str, name: str, body: str) -> str:
