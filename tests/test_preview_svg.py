@@ -217,7 +217,7 @@ def test_rect_pattern_helper_stamps_tiles_not_fill():
     assert "rect_pattern(dotted)" in typst
     assert "PageData" not in typst
     assert "heading_mark" not in typst
-    assert "trail_heading" not in typst
+    assert "let seated_title" not in typst
 
 
 def test_large_rect_pattern_svg_stamps_dots_not_pattern_paint(tmp_path):

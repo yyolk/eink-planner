@@ -213,9 +213,9 @@ def test_generated_week_title_is_range_and_inverts_thursday_month():
     assert "text(size: h1)[/]" not in w01
     assert "2026 /" not in w01
     assert f"Week 1 <2026W01> #h(0.6em) {_W01_RANGE}" in w01
-    heading = w01[w01.index("columns: (auto, auto)") : w01.index("Week 1 <2026W01>")]
-    assert "columns: (auto, auto)" in heading
-    assert "column-gutter: 6pt" in heading
+    heading = w01[w01.index("lead_pair(") : w01.index("Week 1 <2026W01>")]
+    assert "lead_pair(" in heading
+    assert "column-gutter: 6pt" not in heading
     assert "pad(right: 3mm" not in heading
     assert "contents_bars(size:" in heading
     assert "padded_link(<annual>)[2026]" not in heading

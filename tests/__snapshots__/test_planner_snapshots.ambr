@@ -141,17 +141,7 @@
       )
           )
         )
-      ), grid.cell(align: horizon, context {
-        let seated_title = text(size: h1)[2026<annual>]
-        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1)))
-        let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
-        stack(
-          dir: rtl,
-          spacing: 1fr,
-          box(height: band, align(horizon + left, seated_title)),
-          box(height: band, align(horizon + left, seated_mark)),
-        )
-      }),
+      ), grid.cell(align: horizon, trail_heading(text(size: h1)[2026<annual>], pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1))), spacing: 1fr, direction: rtl)),
         grid(
         columns: (1fr, 1fr, 1fr),
         rows: (1fr),
@@ -184,17 +174,7 @@
     'colophon': '''
       #block[
         #set par(spacing: 0em)
-        #context {
-        let seated_title = text(size: h1, weight: "bold")[About this notebook <colophon>]
-        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1)))
-        let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
-        stack(
-          dir: rtl,
-          spacing: 0.5em,
-          box(height: band, align(horizon + left, seated_title)),
-          box(height: band, align(horizon + left, seated_mark)),
-        )
-      }
+        #trail_heading(text(size: h1, weight: "bold")[About this notebook <colophon>], pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1))), spacing: 0.5em, direction: rtl)
         #v(1em)
         #context grid(
           columns: (measure(text(weight: "bold")[Version]).width, 1fr),
@@ -247,8 +227,7 @@
       )
           )
         )
-      ), grid.cell(align: horizon, context {
-        let seated_title = grid(
+      ), grid.cell(align: horizon, trail_heading(grid(
         columns: (auto, auto),
         rows: (3fr, 2fr),
         column-gutter: regular_column_gutter,
@@ -264,16 +243,7 @@
         ),
         [*Thursday*],
         padded_link(<2026W01>)[Week 1]
-      )
-        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1)))
-        let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
-        stack(
-          dir: rtl,
-          spacing: 1fr,
-          box(height: band, align(horizon + left, seated_title)),
-          box(height: band, align(horizon + left, seated_mark)),
-        )
-      }),
+      ), pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1))), spacing: 1fr, direction: rtl)),
         grid(
         columns: (3fr, 5fr),
         rows: 1fr,
@@ -388,13 +358,7 @@
       )
           )
         )
-      ), grid.cell(align: horizon, grid(
-        columns: (auto, auto),
-        column-gutter: 6pt,
-        align: horizon,
-        padded_link(<index>, contents_bars(size: h1)),
-        text(size: h1)[January<month-2026-01-01>]
-      )),
+      ), grid.cell(align: horizon, lead_pair(padded_link(<index>, contents_bars(size: h1)), text(size: h1)[January<month-2026-01-01>])),
         grid(
         columns: 1fr,
         rows: (auto, auto, 1fr),
@@ -441,7 +405,7 @@
       #let h1 = 10mm
       #let link_padding = 8pt
       
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading
       
       #let dotted = dotted(regular_height: regular_height)
       #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -492,13 +456,7 @@
       )
           )
         )
-      ), grid.cell(align: horizon, grid(
-        columns: (auto, auto),
-        column-gutter: 6pt,
-        align: horizon,
-        padded_link(<index>, contents_bars(size: h1)),
-        text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4]
-      )),
+      ), grid.cell(align: horizon, lead_pair(padded_link(<index>, contents_bars(size: h1)), text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4])),
         grid(
         columns: (1fr, 1fr, 1fr),
         rows: (1fr, 1fr, 1fr),
@@ -594,17 +552,7 @@
       )
           )
         )
-      ), grid.cell(align: horizon, context {
-        let seated_title = text(size: h1)[2026<annual>]
-        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1)))
-        let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
-        stack(
-          dir: rtl,
-          spacing: 1fr,
-          box(height: band, align(horizon + left, seated_title)),
-          box(height: band, align(horizon + left, seated_mark)),
-        )
-      }),
+      ), grid.cell(align: horizon, trail_heading(text(size: h1)[2026<annual>], pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1))), spacing: 1fr, direction: rtl)),
         grid(
         columns: (1fr, 1fr, 1fr),
         rows: (1fr),
@@ -637,17 +585,7 @@
     'colophon': '''
       #block[
         #set par(spacing: 0em)
-        #context {
-        let seated_title = text(size: h1, weight: "bold")[About this notebook <colophon>]
-        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1)))
-        let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
-        stack(
-          dir: rtl,
-          spacing: 0.5em,
-          box(height: band, align(horizon + left, seated_title)),
-          box(height: band, align(horizon + left, seated_mark)),
-        )
-      }
+        #trail_heading(text(size: h1, weight: "bold")[About this notebook <colophon>], pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1))), spacing: 0.5em, direction: rtl)
         #v(1em)
         #context grid(
           columns: (measure(text(weight: "bold")[Version]).width, 1fr),
@@ -700,8 +638,7 @@
       )
           )
         )
-      ), grid.cell(align: horizon, context {
-        let seated_title = grid(
+      ), grid.cell(align: horizon, trail_heading(grid(
         columns: (auto, auto),
         rows: (3fr, 2fr),
         column-gutter: regular_column_gutter,
@@ -717,16 +654,7 @@
         ),
         [*Thursday*],
         padded_link(<2026W01>)[Week 1]
-      )
-        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1)))
-        let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
-        stack(
-          dir: rtl,
-          spacing: 1fr,
-          box(height: band, align(horizon + left, seated_title)),
-          box(height: band, align(horizon + left, seated_mark)),
-        )
-      }),
+      ), pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1))), spacing: 1fr, direction: rtl)),
         grid(
         columns: (3fr, 5fr),
         rows: 1fr,
@@ -841,13 +769,7 @@
       )
           )
         )
-      ), grid.cell(align: horizon, grid(
-        columns: (auto, auto),
-        column-gutter: 6pt,
-        align: horizon,
-        padded_link(<index>, contents_bars(size: h1)),
-        text(size: h1)[January<month-2026-01-01>]
-      )),
+      ), grid.cell(align: horizon, lead_pair(padded_link(<index>, contents_bars(size: h1)), text(size: h1)[January<month-2026-01-01>])),
         grid(
         columns: 1fr,
         rows: (auto, auto, 1fr),
@@ -894,7 +816,7 @@
       #let h1 = 8mm
       #let link_padding = 6pt
       
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading
       
       #let dotted = dotted(regular_height: regular_height)
       #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -945,13 +867,7 @@
       )
           )
         )
-      ), grid.cell(align: horizon, grid(
-        columns: (auto, auto),
-        column-gutter: 6pt,
-        align: horizon,
-        padded_link(<index>, contents_bars(size: h1)),
-        text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4]
-      )),
+      ), grid.cell(align: horizon, lead_pair(padded_link(<index>, contents_bars(size: h1)), text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4])),
         grid(
         columns: (1fr, 1fr, 1fr),
         rows: (1fr, 1fr, 1fr),

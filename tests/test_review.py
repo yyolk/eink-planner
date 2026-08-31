@@ -19,11 +19,9 @@ NOMAD = base_config("supernote-nomad")
 _EN_DASH = "–"
 _MARK_RULE = "contents_bars(size:"
 _TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
-_SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
-_SEATED_TITLE = "let seated_title ="
-_SEATED_MARK = "let seated_mark ="
-_SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
-_FOLLOW_RTL = "dir: rtl,\n    spacing: 0.5em,"
+_TRAIL_HEADING = "trail_heading("
+_SEAT_RTL = "spacing: 1fr, direction: rtl"
+_FOLLOW_RTL = "spacing: 0.5em, direction: rtl"
 
 # 2026, Monday week start: Jan 1 is Thursday.
 # Walk is start.beginning_of_month().beginning_of_week() through
@@ -586,14 +584,14 @@ def test_contents_mark_on_review_when_index_on():
         assert "padded_link(<annual>)" not in page
     assert "text(size: h1, [Review <review>])" in index
     assert "padded_link(<review>)" in week
-    heading = index[index.index(_SEATED_TITLE) : index.index(_SEATED_MARK)]
+    heading = index[index.index(_TRAIL_HEADING) : index.index(_TRAIL_MARK)]
     assert "[Review <review>]" in heading
     assert _TRAIL_MARK not in heading
     assert _FOLLOW_RTL in index
     assert _SEAT_RTL not in index
-    assert _SEATED_TRAIL in index
+    assert _TRAIL_HEADING in index
     assert index.index("[Review <review>]") < index.index(_TRAIL_MARK)
-    week_heading = week[week.index(_SEATED_TITLE) : week.index(_SEATED_MARK)]
+    week_heading = week[week.index(_TRAIL_HEADING) : week.index(_TRAIL_MARK)]
     assert "padded_link(<review>)" in week_heading
     assert _FOLLOW_RTL in week
     assert _SEAT_RTL not in week

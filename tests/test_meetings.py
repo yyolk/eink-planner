@@ -24,11 +24,9 @@ ppi = 300"""
 
 _MARK_RULE = "contents_bars(size:"
 _TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
-_SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
-_SEATED_TITLE = "let seated_title ="
-_SEATED_MARK = "let seated_mark ="
-_SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
-_FOLLOW_RTL = "dir: rtl,\n    spacing: 0.5em,"
+_TRAIL_HEADING = "trail_heading("
+_SEAT_RTL = "spacing: 1fr, direction: rtl"
+_FOLLOW_RTL = "spacing: 0.5em, direction: rtl"
 _TICK_STROKE = "stroke: (_, _) => (bottom: regular_stroke + black)"
 
 
@@ -373,14 +371,14 @@ def test_contents_mark_on_meetings_when_index_on():
     assert "column-gutter: 6pt" not in index
     assert "text(size: h1, [Meetings <meetings>])" in index
     assert "padded_link(<meetings>)" in meeting
-    heading = index[index.index(_SEATED_TITLE) : index.index(_SEATED_MARK)]
+    heading = index[index.index(_TRAIL_HEADING) : index.index(_TRAIL_MARK)]
     assert "[Meetings <meetings>]" in heading
     assert _TRAIL_MARK not in heading
     assert _FOLLOW_RTL in index
     assert _SEAT_RTL not in index
-    assert _SEATED_TRAIL in index
+    assert _TRAIL_HEADING in index
     assert index.index("[Meetings <meetings>]") < index.index(_TRAIL_MARK)
-    meeting_heading = meeting[meeting.index(_SEATED_TITLE) : meeting.index(_SEATED_MARK)]
+    meeting_heading = meeting[meeting.index(_TRAIL_HEADING) : meeting.index(_TRAIL_MARK)]
     assert "padded_link(<meetings>)" in meeting_heading
     assert _FOLLOW_RTL in meeting
     assert _SEAT_RTL not in meeting

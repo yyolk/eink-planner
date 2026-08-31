@@ -29,9 +29,9 @@ NOMAD = base_config("supernote-nomad")
 _BUILD_LOG = ("Command", "Git commit", "SHA-256", "Config path", "Config")
 _THEME = ('lang: "toml"', "syntaxes:", "theme:")
 _MARK_RULE = "contents_bars(size:"
-_FOLLOW_RTL = "dir: rtl,\n    spacing: 0.5em,"
-_SEATED_TITLE = "let seated_title ="
-_SEATED_MARK = "let seated_mark ="
+_FOLLOW_RTL = "spacing: 0.5em, direction: rtl"
+_TRAIL_HEADING = "trail_heading("
+_MARK_FLUSH = "padded_link(padding: 0pt, <index>"
 
 
 def _generate(dto: StrictDict) -> str:
@@ -229,11 +229,10 @@ def test_colophon_follow_header_five_bar_and_body():
     assert page.raw_typst is True
     assert page.heading_mark is HeadingMark.LEAD
     assert _FOLLOW_RTL in content
-    assert _SEATED_TITLE in content
-    assert _SEATED_MARK in content
+    assert _TRAIL_HEADING in content
     assert content.count(_MARK_RULE) == 1
     assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + " <colophon>]" in content
-    heading = content[content.index(_SEATED_TITLE) : content.index(_SEATED_MARK)]
+    heading = content[content.index(_TRAIL_HEADING) : content.index(_MARK_FLUSH)]
     assert DEFAULT_TITLE in heading
     assert _MARK_RULE not in heading
     assert "column-gutter: 6pt" not in content
@@ -569,10 +568,9 @@ def test_dump_continuation_header_is_follow_seat_without_nums():
     assert "#show: rest" not in content
     assert "header-ascent" not in content
     assert _FOLLOW_RTL in content
-    assert _SEATED_TITLE in content
-    assert _SEATED_MARK in content
+    assert _TRAIL_HEADING in content
     assert content.count(_MARK_RULE) == 2
-    assert content.count(_SEATED_TITLE) == 2
+    assert content.count(_TRAIL_HEADING) == 2
     assert "column-gutter: 6pt" not in content
     assert "0.85em" not in content
     assert "nums" not in content
@@ -581,7 +579,7 @@ def test_dump_continuation_header_is_follow_seat_without_nums():
     assert "cur == start-page" in content
     assert colo._dump_end_label() in content
     assert colo._dump_state_name() in content
-    heading = content[content.index(_SEATED_TITLE) : content.index(_SEATED_MARK)]
+    heading = content[content.index(_TRAIL_HEADING) : content.index(_MARK_FLUSH)]
     assert DEFAULT_TITLE in heading
     assert _MARK_RULE not in heading
     layer = colo._dump_pagination(manifest)
