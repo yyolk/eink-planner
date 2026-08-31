@@ -390,7 +390,7 @@
       #let h1 = 10mm
       #let link_padding = 8pt
       
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, week_matrix
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, week_matrix, lined_well
       
       #let dotted = dotted(regular_height: regular_height)
       #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -404,6 +404,7 @@
       #let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm)
       #let month_grid = month_grid.with(week-rows: 6, hline-stroke: regular_stroke + black)
       #let week_matrix = week_matrix.with(regular-height: regular_height)
+      #let lined_well = lined_well.with(regular-height: regular_height)
     ''',
     'weekly': '''
       #mos_frame(
@@ -749,7 +750,7 @@
       #let h1 = 8mm
       #let link_padding = 6pt
       
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, week_matrix
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, week_matrix, lined_well
       
       #let dotted = dotted(regular_height: regular_height)
       #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -763,6 +764,7 @@
       #let well_frame = well_frame.with(heading-height: 8mm, row-gutter: 1.5mm)
       #let month_grid = month_grid.with(week-rows: 6, hline-stroke: regular_stroke + black)
       #let week_matrix = week_matrix.with(regular-height: regular_height)
+      #let lined_well = lined_well.with(regular-height: regular_height)
     ''',
     'weekly': '''
       #mos_frame(

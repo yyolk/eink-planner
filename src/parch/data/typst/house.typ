@@ -228,3 +228,12 @@
     grid.cell(colspan: 2, painted.at(7)),
   )
 }
+
+// Full-bleed writing field. Parent is well_frame's 1fr body (bounded).
+// One region; clip is rect_pattern's. No header, inset, side, or cells.
+#let lined_well(regular-height: none, pattern) = box(
+  width: 100%,
+  height: 100%,
+  clip: true,
+  rect_pattern(regular_height: regular-height, pattern),
+)

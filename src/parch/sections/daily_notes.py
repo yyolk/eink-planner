@@ -33,7 +33,7 @@ class DailyNotes:
             out.append(
                 PageData(
                     title=self._title(manifest, note),
-                    content=f"rect_pattern({self.pattern})",
+                    content=f"lined_well({self.pattern})",
                     highlight_months=[note.day.month()],
                     highlight_quarters=[],
                     nav_links=[],

@@ -568,8 +568,6 @@ pages = 1
     notes_body_pages = [
         page
         for page in pages
-        if "rect_pattern(dotted)" in page
-        and "rect_pattern_centered" not in page
-        and "#[] <project-1>" not in page
+        if "lined_well(dotted)" in page
     ]
-    assert notes_body_pages, "notes pages must still call rect_pattern(dotted)"
+    assert notes_body_pages, "daily notes pages must call lined_well(dotted)"
