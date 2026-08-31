@@ -1,7 +1,5 @@
 """Plain cover page (raw Typst, no MOS chrome)."""
 
-from __future__ import annotations
-
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.compose.page_data import PageData

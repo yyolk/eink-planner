@@ -1,7 +1,5 @@
 """Pydantic device/locale models: happy path and nested validation."""
 
-from __future__ import annotations
-
 import tomllib
 
 import pytest

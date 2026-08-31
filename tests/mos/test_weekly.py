@@ -1,7 +1,5 @@
 """Weekly pages: Week N + range title, paper MOS, per-cell pattern."""
 
-from __future__ import annotations
-
 
 from parch.compose.page_data import HeadingMark
 from parch.i18n import I18n

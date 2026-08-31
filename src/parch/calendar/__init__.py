@@ -1,7 +1,5 @@
 """Calendar entities (Day / Week / Month / Quarter) with Ruby-style succ ranges."""
 
-from __future__ import annotations
-
 from collections.abc import Iterator
 from typing import Protocol, TypeVar
 

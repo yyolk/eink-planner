@@ -1,7 +1,5 @@
 """Weekly Review: week index + lined leftover-notes pages (raw Typst, no MOS)."""
 
-from __future__ import annotations
-
 
 import pytest
 

@@ -1,7 +1,5 @@
 """Provenance helpers: command line, version, git HEAD, config hash."""
 
-from __future__ import annotations
-
 import hashlib
 import re
 from pathlib import Path

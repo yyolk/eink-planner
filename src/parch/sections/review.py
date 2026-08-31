@@ -3,8 +3,6 @@
 Raw Typst only — no MOS chrome. Sibling of Habits, not a second weekly planner.
 """
 
-from __future__ import annotations
-
 from parch.calendar import walk
 from parch.calendar.day import Day
 from parch.calendar.week import Week

@@ -1,7 +1,5 @@
 """Shared layout tokens used by more than one MOS section."""
 
-from __future__ import annotations
-
 import re
 
 _LENGTH = re.compile(r"^([+-]?(?:\d+(?:\.\d*)?|\.\d+))(mm|cm|pt)$")

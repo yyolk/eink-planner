@@ -1,7 +1,5 @@
 """Meetings index and per-meeting notes pages (raw Typst, no MOS chrome)."""
 
-from __future__ import annotations
-
 import math
 
 from parch.i18n import I18n

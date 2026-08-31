@@ -1,7 +1,5 @@
 """Habits index (raw Typst) and per-month tracker grids (MOS chrome)."""
 
-from __future__ import annotations
-
 from parch.calendar import walk
 from parch.calendar.day import Day
 from parch.calendar.month import Month

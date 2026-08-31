@@ -1,7 +1,5 @@
 """One page per month."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from parch.calendar import walk

@@ -1,7 +1,5 @@
 """Build-time provenance for the colophon. Not part of the TOML schema."""
 
-from __future__ import annotations
-
 import hashlib
 import shlex
 import subprocess

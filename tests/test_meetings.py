@@ -1,7 +1,5 @@
 """Meetings index + per-meeting notes pages."""
 
-from __future__ import annotations
-
 import pytest
 
 from parch import ConfigError

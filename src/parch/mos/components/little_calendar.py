@@ -1,7 +1,5 @@
 """Mini month calendar used on annual / quarterly / daily pages."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from parch.calendar.day import Day

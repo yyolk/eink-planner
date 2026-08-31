@@ -1,8 +1,6 @@
 """Optional Contents page (section key ``index``) and back-link mark."""
 
-from __future__ import annotations
-
-import typing
+import annotationlib
 
 import pytest
 
@@ -332,7 +330,7 @@ def test_builder_trail_and_raw_headings_call_trail_heading():
     assert "match edge:" in helper
     assert "case HeadingMark.FOLLOW:" in helper
     assert "case HeadingMark.TRAIL:" in helper
-    assert typing.get_type_hints(trail_heading)["edge"] is HeadingMark
+    assert annotationlib.get_annotations(trail_heading)["edge"] is HeadingMark
     builder = inspect.getsource(Builder._heading_stack)
     assert "trail_heading(" in builder
     assert "trail_strip(" not in builder

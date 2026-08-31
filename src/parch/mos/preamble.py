@@ -1,7 +1,5 @@
 """Typst document preamble (page size, strokes, paper tiles, padded_link)."""
 
-from __future__ import annotations
-
 from parch.mos.configurator import Configurator
 
 

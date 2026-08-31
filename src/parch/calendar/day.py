@@ -1,7 +1,5 @@
 """Day entity — port of LYP::Entities::Calendar::Day."""
 
-from __future__ import annotations
-
 import calendar as pycal
 from datetime import date, timedelta
 from typing import TYPE_CHECKING

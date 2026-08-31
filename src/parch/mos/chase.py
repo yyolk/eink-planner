@@ -1,7 +1,5 @@
 """chase — wrap each section page for compose; MosChase owns MOS chrome on one manifest."""
 
-from __future__ import annotations
-
 from parch.i18n import I18n
 from parch.mos.builder import Builder
 from parch.mos.configurator import Configurator

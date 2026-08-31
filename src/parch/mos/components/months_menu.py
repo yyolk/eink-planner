@@ -1,7 +1,5 @@
 """Rotated months strip in the side menu."""
 
-from __future__ import annotations
-
 from collections.abc import Callable, Sequence
 
 from parch.calendar.month import Month

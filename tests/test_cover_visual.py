@@ -1,7 +1,5 @@
 """Raster check that the cover year sits in the upper third."""
 
-from __future__ import annotations
-
 
 from PIL import Image
 

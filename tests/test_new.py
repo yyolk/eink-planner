@@ -1,7 +1,5 @@
 """parch new: copy a shipped TOML and overlay year / sections."""
 
-from __future__ import annotations
-
 import tomllib
 
 import pytest

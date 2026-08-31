@@ -1,7 +1,5 @@
 """Projects index and per-project kanban boards (raw Typst, no MOS chrome)."""
 
-from __future__ import annotations
-
 import math
 
 from parch.i18n import I18n

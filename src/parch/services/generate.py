@@ -1,7 +1,5 @@
 """Select a chase and compose Typst; Coordinator fills the manifest from each section."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from parch import ConfigError

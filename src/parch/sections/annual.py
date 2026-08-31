@@ -1,7 +1,5 @@
 """Year-at-a-glance page of 12 little calendars."""
 
-from __future__ import annotations
-
 import math
 from typing import Any
 

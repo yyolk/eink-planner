@@ -1,7 +1,5 @@
 """Shrink Typst SVG pages for previews (half-scale or crop)."""
 
-from __future__ import annotations
-
 import re
 from xml.etree import ElementTree as ET
 

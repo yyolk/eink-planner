@@ -1,7 +1,5 @@
 """Shared Pydantic base for TOML config models."""
 
-from __future__ import annotations
-
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 

@@ -1,7 +1,5 @@
 """Page payload a section hands to compose."""
 
-from __future__ import annotations
-
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import StrEnum

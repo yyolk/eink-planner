@@ -1,7 +1,5 @@
 """Colophon section: back-of-notebook about page, layout-agnostic."""
 
-from __future__ import annotations
-
 import hashlib
 import re
 from pathlib import Path
