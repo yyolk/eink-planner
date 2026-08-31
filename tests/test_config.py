@@ -16,6 +16,7 @@ def test_strict_dict_dotted_path():
 def test_preamble_raises_on_missing_text_size():
     dto = StrictDict(
         {
+            "device": "158x210",
             "document": {
                 "layout": {
                     "dimensions": {"width": "158mm", "height": "210mm"},

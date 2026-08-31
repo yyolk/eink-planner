@@ -12,7 +12,7 @@ def _minimal(*, enable: list[str] | None = None, **extra: str) -> str:
     names = enable
     parts = {
         "device": """[device]
-name = "x"
+name = "158x210"
 width = "100mm"
 height = "120mm"
 ppi = 300""",

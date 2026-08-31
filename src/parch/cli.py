@@ -262,7 +262,7 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
 
 
 def _write_generated_book(workdir: Path, typst_source: str) -> None:
-    """Write index.typst and copy house.typ into the compile workdir."""
+    """Write index.typst and copy house.typ plus the device .typ into the workdir."""
     workdir.mkdir(parents=True, exist_ok=True)
     (workdir / "index.typst").write_text(typst_source, encoding="utf-8")
     copy_house_typ(workdir)
