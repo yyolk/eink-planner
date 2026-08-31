@@ -198,12 +198,17 @@
 )
 
 // Monthly-page calendar. Rows stay caller-owned (live week count). House
-// owns week-col seating. Same side token as mos_frame.
-#let month_weeks(side, rows: none, week-col: none, stroke: none, ..cells) = grid(
-  stroke: stroke,
-  columns: if side == left { (week-col,) + (1fr,) * 7 } else { (1fr,) * 7 + (week-col,) },
-  rows: rows,
-  .._order_week_rows(side, cells.pos()),
+// owns week-col seating. Same side token as mos_frame. Block fills the
+// outer calendar 1fr so leftover 1fr rows have height.
+#let month_weeks(side, rows: none, week-col: none, stroke: none, ..cells) = block(
+  width: 100%,
+  height: 100%,
+  grid(
+    stroke: stroke,
+    columns: if side == left { (week-col,) + (1fr,) * 7 } else { (1fr,) * 7 + (week-col,) },
+    rows: rows,
+    .._order_week_rows(side, cells.pos()),
+  ),
 )
 
 // Header on auto; bottom inset is the rule's own thickness. Clipped

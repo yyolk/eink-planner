@@ -86,6 +86,7 @@ def test_january_keeps_full_weekdays_and_five_body_rows():
     assert "(1fr,) * 6" not in well
     assert "columns: (regular_height" not in well
     assert "stroke:" not in well
+    assert "block(" not in well
     assert "rows: (1fr, auto, 1fr)" in content
     assert "rows: (auto, auto, 1fr)" not in content
     assert "[], align(center + horizon)[Monday]" in content
@@ -108,11 +109,15 @@ def test_hand_right_still_emits_week_first():
 def test_week_placement_none_is_seven_col_without_side():
     content = _page("2026-01", week_placement="none").content()
     assert "month_weeks(" not in content
+    assert "block(\n    width: 100%,\n    height: 100%,\n    grid(" in content
     assert "columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in content
     assert "rows: (regular_height,) + (1fr,) * 5" in content
     assert "16mm" not in content
     assert "align(center + horizon)[Monday]" in content
     assert "rotate(90deg" not in content
+    notes = content[content.index("grid.hline") :]
+    assert "block(" not in notes
+    assert "rect_pattern(dotted)" in notes
 
 
 def test_august_2026_is_six_rows_on_one_page():
@@ -150,6 +155,8 @@ def test_notes_are_thin_rule_plus_pattern_without_label():
     assert "thick_stroke" not in content
     assert "grid.hline(stroke: regular_stroke + black)" in content
     assert "rect_pattern(dotted)" in content
+    notes = content[content.index("grid.hline") :]
+    assert "block(" not in notes
 
 
 def test_title_is_month_without_year_and_kills_calendar_chip():

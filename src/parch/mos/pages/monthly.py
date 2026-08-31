@@ -50,14 +50,17 @@ class Monthly:
 
     def _calendar(self) -> str:
         if self.week_placement == "none":
-            return f"""grid(
+            return f"""block(
+    width: 100%,
+    height: 100%,
+    grid(
     stroke: regular_stroke,
     columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
     rows: {self._rows()},
 
     {self._heading()},
     {self._day_cells()}
-  )"""
+  ))"""
         return f"""month_weeks({self.side},
     rows: {self._rows()},
     {self._heading()},
