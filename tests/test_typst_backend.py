@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 import parch.services.compile as compile_mod
+from parch.mos.preamble import copy_house_typ
 from parch.services.compile import (
     Compile,
     CompileError,
@@ -191,6 +192,7 @@ def _write_planner(workdir: Path, stem: str) -> Path:
     text = Generate(i18n=I18n.load_default("en")).generate(load(base_config(stem)))
     src = workdir / "index.typst"
     src.write_text(text, encoding="utf-8")
+    copy_house_typ(workdir)
     return src
 
 
@@ -204,6 +206,7 @@ def test_py_cli_nomad_press_and_proof_page1(monkeypatch, tmp_path):
     for dest in (cli_nomad, py_nomad):
         dest.mkdir()
         (dest / "index.typst").write_text(text, encoding="utf-8")
+        copy_house_typ(dest)
 
     cli_pdf = _compile_backend(monkeypatch, "cli", cli_nomad)
     py_pdf = _compile_backend(monkeypatch, "py", py_nomad)
@@ -218,6 +221,7 @@ def test_py_cli_nomad_press_and_proof_page1(monkeypatch, tmp_path):
     for dest in (cli_proof, py_proof):
         dest.mkdir()
         (dest / "index.typst").write_text(proof_text, encoding="utf-8")
+        copy_house_typ(dest)
 
     cli_svgs = _compile_backend(monkeypatch, "cli", cli_proof, pages=[1])
     py_svgs = _compile_backend(monkeypatch, "py", py_proof, pages=[1])

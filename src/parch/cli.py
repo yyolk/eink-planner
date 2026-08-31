@@ -10,6 +10,7 @@ from parch.i18n import I18n
 from parch.toml_config import apply_debug, apply_year
 from parch.provenance import apply_provenance, collect_provenance
 from parch.mos.configurator import Configurator
+from parch.mos.preamble import copy_house_typ
 from parch.services.compile import Compile, CompileError
 from parch.services.generate import Generate
 from parch.services.config_file import DEFAULT_FROM, open_resolved, run_new, shipped_help
@@ -189,9 +190,7 @@ def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
     typst_source = Generate(i18n=i18n).generate(dto)
 
     workdir = Path(args.workdir)
-    workdir.mkdir(parents=True, exist_ok=True)
-    (workdir / "index.typst").write_text(typst_source, encoding="utf-8")
-    print(f"Wrote {workdir / 'index.typst'}")
+    _write_generated_book(workdir, typst_source)
 
     pdf = Compile().compile(
         workdir=workdir,
@@ -218,9 +217,7 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
         )
     typst_source = Generate(i18n=i18n).generate(dto)
     workdir = Path(args.workdir)
-    workdir.mkdir(parents=True, exist_ok=True)
-    (workdir / "index.typst").write_text(typst_source, encoding="utf-8")
-    print(f"Wrote {workdir / 'index.typst'}")
+    _write_generated_book(workdir, typst_source)
 
     if args.samples:
         if args.crop:
@@ -262,6 +259,14 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
         dest.write_text(preview_svg(raw, scale=args.scale, crop=False), encoding="utf-8")
         print(f"Wrote {dest} (page {number})")
     return 0
+
+
+def _write_generated_book(workdir: Path, typst_source: str) -> None:
+    """Write index.typst and copy house.typ into the compile workdir."""
+    workdir.mkdir(parents=True, exist_ok=True)
+    (workdir / "index.typst").write_text(typst_source, encoding="utf-8")
+    copy_house_typ(workdir)
+    print(f"Wrote {workdir / 'index.typst'}")
 
 
 def main(argv: list[str] | None = None) -> int:

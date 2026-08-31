@@ -14,6 +14,7 @@ import pytest
 from parch import ConfigError
 from parch.config import StrictDict, load
 from parch.mos.configurator import Configurator
+from parch.mos.preamble import copy_house_typ
 from parch.services.compile import ensure_typst
 from parch.services.generate import Generate
 from parch.toml_config import parse_toml
@@ -108,6 +109,7 @@ def compile_pdf(typst_src: str, workdir: Path) -> tuple[Path, str]:
     src = workdir / "index.typst"
     pdf = workdir / "index.pdf"
     src.write_text(typst_src, encoding="utf-8")
+    copy_house_typ(workdir)
     typst = ensure_typst(tools_dir=REPO / ".tools")
     result = subprocess.run(
         [str(typst), "compile", str(src), str(pdf)],

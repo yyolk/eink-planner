@@ -5,7 +5,7 @@ import pytest
 from parch.cli import build_parser, generate_cmd, preview_svg_cmd, samples_dest
 from parch.config import load
 from parch.mos.configurator import Configurator
-from parch.mos.preamble import Preamble
+from parch.mos.preamble import Preamble, copy_house_typ, house_typ_resource
 from parch.services.compile import Compile, CompileError
 from parch.services.preview_svg import (
     DEFAULT_SCALE,
@@ -192,15 +192,17 @@ def test_sample_page_numbers_missing_label():
         sample_page_numbers("cover only", year=2026, week_id="2026W01", jan1="2026-01-01")
 
 
-def _rect_pattern_helper(typst: str) -> str:
-    start = typst.index("#let rect_pattern(pattern)")
-    end = typst.index("#let dotted_centered")
-    return typst[start:end]
+def _house_rect_pattern() -> str:
+    text = house_typ_resource().read_text(encoding="utf-8")
+    start = text.index("#let rect_pattern(")
+    end = text.index("#let dotted_centered")
+    return text[start:end]
 
 
 def test_rect_pattern_helper_stamps_tiles_not_fill():
+    house = house_typ_resource().read_text(encoding="utf-8")
+    helper = _house_rect_pattern()
     typst = Preamble(Configurator(load(base_config("158x210-mos-left")))).generate()
-    helper = _rect_pattern_helper(typst)
     assert "fill: pattern" not in helper
     assert "tiling(" not in helper
     assert "layout(size =>" in helper
@@ -209,9 +211,9 @@ def test_rect_pattern_helper_stamps_tiles_not_fill():
     assert "box(width: cell, height: cell, pattern)" in helper
     assert "clip: true" in helper
     assert "here().position()" in helper
-    assert "#let rect_pattern(pattern) = rect(" in typst
-    assert "#let dotted = place(" in typst
-    assert "#let lined = place(" in typst
+    assert "#let rect_pattern(regular_height: none, pattern) = rect(" in helper
+    assert "#let dotted(regular_height: none) = place(" in house
+    assert "#let lined(regular_height: none, regular_stroke: none) = place(" in house
     assert "rect_pattern(dotted)" in typst
     assert "PageData" not in typst
     assert "heading_mark" not in typst
@@ -225,6 +227,7 @@ def test_large_rect_pattern_svg_stamps_dots_not_pattern_paint(tmp_path):
         + "\n#rect_pattern(dotted)\n",
         encoding="utf-8",
     )
+    copy_house_typ(tmp_path)
     paths = Compile().compile_svg(
         tmp_path,
         pages=[1],
