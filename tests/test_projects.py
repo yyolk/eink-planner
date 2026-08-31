@@ -26,11 +26,9 @@ ppi = 300"""
 
 _MARK_RULE = "contents_bars(size:"
 _TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
-_SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
-_SEATED_TITLE = "let seated_title ="
-_SEATED_MARK = "let seated_mark ="
-_SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
-_FOLLOW_RTL = "dir: rtl,\n    spacing: 0.5em,"
+_TRAIL_HEADING = "trail_heading("
+_SEAT_RTL = "spacing: 1fr, direction: rtl"
+_FOLLOW_RTL = "spacing: 0.5em, direction: rtl"
 _CARD_STROKE = "stroke: regular_stroke + black"
 _CARD_LINE = "line(length: size.width, stroke: 0.2pt + black)"
 
@@ -467,14 +465,14 @@ def test_contents_mark_on_projects_when_index_on():
     assert "column-gutter: 6pt" not in index
     assert "text(size: h1, [Projects <projects>])" in index
     assert "padded_link(<projects>)" in board
-    heading = index[index.index(_SEATED_TITLE) : index.index(_SEATED_MARK)]
+    heading = index[index.index(_TRAIL_HEADING) : index.index(_TRAIL_MARK)]
     assert "[Projects <projects>]" in heading
     assert _TRAIL_MARK not in heading
     assert _FOLLOW_RTL in index
     assert _SEAT_RTL not in index
-    assert _SEATED_TRAIL in index
+    assert _TRAIL_HEADING in index
     assert index.index("[Projects <projects>]") < index.index(_TRAIL_MARK)
-    board_heading = board[board.index(_SEATED_TITLE) : board.index(_SEATED_MARK)]
+    board_heading = board[board.index(_TRAIL_HEADING) : board.index(_TRAIL_MARK)]
     assert "padded_link(<projects>)" in board_heading
     assert _FOLLOW_RTL in board
     assert _SEAT_RTL not in board

@@ -12,7 +12,10 @@ from tests.helpers import base_config
 def test_preamble_imports_house_and_does_not_inline_bodies():
     typst = Preamble(Configurator(load(base_config("158x210-mos-left")))).generate()
     assert '#import "house.typ"' in typst
-    assert "contents_bars" in typst[typst.index('#import "house.typ"') :].splitlines()[0]
+    imported = typst[typst.index('#import "house.typ"') :].splitlines()[0]
+    assert "contents_bars" in imported
+    assert "lead_pair" in imported
+    assert "trail_heading" in imported
     assert "#let link_padding =" in typst
     assert "#let rect_pattern = rect_pattern.with(regular_height: regular_height)" in typst
     assert "#let padded_link = padded_link.with(padding: link_padding)" in typst
@@ -26,9 +29,17 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let padded_link(padding:" not in typst
     assert "0.7em.to-absolute()" not in typst
     assert "line(length: 0.844em, stroke: thick_stroke + black)" not in typst
+    assert "let seated_title =" not in typst
+    assert "measure(seated_title)" not in typst
+    assert "columns: (auto, auto)" not in typst
+    assert "column-gutter: 6pt" not in typst
     house = house_typ_resource().read_text(encoding="utf-8")
     assert "#set page" not in house
     assert "#let contents_bars(" in house
+    assert "#let lead_pair(" in house
+    assert "#let trail_heading(" in house
+    assert "dir: ltr" in house
+    assert "calc.max(measure(seated_title).height, measure(seated_mark).height)" in house
 
 
 def test_copy_house_typ_writes_workdir(tmp_path):
@@ -41,6 +52,8 @@ def test_copy_house_typ_writes_workdir(tmp_path):
     assert "#let rect_pattern(" in text
     assert "#let padded_link(" in text
     assert "#let contents_bars(" in text
+    assert "#let lead_pair(" in text
+    assert "#let trail_heading(" in text
 
 
 def test_press_copies_house_typ_next_to_index(tmp_path, monkeypatch):

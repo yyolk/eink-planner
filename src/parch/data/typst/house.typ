@@ -119,3 +119,23 @@
     ))
   )
 })
+
+#let lead_pair(left, right, spacing: 6pt) = stack(
+  dir: ltr,
+  spacing: spacing,
+  align: horizon,
+  left,
+  right,
+)
+
+#let trail_heading(title, mark, spacing: none, direction: ltr) = context {
+  let seated_title = title
+  let seated_mark = mark
+  let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
+  stack(
+    dir: direction,
+    spacing: spacing,
+    box(height: band, align(horizon + left, seated_title)),
+    box(height: band, align(horizon + left, seated_mark)),
+  )
+}

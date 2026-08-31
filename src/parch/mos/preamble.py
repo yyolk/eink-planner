@@ -58,7 +58,7 @@ class Preamble:
 #let h1 = {h1}
 #let link_padding = {_v(p, 'link_padding')}
 
-#import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars
+#import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading
 
 #let dotted = dotted(regular_height: regular_height)
 #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)

@@ -36,12 +36,10 @@ MONTHS = (
 )
 _MARK_RULE = "contents_bars(size:"
 _TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
-_SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
-_SEATED_TITLE = "let seated_title ="
-_SEATED_MARK = "let seated_mark ="
-_SEAT_RTL = "dir: rtl,\n    spacing: 1fr,"
-_SEAT_LTR = "dir: ltr,\n    spacing: 1fr,"
-_FOLLOW_RTL = "dir: rtl,\n    spacing: 0.5em,"
+_TRAIL_HEADING = "trail_heading("
+_SEAT_RTL = "spacing: 1fr, direction: rtl"
+_SEAT_LTR = "spacing: 1fr, direction: ltr"
+_FOLLOW_RTL = "spacing: 0.5em, direction: rtl"
 _HEADER_LINE = "line(start: (0%, 100%), end: (100%, 0%), stroke: regular_stroke)"
 _NAMED_MARK = "align(center + horizon, text["
 _BOX = "grid.cell(stroke: regular_stroke, [])"
@@ -824,17 +822,17 @@ def test_index_heading_is_trail_strip_when_contents_on():
     assert "text(size: h1)[/]" not in index
     assert "padded_link(<annual>)" not in index
     assert "text(size: h1, [Habits <habits>])" in index
-    heading = index[index.index(_SEATED_TITLE) : index.index(_SEATED_MARK)]
+    heading = index[index.index(_TRAIL_HEADING) : index.index(_TRAIL_MARK)]
     assert "[Habits <habits>]" in heading
     assert _TRAIL_MARK not in heading
     assert _FOLLOW_RTL in index
     assert _SEAT_RTL not in index
-    assert _SEATED_TRAIL in index
+    assert _TRAIL_HEADING in index
     assert index.index("[Habits <habits>]") < index.index(_TRAIL_MARK)
     assert "column-gutter: 6pt" not in heading
-    month_heading = month[month.index(_SEATED_TITLE) : month.index(_SEATED_MARK)]
+    month_heading = month[month.index(_TRAIL_HEADING) : month.index(_TRAIL_MARK)]
     assert _SEAT_RTL in month
-    assert _SEATED_TRAIL in month
+    assert _TRAIL_HEADING in month
     assert "dir: ttb" not in month_heading
     assert "column-gutter: 6pt" not in month_heading
     assert "January<habits-january>" in month_heading
@@ -874,9 +872,9 @@ def test_mos_right_month_mark_trails_alone_left_of_rail():
     month = _month_page(typst)
     assert _TRAIL_MARK in month
     assert month.index("January<habits-january>") < month.index(_TRAIL_MARK)
-    heading = month[month.index(_SEATED_TITLE) : month.index(_SEATED_MARK)]
+    heading = month[month.index(_TRAIL_HEADING) : month.index(_TRAIL_MARK)]
     assert _SEAT_LTR in month
-    assert _SEATED_TRAIL in month
+    assert _TRAIL_HEADING in month
     assert "dir: ttb" not in heading
     assert "column-gutter: 6pt" not in heading
     assert heading.index("padded_link(<habits>)") < heading.index("January<habits-january>")

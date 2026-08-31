@@ -56,19 +56,11 @@ def lead_title(
     title: str,
     body_size: str = "8pt",
 ) -> str:
-    """Glue the Contents mark to the left of *title* (two-column grid)."""
+    """Glue the Contents mark to the left of *title* (house stack pair)."""
     mark = contents_mark(manifest, heading_height, body_size, face="h1")
     if not mark:
         return title
-    return (
-        "grid(\n"
-        "  columns: (auto, auto),\n"
-        "  column-gutter: 6pt,\n"
-        "  align: horizon,\n"
-        f"  {mark},\n"
-        f"  {title}\n"
-        ")"
-    )
+    return f"lead_pair({mark}, {title})"
 
 
 def trail_strip(
@@ -84,15 +76,7 @@ def trail_strip(
         link_padding=None if chip else "0pt",
     )
     if mark and chip:
-        return (
-            "grid(\n"
-            "  columns: (auto, auto),\n"
-            "  column-gutter: 6pt,\n"
-            "  align: horizon,\n"
-            f"  {mark},\n"
-            f"  {chip}\n"
-            ")"
-        )
+        return f"lead_pair({mark}, {chip})"
     if mark and not chip:
         return f"pad(right: 3mm, {mark})"
     return mark or chip
@@ -121,14 +105,4 @@ def trail_heading(
             spacing = "1fr"
         case _:
             raise ValueError(f"trail_heading edge must be TRAIL or FOLLOW, not {edge!r}")
-    return f"""context {{
-  let seated_title = {title}
-  let seated_mark = {mark}
-  let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
-  stack(
-    dir: {direction},
-    spacing: {spacing},
-    box(height: band, align(horizon + left, seated_title)),
-    box(height: band, align(horizon + left, seated_mark)),
-  )
-}}"""
+    return f"trail_heading({title}, {mark}, spacing: {spacing}, direction: {direction})"
