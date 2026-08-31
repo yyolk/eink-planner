@@ -81,6 +81,10 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "rows: (1fr, 1fr, 1fr)" in house
     assert "grid.cell(colspan: 2," in house
     assert 'bottom-edge: "descender"' in house
+    week_cell = house[house.index("#let week_cell(") : house.index("#let week_matrix(")]
+    assert "inset: (bottom: 0.25em)" not in week_cell
+    assert 'text(bottom-edge: "descender"' in week_cell
+    assert "inset: (top: 0.25em, bottom: 0.25em)" in week_cell
     week_matrix_sig = house[house.index("#let week_matrix(") : house.index("..contents,")]
     assert "side" not in week_matrix_sig
     assert "row-gutter" not in week_matrix_sig

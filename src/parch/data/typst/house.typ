@@ -193,7 +193,6 @@
   rows: (auto, 1fr),
   grid.cell(
     stroke: (bottom: header-stroke),
-    inset: (bottom: 0.25em),
     text(bottom-edge: "descender", header),
   ),
   box(
