@@ -6,38 +6,26 @@ from parch import ConfigError
 from parch.cli import build_parser
 from parch.config import load
 from parch.mos.configurator import Configurator
-from parch.toml_config import apply_debug, apply_year, load_toml, parse_toml
+from parch.toml_config import apply_debug, apply_hand, apply_year, load_toml, parse_toml
 from tests.toml_fixtures import _minimal, omit_toml_sections
 from tests.helpers import base_config, load_default
 
 NOMAD = base_config("supernote-nomad")
 NOMAD_LINED = base_config("supernote-nomad-lined")
-NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
-NOMAD_MOS_RIGHT_LINED = base_config("supernote-nomad-mos-right-lined")
-MOS_LEFT = base_config("158x210-mos-left")
-MOS_LEFT_LINED = base_config("158x210-mos-left-lined")
-MOS_RIGHT = base_config("158x210-mos-right")
-MOS_RIGHT_LINED = base_config("158x210-mos-right-lined")
+PAPER_158 = base_config("158x210")
+PAPER_158_LINED = base_config("158x210-lined")
 SCRIBE = base_config("kindle-scribe")
 SCRIBE_LINED = base_config("kindle-scribe-lined")
-SCRIBE_MOS_RIGHT = base_config("kindle-scribe-mos-right")
-SCRIBE_MOS_RIGHT_LINED = base_config("kindle-scribe-mos-right-lined")
 
 _SHIPPED = [
     NOMAD,
     NOMAD_LINED,
-    NOMAD_MOS_RIGHT,
-    NOMAD_MOS_RIGHT_LINED,
-    MOS_LEFT,
-    MOS_LEFT_LINED,
-    MOS_RIGHT,
-    MOS_RIGHT_LINED,
+    PAPER_158,
+    PAPER_158_LINED,
     SCRIBE,
     SCRIBE_LINED,
-    SCRIBE_MOS_RIGHT,
-    SCRIBE_MOS_RIGHT_LINED,
 ]
-_NOMAD = {NOMAD, NOMAD_LINED, NOMAD_MOS_RIGHT, NOMAD_MOS_RIGHT_LINED}
+_NOMAD = {NOMAD, NOMAD_LINED}
 _NOMAD_SECTIONS = [
     "cover",
     "index",
@@ -55,12 +43,9 @@ _NOMAD_SECTIONS = [
     "colophon",
 ]
 _LINED = {
-    MOS_LEFT_LINED,
-    MOS_RIGHT_LINED,
+    PAPER_158_LINED,
     NOMAD_LINED,
-    NOMAD_MOS_RIGHT_LINED,
     SCRIBE_LINED,
-    SCRIBE_MOS_RIGHT_LINED,
 }
 
 
@@ -121,7 +106,7 @@ def test_year_and_week_starts_mapping():
 
 
 def test_mos_left_daily_columns():
-    dto = load(MOS_LEFT)
+    dto = load(PAPER_158)
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")
     params = daily["params"]
     assert params["columns_width"] == "(3fr, 5fr)"
@@ -137,15 +122,15 @@ def test_mos_left_daily_columns():
     assert notes["notes_height"] == "1fr"
 
 
-def test_mos_right_daily_track_flip():
-    dto = load(MOS_RIGHT)
+def test_apply_hand_right_does_not_flip_daily_tracks():
+    dto = apply_hand(load(PAPER_158), "right")
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")
     params = daily["params"]
-    assert params["columns_width"] == "(5fr, 3fr)"
-    assert [c["class"] for c in params["left_column"]] == ["priorities", "notes"]
-    assert [c["class"] for c in params["right_column"]] == ["schedule", "little_calendar"]
-    assert params["left_column"][0]["params"]["number"] == 5
-    schedule = params["right_column"][0]["params"]
+    assert dto["planner"]["params"]["mos_layout"]["side_menu_position"] == "right"
+    assert params["columns_width"] == "(3fr, 5fr)"
+    assert [c["class"] for c in params["left_column"]] == ["schedule", "little_calendar"]
+    assert [c["class"] for c in params["right_column"]] == ["priorities", "notes"]
+    schedule = params["left_column"][0]["params"]
     assert schedule["from"] == 8
     assert schedule["to"] == 20
 
@@ -353,6 +338,49 @@ def test_year_cli_rejects_non_ints():
         parser.parse_args(["press", str(NOMAD), "--year", "true"])
     with pytest.raises(SystemExit):
         parser.parse_args(["press", str(NOMAD), "--year", "nope"])
+
+
+def test_hand_cli_flag():
+    parser = build_parser()
+    args = parser.parse_args(["press", str(NOMAD), "--hand", "right"])
+    assert args.hand == "right"
+    off = parser.parse_args(["press", str(NOMAD)])
+    assert off.hand is None
+    assert "--hand" in _press_parser().format_help()
+    proof = parser.parse_args(["proof", "158x210", "--pages", "1", "--hand", "left"])
+    assert proof.hand == "left"
+    new = parser.parse_args(["new", "--from", "supernote-nomad", "--hand", "right", "--yes", "-o", "x.toml"])
+    assert new.hand == "right"
+
+
+def test_hand_cli_rejects_unknown():
+    parser = build_parser()
+    with pytest.raises(SystemExit):
+        parser.parse_args(["press", str(NOMAD), "--hand", "both"])
+
+
+def test_apply_hand_overlays_side_menu_only():
+    dto = apply_hand(load(PAPER_158), "right")
+    mos = dto["planner"]["params"]["mos_layout"]
+    assert mos["side_menu_position"] == "right"
+    daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
+    assert daily["columns_width"] == "(3fr, 5fr)"
+    quarterly = next(s for s in dto["planner"]["sections"] if s["name"] == "quarterly")["params"]
+    assert quarterly["months_column"] == "left"
+    monthly = next(s for s in dto["planner"]["sections"] if s["name"] == "monthly")["params"]["month_params"]
+    assert monthly["week_placement"] == "left"
+
+
+def test_apply_hand_none_leaves_profile_side():
+    dto = apply_hand(load(PAPER_158), None)
+    assert dto["planner"]["params"]["mos_layout"]["side_menu_position"] == "left"
+
+
+def test_apply_hand_rejects_unknown():
+    with pytest.raises(ConfigError, match="expected left or right"):
+        apply_hand(load(NOMAD), "top")
+    with pytest.raises(ConfigError, match="expected left or right"):
+        apply_hand(load(NOMAD), True)
 
 
 def test_apply_year_overlays_start_and_end_dates():

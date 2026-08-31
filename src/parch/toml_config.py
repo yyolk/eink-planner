@@ -469,6 +469,39 @@ def apply_debug(dto: StrictDict, debug: bool) -> StrictDict:
     return StrictDict(data)
 
 
+def apply_hand(dto: StrictDict, hand: str | None) -> StrictDict:
+    """CLI overlay: set mos.side_menu only. Well stays LTR."""
+    if hand is None:
+        return dto
+    side = _coerce_hand(hand)
+    data = dto.to_plain()
+    planner = data.setdefault("planner", {})
+    if not isinstance(planner, dict):
+        planner = {}
+        data["planner"] = planner
+    params = planner.setdefault("params", {})
+    if not isinstance(params, dict):
+        params = {}
+        planner["params"] = params
+    mos_layout = params.setdefault("mos_layout", {})
+    if not isinstance(mos_layout, dict):
+        mos_layout = {}
+        params["mos_layout"] = mos_layout
+    mos_layout["side_menu_position"] = side
+    return StrictDict(data)
+
+
+def _coerce_hand(hand: Any) -> str:
+    if isinstance(hand, bool):
+        raise ConfigError("hand: expected left or right")
+    if not isinstance(hand, str):
+        raise ConfigError("hand: expected left or right")
+    lowered = hand.lower()
+    if lowered in {"left", "right"}:
+        return lowered
+    raise ConfigError("hand: expected left or right")
+
+
 def apply_year(dto: StrictDict, year: int | None) -> StrictDict:
     """CLI overlay: rewrite start/end dates. Year stays in the profile."""
     if year is None:

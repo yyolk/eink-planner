@@ -1,5 +1,5 @@
 # serializer version: 1
-# name: test_shipped_planner_page_tree[158x210-mos-left]
+# name: test_shipped_planner_page_tree[158x210]
   list([
     dict({
       'name': 'cover',
@@ -99,7 +99,7 @@
     }),
   ])
 # ---
-# name: test_short_january_critical_pages[158x210-mos-left]
+# name: test_short_january_critical_pages[158x210]
   dict({
     'annual': '''
       #mos_frame(

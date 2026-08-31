@@ -24,7 +24,7 @@ def test_press_dispatch_handler():
 
 def test_proof_dispatch_handler():
     parser = build_parser()
-    proof = parser.parse_args(["proof", "158x210-mos-left", "--samples"])
+    proof = parser.parse_args(["proof", "158x210", "--samples"])
     assert proof.run is preview_svg_cmd
     assert proof.command == "proof"
 
@@ -51,6 +51,7 @@ def test_press_help(capsys):
     assert press_exc.value.code == 0
     press_help = capsys.readouterr().out
     assert "--workdir" in press_help
+    assert "--hand" in press_help
     assert "--pages" not in press_help
 
 
@@ -61,6 +62,7 @@ def test_proof_help(capsys):
     proof_help = capsys.readouterr().out
     assert "--pages" in proof_help
     assert "--samples" in proof_help
+    assert "--hand" in proof_help
 
 
 def test_dropped_aliases_are_unknown(capsys):

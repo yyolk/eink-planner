@@ -262,6 +262,9 @@ def test_device_label_is_human_name():
     scribe = Colophon(**_colo_kwargs(device="kindle-scribe")).pages(None)[0].content
     assert "Kindle Scribe" in scribe
     assert "kindle-scribe" not in scribe
+    paper = Colophon(**_colo_kwargs(device="158x210")).pages(None)[0].content
+    assert "158 × 210" in paper
+    assert "158x210" not in paper
 
 
 def test_colophon_between_cover_and_annual_keeps_links(tmp_path):
@@ -347,6 +350,7 @@ def test_generate_cmd_attaches_provenance_but_page_stays_quiet(tmp_path, monkeyp
             "with_ghostscript": False,
             "debug": False,
             "year": None,
+            "hand": None,
         },
     )()
     assert generate_cmd(ns, argv=["parch", "generate", str(path)]) == 0
@@ -361,16 +365,10 @@ def test_shipped_profiles_include_colophon_where_shipped():
     include = {
         "supernote-nomad.toml",
         "supernote-nomad-lined.toml",
-        "supernote-nomad-mos-right.toml",
-        "supernote-nomad-mos-right-lined.toml",
         "kindle-scribe.toml",
         "kindle-scribe-lined.toml",
-        "kindle-scribe-mos-right.toml",
-        "kindle-scribe-mos-right-lined.toml",
-        "158x210-mos-left.toml",
-        "158x210-mos-left-lined.toml",
-        "158x210-mos-right.toml",
-        "158x210-mos-right-lined.toml",
+        "158x210.toml",
+        "158x210-lined.toml",
     }
     for name in include:
         dto = load(base_config(name.removesuffix(".toml")))
@@ -643,7 +641,7 @@ def test_dump_pagination_seats_follow_below_profile_margin_top():
     slim = Colophon(
         section_name="colophon",
         i18n=load_default(),
-        configurator=Configurator(load(base_config("158x210-mos-left"))),
+        configurator=Configurator(load(base_config("158x210"))),
         dump=True,
     )
     n = nomad._dump_pagination(None)

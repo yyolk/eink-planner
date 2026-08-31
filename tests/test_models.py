@@ -9,13 +9,13 @@ from parch.models import DeviceProfile, load_device_profile, load_locale
 from tests.toml_fixtures import _minimal
 from tests.helpers import base_config, packaged_locale
 
-MOS_LEFT = base_config("158x210-mos-left")
-MOS_RIGHT = base_config("158x210-mos-right")
+PAPER_158 = base_config("158x210")
 LOCALE = packaged_locale()
 
 
 def test_happy_path_mos_left():
-    profile = load_device_profile(MOS_LEFT)
+    profile = load_device_profile(PAPER_158)
+    assert profile.device.name == "158x210"
     assert profile.mos.side_menu == "left"
     assert profile.sections[-1] == "colophon"
     assert profile.section.daily is not None
@@ -24,15 +24,37 @@ def test_happy_path_mos_left():
     assert profile.section.daily.columns == ["3fr", "5fr"]
 
 
-def test_happy_path_mos_right():
-    profile = load_device_profile(MOS_RIGHT)
+def test_happy_path_side_menu_right_keeps_ltr_well():
+    text = _minimal(
+        enable=["daily"],
+        mos="""[mos]
+side_menu = "right"
+side_menu_width = "10mm"
+reverse_months_quarters = true
+menu_rotate = "270deg"
+column_gutter = "1.5mm"
+row_gutter = "1.5mm"
+""",
+        sections="""[section.daily]
+columns = ["3fr", "5fr"]
+item_spacing = "5mm"
+
+[section.daily.left.schedule]
+hour_from = 8
+hour_to = 20
+
+[section.daily.right.priorities]
+count = 5
+""",
+    )
+    profile = DeviceProfile.model_validate(tomllib.loads(text))
     assert profile.mos.side_menu == "right"
     assert profile.section.daily is not None
-    assert profile.section.daily.columns == ["5fr", "3fr"]
+    assert profile.section.daily.columns == ["3fr", "5fr"]
     assert profile.section.daily.left is not None
     assert profile.section.daily.right is not None
-    assert profile.section.daily.left.priorities is not None
-    assert profile.section.daily.right.schedule is not None
+    assert profile.section.daily.left.schedule is not None
+    assert profile.section.daily.right.priorities is not None
 
 
 def test_happy_path_locale():

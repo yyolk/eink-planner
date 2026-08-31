@@ -8,13 +8,12 @@ from parch.compose.page_data import HeadingMark
 from parch.config import load
 from parch.services.config_file import CANONICAL_SECTIONS
 from parch.services.generate import Generate
-from parch.toml_config import parse_toml
+from parch.toml_config import apply_hand, parse_toml
 from tests.test_toml_omit_sections import compile_pdf
 from tests.toml_fixtures import _minimal, omit_toml_sections, short_january
 from tests.helpers import base_config, load_default
 
 NOMAD = base_config("supernote-nomad")
-NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
 
 _TOC_TITLE = 'weight: "bold")[Contents <index>]'
 _MARK_RULE = "contents_bars(size:"
@@ -290,7 +289,7 @@ def test_slim_compiles(tmp_path):
 
 
 def test_mos_right_mark_sits_next_to_strip():
-    typst = _generate(load(NOMAD_MOS_RIGHT))
+    typst = _generate(apply_hand(load(NOMAD), "right"))
     page = _annual_page(typst)
     title_at = page.index("2026<annual>")
     mark_at = page.index(_MARK_FLUSH)
@@ -343,7 +342,7 @@ def test_daily_mark_is_trail_strip_alone():
 
 
 def test_mos_right_daily_mark_is_trail_strip_alone():
-    typst = _generate(load(NOMAD_MOS_RIGHT))
+    typst = _generate(apply_hand(load(NOMAD), "right"))
     page = next(p for p in _pages(typst) if "1 <2026-01-01>" in p)
     title_at = page.index("1 <2026-01-01>")
     mark_at = page.index(_MARK_FLUSH)
@@ -360,7 +359,7 @@ def test_mos_right_daily_mark_is_trail_strip_alone():
 
 
 def test_mos_right_habits_mark_sits_next_to_strip():
-    typst = _generate(load(NOMAD_MOS_RIGHT))
+    typst = _generate(apply_hand(load(NOMAD), "right"))
     page = next(p for p in _pages(typst) if "January<habits-january>" in p)
     title_at = page.index("January<habits-january>")
     mark_at = page.index(_MARK_FLUSH)
@@ -484,7 +483,7 @@ def test_heading_stack_matches_follow_trail_lead_after_chip_guard():
     assert _TRAIL_HEADING in chipped
     assert _LEAD_PAIR in chipped
 
-    right = load(NOMAD_MOS_RIGHT)
+    right = apply_hand(load(NOMAD), "right")
     right_coord = Coordinator(right, i18n=load_default())
     right_builder = Builder(
         i18n=right_coord.i18n,

@@ -1,5 +1,6 @@
 # Kindle Scribe
 # 1860×2480 @ 300 PPI → 157.48 × 209.97 mm
+# MOS strip side is mos.side_menu (default left). Override with --hand.
 
 sections = [
   "cover",

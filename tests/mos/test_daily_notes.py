@@ -7,12 +7,11 @@ from parch.mos.manifest import Manifest
 from parch.sections.annual import Annual
 from parch.sections.daily_notes import DailyNotes
 from parch.services.generate import Generate
-from parch.toml_config import parse_toml
+from parch.toml_config import apply_hand, parse_toml
 from tests.helpers import base_config, load_default, make_configurator
 from tests.toml_fixtures import omit_toml_sections
 
 NOMAD = base_config("supernote-nomad")
-NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
 
 _MARK_RULE = "contents_bars(size:"
 _MARK_FLUSH = "padded_link(padding: 0pt, <index>"
@@ -250,9 +249,9 @@ def test_generated_trail_mark_alone_and_inverts_january_only():
     assert p2.count("table.cell(fill: black") == 1
 
 
-def test_generated_mos_right_trail_mark_alone_left_of_q1():
-    text = omit_toml_sections(NOMAD_MOS_RIGHT.read_text(encoding="utf-8"), _BULKY)
-    typst = _generate(parse_toml(text, source="nomad-mos-right-daily-notes.toml"))
+def test_generated_hand_right_trail_mark_alone_left_of_q1():
+    text = omit_toml_sections(NOMAD.read_text(encoding="utf-8"), _BULKY)
+    typst = _generate(apply_hand(parse_toml(text, source="nomad-hand-right-daily-notes.toml"), "right"))
     pages = _note_pages(typst)
     p1 = pages["p1"]
     assert "padded_link(<annual>, [2026])" not in p1

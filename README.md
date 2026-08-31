@@ -6,9 +6,9 @@ Yearly planner PDFs for e-ink, a Python port of [Vitaliy Kudryk’s LYP](https:/
 [![CI](https://github.com/yyolk/parch/actions/workflows/ci.yml/badge.svg)](https://github.com/yyolk/parch/actions/workflows/ci.yml)
 
 <p>
-<img src="docs/samples/158x210-mos-left/cover.svg" alt="Cover" width="180" />
-<img src="docs/samples/158x210-mos-left/contents.svg" alt="Contents" width="180" />
-<img src="docs/samples/158x210-mos-left/monthly-jan.svg" alt="January" width="180" />
+<img src="docs/samples/158x210/cover.svg" alt="Cover" width="180" />
+<img src="docs/samples/158x210/contents.svg" alt="Contents" width="180" />
+<img src="docs/samples/158x210/monthly-jan.svg" alt="January" width="180" />
 </p>
 
 ## Install
@@ -35,6 +35,7 @@ parch press supernote-nomad
 | `-g` / `--with-ghostscript` | off | Optional PDF shrink via `gs` |
 | `--debug` | off | Draw MOS debug strokes (not a config key) |
 | `--year` | file year | Overlay planner year (dates and cover title; not a config key) |
+| `--hand` | profile `mos.side_menu` (or left) | MOS strip side. Overlay sets `mos.side_menu` only; well stays LTR |
 
 `--year` also rewrites the cover title year when the old year is in the title.
 
@@ -46,22 +47,16 @@ Without `--yes`, `parch new` asks for starting profile, year, sections, and outp
 
 ## Devices
 
-MOS-left is the right-handed writing layout (nav opposite the writing hand). MOS-right is the left-handed writing layout.
+Six shipped profiles: physical device × paper. MOS strip side is `mos.side_menu` (default left). Override with `--hand left|right` on `press`, `proof`, and `new`. `--hand` does not reverse the well.
 
-| Profile | Device | Writing hand |
-| --- | --- | --- |
-| `supernote-nomad` | SuperNote Nomad (A6 X2) | right |
-| `supernote-nomad-lined` | SuperNote Nomad lined | right |
-| `supernote-nomad-mos-right` | SuperNote Nomad | left |
-| `supernote-nomad-mos-right-lined` | SuperNote Nomad lined | left |
-| `158x210-mos-left` | 158×210 | right |
-| `158x210-mos-left-lined` | 158×210 lined | right |
-| `158x210-mos-right` | 158×210 | left |
-| `158x210-mos-right-lined` | 158×210 lined | left |
-| `kindle-scribe` | Kindle Scribe | right |
-| `kindle-scribe-lined` | Kindle Scribe lined | right |
-| `kindle-scribe-mos-right` | Kindle Scribe | left |
-| `kindle-scribe-mos-right-lined` | Kindle Scribe lined | left |
+| Profile | Device |
+| --- | --- |
+| `supernote-nomad` | SuperNote Nomad (A6 X2) |
+| `supernote-nomad-lined` | SuperNote Nomad lined |
+| `kindle-scribe` | Kindle Scribe |
+| `kindle-scribe-lined` | Kindle Scribe lined |
+| `158x210` | 158×210 |
+| `158x210-lined` | 158×210 lined |
 
 ## Development
 
@@ -83,7 +78,7 @@ Or `uv tool install --with typst==0.15.0 parch`, then `PARCH_TYPST=py parch pres
 
 `uv run pytest` skips the full-book comparison (`slow`). Run it with `uv run pytest -m slow -o addopts=`.
 
-Regenerate the thumbs above with `parch proof 158x210-mos-left --samples`.
+Regenerate the thumbs above with `parch proof 158x210 --samples`.
 
 Ship steps live in [Releasing](docs/releasing.md).
 

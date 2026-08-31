@@ -20,11 +20,11 @@ DEFAULT_FROM = "supernote-nomad"
 # Wizard + help labels (not stems). --from still takes a stem or path.
 SHIPPED_PROFILES: tuple[tuple[str, str], ...] = (
     ("SuperNote Nomad", "supernote-nomad"),
-    ("SuperNote Nomad (left-handed)", "supernote-nomad-mos-right"),
+    ("SuperNote Nomad lined", "supernote-nomad-lined"),
     ("Kindle Scribe", "kindle-scribe"),
-    ("158×210", "158x210-mos-left"),
-    ("158×210 lined", "158x210-mos-left-lined"),
-    ("158×210 (left-handed)", "158x210-mos-right"),
+    ("Kindle Scribe lined", "kindle-scribe-lined"),
+    ("158×210", "158x210"),
+    ("158×210 lined", "158x210-lined"),
 )
 
 CANONICAL_SECTIONS: tuple[str, ...] = (
@@ -55,6 +55,10 @@ _COVER_TABLE = re.compile(
 _SECTIONS_ARRAY = re.compile(r"(?ms)^[ \t]*sections\s*=\s*\[.*?\]")
 _YEAR_ASSIGN = re.compile(r"(?m)^[ \t]*year\s*=\s*\d+")
 _TITLE_ASSIGN = re.compile(r'(?m)^[ \t]*title\s*=\s*"([^"]*)"')
+_MOS_TABLE = re.compile(
+    r"(?ms)^[ \t]*\[[ \t]*mos[ \t]*\][ \t]*(#[^\n]*)?\n(?:(?!^[ \t]*\[).)*"
+)
+_SIDE_MENU_ASSIGN = re.compile(r'(?m)^[ \t]*side_menu\s*=\s*"[^"]*"')
 
 
 def shipped_help() -> str:
@@ -116,13 +120,16 @@ def overlay_toml(
     year: int | None = None,
     sections: list[str] | None = None,
     source_sections: list[str] | None = None,
+    hand: str | None = None,
 ) -> str:
-    """Copy source text and surgically overlay year / cover title / sections."""
+    """Copy source text and surgically overlay year / cover title / sections / hand."""
     if year is not None:
         text = _replace_calendar_year(text, year)
         text = _replace_cover_title_year(text, year)
     if sections is not None and sections != source_sections:
         text = _replace_sections(text, sections)
+    if hand is not None:
+        text = _replace_mos_side_menu(text, hand)
     return text
 
 
@@ -134,6 +141,7 @@ def run_new(
     sections: str | None,
     yes: bool,
     force: bool,
+    hand: str | None = None,
 ) -> int:
     interactive = (not yes) and sys.stdin.isatty()
 
@@ -178,6 +186,7 @@ def run_new(
         year=year,
         sections=chosen_sections,
         source_sections=source_sections,
+        hand=hand,
     )
     tmp: Path | None = None
     try:
@@ -270,6 +279,27 @@ def _replace_cover_title_year(text: str, year: int) -> str:
         return _TITLE_ASSIGN.sub(repl_title, block, count=1)
 
     new_text, n = _COVER_TABLE.subn(repl_block, text, count=1)
+    return new_text if n else text
+
+
+def _replace_mos_side_menu(text: str, hand: str) -> str:
+    side = hand.lower()
+    if side not in {"left", "right"}:
+        raise ConfigError("hand: expected left or right")
+
+    def repl_block(match: re.Match[str]) -> str:
+        block = match.group(0)
+        new_block, n = _SIDE_MENU_ASSIGN.subn(f'side_menu = "{side}"', block, count=1)
+        if n:
+            return new_block
+        if block.endswith("\n"):
+            return f'{block}side_menu = "{side}"\n'
+        return f'{block}\nside_menu = "{side}"\n'
+
+    new_text, n = _MOS_TABLE.subn(repl_block, text, count=1)
+    if n:
+        return new_text
+    new_text, n = _SIDE_MENU_ASSIGN.subn(f'side_menu = "{side}"', text, count=1)
     return new_text if n else text
 
 
