@@ -273,8 +273,6 @@ def test_colophon_between_cover_and_annual_keeps_links(tmp_path):
         enable=["cover", "colophon", "annual"],
         device="""[device]
 name = "supernote-nomad"
-width = "118.87mm"
-height = "158.5mm"
 ppi = 300""",
         sections="""[section.cover]
 title = "Hi"
@@ -707,8 +705,6 @@ def test_dump_continuation_pdf_contains_about_title(tmp_path):
             enable=["colophon"],
             device="""[device]
 name = "supernote-nomad"
-width = "118.87mm"
-height = "158.5mm"
 ppi = 300""",
             sections="""[section.colophon]
 dump = true

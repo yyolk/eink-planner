@@ -15,8 +15,6 @@ _DPI = 200
 
 _NOMAD = """[device]
 name = "supernote-nomad"
-width = "118.87mm"
-height = "158.5mm"
 ppi = 300"""
 
 

@@ -13,8 +13,6 @@ def _minimal(*, enable: list[str] | None = None, **extra: str) -> str:
     parts = {
         "device": """[device]
 name = "158x210"
-width = "100mm"
-height = "120mm"
 ppi = 300""",
         "calendar": """[calendar]
 year = 2026
@@ -26,12 +24,6 @@ thick = "0.6pt"
 [style.type]
 body = "8pt"
 h1 = "8mm"
-
-[style.margin]
-top = "8mm"
-bottom = "0mm"
-left = "0mm"
-right = "4mm"
 
 [style.gutter]
 column = "8pt\"""",

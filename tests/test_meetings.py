@@ -18,8 +18,6 @@ NOMAD = base_config("supernote-nomad")
 
 _NOMAD_DEVICE = """[device]
 name = "supernote-nomad"
-width = "118.87mm"
-height = "158.5mm"
 ppi = 300"""
 
 _MARK_RULE = "contents_bars(size:"

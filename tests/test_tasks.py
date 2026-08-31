@@ -305,7 +305,6 @@ def test_day_strip_labels_and_links_when_daily_exists():
         _minimal(
             enable=["daily", "tasks"],
             sections="""[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "4mm"
 
 [section.daily.left.schedule]

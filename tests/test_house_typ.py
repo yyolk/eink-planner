@@ -26,7 +26,7 @@ def _preamble_set_page(typst: str) -> str:
 
 def test_preamble_imports_house_and_does_not_inline_bodies():
     typst = Preamble(Configurator(load(base_config("158x210")))).generate()
-    assert '#import "158x210.typ": page-width, page-height, page-margin' in typst
+    assert '#import "158x210.typ": page-width, page-height, page-margin, mos-width' in typst
     assert "#include" not in typst
     set_page = _preamble_set_page(typst)
     assert set_page == "#set page(width: page-width, height: page-height, margin: page-margin(left))\n\n"
@@ -55,13 +55,13 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let padded_link = padded_link.with(padding: link_padding)" in typst
     assert "#let contents_bars = contents_bars.with(thick_stroke: thick_stroke)" in typst
     assert "#let trail_heading = trail_heading.with(spacing: 1fr)" in typst
-    assert "#let mos_frame = mos_frame.with(mos-width: 10mm, column-gutter: 2mm)" in typst
+    assert "#let mos_frame = mos_frame.with(mos-width: mos-width, column-gutter: 2mm)" in typst
     assert "#let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm)" in typst
     assert "#let month_grid = month_grid.with(hline-stroke: regular_stroke + black)" in typst
     assert "week-rows:" not in typst
     assert "#let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)" in typst
     assert "month_weeks.with(rows" not in typst
-    assert "#let week_matrix = week_matrix.with(regular-height: regular_height)" in typst
+    assert "#let week_matrix = week_matrix.with(header-stroke: regular_stroke + black, regular-height: regular_height)" in typst
     assert "#let lined_well = lined_well.with(regular-height: regular_height)" in typst
     assert "#let daily_well = daily_well.with(column-gutter: regular_column_gutter)" in typst
     assert "#let quarter_well = quarter_well.with(column-gutter: regular_column_gutter)" in typst
@@ -234,7 +234,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
 def test_preamble_mos_right_uses_page_margin_right():
     dto = apply_hand(load(base_config("158x210")), "right")
     typst = Preamble(Configurator(dto)).generate()
-    assert '#import "158x210.typ": page-width, page-height, page-margin' in typst
+    assert '#import "158x210.typ": page-width, page-height, page-margin, mos-width' in typst
     assert "page-margin(right)" in _preamble_set_page(typst)
     assert "page-margin(left)" not in _preamble_set_page(typst)
 
@@ -244,10 +244,10 @@ def test_preamble_nomad_and_scribe_import_matching_device_file():
     scribe = Preamble(Configurator(load(base_config("kindle-scribe")))).generate()
     lined = Preamble(Configurator(load(base_config("supernote-nomad-lined")))).generate()
     right = Preamble(Configurator(apply_hand(load(base_config("kindle-scribe")), "right"))).generate()
-    assert '#import "supernote-nomad.typ": page-width, page-height, page-margin' in nomad
-    assert '#import "kindle-scribe.typ": page-width, page-height, page-margin' in scribe
-    assert '#import "supernote-nomad.typ": page-width, page-height, page-margin' in lined
-    assert '#import "kindle-scribe.typ": page-width, page-height, page-margin' in right
+    assert '#import "supernote-nomad.typ": page-width, page-height, page-margin, mos-width' in nomad
+    assert '#import "kindle-scribe.typ": page-width, page-height, page-margin, mos-width' in scribe
+    assert '#import "supernote-nomad.typ": page-width, page-height, page-margin, mos-width' in lined
+    assert '#import "kindle-scribe.typ": page-width, page-height, page-margin, mos-width' in right
     assert "118.87" not in _preamble_set_page(nomad)
     assert "157.48" not in _preamble_set_page(scribe)
     assert "height: auto" not in nomad
@@ -267,17 +267,19 @@ def test_device_typ_files_share_page_margin_shape():
 )
 """
     sizes = {
-        "supernote-nomad.typ": ("118.87mm", "158.5mm", "8mm", "4mm"),
-        "kindle-scribe.typ": ("157.48mm", "209.97mm", "5mm", "5mm"),
-        "158x210.typ": ("158mm", "210mm", "5mm", "5mm"),
+        "supernote-nomad.typ": ("118.87mm", "158.5mm", "8mm", "4mm", "8mm"),
+        "kindle-scribe.typ": ("157.48mm", "209.97mm", "5mm", "5mm", "10mm"),
+        "158x210.typ": ("158mm", "210mm", "5mm", "5mm", "10mm"),
     }
     assert KNOWN_DEVICE_TYP == frozenset(sizes)
-    for name, (width, height, toolbar, writing) in sizes.items():
+    for name, (width, height, toolbar, writing, mos) in sizes.items():
         text = device_typ_resource(name).read_text(encoding="utf-8")
         assert f"#let page-width = {width}" in text
         assert f"#let page-height = {height}" in text
         assert f"#let toolbar-clearance = {toolbar}" in text
         assert f"#let writing-clearance = {writing}" in text
+        assert f"#let mos-width = {mos}" in text
+        assert "#let mos-width = toolbar-clearance" not in text
         assert expected in text
         assert "height: auto" not in text
         assert "#include" not in text
@@ -342,7 +344,7 @@ def test_press_copies_house_typ_next_to_index(tmp_path, monkeypatch):
     assert (workdir / "158x210.typ").is_file()
     index = (workdir / "index.typst").read_text(encoding="utf-8")
     assert '#import "house.typ"' in index
-    assert '#import "158x210.typ": page-width, page-height, page-margin' in index
+    assert '#import "158x210.typ": page-width, page-height, page-margin, mos-width' in index
     assert (workdir / "house.typ").read_text(encoding="utf-8") == house_typ_resource().read_text(
         encoding="utf-8"
     )
@@ -377,7 +379,7 @@ def test_wheel_includes_house_typ(tmp_path):
 
 def test_copy_house_typ_copies_imported_device_file(tmp_path):
     (tmp_path / "index.typst").write_text(
-        '#import "kindle-scribe.typ": page-width, page-height, page-margin\n',
+        '#import "kindle-scribe.typ": page-width, page-height, page-margin, mos-width\n',
         encoding="utf-8",
     )
     copy_house_typ(tmp_path)

@@ -1,7 +1,35 @@
-"""Device profile models.
+"""Device profile models. TOML keys use underscores; hyphens are OK in filenames only."""
 
-TOML keys use underscores; hyphens are OK in filenames only.
-"""
+# Locked scale + config ownership (Gridwright). Do not reinterpret.
+#
+# Pin: reverse_months_quarters stays MOS-strip overlay — not dead TOML, not a
+# well-track knob. It packs the rotated strip (1fr/3fr quarters|months,
+# cols.reverse() + item order). True on every shipped device independent of
+# side, so do not fold it into side this slice. reverse_months_quarters_items
+# stays Python item order. Well helpers still take side only. Python still
+# data + side. Do not derive reverse_months_quarters from side.
+#
+# Device .typ (physical, not per-section): page-width / page-height,
+# toolbar-clearance, writing-clearance, page-margin(side), and mos-width.
+# MOS is not toolbar — Nomad 8mm vs Scribe 10mm. Export today's
+# side_menu_width as mos-width. Do not alias it to toolbar-clearance.
+#
+# House: tracks from side only (mos_frame, daily_well 3/5, quarter_well 2/3,
+# week rail, trail_heading ltr). No new length knobs.
+#
+# Preamble book: regular_stroke / thick_stroke, regular_height,
+# regular_column_gutter, type (size, h1), link_padding, heading-height, MOS
+# column/row gutter. week_matrix header-stroke lives here so week_cell can
+# read .thickness.
+#
+# Section overlay (default or sealed): monthly daily_cell_height, notes
+# title_height, paper pattern, week_placement: none only, counts/pages/hours,
+# week_label_rotation, little-cal inset, cover type. Not tracks.
+#
+# Dead TOML: [style.margin], [device] width/height (keep name, ppi if
+# colophon needs them), months_column, week_placement left|right,
+# section.daily.columns 3fr/5fr. Do not drop reverse_months_quarters.
+# --hand / later --paper stay overlays until parch new writes the file.
 
 import tomllib
 from pathlib import Path
@@ -20,6 +48,62 @@ from pydantic import (
 from parch.models.base import StrictModel
 
 _PATTERNS = frozenset({"dotted", "lined"})
+
+# Physical tokens copied from device .typ. Not TOML. MOS is not toolbar.
+DEVICE_SCALE = {
+    "supernote-nomad": {
+        "width": "118.87mm",
+        "height": "158.5mm",
+        "toolbar_clearance": "8mm",
+        "writing_clearance": "4mm",
+        "mos_width": "8mm",
+    },
+    "kindle-scribe": {
+        "width": "157.48mm",
+        "height": "209.97mm",
+        "toolbar_clearance": "5mm",
+        "writing_clearance": "5mm",
+        "mos_width": "10mm",
+    },
+    "158x210": {
+        "width": "158mm",
+        "height": "210mm",
+        "toolbar_clearance": "5mm",
+        "writing_clearance": "5mm",
+        "mos_width": "10mm",
+    },
+}
+
+
+def device_scale(name: str) -> dict[str, str]:
+    """Physical-device tokens for *name* (prefix match, including -lined)."""
+    lowered = name.strip().lower()
+    for prefix, scale in DEVICE_SCALE.items():
+        if lowered == prefix or lowered.startswith(prefix + "-"):
+            return scale
+    raise ValueError(
+        "unknown physical device; expected supernote-nomad, kindle-scribe, or 158x210"
+    )
+
+
+def device_page_margin(scale: dict[str, str]) -> dict[str, str]:
+    """MOS-left page-margin copy. page-margin(side) owns the writing-edge flip."""
+    return {
+        "top": scale["toolbar_clearance"],
+        "bottom": "0mm",
+        "left": "0mm",
+        "right": scale["writing_clearance"],
+    }
+
+
+def _week_placement_none(value: Any) -> str:
+    text = str(value).lstrip(":").lower()
+    if text == "none":
+        return text
+    raise ValueError("week_placement: none only")
+
+
+WeekPlacementNone = Annotated[str, AfterValidator(_week_placement_none)]
 
 
 def _require_pattern(value: Any) -> str:
@@ -47,8 +131,6 @@ ScratchPad = Annotated[str | None, AfterValidator(_scratch_pad_value)]
 
 class Device(StrictModel):
     name: str
-    width: str
-    height: str
     ppi: StrictInt | None = None
 
 
@@ -67,13 +149,6 @@ class TypeStyle(StrictModel):
     h1: str
 
 
-class Margin(StrictModel):
-    top: str
-    bottom: str
-    left: str
-    right: str
-
-
 class Gutter(StrictModel):
     column: str
     row: str | None = None  # optional; adapter ignores it
@@ -85,7 +160,7 @@ class Heading(StrictModel):
 
 
 class LittleCalendar(StrictModel):
-    week_placement: str | None = None
+    week_placement: WeekPlacementNone | None = None
     inset: str | None = None
     show_month_name: StrictBool | None = None
 
@@ -93,7 +168,6 @@ class LittleCalendar(StrictModel):
 class Style(StrictModel):
     stroke: Stroke
     type: TypeStyle
-    margin: Margin
     gutter: Gutter
     regular_height: str | None = None
     link_padding: str | None = None
@@ -105,6 +179,7 @@ class Style(StrictModel):
 class Mos(StrictModel):
     side_menu: str
     side_menu_width: str
+    # MOS-strip overlay. True on every shipped device; not derived from side.
     reverse_months_quarters: StrictBool
     menu_rotate: str
     column_gutter: str
@@ -137,14 +212,13 @@ class AnnualSection(StrictModel):
 
 
 class QuarterlySection(StrictModel):
-    months_column: str
     pattern: OptionalPattern = None
     show_month_name: StrictBool | None = None
     little_calendar: LittleCalendar | None = None
 
 
 class MonthlySection(StrictModel):
-    week_placement: str
+    week_placement: WeekPlacementNone | None = None
     week_label_rotation: str
     daily_cell_height: str
     pattern: OptionalPattern = None
@@ -212,17 +286,9 @@ _DAILY_COMPONENTS = tuple(DailyTrack.model_fields)
 
 
 class DailySection(StrictModel):
-    columns: list[str]
     item_spacing: str
     left: DailyTrack | None = None
     right: DailyTrack | None = None
-
-    @field_validator("columns")
-    @classmethod
-    def _two_columns(cls, value: list[str]) -> list[str]:
-        if len(value) != 2:
-            raise ValueError("columns length must be 2")
-        return value
 
 
 class DailyNotesSection(StrictModel):

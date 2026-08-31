@@ -16,14 +16,10 @@ _COL_FRACS = (0.20, 0.50, 0.80)
 
 _NOMAD = """[device]
 name = "supernote-nomad"
-width = "118.87mm"
-height = "158.5mm"
 ppi = 300"""
 
 _SCRIBE = """[device]
 name = "kindle-scribe"
-width = "157.48mm"
-height = "209.97mm"
 ppi = 300"""
 
 

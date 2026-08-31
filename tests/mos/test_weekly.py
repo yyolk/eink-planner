@@ -100,9 +100,8 @@ def _week_pages(typst_src: str) -> dict[str, str]:
 def _assert_week_matrix_emit(content: str, *, gutter: str, pattern: str, notes: str = "[Notes]") -> None:
     assert "week_matrix(" in content
     assert f"column-gutter: {gutter}" in content
-    assert "header-stroke: regular_stroke + black" in content
+    assert "header-stroke" not in content
     assert f"pattern: {pattern}" in content
-    assert content.count("header-stroke:") == 1
     assert content.count(f"pattern: {pattern}") == 1
     assert "grid.cell" not in content
     assert "grid.cell(colspan" not in content
@@ -141,8 +140,8 @@ def test_headers_link_to_daily_when_registered():
 def test_thin_black_rule_not_thick_stroke():
     content = _page("2025-12-29").content()
     assert "thick_stroke" not in content
-    assert content.count("regular_stroke + black") == 1
-    assert "header-stroke: regular_stroke + black" in content
+    assert "regular_stroke + black" not in content
+    assert "header-stroke" not in content
 
 
 def test_eight_contents_then_notes_no_python_grid_cell():

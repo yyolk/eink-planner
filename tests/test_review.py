@@ -322,7 +322,6 @@ def test_day_strip_labels_and_links_when_daily_exists():
         _minimal(
             enable=["daily", "review"],
             sections="""[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "4mm"
 
 [section.daily.left.schedule]
@@ -518,11 +517,6 @@ thick = "0.6pt"
 body = "8pt"
 h1 = "8mm"
 
-[style.margin]
-top = "8mm"
-bottom = "0mm"
-left = "0mm"
-right = "4mm"
 
 [style.gutter]
 column = "8pt"

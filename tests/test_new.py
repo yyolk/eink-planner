@@ -224,9 +224,10 @@ def test_new_hand_overlays_side_menu_only(tmp_path):
     data = tomllib.loads(out.read_text(encoding="utf-8"))
     assert data["mos"]["side_menu"] == "right"
     assert data["device"]["name"] == "supernote-nomad"
-    assert data["section"]["quarterly"]["months_column"] == "left"
-    assert data["section"]["monthly"]["week_placement"] == "left"
-    assert data["section"]["daily"]["columns"] == ["3fr", "5fr"]
+    assert "months_column" not in data["section"]["quarterly"]
+    assert "week_placement" not in data["section"]["monthly"]
+    assert "columns" not in data["section"]["daily"]
+    assert data["mos"]["reverse_months_quarters"] is True
     assert "left" in data["section"]["daily"]
     assert "right" in data["section"]["daily"]
     assert "schedule" in data["section"]["daily"]["left"]

@@ -34,6 +34,8 @@ from parch.models.device import (
     TasksSection,
     Schedule,
     WeeklySection,
+    device_page_margin,
+    device_scale,
 )
 
 _SECTION_CLASS = {
@@ -120,7 +122,6 @@ def device_profile_to_dto(profile: DeviceProfile) -> dict[str, Any]:
     little = dict(style_little)
     if extras.get("daily_little_calendar"):
         little.update(extras["daily_little_calendar"])
-    little.setdefault("week_placement", "left")
     little.setdefault("inset", "3pt")
 
     for section in sections:
@@ -131,7 +132,6 @@ def device_profile_to_dto(profile: DeviceProfile) -> dict[str, Any]:
                 if comp.get("class") != "little_calendar":
                     continue
                 merged = {**style_little, **(comp.get("params") or {})}
-                merged.setdefault("week_placement", "left")
                 merged.setdefault("inset", "3pt")
                 comp["params"] = merged
 
@@ -159,13 +159,18 @@ def device_profile_to_dto(profile: DeviceProfile) -> dict[str, Any]:
     last_day = calendar.monthrange(year, 12)[1]
     end_date = f"{year:04d}-12-{last_day:02d}"
 
+    try:
+        scale = device_scale(profile.device.name)
+    except ValueError as exc:
+        raise ConfigError(str(exc)) from exc
+
     return {
         "chase": "mos",
         "device": profile.device.name,
         "document": {
             "layout": {
-                "dimensions": {"width": profile.device.width, "height": profile.device.height},
-                "margin": style.margin.model_dump(),
+                "dimensions": {"width": scale["width"], "height": scale["height"]},
+                "margin": device_page_margin(scale),
             },
             "text": {"size": style.type.body, "h1": style.type.h1},
         },
@@ -257,7 +262,7 @@ def _section_annual(table: AnnualSection) -> dict[str, Any]:
 
 
 def _section_quarterly(table: QuarterlySection) -> dict[str, Any]:
-    params: dict[str, Any] = {"months_column": table.months_column}
+    params: dict[str, Any] = {}
     little = _little_cal_dict(table.little_calendar)
     if table.show_month_name is not None:
         little["show_month_name"] = table.show_month_name
@@ -269,13 +274,13 @@ def _section_quarterly(table: QuarterlySection) -> dict[str, Any]:
 
 
 def _section_monthly(table: MonthlySection) -> dict[str, Any]:
-    params: dict[str, Any] = {
-        "month_params": {
-            "week_placement": table.week_placement,
-            "week_label_rotation": table.week_label_rotation,
-            "daily_cell_height": table.daily_cell_height,
-        }
+    month_params: dict[str, Any] = {
+        "week_label_rotation": table.week_label_rotation,
+        "daily_cell_height": table.daily_cell_height,
     }
+    if table.week_placement is not None:
+        month_params["week_placement"] = table.week_placement
+    params: dict[str, Any] = {"month_params": month_params}
     if table.pattern is not None:
         params["pattern"] = table.pattern
     return params

@@ -30,7 +30,6 @@ class Weekly:
         notes = f"[{self.i18n.t('notes')}]"
         return f"""week_matrix(
   column-gutter: {self.column_gutter},
-  header-stroke: regular_stroke + black,
   pattern: {self.pattern},
   {cells},
   {notes},

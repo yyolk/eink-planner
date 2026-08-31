@@ -35,11 +35,6 @@ thick = "0.6pt"
 body = "8pt"
 h1 = "8mm"
 
-[style.margin]
-top = "8mm"
-bottom = "0mm"
-left = "0mm"
-right = "4mm"
 
 [style.gutter]
 column = "8pt"
@@ -67,7 +62,6 @@ def _mixed_sections(daily_pattern: str | None, extra_pattern: str | None, revers
     notes_body = f'pattern = "{daily_pattern}"\n' if daily_pattern else ""
     notes_pages = f'pattern = "{extra_pattern}"\n' if extra_pattern else ""
     daily = f"""[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "1mm"
 
 [section.daily.left.schedule]
@@ -112,7 +106,6 @@ def test_style_scratch_pad_is_house_default_under_explicit_section():
         enable=["daily", "daily_notes"],
         style=_STYLE_LINED,
         sections="""[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "1mm"
 
 [section.daily.left.schedule]
@@ -138,7 +131,6 @@ def test_explicit_dotted_wins_over_style_lined():
         enable=["daily", "daily_notes"],
         style=_STYLE_LINED,
         sections="""[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "1mm"
 
 [section.daily.left.schedule]
@@ -166,7 +158,6 @@ def test_unknown_pattern_raises():
             enable=["daily", "daily_notes"],
             style=_STYLE_LINED.replace('scratch_pad = "lined"', 'scratch_pad = "mesh"'),
             sections="""[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "1mm"
 
 [section.daily.left.schedule]
@@ -248,11 +239,9 @@ def test_lined_sibling_keeps_daily_notes_dotted(path: Path):
 
 def test_week_month_quarter_accept_pattern_lined():
     sections = """[section.quarterly]
-months_column = "left"
 pattern = "lined"
 
 [section.monthly]
-week_placement = "left"
 week_label_rotation = "90deg"
 daily_cell_height = "16mm"
 pattern = "lined"

@@ -18,14 +18,12 @@ class Quarterly:
         section_name: str,
         i18n: I18n,
         configurator: Configurator,
-        months_column: str,
         pattern: str = "dotted",
         **other: Any,
     ) -> None:
         self.section_name = section_name
         self.i18n = i18n
         self.configurator = configurator
-        self.months_column = str(months_column).lstrip(":").lower()
         self.pattern = pattern
         base = self.configurator.dig("planner", "params", "little_calendar") or {}
         extra = other.get("little_calendar") or {}
@@ -43,7 +41,6 @@ class Quarterly:
                 i18n=self.i18n,
                 manifest=manifest,
                 quarter=quarter,
-                months_column=self.months_column,
                 little_calendar=self.little_calendar,
                 pattern=self.pattern,
                 side=self.side,

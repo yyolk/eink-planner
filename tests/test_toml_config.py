@@ -5,6 +5,7 @@ import pytest
 from parch import ConfigError
 from parch.cli import build_parser
 from parch.config import load
+from parch.models.device import DEVICE_SCALE, device_page_margin, device_scale
 from parch.mos.configurator import Configurator
 from parch.toml_config import apply_debug, apply_hand, apply_year, load_toml, parse_toml
 from tests.toml_fixtures import _minimal, omit_toml_sections
@@ -61,6 +62,24 @@ def test_parse_shipped_toml_profiles(path: Path):
     else:
         expected = ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "colophon"]
     assert names == expected
+    mos = dto["planner"]["params"]["mos_layout"]
+    assert mos["reverse_months_quarters"] is True
+    scale = device_scale(dto["device"])
+    assert dto["document"]["layout"]["dimensions"]["width"] == scale["width"]
+    assert dto["document"]["layout"]["dimensions"]["height"] == scale["height"]
+    assert dto["document"]["layout"]["margin"] == device_page_margin(scale)
+    text = path.read_text(encoding="utf-8")
+    assert "reverse_months_quarters = true" in text
+    assert "[style.margin]" not in text
+    assert "months_column" not in text
+    assert "week_placement" not in text
+    assert "columns = " not in text
+    assert "\nwidth = " not in text
+    assert "\nheight = " not in text
+    assert scale["mos_width"] != scale["toolbar_clearance"] or path.name.startswith("supernote-nomad")
+    assert DEVICE_SCALE["kindle-scribe"]["mos_width"] == "10mm"
+    assert DEVICE_SCALE["kindle-scribe"]["toolbar_clearance"] == "5mm"
+    assert DEVICE_SCALE["supernote-nomad"]["mos_width"] == "8mm"
 
 
 def test_load_rejects_yaml_and_kdl_device_profiles():
@@ -195,11 +214,6 @@ thick = "0.6pt"
 body = "8pt"
 h1 = "8mm"
 
-[style.margin]
-top = "8mm"
-bottom = "0mm"
-left = "0mm"
-right = "4mm"
 
 [style.gutter]
 column = "8pt"
@@ -363,12 +377,13 @@ def test_apply_hand_overlays_side_menu_only():
     dto = apply_hand(load(PAPER_158), "right")
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["side_menu_position"] == "right"
+    assert mos["reverse_months_quarters"] is True
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
     assert "columns_width" not in daily
     quarterly = next(s for s in dto["planner"]["sections"] if s["name"] == "quarterly")["params"]
-    assert quarterly["months_column"] == "left"
+    assert "months_column" not in quarterly
     monthly = next(s for s in dto["planner"]["sections"] if s["name"] == "monthly")["params"]["month_params"]
-    assert monthly["week_placement"] == "left"
+    assert "week_placement" not in monthly
 
 
 def test_apply_hand_none_leaves_profile_side():
@@ -445,7 +460,6 @@ def test_bool_values_are_not_integers():
                 enable=["daily"],
                 sections="""[section.daily]
 item_spacing = "1mm"
-columns = ["3fr", "5fr"]
 
 [section.daily.left.schedule]
 hour_from = true
@@ -473,7 +487,6 @@ def test_hour_range_rejects_float_args():
                 enable=["daily"],
                 sections="""[section.daily]
 item_spacing = "1mm"
-columns = ["3fr", "5fr"]
 
 [section.daily.left.schedule]
 hour_from = 8.5
@@ -495,7 +508,7 @@ def _daily_little_calendar(dto):
     raise AssertionError("daily little calendar component missing")
 
 
-def test_daily_little_calendar_inherits_style_week_placement_and_inset():
+def test_daily_little_calendar_inherits_style_inset():
     style = """[style.stroke]
 regular = "0.3pt"
 thick = "0.6pt"
@@ -504,21 +517,14 @@ thick = "0.6pt"
 body = "8pt"
 h1 = "8mm"
 
-[style.margin]
-top = "8mm"
-bottom = "0mm"
-left = "0mm"
-right = "4mm"
 
 [style.gutter]
 column = "8pt"
 
 [style.little_calendar]
-week_placement = "left"
 inset = "3pt"
 """
     sections = """[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "1mm"
 
 [section.daily.left.little_calendar]
@@ -529,7 +535,7 @@ count = 1
 """
     dto = parse_toml(_minimal(enable=["daily"], style=style, sections=sections))
     params = _daily_little_calendar(dto)
-    assert params["week_placement"] == "left"
+    assert "week_placement" not in params
     assert params["inset"] == "3pt"
     assert params["show_month_name"] is True
 
@@ -543,11 +549,6 @@ thick = "0.6pt"
 body = "8pt"
 h1 = "8mm"
 
-[style.margin]
-top = "8mm"
-bottom = "0mm"
-left = "0mm"
-right = "4mm"
 
 [style.gutter]
 column = "8pt"
@@ -556,7 +557,6 @@ column = "8pt"
 inset = "3pt"
 """
     sections = """[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "1mm"
 
 [section.daily.left.little_calendar]
@@ -575,15 +575,83 @@ def test_device_ppi_may_be_omitted():
     dto = parse_toml(
         _minimal(
             device="""[device]
-name = "x"
-width = "100mm"
-height = "120mm"
+name = "158x210"
 """,
         )
     )
-    assert dto["device"] == "x"
-    assert dto["document"]["layout"]["dimensions"]["width"] == "100mm"
-    assert dto["document"]["layout"]["dimensions"]["height"] == "120mm"
+    assert dto["device"] == "158x210"
+    assert dto["document"]["layout"]["dimensions"]["width"] == "158mm"
+    assert dto["document"]["layout"]["dimensions"]["height"] == "210mm"
+    assert dto["document"]["layout"]["margin"]["top"] == "5mm"
+    assert dto["document"]["layout"]["margin"]["right"] == "5mm"
+
+
+def test_dead_toml_keys_are_unknown():
+    with pytest.raises(ConfigError, match="unknown key"):
+        parse_toml(_minimal() + "\n[style.margin]\ntop = \"5mm\"\n")
+    with pytest.raises(ConfigError, match="unknown key"):
+        parse_toml(
+            _minimal(
+                device="""[device]
+name = "158x210"
+width = "158mm"
+height = "210mm"
+"""
+            )
+        )
+    with pytest.raises(ConfigError, match="unknown key"):
+        parse_toml(
+            _minimal(
+                enable=["quarterly"],
+                sections="""[section.quarterly]
+months_column = "left"
+show_month_name = true
+""",
+            )
+        )
+    with pytest.raises(ConfigError, match="unknown key"):
+        parse_toml(
+            _minimal(
+                enable=["daily"],
+                sections="""[section.daily]
+columns = ["3fr", "5fr"]
+item_spacing = "1mm"
+
+[section.daily.left.schedule]
+hour_from = 8
+hour_to = 20
+
+[section.daily.right.priorities]
+count = 1
+""",
+            )
+        )
+
+
+def test_week_placement_left_right_rejected_none_ok():
+    with pytest.raises(ConfigError, match="week_placement"):
+        parse_toml(
+            _minimal(
+                enable=["monthly"],
+                sections="""[section.monthly]
+week_placement = "left"
+week_label_rotation = "90deg"
+daily_cell_height = "2.5cm"
+""",
+            )
+        )
+    dto = parse_toml(
+        _minimal(
+            enable=["monthly"],
+            sections="""[section.monthly]
+week_placement = "none"
+week_label_rotation = "90deg"
+daily_cell_height = "2.5cm"
+""",
+        )
+    )
+    monthly = next(s for s in dto["planner"]["sections"] if s["name"] == "monthly")
+    assert monthly["params"]["month_params"]["week_placement"] == "none"
 
 
 def test_empty_style_scratch_pad_is_dotted():
@@ -598,11 +666,6 @@ thick = "0.6pt"
 body = "8pt"
 h1 = "8mm"
 
-[style.margin]
-top = "8mm"
-bottom = "0mm"
-left = "0mm"
-right = "4mm"
 
 [style.gutter]
 column = "8pt"

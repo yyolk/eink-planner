@@ -83,7 +83,6 @@ def test_daily_notes_left_schedule_right_dto_and_typst():
     text = _minimal(
         enable=["daily"],
         sections="""[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "5mm"
 
 [section.daily.left.notes]
@@ -91,7 +90,6 @@ pattern = "dotted"
 title_height = "5mm"
 
 [section.daily.left.little_calendar]
-week_placement = "right"
 inset = "5pt"
 
 [section.daily.right.schedule]
@@ -107,7 +105,7 @@ count = 5
     params = _daily_section(dto)["params"]
     assert [c["class"] for c in params["left_column"]] == ["notes", "little_calendar"]
     assert [c["class"] for c in params["right_column"]] == ["schedule", "priorities"]
-    assert dto["planner"]["params"]["little_calendar"]["week_placement"] == "right"
+    assert "week_placement" not in dto["planner"]["params"]["little_calendar"]
 
     typst_src = _generate(short_january(dto))
     marker = "daily_well("
@@ -123,7 +121,6 @@ def test_unknown_daily_child_still_rejected():
             _minimal(
                 enable=["daily"],
                 sections="""[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "5mm"
 
 [section.daily.right.priorities]
@@ -140,7 +137,6 @@ banana = 1
             _minimal(
                 enable=["daily"],
                 sections="""[section.daily]
-columns = ["3fr", "5fr"]
 item_spacing = "5mm"
 
 [section.daily.left.priorities]
@@ -174,16 +170,16 @@ def test_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert [c["class"] for c in daily["left_column"]] == ["schedule", "little_calendar"]
     assert [c["class"] for c in daily["right_column"]] == ["priorities", "notes"]
     quarterly = next(s for s in dto["planner"]["sections"] if s["name"] == "quarterly")["params"]
-    assert quarterly["months_column"] == "left"
+    assert "months_column" not in quarterly
     monthly = next(s for s in dto["planner"]["sections"] if s["name"] == "monthly")["params"]["month_params"]
-    assert monthly["week_placement"] == "left"
+    assert "week_placement" not in monthly
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
     assert names[-1] == "colophon"
     typst_src = _generate(dto)
     assert "page-margin(right)" in typst_src
     assert "#mos_frame(\n  right," in typst_src
     assert "#mos_frame(\n  left," not in typst_src
-    assert "mos-width: 10mm" in typst_src
+    assert "mos-width: mos-width" in typst_src
     assert "daily_well(right," in typst_src
     assert "month_grid(right," in typst_src
     assert "month_weeks(right," in typst_src
@@ -229,9 +225,9 @@ def test_nomad_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert schedule["time_format"] == "%k"
     assert schedule["trailing_30_minutes"] is True
     quarterly = next(s for s in dto["planner"]["sections"] if s["name"] == "quarterly")["params"]
-    assert quarterly["months_column"] == "left"
+    assert "months_column" not in quarterly
     monthly = next(s for s in dto["planner"]["sections"] if s["name"] == "monthly")["params"]["month_params"]
-    assert monthly["week_placement"] == "left"
+    assert "week_placement" not in monthly
     assert monthly["daily_cell_height"] == "16mm"
     assert monthly["week_label_rotation"] == "90deg"
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
@@ -240,7 +236,7 @@ def test_nomad_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert "page-margin(right)" in typst_src
     assert "#mos_frame(\n  right," in typst_src
     assert "#mos_frame(\n  left," not in typst_src
-    assert "mos-width: 8mm" in typst_src
+    assert "mos-width: mos-width" in typst_src
     assert "rows: 1fr" in typst_src
     assert "rows: (auto, 1fr)" in typst_src
     assert "daily_well(right," in typst_src
