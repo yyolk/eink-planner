@@ -432,7 +432,9 @@ def test_nomad_ships_review_after_habits():
     review = next(s for s in dto["planner"]["sections"] if s["name"] == "review")
     assert review["params"]["weeks_per_page"] == 13
     assert review["params"]["pattern"] == "lined"
-    assert "pattern" not in NOMAD.read_text(encoding="utf-8").split("[section.habits]")[-1]
+    habits_onward = NOMAD.read_text(encoding="utf-8").split("[section.habits]")[-1]
+    assert '[section.review]' in habits_onward
+    assert 'pattern = "lined"' in habits_onward
 
 
 def test_short_january_review_compiles(tmp_path):

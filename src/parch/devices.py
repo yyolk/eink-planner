@@ -30,6 +30,8 @@ class Device:
     toolbar_clearance: str
     writing_clearance: str
     mos_width: str
+    width_px: int | None = None
+    height_px: int | None = None
 
     def __post_init__(self) -> None:
         if self.toolbar_edge not in TOOLBAR_EDGES:
@@ -49,10 +51,14 @@ class Device:
 
     @property
     def width_pt(self) -> float:
+        if self.width_px is not None:
+            return round(self.width_px / self.ppi * PT_PER_INCH, 2)
         return round(self.width_mm / MM_PER_INCH * PT_PER_INCH, 2)
 
     @property
     def height_pt(self) -> float:
+        if self.height_px is not None:
+            return round(self.height_px / self.ppi * PT_PER_INCH, 2)
         return round(self.height_mm / MM_PER_INCH * PT_PER_INCH, 2)
 
     def page_size_mm(self) -> tuple[str, str]:
@@ -80,6 +86,8 @@ SUPERNOTE_NOMAD = Device(
     toolbar_clearance="8mm",
     writing_clearance="4mm",
     mos_width="8mm",
+    width_px=1404,
+    height_px=1872,
 )
 
 # Kindle Scribe: 1860×2480 @ 300 PPI → 157.48×209.97 mm. No toolbar.
@@ -93,6 +101,8 @@ KINDLE_SCRIBE = Device(
     toolbar_clearance="5mm",
     writing_clearance="5mm",
     mos_width="10mm",
+    width_px=1860,
+    height_px=2480,
 )
 
 # 158×210 mm paper size. No toolbar.

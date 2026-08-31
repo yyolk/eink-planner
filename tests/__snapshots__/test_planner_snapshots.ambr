@@ -351,7 +351,9 @@
       )
     ''',
     'preamble': '''
-      #import "158x210.typ": page-width, page-height, page-margin, mos-width
+      #import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
+      #let page-margin = page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)
       #set page(width: page-width, height: page-height, margin: page-margin(left))
       
       #set text(
@@ -365,8 +367,6 @@
       
       #let h1 = 10mm
       #let link_padding = 8pt
-      
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well
       
       #let dotted = dotted(regular_height: regular_height)
       #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -690,7 +690,9 @@
       )
     ''',
     'preamble': '''
-      #import "supernote-nomad.typ": page-width, page-height, page-margin, mos-width
+      #import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
+      #let page-margin = page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)
       #set page(width: page-width, height: page-height, margin: page-margin(left))
       
       #set text(
@@ -704,8 +706,6 @@
       
       #let h1 = 8mm
       #let link_padding = 6pt
-      
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well
       
       #let dotted = dotted(regular_height: regular_height)
       #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
