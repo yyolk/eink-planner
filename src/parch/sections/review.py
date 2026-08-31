@@ -185,7 +185,6 @@ class Review:
             heading_height_token(self.configurator),
             f"text(size: h1, {review_cell})",
             body_size_token(self.configurator),
-            direction="rtl",
             edge=HeadingMark.FOLLOW,
         )
 

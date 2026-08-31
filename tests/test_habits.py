@@ -39,7 +39,6 @@ _TRAIL_MARK = "padded_link(padding: 0pt, <index>"
 _TRAIL_HEADING = "trail_heading("
 _LEAD_PAIR = "lead_pair("
 _SEAT_RTL = "spacing: 1fr, direction: rtl"
-_SEAT_LTR = "spacing: 1fr, direction: ltr"
 _FOLLOW_SPACING = "spacing: 0.5em"
 _HEADER_LINE = "line(start: (0%, 100%), end: (100%, 0%), stroke: regular_stroke)"
 _NAMED_MARK = "align(center + horizon, text["
@@ -830,7 +829,7 @@ def test_index_heading_is_trail_strip_when_contents_on():
     assert index.index(_TRAIL_MARK) < index.index("[Habits <habits>]")
     assert "column-gutter: 6pt" not in index
     month_heading = month[month.index(_TRAIL_HEADING) : month.index(_TRAIL_MARK)]
-    assert _SEAT_LTR in month
+    assert "direction:" not in month
     assert _TRAIL_HEADING in month
     assert "dir: ttb" not in month_heading
     assert "column-gutter: 6pt" not in month_heading
@@ -872,7 +871,7 @@ def test_mos_right_month_mark_trails_alone_left_of_rail():
     assert _TRAIL_MARK in month
     assert month.index("January<habits-january>") < month.index(_TRAIL_MARK)
     heading = month[month.index(_TRAIL_HEADING) : month.index(_TRAIL_MARK)]
-    assert _SEAT_LTR in month
+    assert "direction:" not in month
     assert _TRAIL_HEADING in month
     assert "dir: ttb" not in heading
     assert "column-gutter: 6pt" not in heading

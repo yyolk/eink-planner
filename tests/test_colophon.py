@@ -118,6 +118,7 @@ def test_colophon_heading_uses_trail_heading_follow_not_lead_title():
     heading = inspect.getsource(Colophon._heading)
     assert "trail_heading(" in heading
     assert "edge=HeadingMark.FOLLOW" in heading
+    assert "direction" not in heading
     assert "lead_title" not in heading
     assert "lead_title" not in inspect.getsource(Colophon._content)
     assert "lead_title" not in inspect.getsource(Colophon)
