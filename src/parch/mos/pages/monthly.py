@@ -9,6 +9,7 @@ from parch.calendar.day import Day
 from parch.calendar.month import Month
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
+from parch.typst_emit import typst_emit
 
 WEEK_PLACEMENTS = ("left", "right", "none")
 
@@ -32,7 +33,9 @@ class Monthly:
             raise ConfigError(f"week_placement: allowed: {list(WEEK_PLACEMENTS)}")
 
     def title(self) -> str:
-        return f'text(size: h1)[{self.i18n.t(f"months.full.{self.month.name}")}<{self.month.id}>]'
+        return typst_emit(
+            t'text(size: h1)[{self.i18n.t(f"months.full.{self.month.name}")}<{self.month.id}>]'
+        )
 
     def content(self) -> str:
         return f"""grid(
