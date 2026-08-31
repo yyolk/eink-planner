@@ -132,7 +132,6 @@ class Colophon:
             heading_height_token(self.configurator),
             f'text(size: h1, weight: "bold"){hit}',
             body_size_token(self.configurator),
-            direction="rtl",
             edge=HeadingMark.FOLLOW,
         )
 

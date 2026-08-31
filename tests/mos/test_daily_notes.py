@@ -17,7 +17,6 @@ _MARK_RULE = "contents_bars(size:"
 _MARK_FLUSH = "padded_link(padding: 0pt, <index>"
 _TRAIL_MARK = "padded_link(padding: 0pt, <index>"
 _TRAIL_HEADING = "trail_heading("
-_SEAT_LTR = "spacing: 1fr, direction: ltr"
 
 _BULKY = (
     "colophon",
@@ -218,7 +217,8 @@ def test_generated_trail_mark_alone_and_inverts_january_only():
     assert p1.index("1 <daily-note-2026-01-01-page-1>") < p1.index(_TRAIL_MARK)
     heading = p1[p1.index(_TRAIL_HEADING) : p1.index(_TRAIL_MARK)]
     assert "1 <daily-note-2026-01-01-page-1>" in heading
-    assert _SEAT_LTR in p1
+    assert "direction:" not in heading
+    assert "spacing:" not in heading
     assert _TRAIL_HEADING in p1
     assert "column-gutter: 6pt" not in heading
     assert "text(size: h1)[1 <daily-note-2026-01-01-page-1>]" in p1
@@ -260,7 +260,8 @@ def test_generated_hand_right_trail_mark_alone_left_of_q1():
     assert p1.index("1 <daily-note-2026-01-01-page-1>") < p1.index(_TRAIL_MARK)
     heading = p1[p1.index(_TRAIL_HEADING) : p1.index(_TRAIL_MARK)]
     assert "1 <daily-note-2026-01-01-page-1>" in heading
-    assert _SEAT_LTR in p1
+    assert "direction:" not in heading
+    assert "spacing:" not in heading
     assert _TRAIL_HEADING in p1
     assert "column-gutter: 6pt" not in heading
     assert "2026 /" not in p1

@@ -54,6 +54,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let rect_pattern = rect_pattern.with(regular_height: regular_height)" in typst
     assert "#let padded_link = padded_link.with(padding: link_padding)" in typst
     assert "#let contents_bars = contents_bars.with(thick_stroke: thick_stroke)" in typst
+    assert "#let trail_heading = trail_heading.with(spacing: 1fr)" in typst
     assert "#let mos_frame = mos_frame.with(mos-width: 10mm, column-gutter: 2mm)" in typst
     assert "#let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm)" in typst
     assert "#let month_grid = month_grid.with(hline-stroke: regular_stroke + black)" in typst
@@ -120,6 +121,13 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let lead_pair(mark, title, spacing: 6pt)" in house
     assert "#let lead_pair(left, right" not in house
     assert "#let trail_heading(" in house
+    assert "#let trail_heading(title, mark, spacing: none)" in house
+    assert "#let trail_heading(title, mark, spacing: none, direction:" not in house
+    trail_heading = house[house.index("#let trail_heading(") : house.index("#let mos_frame(")]
+    assert "dir: ltr" in trail_heading
+    assert "direction" not in trail_heading
+    assert "seated_title" not in trail_heading
+    assert "seated_mark" not in trail_heading
     assert "#let mos_frame(" in house
     assert "#let well_frame(" in house
     assert "#let month_grid(" in house
@@ -197,7 +205,8 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "reverse" not in quarter_well
     assert "rowspan" not in house
     assert "dir: ltr" in house
-    assert "calc.max(measure(seated_title).height, measure(seated_mark).height)" in house
+    assert "calc.max(measure(title).height, measure(mark).height)" in house
+    assert "measure(seated_title)" not in house
 
 
 def test_preamble_mos_right_uses_page_margin_right():

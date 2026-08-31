@@ -135,7 +135,7 @@
           )
         ),
         well_frame(
-          trail_heading(text(size: h1)[2026<annual>], padded_link(padding: 0pt, <index>, contents_bars(size: h1)), spacing: 1fr, direction: ltr),
+          trail_heading(text(size: h1)[2026<annual>], padded_link(padding: 0pt, <index>, contents_bars(size: h1))),
           grid(
         columns: (1fr, 1fr, 1fr),
         rows: (1fr),
@@ -227,7 +227,7 @@
         ),
         [*Thursday*],
         padded_link(<2026W01>)[Week 1]
-      ), padded_link(padding: 0pt, <index>, contents_bars(size: h1)), spacing: 1fr, direction: ltr),
+      ), padded_link(padding: 0pt, <index>, contents_bars(size: h1))),
           daily_well(left, grid(
         columns: 1fr,
         rows: (auto, 1fr),
@@ -377,6 +377,7 @@
       #let scratch_pad = rect_pattern(dotted)
       #let padded_link = padded_link.with(padding: link_padding)
       #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
+      #let trail_heading = trail_heading.with(spacing: 1fr)
       #let mos_frame = mos_frame.with(mos-width: 10mm, column-gutter: 2mm)
       #let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm)
       #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
@@ -475,7 +476,7 @@
           )
         ),
         well_frame(
-          trail_heading(text(size: h1)[2026<annual>], padded_link(padding: 0pt, <index>, contents_bars(size: h1)), spacing: 1fr, direction: ltr),
+          trail_heading(text(size: h1)[2026<annual>], padded_link(padding: 0pt, <index>, contents_bars(size: h1))),
           grid(
         columns: (1fr, 1fr, 1fr),
         rows: (1fr),
@@ -567,7 +568,7 @@
         ),
         [*Thursday*],
         padded_link(<2026W01>)[Week 1]
-      ), padded_link(padding: 0pt, <index>, contents_bars(size: h1)), spacing: 1fr, direction: ltr),
+      ), padded_link(padding: 0pt, <index>, contents_bars(size: h1))),
           daily_well(left, grid(
         columns: 1fr,
         rows: (auto, 1fr),
@@ -717,6 +718,7 @@
       #let scratch_pad = rect_pattern(dotted)
       #let padded_link = padded_link.with(padding: link_padding)
       #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
+      #let trail_heading = trail_heading.with(spacing: 1fr)
       #let mos_frame = mos_frame.with(mos-width: 8mm, column-gutter: 1.5mm)
       #let well_frame = well_frame.with(heading-height: 8mm, row-gutter: 1.5mm)
       #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)

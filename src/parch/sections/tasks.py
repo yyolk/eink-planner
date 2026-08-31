@@ -178,7 +178,6 @@ class Tasks:
             heading_height_token(self.configurator),
             f"text(size: h1, {tasks_cell})",
             body_size_token(self.configurator),
-            direction="rtl",
             edge=HeadingMark.FOLLOW,
         )
 

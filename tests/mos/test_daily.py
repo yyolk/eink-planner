@@ -18,7 +18,6 @@ _MARK_RULE = "contents_bars(size:"
 _MARK_FLUSH = "padded_link(padding: 0pt, <index>"
 _TRAIL_MARK = "padded_link(padding: 0pt, <index>"
 _TRAIL_HEADING = "trail_heading("
-_SEAT_LTR = "spacing: 1fr, direction: ltr"
 
 _BULKY = (
     "colophon",
@@ -261,7 +260,8 @@ def test_generated_contents_mark_alone_and_inverts_january_only():
     assert jan1.index("1 <2026-01-01>") < jan1.index(_TRAIL_MARK)
     heading = jan1[jan1.index(_TRAIL_HEADING) : jan1.index(_TRAIL_MARK)]
     assert "1 <2026-01-01>" in heading
-    assert _SEAT_LTR in jan1
+    assert "direction:" not in heading
+    assert "spacing:" not in heading
     assert _TRAIL_HEADING in jan1
     assert "column-gutter: 6pt" not in heading
     assert "text(size: h1)[1 <2026-01-01>]" in jan1
@@ -304,7 +304,8 @@ def test_generated_hand_right_contents_mark_alone_left_of_q1():
     assert jan1.index("1 <2026-01-01>") < jan1.index(_TRAIL_MARK)
     heading = jan1[jan1.index(_TRAIL_HEADING) : jan1.index(_TRAIL_MARK)]
     assert "1 <2026-01-01>" in heading
-    assert _SEAT_LTR in jan1
+    assert "direction:" not in heading
+    assert "spacing:" not in heading
     assert _TRAIL_HEADING in jan1
     assert "column-gutter: 6pt" not in heading
     assert "2026 /" not in jan1

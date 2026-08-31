@@ -86,11 +86,10 @@ def trail_heading(
     title: str | None,
     body_size: str = "8pt",
     *,
-    direction: str = "ltr",
     chip: str | None = None,
     edge: HeadingMark = HeadingMark.TRAIL,
 ) -> str:
-    """TRAIL is 1fr opposite-ends, always ltr. FOLLOW is lead_pair at 0.5em."""
+    """TRAIL emits trail_heading(title, mark). FOLLOW is lead_pair at 0.5em."""
     mark = trail_strip(manifest, heading_height, body_size, chip)
     if not title:
         return mark or ""
@@ -100,6 +99,6 @@ def trail_heading(
         case HeadingMark.FOLLOW:
             return f"lead_pair({mark}, {title}, spacing: 0.5em)"
         case HeadingMark.TRAIL:
-            return f"trail_heading({title}, {mark}, spacing: 1fr, direction: ltr)"
+            return f"trail_heading({title}, {mark})"
         case _:
             raise ValueError(f"trail_heading edge must be TRAIL or FOLLOW, not {edge!r}")
