@@ -87,6 +87,9 @@ def test_january_keeps_full_weekdays_and_five_body_rows():
     assert "columns: (regular_height" not in well
     assert "stroke:" not in well
     assert "block(" not in well
+    assert "layout(size => block(" in content
+    assert "width: size.width," in content
+    assert "height: size.height," in content
     assert "rows: (1fr, auto, 1fr)" in content
     assert "rows: (auto, auto, 1fr)" not in content
     assert "[], align(center + horizon)[Monday]" in content
@@ -125,6 +128,7 @@ def test_august_2026_is_six_rows_on_one_page():
     content = page.content()
     weeks = page._month_in_weeks()
     assert len(weeks) == 6
+    assert "layout(size => block(" in content
     assert "rows: (1fr, auto, 1fr)" in content
     assert "rows: (regular_height,) + (1fr,) * 6" in content
     assert "rows: (auto, auto, 1fr)" not in content
