@@ -279,6 +279,7 @@ pattern = "lined"
     week = next(page for page in pages if "Week 1 <2026W01>" in page)
     assert "rect_pattern(lined)" in quarter
     assert "rect_pattern(lined)" in month
-    assert "rect_pattern(lined)" in week
-    assert week.count("rect_pattern(lined)") == 8
+    assert "week_matrix(" in week
+    assert "pattern: lined" in week
+    assert "rect_pattern(lined)" not in week
     assert "grid.cell(colspan: 3, rect_pattern" not in week

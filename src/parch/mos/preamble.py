@@ -60,7 +60,7 @@ class Preamble:
 #let h1 = {h1}
 #let link_padding = {_v(p, 'link_padding')}
 
-#import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid
+#import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, week_matrix
 
 #let dotted = dotted(regular_height: regular_height)
 #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -72,7 +72,8 @@ class Preamble:
 #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
 #let mos_frame = mos_frame.with(mos-width: {_v(mos_layout, 'side_menu_width')}, column-gutter: {_v(mos_layout, 'column_gutter')})
 #let well_frame = well_frame.with(heading-height: {_v(heading, 'height')}, row-gutter: {_v(mos_layout, 'row_gutter')})
-#let month_grid = month_grid.with(week-rows: 6, hline-stroke: regular_stroke + black)"""
+#let month_grid = month_grid.with(week-rows: 6, hline-stroke: regular_stroke + black)
+#let week_matrix = week_matrix.with(regular-height: regular_height)"""
 
 
 def _v(mapping, key: str):

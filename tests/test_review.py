@@ -391,8 +391,9 @@ column_gutter = "4pt"
     assert "<review-2026W01>" in review
     assert "Week 1" in weekly
     assert "Week 1" not in review
-    # weekly planner is 3 columns + dotted/lined day fields; review is not
-    assert "columns: (1fr, 1fr, 1fr)" in weekly
+    # weekly planner is house week_matrix; review is not
+    assert "week_matrix(" in weekly
+    assert "week_matrix(" not in review
     assert "columns: (1fr, 1fr, 1fr)" not in review
 
 
