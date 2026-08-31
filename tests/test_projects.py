@@ -25,10 +25,10 @@ height = "158.5mm"
 ppi = 300"""
 
 _MARK_RULE = "contents_bars(size:"
-_TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
-_TRAIL_HEADING = "trail_heading("
+_TRAIL_MARK = "padded_link(padding: 0pt, <index>"
+_LEAD_PAIR = "lead_pair("
 _SEAT_RTL = "spacing: 1fr, direction: rtl"
-_FOLLOW_RTL = "spacing: 0.5em, direction: rtl"
+_FOLLOW_SPACING = "spacing: 0.5em"
 _CARD_STROKE = "stroke: regular_stroke + black"
 _CARD_LINE = "line(length: size.width, stroke: 0.2pt + black)"
 
@@ -465,17 +465,17 @@ def test_contents_mark_on_projects_when_index_on():
     assert "column-gutter: 6pt" not in index
     assert "text(size: h1, [Projects <projects>])" in index
     assert "padded_link(<projects>)" in board
-    heading = index[index.index(_TRAIL_HEADING) : index.index(_TRAIL_MARK)]
-    assert "[Projects <projects>]" in heading
-    assert _TRAIL_MARK not in heading
-    assert _FOLLOW_RTL in index
+    assert "[Projects <projects>]" in index
+    assert _LEAD_PAIR in index
+    assert _FOLLOW_SPACING in index
     assert _SEAT_RTL not in index
-    assert _TRAIL_HEADING in index
-    assert index.index("[Projects <projects>]") < index.index(_TRAIL_MARK)
-    board_heading = board[board.index(_TRAIL_HEADING) : board.index(_TRAIL_MARK)]
-    assert "padded_link(<projects>)" in board_heading
-    assert _FOLLOW_RTL in board
+    assert "trail_heading(" not in index
+    assert index.index(_TRAIL_MARK) < index.index("[Projects <projects>]")
+    assert "padded_link(<projects>)" in board
+    assert _LEAD_PAIR in board
+    assert _FOLLOW_SPACING in board
     assert _SEAT_RTL not in board
+    assert "trail_heading(" not in board
     projects = _projects(dto)
     manifest = Manifest()
     projects.register(manifest)

@@ -120,11 +120,11 @@
   )
 })
 
-#let lead_pair(left, right, spacing: 6pt) = stack(
+#let lead_pair(mark, title, spacing: 6pt) = stack(
   dir: ltr,
   spacing: spacing,
-  align(horizon, left),
-  align(horizon, right),
+  align(horizon, mark),
+  align(horizon, title),
 )
 
 #let trail_heading(title, mark, spacing: none, direction: ltr) = context {
@@ -138,3 +138,29 @@
     box(height: band, align(horizon + left, seated_mark)),
   )
 }
+
+#let mos_frame(side, mos, well, mos-width: none, column-gutter: none) = if side == left {
+  grid(
+    columns: (mos-width, 1fr),
+    rows: 1fr,
+    column-gutter: column-gutter,
+    mos,
+    well,
+  )
+} else {
+  grid(
+    columns: (1fr, mos-width),
+    rows: 1fr,
+    column-gutter: column-gutter,
+    well,
+    mos,
+  )
+}
+
+#let well_frame(heading, body, heading-height: none, row-gutter: none) = grid(
+  columns: 1fr,
+  rows: (heading-height, 1fr),
+  row-gutter: row-gutter,
+  grid.cell(align: horizon, heading),
+  body,
+)

@@ -22,9 +22,9 @@ _MARK_LINK = "padded_link(<index>"
 _MARK_FLUSH = "padded_link(padding: 0pt, <index>"
 _TRAIL_HEADING = "trail_heading("
 _LEAD_PAIR = "lead_pair("
-_SEAT_RTL = "spacing: 1fr, direction: rtl"
 _SEAT_LTR = "spacing: 1fr, direction: ltr"
-_FOLLOW_RTL = "spacing: 0.5em, direction: rtl"
+_FOLLOW_PAIR = "lead_pair("
+_FOLLOW_SPACING = "spacing: 0.5em"
 
 
 def _generate(dto) -> str:
@@ -210,7 +210,7 @@ def test_lead_title_emits_lead_pair_or_title():
     assert "columns: (auto, auto)" not in lead_title(manifest, "h1", title)
 
 
-def test_trail_strip_emits_lead_pair_or_pad():
+def test_trail_strip_emits_lead_pair_or_mark():
     from parch.mos.contents_mark import trail_strip
     from parch.mos.manifest import Manifest
 
@@ -220,7 +220,8 @@ def test_trail_strip_emits_lead_pair_or_pad():
     manifest = Manifest()
     manifest.register_source("index")
     mark = "padded_link(padding: 0pt, <index>, contents_bars(size: h1))"
-    assert trail_strip(manifest, "h1") == f"pad(right: 3mm, {mark})"
+    assert trail_strip(manifest, "h1") == mark
+    assert "pad(right: 3mm" not in trail_strip(manifest, "h1")
     chip = "text[Q1]"
     assert trail_strip(manifest, "h1", chip=chip) == (
         f"lead_pair(padded_link(<index>, contents_bars(size: h1)), {chip})"
@@ -263,12 +264,12 @@ def test_colophon_has_mark_and_unchanged_facts():
     assert _MARK_FLUSH in page
     assert _MARK_RULE in page
     assert page.count(_MARK_RULE) == 1
-    assert _FOLLOW_RTL in page
-    assert _TRAIL_HEADING in page
-    heading = page[page.index(_TRAIL_HEADING) : page.index(_MARK_FLUSH)]
+    assert _FOLLOW_SPACING in page
+    assert _FOLLOW_PAIR in page
+    assert _TRAIL_HEADING not in page
+    heading = page[page.index(_LEAD_PAIR) :]
     assert "[About this notebook <colophon>]" in heading
-    assert _MARK_FLUSH not in heading
-    assert page.index("[About this notebook <colophon>]") < page.index(_MARK_FLUSH)
+    assert page.index(_MARK_FLUSH) < page.index("[About this notebook <colophon>]")
     assert "column-gutter: 6pt" not in page
     assert "columns: (auto, auto)" not in page
     assert "[*Device*]" in page
@@ -294,6 +295,8 @@ def test_mos_right_mark_sits_next_to_strip():
     title_at = page.index("2026<annual>")
     mark_at = page.index(_MARK_FLUSH)
     assert title_at < mark_at
+    assert _SEAT_LTR in page
+    assert "#mos_frame(\n  right," in page
     assert "padded_link(<annual>, [Calendar])" not in page
     assert "[Calendar]" not in page
     for label in ("Q1", "Q2", "Q3", "Q4"):
@@ -310,8 +313,11 @@ def test_mos_left_annual_mark_is_trail_strip_sibling():
     heading = page[page.index(_TRAIL_HEADING) : page.index(_MARK_FLUSH)]
     assert "2026<annual>" in heading
     assert "columns: (auto, auto)" not in heading
-    assert _SEAT_RTL in page
+    assert _SEAT_LTR in page
     assert _TRAIL_HEADING in page
+    assert "#mos_frame(" in page
+    assert "well_frame(" in page
+    assert "rowspan" not in page
     assert "padded_link(<annual>, [Calendar])" not in page
     assert "[Calendar]" not in page
     for label in ("Q1", "Q2", "Q3", "Q4"):
@@ -324,15 +330,16 @@ def test_daily_mark_is_trail_strip_alone():
     page = next(p for p in _pages(typst) if "1 <2026-01-01>" in p)
     title_at = page.index("1 <2026-01-01>")
     mark_at = page.index(_MARK_FLUSH)
-    trail_at = page.index("pad(right: 3mm")
-    assert title_at < trail_at <= mark_at
+    assert title_at < mark_at
     heading = page[page.index(_TRAIL_HEADING) : page.index(_MARK_FLUSH)]
     assert "1 <2026-01-01>" in heading
-    assert _SEAT_RTL in page
+    assert _SEAT_LTR in page
     assert _TRAIL_HEADING in page
+    assert "pad(right: 3mm" not in page
     assert "column-gutter: 6pt" not in heading
     assert "padded_link(<annual>, [2026])" not in page
     assert page.count(_MARK_RULE) == 1
+    assert "#mos_frame(" in page
 
 
 def test_mos_right_daily_mark_is_trail_strip_alone():
@@ -340,15 +347,16 @@ def test_mos_right_daily_mark_is_trail_strip_alone():
     page = next(p for p in _pages(typst) if "1 <2026-01-01>" in p)
     title_at = page.index("1 <2026-01-01>")
     mark_at = page.index(_MARK_FLUSH)
-    trail_at = page.index("pad(right: 3mm")
-    assert title_at < trail_at <= mark_at
+    assert title_at < mark_at
     heading = page[page.index(_TRAIL_HEADING) : page.index(_MARK_FLUSH)]
     assert "1 <2026-01-01>" in heading
     assert _SEAT_LTR in page
     assert _TRAIL_HEADING in page
+    assert "pad(right: 3mm" not in page
     assert "column-gutter: 6pt" not in heading
     assert "padded_link(<annual>, [2026])" not in page
     assert page.count(_MARK_RULE) == 1
+    assert "#mos_frame(\n  right," in page
 
 
 def test_mos_right_habits_mark_sits_next_to_strip():
@@ -356,10 +364,11 @@ def test_mos_right_habits_mark_sits_next_to_strip():
     page = next(p for p in _pages(typst) if "January<habits-january>" in p)
     title_at = page.index("January<habits-january>")
     mark_at = page.index(_MARK_FLUSH)
-    strip_at = page.index("rowspan: 2")
-    assert title_at < mark_at < strip_at
-    assert page[mark_at:strip_at].count("padded_link") == 1
+    assert title_at < mark_at
     assert _TRAIL_HEADING in page
+    assert _SEAT_LTR in page
+    assert "#mos_frame(\n  right," in page
+    assert "rowspan: 2" not in page
 
 
 def test_builder_trail_and_raw_headings_call_trail_heading():
@@ -376,6 +385,8 @@ def test_builder_trail_and_raw_headings_call_trail_heading():
 
     helper = inspect.getsource(trail_heading)
     assert "trail_heading({title}, {mark}" in helper
+    assert "lead_pair({mark}, {title}, spacing: 0.5em)" in helper
+    assert "direction: ltr" in helper
     assert "let seated_title" not in helper
     assert "measure(seated_title)" not in helper
     assert "trail_strip(" in helper
@@ -383,14 +394,20 @@ def test_builder_trail_and_raw_headings_call_trail_heading():
     assert "case HeadingMark.FOLLOW:" in helper
     assert "case HeadingMark.TRAIL:" in helper
     assert annotationlib.get_annotations(trail_heading)["edge"] is HeadingMark
+    layout = inspect.getsource(Builder._layout_page)
+    assert "mos_frame(" in layout
+    assert "well_frame(" in layout
+    assert "row.reverse" not in layout
+    assert "list(reversed" not in layout
     builder = inspect.getsource(Builder._heading_stack)
     assert "trail_heading(" in builder
     assert "trail_strip(" not in builder
     assert "edge=HeadingMark.FOLLOW" in builder
     assert "edge=HeadingMark.TRAIL" in builder
-    assert "if mos_right or chip:" in builder
+    assert "if chip:" in builder
+    assert "mos_right" not in builder
     assert "match heading_mark:" in builder
-    assert builder.index("if mos_right or chip:") < builder.index("match heading_mark:")
+    assert builder.index("if chip:") < builder.index("match heading_mark:")
     assert "case HeadingMark.FOLLOW:" in builder
     assert "case HeadingMark.TRAIL:" in builder
     assert "case HeadingMark.LEAD:" in builder
@@ -413,10 +430,10 @@ def test_trail_heading_rejects_string_edge_fallthrough():
     follow = trail_heading(
         manifest, "h1", "text(size: h1)[Tasks]", edge=HeadingMark.FOLLOW,
     )
-    assert follow.startswith("trail_heading(")
+    assert follow.startswith("lead_pair(")
     assert "spacing: 0.5em" in follow
     assert "spacing: 1fr" not in follow
-    assert "direction: ltr" in follow
+    assert "direction:" not in follow
     assert "let seated_title" not in follow
     trail = trail_heading(
         manifest, "h1", "text(size: h1)[Tasks]", edge=HeadingMark.TRAIL,
@@ -425,13 +442,15 @@ def test_trail_heading_rejects_string_edge_fallthrough():
     assert "spacing: 1fr" in trail
     assert "direction: ltr" in trail
     assert trail_heading(None, "h1", "text(size: h1)[Tasks]") == "text(size: h1)[Tasks]"
-    assert trail_heading(manifest, "h1", None).startswith("pad(right: 3mm,")
+    assert trail_heading(manifest, "h1", None) == (
+        "padded_link(padding: 0pt, <index>, contents_bars(size: h1))"
+    )
     for bad in ("FOLLOW", HeadingMark.LEAD):
         with pytest.raises(ValueError, match="TRAIL or FOLLOW"):
             trail_heading(manifest, "h1", "text(size: h1)[Tasks]", edge=bad)
 
 
-def test_heading_stack_matches_follow_trail_lead_after_mos_right_or_chip_guard():
+def test_heading_stack_matches_follow_trail_lead_after_chip_guard():
     from parch.compose.coordinator import Coordinator
     from parch.mos.builder import Builder
 
@@ -442,22 +461,24 @@ def test_heading_stack_matches_follow_trail_lead_after_mos_right_or_chip_guard()
         i18n=coord.i18n, configurator=coord.configurator, manifest=coord.manifest,
     )
     builder.manifest.register_source("index")
-    follow = builder._heading_stack(None, title, None, None, HeadingMark.FOLLOW)
+    follow = builder._heading_stack(None, title, None, HeadingMark.FOLLOW)
+    assert follow.startswith("lead_pair(")
     assert "spacing: 0.5em" in follow
     assert "spacing: 1fr" not in follow
-    trail = builder._heading_stack(None, title, None, None, HeadingMark.TRAIL)
+    trail = builder._heading_stack(None, title, None, HeadingMark.TRAIL)
     assert "spacing: 1fr" in trail
-    lead = builder._heading_stack(None, title, None, None, HeadingMark.LEAD)
+    assert "direction: ltr" in trail
+    lead = builder._heading_stack(None, title, None, HeadingMark.LEAD)
     assert _LEAD_PAIR in lead
     assert "columns: (auto, auto)" not in lead
     assert "spacing: 0.5em" not in lead
     assert "spacing: 1fr" not in lead
-    assert builder._heading_stack(None, None, None, None, HeadingMark.LEAD) == ""
+    assert builder._heading_stack(None, None, None, HeadingMark.LEAD) == ""
     with pytest.raises(ValueError, match="FOLLOW, TRAIL, or LEAD"):
-        builder._heading_stack(None, title, None, None, "nope")
+        builder._heading_stack(None, title, None, "nope")
     builder.manifest.register_source("chip-page")
     chipped = builder._heading_stack(
-        None, title, [("chip-page", "Chip")], None, HeadingMark.LEAD,
+        None, title, [("chip-page", "Chip")], HeadingMark.LEAD,
     )
     assert "spacing: 1fr" in chipped
     assert _TRAIL_HEADING in chipped
@@ -471,6 +492,7 @@ def test_heading_stack_matches_follow_trail_lead_after_mos_right_or_chip_guard()
         manifest=right_coord.manifest,
     )
     right_builder.manifest.register_source("index")
-    glued = right_builder._heading_stack(None, title, None, None, HeadingMark.LEAD)
-    assert "spacing: 1fr" in glued
+    glued = right_builder._heading_stack(None, title, None, HeadingMark.LEAD)
+    assert _LEAD_PAIR in glued
+    assert "spacing: 1fr" not in glued
     assert "columns: (auto, auto)" not in glued

@@ -69,16 +69,14 @@ def trail_strip(
     body_size: str = "8pt",
     chip: str | None = None,
 ) -> str | None:
-    """Mark immediately left of *chip*, flush to the MOS strip."""
-    # Flush to the MOS strip: do not let padded_link inset paint on Q1.
+    """Mark immediately left of *chip*, or the flush mark alone."""
+    # Chip uses default link padding; a lone mark keeps 0pt so the bars stay tight.
     mark = contents_mark(
         manifest, heading_height, body_size, face="h1",
         link_padding=None if chip else "0pt",
     )
     if mark and chip:
         return f"lead_pair({mark}, {chip})"
-    if mark and not chip:
-        return f"pad(right: 3mm, {mark})"
     return mark or chip
 
 
@@ -92,7 +90,7 @@ def trail_heading(
     chip: str | None = None,
     edge: HeadingMark = HeadingMark.TRAIL,
 ) -> str:
-    """TRAIL is 1fr opposite-ends; FOLLOW is 0.5em after the mark, own hits."""
+    """TRAIL is 1fr opposite-ends, always ltr. FOLLOW is lead_pair at 0.5em."""
     mark = trail_strip(manifest, heading_height, body_size, chip)
     if not title:
         return mark or ""
@@ -100,9 +98,8 @@ def trail_heading(
         return title
     match edge:
         case HeadingMark.FOLLOW:
-            spacing = "0.5em"
+            return f"lead_pair({mark}, {title}, spacing: 0.5em)"
         case HeadingMark.TRAIL:
-            spacing = "1fr"
+            return f"trail_heading({title}, {mark}, spacing: 1fr, direction: ltr)"
         case _:
             raise ValueError(f"trail_heading edge must be TRAIL or FOLLOW, not {edge!r}")
-    return f"trail_heading({title}, {mark}, spacing: {spacing}, direction: {direction})"

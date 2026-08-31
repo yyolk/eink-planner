@@ -29,8 +29,8 @@ NOMAD = base_config("supernote-nomad")
 _BUILD_LOG = ("Command", "Git commit", "SHA-256", "Config path", "Config")
 _THEME = ('lang: "toml"', "syntaxes:", "theme:")
 _MARK_RULE = "contents_bars(size:"
-_FOLLOW_RTL = "spacing: 0.5em, direction: rtl"
-_TRAIL_HEADING = "trail_heading("
+_FOLLOW_SPACING = "spacing: 0.5em"
+_LEAD_PAIR = "lead_pair("
 _MARK_FLUSH = "padded_link(padding: 0pt, <index>"
 
 
@@ -228,13 +228,12 @@ def test_colophon_follow_header_five_bar_and_body():
     content = page.content
     assert page.raw_typst is True
     assert page.heading_mark is HeadingMark.LEAD
-    assert _FOLLOW_RTL in content
-    assert _TRAIL_HEADING in content
+    assert _FOLLOW_SPACING in content
+    assert _LEAD_PAIR in content
+    assert "trail_heading(" not in content
     assert content.count(_MARK_RULE) == 1
     assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + " <colophon>]" in content
-    heading = content[content.index(_TRAIL_HEADING) : content.index(_MARK_FLUSH)]
-    assert DEFAULT_TITLE in heading
-    assert _MARK_RULE not in heading
+    assert content.index(_MARK_FLUSH) < content.index(DEFAULT_TITLE)
     assert "column-gutter: 6pt" not in content
     assert "columns: (auto, auto)" not in content
     assert "side_menu" not in content
@@ -567,10 +566,11 @@ def test_dump_continuation_header_is_follow_seat_without_nums():
     assert "foreground: context" in content
     assert "#show: rest" not in content
     assert "header-ascent" not in content
-    assert _FOLLOW_RTL in content
-    assert _TRAIL_HEADING in content
+    assert _FOLLOW_SPACING in content
+    assert _LEAD_PAIR in content
+    assert "trail_heading(" not in content
     assert content.count(_MARK_RULE) == 2
-    assert content.count(_TRAIL_HEADING) == 2
+    assert content.count(_LEAD_PAIR) == 2
     assert "column-gutter: 6pt" not in content
     assert "0.85em" not in content
     assert "nums" not in content
@@ -579,14 +579,13 @@ def test_dump_continuation_header_is_follow_seat_without_nums():
     assert "cur == start-page" in content
     assert colo._dump_end_label() in content
     assert colo._dump_state_name() in content
-    heading = content[content.index(_TRAIL_HEADING) : content.index(_MARK_FLUSH)]
-    assert DEFAULT_TITLE in heading
-    assert _MARK_RULE not in heading
+    assert content.index(_MARK_FLUSH) < content.index(DEFAULT_TITLE)
     layer = colo._dump_pagination(manifest)
     assert "foreground: context" in layer
     assert "place(top + left, pad(top:" in layer
     assert "here().page()" in layer[layer.index("foreground: context") :]
-    assert _FOLLOW_RTL in layer
+    assert _FOLLOW_SPACING in layer
+    assert _LEAD_PAIR in layer
     assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + "]" in layer
     assert 'text(size: h1, weight: "bold")[' + DEFAULT_TITLE + " <colophon>]" in layer
     assert layer.count("<colophon>") == 1
@@ -604,7 +603,8 @@ def test_dump_pagination_heading_omits_colophon_label():
     assert "<colophon>" not in more
     assert layer.count("<colophon>") == 1
     assert "if cur == start-page" in layer
-    assert layer.count(_FOLLOW_RTL) == 2
+    assert layer.count(_LEAD_PAIR) == 2
+    assert layer.count(_FOLLOW_SPACING) == 2
     assert "column-gutter: 6pt" not in layer
     assert "0.85em" not in layer
     assert "header-ascent" not in layer

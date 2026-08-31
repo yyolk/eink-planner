@@ -37,17 +37,13 @@ class Navigation:
     ) -> str:
         months = self._months_menu(highlight_months, month_link_id=month_link_id)
         if not show_quarters:
-            return f"""grid.cell(
-  rowspan: 2,
-
-  rotate(
+            return f"""rotate(
     {_v(self.mos_layout, 'menu_rotate')},
     origin: center + horizon,
     reflow: true,
 
     {months}
-  )
-)"""
+  )"""
         cols = ["1fr", "3fr"]
         items = [
             self._quarters_menu(highlight_quarters),
@@ -56,10 +52,7 @@ class Navigation:
         if _v(self.mos_layout, "reverse_months_quarters"):
             cols.reverse()
             items.reverse()
-        return f"""grid.cell(
-  rowspan: 2,
-
-  rotate(
+        return f"""rotate(
     {_v(self.mos_layout, 'menu_rotate')},
     origin: center + horizon,
     reflow: true,
@@ -73,8 +66,7 @@ class Navigation:
 
       {",\n".join(items)}
     )
-  )
-)"""
+  )"""
 
     def heading_menu_grid(
         self,

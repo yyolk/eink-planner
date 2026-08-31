@@ -18,10 +18,10 @@ from tests.helpers import base_config, load_default
 NOMAD = base_config("supernote-nomad")
 _EN_DASH = "–"
 _MARK_RULE = "contents_bars(size:"
-_TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
-_TRAIL_HEADING = "trail_heading("
+_TRAIL_MARK = "padded_link(padding: 0pt, <index>"
+_LEAD_PAIR = "lead_pair("
 _SEAT_RTL = "spacing: 1fr, direction: rtl"
-_FOLLOW_RTL = "spacing: 0.5em, direction: rtl"
+_FOLLOW_SPACING = "spacing: 0.5em"
 _W01_TITLE = f"Week 1 #h(0.6em) Dec 29 {_EN_DASH} Jan 4"
 
 # 2026, Monday week start: Jan 1 is Thursday.
@@ -500,17 +500,17 @@ def test_contents_mark_on_tasks_when_index_on():
         assert "padded_link(<annual>)" not in page
     assert "text(size: h1, [Tasks <tasks>])" in index
     assert "padded_link(<tasks>)" in week
-    heading = index[index.index(_TRAIL_HEADING) : index.index(_TRAIL_MARK)]
-    assert "[Tasks <tasks>]" in heading
-    assert _TRAIL_MARK not in heading
-    assert _FOLLOW_RTL in index
+    assert "[Tasks <tasks>]" in index
+    assert _LEAD_PAIR in index
+    assert _FOLLOW_SPACING in index
     assert _SEAT_RTL not in index
-    assert _TRAIL_HEADING in index
-    assert index.index("[Tasks <tasks>]") < index.index(_TRAIL_MARK)
-    week_heading = week[week.index(_TRAIL_HEADING) : week.index(_TRAIL_MARK)]
-    assert "padded_link(<tasks>)" in week_heading
-    assert _FOLLOW_RTL in week
+    assert "trail_heading(" not in index
+    assert index.index(_TRAIL_MARK) < index.index("[Tasks <tasks>]")
+    assert "padded_link(<tasks>)" in week
+    assert _LEAD_PAIR in week
+    assert _FOLLOW_SPACING in week
     assert _SEAT_RTL not in week
+    assert "trail_heading(" not in week
     assert _W01_TITLE in week
     contents = next(p for p in _pages(typst) if 'weight: "bold")[Contents <index>]' in p)
     assert "padded_link(<index>" not in contents
