@@ -11,8 +11,8 @@
 #
 # Device .typ (physical, not per-section): page-width / page-height,
 # toolbar-clearance, writing-clearance, page-margin(side), and mos-width.
-# MOS is not toolbar — Nomad 8mm vs Scribe 10mm. Export today's
-# side_menu_width as mos-width. Do not alias it to toolbar-clearance.
+# MOS is not toolbar — Nomad 8mm vs Scribe 10mm. Do not alias mos-width
+# to toolbar-clearance.
 #
 # House: tracks from side only (mos_frame, daily_well 3/5, quarter_well 2/3,
 # week rail, trail_heading ltr). No new length knobs.
@@ -28,7 +28,8 @@
 #
 # Dead TOML: [style.margin], [device] width/height (keep name, ppi if
 # colophon needs them), months_column, week_placement left|right,
-# section.daily.columns 3fr/5fr. Do not drop reverse_months_quarters.
+# section.daily.columns 3fr/5fr, side_menu_width. Do not drop
+# reverse_months_quarters.
 # --hand / later --paper stay overlays until parch new writes the file.
 
 import tomllib
@@ -178,7 +179,6 @@ class Style(StrictModel):
 
 class Mos(StrictModel):
     side_menu: str
-    side_menu_width: str
     # MOS-strip overlay. True on every shipped device; not derived from side.
     reverse_months_quarters: StrictBool
     menu_rotate: str

@@ -227,6 +227,7 @@ def test_new_hand_overlays_side_menu_only(tmp_path):
     assert "months_column" not in data["section"]["quarterly"]
     assert "week_placement" not in data["section"]["monthly"]
     assert "columns" not in data["section"]["daily"]
+    assert "side_menu_width" not in data["mos"]
     assert data["mos"]["reverse_months_quarters"] is True
     assert "left" in data["section"]["daily"]
     assert "right" in data["section"]["daily"]
@@ -239,12 +240,13 @@ def test_overlay_hand_rewrites_mos_side_menu():
     text = (
         "[mos] # nav\n"
         'side_menu = "left"\n'
-        'side_menu_width = "8mm"\n'
+        "reverse_months_quarters = true\n"
     )
     written = overlay_toml(text, hand="right")
     data = tomllib.loads(written)
     assert data["mos"]["side_menu"] == "right"
-    assert data["mos"]["side_menu_width"] == "8mm"
+    assert data["mos"]["reverse_months_quarters"] is True
+    assert "side_menu_width" not in data["mos"]
 
 
 def test_overlay_table_headers_allow_space_and_comment():

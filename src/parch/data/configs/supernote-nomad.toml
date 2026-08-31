@@ -42,7 +42,6 @@ column = "8pt"
 # side_menu left|right is the physical side of the MOS strip
 [mos]
 side_menu = "left"
-side_menu_width = "8mm"
 reverse_months_quarters = true
 menu_rotate = "270deg"
 column_gutter = "1.5mm"

@@ -17,6 +17,8 @@ def test_happy_path_mos_left():
     profile = load_device_profile(PAPER_158)
     assert profile.device.name == "158x210"
     assert profile.mos.side_menu == "left"
+    assert "side_menu_width" not in type(profile.mos).model_fields
+    assert profile.mos.reverse_months_quarters is True
     assert profile.sections[-1] == "colophon"
     assert profile.section.daily is not None
     assert profile.section.daily.left is not None
@@ -29,7 +31,6 @@ def test_happy_path_side_menu_right_keeps_ltr_well():
         enable=["daily"],
         mos="""[mos]
 side_menu = "right"
-side_menu_width = "10mm"
 reverse_months_quarters = true
 menu_rotate = "270deg"
 column_gutter = "1.5mm"
@@ -136,6 +137,11 @@ def test_device_profile_json_schema_is_dict():
     schema = DeviceProfile.model_json_schema()
     assert isinstance(schema, dict)
     assert "properties" in schema
+    mos = schema.get("$defs", {}).get("Mos", schema.get("definitions", {}).get("Mos", {}))
+    props = mos.get("properties", {})
+    assert "side_menu" in props
+    assert "reverse_months_quarters" in props
+    assert "side_menu_width" not in props
 
 
 def test_string_field_rejects_integer():

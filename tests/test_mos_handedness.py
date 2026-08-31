@@ -31,7 +31,6 @@ def test_side_menu_right_parses():
         _minimal(
             mos="""[mos]
 side_menu = "right"
-side_menu_width = "10mm"
 reverse_months_quarters = true
 menu_rotate = "270deg"
 column_gutter = "1.5mm"
@@ -42,7 +41,8 @@ row_gutter = "1.5mm"
     )
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["side_menu_position"] == "right"
-    assert mos["side_menu_width"] == "10mm"
+    assert "side_menu_width" not in mos
+    assert mos["reverse_months_quarters"] is True
 
 
 def test_side_menu_position_is_case_insensitive():
@@ -50,7 +50,6 @@ def test_side_menu_position_is_case_insensitive():
         _minimal(
             mos="""[mos]
 side_menu = "RIGHT"
-side_menu_width = "10mm"
 reverse_months_quarters = true
 menu_rotate = "270deg"
 column_gutter = "1.5mm"
@@ -68,7 +67,6 @@ def test_side_menu_rejects_non_left_right():
             _minimal(
                 mos="""[mos]
 side_menu = "top"
-side_menu_width = "10mm"
 reverse_months_quarters = true
 menu_rotate = "270deg"
 column_gutter = "1.5mm"
@@ -163,7 +161,8 @@ def test_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
     dto = short_january(apply_hand(load(PAPER_158), "right"))
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["side_menu_position"] == "right"
-    assert mos["side_menu_width"] == "10mm"
+    assert "side_menu_width" not in mos
+    assert mos["reverse_months_quarters"] is True
     assert mos["menu_rotate"] == "270deg"
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
     assert "columns_width" not in daily
@@ -209,7 +208,8 @@ def test_nomad_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
     dto = short_january(apply_hand(load(NOMAD), "right"))
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["side_menu_position"] == "right"
-    assert mos["side_menu_width"] == "8mm"
+    assert "side_menu_width" not in mos
+    assert mos["reverse_months_quarters"] is True
     assert mos["menu_rotate"] == "270deg"
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
     assert "columns_width" not in daily

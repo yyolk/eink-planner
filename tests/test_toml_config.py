@@ -64,12 +64,16 @@ def test_parse_shipped_toml_profiles(path: Path):
     assert names == expected
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["reverse_months_quarters"] is True
+    assert "side_menu_width" not in mos
+    assert mos["side_menu_position"] in {"left", "right"}
     scale = device_scale(dto["device"])
     assert dto["document"]["layout"]["dimensions"]["width"] == scale["width"]
     assert dto["document"]["layout"]["dimensions"]["height"] == scale["height"]
     assert dto["document"]["layout"]["margin"].to_plain() == device_page_margin(scale)
     text = path.read_text(encoding="utf-8")
     assert "reverse_months_quarters = true" in text
+    assert "side_menu =" in text
+    assert "side_menu_width" not in text
     assert "[style.margin]" not in text
     assert "months_column" not in text
     assert "week_placement" not in text
@@ -193,7 +197,6 @@ def test_leftover_layout_table_is_unknown_key():
     leftover = """[layout]
 name = "mos"
 side_menu = "left"
-side_menu_width = "8mm"
 reverse_months_quarters = true
 menu_rotate = "270deg"
 column_gutter = "1.5mm"
@@ -624,6 +627,19 @@ hour_to = 20
 [section.daily.right.priorities]
 count = 1
 """,
+            )
+        )
+    with pytest.raises(ConfigError, match="unknown key: mos.side_menu_width"):
+        parse_toml(
+            _minimal(
+                mos="""[mos]
+side_menu = "left"
+side_menu_width = "8mm"
+reverse_months_quarters = true
+menu_rotate = "270deg"
+column_gutter = "1.5mm"
+row_gutter = "1.5mm"
+"""
             )
         )
 
