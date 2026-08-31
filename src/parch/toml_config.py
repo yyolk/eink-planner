@@ -290,7 +290,6 @@ def _section_weekly(table: WeeklySection) -> dict[str, Any]:
 
 def _section_daily(table: DailySection, extras: dict[str, Any]) -> dict[str, Any]:
     return {
-        "columns_width": "(" + ", ".join(table.columns) + ")",
         "items_spacing": table.item_spacing,
         "left_column": _daily_column(table.left, extras) if table.left else [],
         "right_column": _daily_column(table.right, extras) if table.right else [],

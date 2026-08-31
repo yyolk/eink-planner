@@ -110,8 +110,9 @@ count = 5
     assert dto["planner"]["params"]["little_calendar"]["week_placement"] == "right"
 
     typst_src = _generate(short_january(dto))
-    marker = "columns: (3fr, 5fr)"
+    marker = "daily_well("
     body = typst_src[typst_src.index(marker) :]
+    assert "daily_well(left," in body
     assert body.index("[Notes") < body.index("[Schedule]")
     assert "rows: (auto, 1fr)" in typst_src
 
@@ -169,7 +170,7 @@ def test_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert mos["side_menu_width"] == "10mm"
     assert mos["menu_rotate"] == "270deg"
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
-    assert daily["columns_width"] == "(3fr, 5fr)"
+    assert "columns_width" not in daily
     assert [c["class"] for c in daily["left_column"]] == ["schedule", "little_calendar"]
     assert [c["class"] for c in daily["right_column"]] == ["priorities", "notes"]
     quarterly = next(s for s in dto["planner"]["sections"] if s["name"] == "quarterly")["params"]
@@ -183,6 +184,10 @@ def test_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert "#mos_frame(\n  right," in typst_src
     assert "#mos_frame(\n  left," not in typst_src
     assert "mos-width: 10mm" in typst_src
+    assert "daily_well(right," in typst_src
+    well = typst_src[typst_src.index("daily_well(") :]
+    assert well.index("right,") < well.index("[Schedule]")
+    assert well.index("[Schedule]") < well.index("[Priorities]")
     pdf, stderr = compile_pdf(typst_src, tmp_path / "hand-right")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
 
@@ -201,7 +206,7 @@ def test_nomad_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert mos["side_menu_width"] == "8mm"
     assert mos["menu_rotate"] == "270deg"
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
-    assert daily["columns_width"] == "(3fr, 5fr)"
+    assert "columns_width" not in daily
     assert daily["items_spacing"] == "4mm"
     assert [c["class"] for c in daily["left_column"]] == ["schedule", "little_calendar"]
     assert [c["class"] for c in daily["right_column"]] == ["priorities", "notes"]
@@ -228,6 +233,10 @@ def test_nomad_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert "mos-width: 8mm" in typst_src
     assert "rows: 1fr" in typst_src
     assert "rows: (auto, 1fr)" in typst_src
+    assert "daily_well(right," in typst_src
+    well = typst_src[typst_src.index("daily_well(") :]
+    assert well.index("right,") < well.index("[Schedule]")
+    assert well.index("[Schedule]") < well.index("[Priorities]")
     pdf, stderr = compile_pdf(typst_src, tmp_path / "nomad-hand-right")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
 
@@ -239,16 +248,16 @@ def test_shipped_nomad_includes_colophon():
     assert names == ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "tasks", "meetings", "colophon"]
 
 
-def test_shipped_mos_daily_schedule_track_stays_3fr_on_both_hands():
-    """Schedule stays 3fr left and notes 5fr right; --hand does not swap tracks."""
+def test_shipped_mos_daily_tracks_stay_hours_then_writing_on_both_hands():
+    """TOML left|right stay hours then writing; --hand does not swap those tables."""
     left = _daily_section(load(PAPER_158))["params"]
-    assert left["columns_width"] == "(3fr, 5fr)"
+    assert "columns_width" not in left
     assert [c["class"] for c in left["left_column"]] == ["schedule", "little_calendar"]
     assert [c["class"] for c in left["right_column"]] == ["priorities", "notes"]
 
     for path in (PAPER_158, NOMAD):
         right = _daily_section(apply_hand(load(path), "right"))["params"]
-        assert right["columns_width"] == "(3fr, 5fr)", path.name
+        assert "columns_width" not in right, path.name
         assert [c["class"] for c in right["left_column"]] == ["schedule", "little_calendar"]
         assert [c["class"] for c in right["right_column"]] == ["priorities", "notes"]
 
@@ -280,4 +289,9 @@ def test_press_hand_right_sets_page_margin_and_mos_frame(tmp_path, monkeypatch):
     assert "#mos_frame(\n  right," in typst
     assert "page-margin(left)" not in typst
     assert "#mos_frame(\n  left," not in typst
-    assert "columns: (3fr, 5fr)" in typst
+    assert "daily_well(right," in typst
+    well = typst[typst.index("daily_well(") :]
+    assert well.index("right,") < well.index("[Schedule]")
+    assert well.index("[Schedule]") < well.index("[Priorities]")
+    assert "columns: (3fr, 5fr)" not in typst
+    assert "columns: (5fr, 3fr)" not in typst

@@ -45,6 +45,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "month_grid" in imported
     assert "week_matrix" in imported
     assert "lined_well" in imported
+    assert "daily_well" in imported
     assert "week_cell" not in imported
     assert "#let link_padding =" in typst
     assert "#let rect_pattern = rect_pattern.with(regular_height: regular_height)" in typst
@@ -55,6 +56,9 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let month_grid = month_grid.with(week-rows: 6, hline-stroke: regular_stroke + black)" in typst
     assert "#let week_matrix = week_matrix.with(regular-height: regular_height)" in typst
     assert "#let lined_well = lined_well.with(regular-height: regular_height)" in typst
+    assert "#let daily_well = daily_well.with(column-gutter: regular_column_gutter)" in typst
+    assert "3fr" not in typst
+    assert "5fr" not in typst
     assert "#let dotted = dotted(regular_height: regular_height)" in typst
     assert "#let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)" in typst
     assert "#let scratch_pad = rect_pattern(dotted)" in typst
@@ -88,6 +92,9 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     # lined_well chrome lives in house.typ, not the preamble.
     assert "#let lined_well(regular-height" not in typst
     assert "rect_pattern(regular_height: regular-height, pattern)" not in typst
+    # daily_well chrome (3fr/5fr seating) lives in house.typ.
+    assert "#let daily_well(side" not in typst
+    assert "columns: if side == left" not in typst
     house = house_typ_resource().read_text(encoding="utf-8")
     assert "#set page" not in house
     assert "page-width" not in house
@@ -120,7 +127,8 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "side" not in week_matrix_sig
     assert "row-gutter" not in week_matrix_sig
     assert "#let lined_well(" in house
-    lined_well = house[house.index("#let lined_well(") :]
+    lined_start = house.index("#let lined_well(")
+    lined_well = house[lined_start : house.index("\n\n", lined_start)]
     assert "width: 100%" in lined_well
     assert "height: 100%" in lined_well
     assert "rect_pattern(regular_height: regular-height, pattern)" in lined_well
@@ -128,6 +136,14 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "side" not in lined_well
     assert "grid(" not in lined_well
     assert "header" not in lined_well
+    assert "#let daily_well(" in house
+    daily_well = house[house.index("#let daily_well(") :]
+    assert "daily_well(side, hours, writing, column-gutter: 0pt)" in daily_well
+    assert "columns: if side == left { (3fr, 5fr) } else { (5fr, 3fr) }" in daily_well
+    assert "rows: (1fr,)" in daily_well
+    assert "..if side == left { (hours, writing) } else { (writing, hours) }" in daily_well
+    assert "height: auto" not in daily_well
+    assert "reverse" not in daily_well
     assert "rowspan" not in house
     assert "dir: ltr" in house
     assert "calc.max(measure(seated_title).height, measure(seated_mark).height)" in house
@@ -206,6 +222,7 @@ def test_copy_house_typ_writes_workdir(tmp_path):
     assert "#let week_matrix(" in text
     assert "#let week_cell(" in text
     assert "#let lined_well(" in text
+    assert "#let daily_well(" in text
 
 
 def test_press_copies_house_typ_next_to_index(tmp_path, monkeypatch):
