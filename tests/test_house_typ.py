@@ -163,9 +163,31 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "grid.cell(colspan: 2," in house
     assert 'bottom-edge: "descender"' in house
     week_cell = house[house.index("#let week_cell(") : house.index("#let week_matrix(")]
+    assert week_cell.startswith(
+        "#let week_cell(header, header-stroke: none, pattern: none, regular-height: none) = {\n"
+        "  let gap = if header-stroke == none { 0pt } else { stroke(header-stroke).thickness }\n"
+        "  grid(\n"
+        "    columns: 1fr,\n"
+        "    rows: (auto, 1fr),\n"
+        "    grid.cell(\n"
+        "      inset: (bottom: gap),\n"
+        "      stroke: (bottom: header-stroke),\n"
+        '      text(bottom-edge: "descender", header),\n'
+        "    ),\n"
+        "    box(\n"
+        "      width: 100%,\n"
+        "      height: 100%,\n"
+        "      clip: true,\n"
+        "      inset: (top: 0.25em, bottom: 0.25em),\n"
+        "      rect_pattern(regular_height: regular-height, pattern),\n"
+        "    ),\n"
+        "  )\n"
+        "}\n"
+    )
     assert "inset: (bottom: 0.25em)" not in week_cell
     assert 'text(bottom-edge: "descender"' in week_cell
     assert "inset: (top: 0.25em, bottom: 0.25em)" in week_cell
+    assert "1.5 * gap" not in week_cell
     week_matrix_sig = house[house.index("#let week_matrix(") : house.index("..contents,")]
     assert "side" not in week_matrix_sig
     assert "row-gutter" not in week_matrix_sig
