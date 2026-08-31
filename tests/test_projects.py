@@ -24,7 +24,7 @@ width = "118.87mm"
 height = "158.5mm"
 ppi = 300"""
 
-_MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
+_MARK_RULE = "contents_bars(size:"
 _TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
 _SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
 _SEATED_TITLE = "let seated_title ="
@@ -457,8 +457,8 @@ def test_contents_mark_on_projects_when_index_on():
     board = _board_page(typst)
     assert _TRAIL_MARK in index
     assert _TRAIL_MARK in board
-    assert index.count(_MARK_RULE) == 5
-    assert board.count(_MARK_RULE) == 5
+    assert index.count(_MARK_RULE) == 1
+    assert board.count(_MARK_RULE) == 1
     for page in (index, board):
         assert "columns: (auto, auto)" not in page
         assert "2026 /" not in page

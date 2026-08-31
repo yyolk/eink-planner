@@ -12,9 +12,11 @@ from tests.helpers import base_config
 def test_preamble_imports_house_and_does_not_inline_bodies():
     typst = Preamble(Configurator(load(base_config("158x210-mos-left")))).generate()
     assert '#import "house.typ"' in typst
+    assert "contents_bars" in typst[typst.index('#import "house.typ"') :].splitlines()[0]
     assert "#let link_padding =" in typst
     assert "#let rect_pattern = rect_pattern.with(regular_height: regular_height)" in typst
     assert "#let padded_link = padded_link.with(padding: link_padding)" in typst
+    assert "#let contents_bars = contents_bars.with(thick_stroke: thick_stroke)" in typst
     assert "#let dotted = dotted(regular_height: regular_height)" in typst
     assert "#let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)" in typst
     assert "#let scratch_pad = rect_pattern(dotted)" in typst
@@ -22,7 +24,11 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "link(target)[#box(inset: padding, content)]" not in typst
     assert "#let rect_pattern(pattern) = rect(" not in typst
     assert "#let padded_link(padding:" not in typst
-    assert "#set page" not in house_typ_resource().read_text(encoding="utf-8")
+    assert "0.7em.to-absolute()" not in typst
+    assert "line(length: 0.844em, stroke: thick_stroke + black)" not in typst
+    house = house_typ_resource().read_text(encoding="utf-8")
+    assert "#set page" not in house
+    assert "#let contents_bars(" in house
 
 
 def test_copy_house_typ_writes_workdir(tmp_path):
@@ -34,6 +40,7 @@ def test_copy_house_typ_writes_workdir(tmp_path):
     assert text == packaged
     assert "#let rect_pattern(" in text
     assert "#let padded_link(" in text
+    assert "#let contents_bars(" in text
 
 
 def test_press_copies_house_typ_next_to_index(tmp_path, monkeypatch):

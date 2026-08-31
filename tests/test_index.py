@@ -17,7 +17,7 @@ NOMAD = base_config("supernote-nomad")
 NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
 
 _TOC_TITLE = 'weight: "bold")[Contents <index>]'
-_MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
+_MARK_RULE = "contents_bars(size:"
 _MARK_LINK = "padded_link(<index>"
 _MARK_FLUSH = "padded_link(padding: 0pt, <index>"
 _SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
@@ -177,6 +177,23 @@ def test_omit_index_has_no_contents_and_no_mark():
     assert "index" not in names
 
 
+def test_contents_mark_emits_contents_bars_call():
+    from parch.mos.contents_mark import contents_mark
+    from parch.mos.manifest import Manifest
+
+    assert contents_mark(None, "h1") == ""
+    off = Manifest()
+    assert contents_mark(off, "h1") == ""
+    manifest = Manifest()
+    manifest.register_source("index")
+    assert contents_mark(manifest, "h1") == (
+        "padded_link(<index>, contents_bars(size: h1))"
+    )
+    assert contents_mark(manifest, "h1", link_padding="0pt") == (
+        "padded_link(padding: 0pt, <index>, contents_bars(size: h1))"
+    )
+
+
 def test_index_on_cover_has_no_mark():
     typst = _generate(load(NOMAD))
     cover = _cover_page(typst)
@@ -203,7 +220,7 @@ def test_annual_has_no_calendar_chip_and_links_to_index():
     assert "2026<annual>" in page
     assert _MARK_FLUSH in page
     assert _MARK_RULE in page
-    assert page.count(_MARK_RULE) == 5
+    assert page.count(_MARK_RULE) == 1
 
 
 def test_colophon_has_mark_and_unchanged_facts():
@@ -211,7 +228,7 @@ def test_colophon_has_mark_and_unchanged_facts():
     page = _colophon_page(typst)
     assert _MARK_FLUSH in page
     assert _MARK_RULE in page
-    assert page.count(_MARK_RULE) == 5
+    assert page.count(_MARK_RULE) == 1
     assert _FOLLOW_RTL in page
     assert _SEATED_TRAIL in page
     heading = page[page.index(_SEATED_TITLE) : page.index(_SEATED_MARK)]
@@ -247,7 +264,7 @@ def test_mos_right_mark_sits_next_to_strip():
     assert "[Calendar]" not in page
     for label in ("Q1", "Q2", "Q3", "Q4"):
         assert label in page
-    assert page.count(_MARK_RULE) == 5
+    assert page.count(_MARK_RULE) == 1
 
 
 def test_mos_left_annual_mark_is_trail_strip_sibling():
@@ -265,7 +282,7 @@ def test_mos_left_annual_mark_is_trail_strip_sibling():
     assert "[Calendar]" not in page
     for label in ("Q1", "Q2", "Q3", "Q4"):
         assert label in page
-    assert page.count(_MARK_RULE) == 5
+    assert page.count(_MARK_RULE) == 1
 
 
 def test_daily_mark_is_trail_strip_alone():
@@ -281,7 +298,7 @@ def test_daily_mark_is_trail_strip_alone():
     assert _SEATED_TRAIL in page
     assert "column-gutter: 6pt" not in heading
     assert "padded_link(<annual>, [2026])" not in page
-    assert page.count(_MARK_RULE) == 5
+    assert page.count(_MARK_RULE) == 1
 
 
 def test_mos_right_daily_mark_is_trail_strip_alone():
@@ -297,7 +314,7 @@ def test_mos_right_daily_mark_is_trail_strip_alone():
     assert _SEATED_TRAIL in page
     assert "column-gutter: 6pt" not in heading
     assert "padded_link(<annual>, [2026])" not in page
-    assert page.count(_MARK_RULE) == 5
+    assert page.count(_MARK_RULE) == 1
 
 
 def test_mos_right_habits_mark_sits_next_to_strip():

@@ -14,7 +14,7 @@ from tests.toml_fixtures import omit_toml_sections
 NOMAD = base_config("supernote-nomad")
 NOMAD_MOS_RIGHT = base_config("supernote-nomad-mos-right")
 
-_MARK_RULE = "line(length: 0.844em, stroke: thick_stroke + black)"
+_MARK_RULE = "contents_bars(size:"
 _MARK_FLUSH = "padded_link(padding: 0pt, <index>"
 _TRAIL_MARK = "pad(right: 3mm, padded_link(padding: 0pt, <index>"
 _SEATED_TRAIL = "box(height: band, align(horizon + left, seated_"
@@ -214,7 +214,7 @@ def test_generated_trail_mark_alone_and_inverts_january_only():
     assert "grid.cell(fill: black, text(white)[#padded_link(<annual>, [2026])])" not in p1
     assert _TRAIL_MARK in p1
     assert _MARK_FLUSH in p1
-    assert p1.count(_MARK_RULE) == 5
+    assert p1.count(_MARK_RULE) == 1
     assert p1.index("1 <daily-note-2026-01-01-page-1>") < p1.index(_TRAIL_MARK)
     heading = p1[p1.index(_SEATED_TITLE) : p1.index(_SEATED_MARK)]
     assert "1 <daily-note-2026-01-01-page-1>" in heading
@@ -255,7 +255,7 @@ def test_generated_mos_right_trail_mark_alone_left_of_q1():
     p1 = pages["p1"]
     assert "padded_link(<annual>, [2026])" not in p1
     assert _TRAIL_MARK in p1
-    assert p1.count(_MARK_RULE) == 5
+    assert p1.count(_MARK_RULE) == 1
     assert p1.index("1 <daily-note-2026-01-01-page-1>") < p1.index(_TRAIL_MARK)
     heading = p1[p1.index(_SEATED_TITLE) : p1.index(_SEATED_MARK)]
     assert "1 <daily-note-2026-01-01-page-1>" in heading

@@ -143,23 +143,7 @@
         )
       ), grid.cell(align: horizon, context {
         let seated_title = text(size: h1)[2026<annual>]
-        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
-        let cap = 0.7em.to-absolute()
-        let gap = (cap - 5 * thick_stroke) / 4
-        box(
-          width: 0.844em,
-          height: cap,
-          align(horizon + left, stack(
-            dir: ttb,
-            spacing: gap,
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-          ))
-        )
-      })))
+        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1)))
         let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
         stack(
           dir: rtl,
@@ -202,23 +186,7 @@
         #set par(spacing: 0em)
         #context {
         let seated_title = text(size: h1, weight: "bold")[About this notebook <colophon>]
-        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
-        let cap = 0.7em.to-absolute()
-        let gap = (cap - 5 * thick_stroke) / 4
-        box(
-          width: 0.844em,
-          height: cap,
-          align(horizon + left, stack(
-            dir: ttb,
-            spacing: gap,
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-          ))
-        )
-      })))
+        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1)))
         let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
         stack(
           dir: rtl,
@@ -297,23 +265,7 @@
         [*Thursday*],
         padded_link(<2026W01>)[Week 1]
       )
-        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
-        let cap = 0.7em.to-absolute()
-        let gap = (cap - 5 * thick_stroke) / 4
-        box(
-          width: 0.844em,
-          height: cap,
-          align(horizon + left, stack(
-            dir: ttb,
-            spacing: gap,
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-          ))
-        )
-      })))
+        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1)))
         let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
         stack(
           dir: rtl,
@@ -440,23 +392,7 @@
         columns: (auto, auto),
         column-gutter: 6pt,
         align: horizon,
-        padded_link(<index>, text(size: h1, context {
-        let cap = 0.7em.to-absolute()
-        let gap = (cap - 5 * thick_stroke) / 4
-        box(
-          width: 0.844em,
-          height: cap,
-          align(horizon + left, stack(
-            dir: ttb,
-            spacing: gap,
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-          ))
-        )
-      })),
+        padded_link(<index>, contents_bars(size: h1)),
         text(size: h1)[January<month-2026-01-01>]
       )),
         grid(
@@ -505,7 +441,7 @@
       #let h1 = 10mm
       #let link_padding = 8pt
       
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars
       
       #let dotted = dotted(regular_height: regular_height)
       #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -514,6 +450,7 @@
       #let rect_pattern_centered = rect_pattern_centered.with(regular_height: regular_height)
       #let scratch_pad = rect_pattern(dotted)
       #let padded_link = padded_link.with(padding: link_padding)
+      #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
     ''',
     'weekly': '''
       #grid(
@@ -559,23 +496,7 @@
         columns: (auto, auto),
         column-gutter: 6pt,
         align: horizon,
-        padded_link(<index>, text(size: h1, context {
-        let cap = 0.7em.to-absolute()
-        let gap = (cap - 5 * thick_stroke) / 4
-        box(
-          width: 0.844em,
-          height: cap,
-          align(horizon + left, stack(
-            dir: ttb,
-            spacing: gap,
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-          ))
-        )
-      })),
+        padded_link(<index>, contents_bars(size: h1)),
         text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4]
       )),
         grid(
@@ -675,23 +596,7 @@
         )
       ), grid.cell(align: horizon, context {
         let seated_title = text(size: h1)[2026<annual>]
-        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
-        let cap = 0.7em.to-absolute()
-        let gap = (cap - 5 * thick_stroke) / 4
-        box(
-          width: 0.844em,
-          height: cap,
-          align(horizon + left, stack(
-            dir: ttb,
-            spacing: gap,
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-          ))
-        )
-      })))
+        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1)))
         let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
         stack(
           dir: rtl,
@@ -734,23 +639,7 @@
         #set par(spacing: 0em)
         #context {
         let seated_title = text(size: h1, weight: "bold")[About this notebook <colophon>]
-        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
-        let cap = 0.7em.to-absolute()
-        let gap = (cap - 5 * thick_stroke) / 4
-        box(
-          width: 0.844em,
-          height: cap,
-          align(horizon + left, stack(
-            dir: ttb,
-            spacing: gap,
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-          ))
-        )
-      })))
+        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1)))
         let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
         stack(
           dir: rtl,
@@ -829,23 +718,7 @@
         [*Thursday*],
         padded_link(<2026W01>)[Week 1]
       )
-        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, text(size: h1, context {
-        let cap = 0.7em.to-absolute()
-        let gap = (cap - 5 * thick_stroke) / 4
-        box(
-          width: 0.844em,
-          height: cap,
-          align(horizon + left, stack(
-            dir: ttb,
-            spacing: gap,
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-          ))
-        )
-      })))
+        let seated_mark = pad(right: 3mm, padded_link(padding: 0pt, <index>, contents_bars(size: h1)))
         let band = calc.max(measure(seated_title).height, measure(seated_mark).height)
         stack(
           dir: rtl,
@@ -972,23 +845,7 @@
         columns: (auto, auto),
         column-gutter: 6pt,
         align: horizon,
-        padded_link(<index>, text(size: h1, context {
-        let cap = 0.7em.to-absolute()
-        let gap = (cap - 5 * thick_stroke) / 4
-        box(
-          width: 0.844em,
-          height: cap,
-          align(horizon + left, stack(
-            dir: ttb,
-            spacing: gap,
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-          ))
-        )
-      })),
+        padded_link(<index>, contents_bars(size: h1)),
         text(size: h1)[January<month-2026-01-01>]
       )),
         grid(
@@ -1037,7 +894,7 @@
       #let h1 = 8mm
       #let link_padding = 6pt
       
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars
       
       #let dotted = dotted(regular_height: regular_height)
       #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
@@ -1046,6 +903,7 @@
       #let rect_pattern_centered = rect_pattern_centered.with(regular_height: regular_height)
       #let scratch_pad = rect_pattern(dotted)
       #let padded_link = padded_link.with(padding: link_padding)
+      #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
     ''',
     'weekly': '''
       #grid(
@@ -1091,23 +949,7 @@
         columns: (auto, auto),
         column-gutter: 6pt,
         align: horizon,
-        padded_link(<index>, text(size: h1, context {
-        let cap = 0.7em.to-absolute()
-        let gap = (cap - 5 * thick_stroke) / 4
-        box(
-          width: 0.844em,
-          height: cap,
-          align(horizon + left, stack(
-            dir: ttb,
-            spacing: gap,
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-            line(length: 0.844em, stroke: thick_stroke + black),
-          ))
-        )
-      })),
+        padded_link(<index>, contents_bars(size: h1)),
         text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4]
       )),
         grid(
