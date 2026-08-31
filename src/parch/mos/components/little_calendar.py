@@ -4,9 +4,10 @@ from typing import Any
 
 from parch.calendar.day import Day
 from parch.calendar.month import Month
-from parch.calendar.week import Week
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
+
+WEEK_ROWS = 6
 
 
 class LittleCalendar:
@@ -32,15 +33,12 @@ class LittleCalendar:
         self.inset = inset
 
     def generate(self) -> str:
-        return f"""grid(
-  align: center + horizon,
+        return f"""month_grid(
   inset: {self.inset},
   stroke: {self._stroke()},
   columns: ({self._columns()}),
-  rows: 1fr,
-
-  {self._optional_month_name()}
-  {self._heading()}, grid.hline(stroke: regular_stroke + black),
+  {self._name_cell()}
+  {self._heading()},
   {self._day_cells()}
 )"""
 
@@ -54,21 +52,25 @@ class LittleCalendar:
         cols = ["1fr"] * 7
         return ", ".join(self._with_week_column(cols, "1fr"))
 
-    def _optional_month_name(self) -> str:
-        if not self.show_month_name:
-            return ""
+    def _name_cell(self) -> str:
         colspan = len(self._with_week_column([""] * 7, ""))
-        name = self.i18n.t(f"months.full.{self.month.name}")
-        return f"""grid.cell(
+        if self.show_month_name:
+            name = self.i18n.t(f"months.full.{self.month.name}")
+            return f"""grid.cell(
     colspan: {colspan},
     [{name}]
   ),
-  grid.hline(stroke: regular_stroke + black),
+"""
+        # Occupy the name track so weekdays stay on the second auto row.
+        return f"""grid.cell(
+    colspan: {colspan},
+    inset: 0pt,
+    []
+  ),
 """
 
     def _heading(self) -> str:
-        weeks = self._month_in_weeks()
-        sample = weeks[1] if len(weeks) > 1 else weeks[0]
+        sample = self._expand_week_ranges()[0]
         heading = [f"[{self.i18n.t(f'weekday.letter.{day.weekday_name}')}]" for day in sample]
         week_label = f"[{self.i18n.t('weekday.letter.week')}]" if self.show_week_letter else "[]"
         return ", ".join(self._with_week_column(heading, week_label))
@@ -89,14 +91,17 @@ class LittleCalendar:
         return text
 
     def _week_label_cell(self, week: list[Day | None]) -> str:
-        current_week = self._first_present_day(week).week()
+        present = self._first_present_day(week)
+        if present is None:
+            return "[]"
+        current_week = present.week()
         return self.manifest.link_or_content(current_week.id, str(current_week.number))
 
-    def _first_present_day(self, week: list[Day | None]) -> Day:
+    def _first_present_day(self, week: list[Day | None]) -> Day | None:
         for day in week:
             if day is not None:
                 return day
-        raise RuntimeError("week has no in-month days")
+        return None
 
     def _with_week_column(self, cells: list[Any], value: Any) -> list[Any]:
         out = list(cells)
@@ -109,7 +114,15 @@ class LittleCalendar:
     def _month_in_weeks(self) -> list[list[Day | None]]:
         ranges = self._expand_week_ranges()
         weeks = self._mask_outside_days(ranges)
-        return [week for week in weeks if not all(d is None for d in week)]
+        weeks = [week for week in weeks if not all(d is None for d in week)]
+        empty = [None] * 7
+        while len(weeks) < WEEK_ROWS:
+            weeks.append(list(empty))
+        if len(weeks) > WEEK_ROWS:
+            raise RuntimeError(
+                f"month {self.month.id} has {len(weeks)} weeks; month_grid week-rows is {WEEK_ROWS}"
+            )
+        return weeks
 
     def _expand_week_ranges(self) -> list[list[Day]]:
         first = self.month.day.beginning_of_week()

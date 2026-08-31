@@ -164,3 +164,24 @@
   grid.cell(align: horizon, heading),
   body,
 )
+
+// Name + weekdays are auto; week-rows are equal 1fr tracks. Never `rows: 1fr`
+// alone (5-week vs 6-week months would move the weekday rule). Columns default
+// to week + 7 days. Stroke/inset stay caller-owned.
+#let month_grid(
+  inset: none,
+  stroke: none,
+  columns: (1fr,) * 8,
+  week-rows: 6,
+  hline-stroke: none,
+  ..cells,
+) = grid(
+  align: center + horizon,
+  inset: inset,
+  stroke: stroke,
+  columns: columns,
+  rows: (auto, auto) + (1fr,) * week-rows,
+  grid.hline(y: 1, stroke: hline-stroke),
+  grid.hline(y: 2, stroke: hline-stroke),
+  ..cells,
+)

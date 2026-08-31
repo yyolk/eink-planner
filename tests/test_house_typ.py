@@ -18,12 +18,14 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "trail_heading" in imported
     assert "mos_frame" in imported
     assert "well_frame" in imported
+    assert "month_grid" in imported
     assert "#let link_padding =" in typst
     assert "#let rect_pattern = rect_pattern.with(regular_height: regular_height)" in typst
     assert "#let padded_link = padded_link.with(padding: link_padding)" in typst
     assert "#let contents_bars = contents_bars.with(thick_stroke: thick_stroke)" in typst
     assert "#let mos_frame = mos_frame.with(mos-width: 10mm, column-gutter: 2mm)" in typst
     assert "#let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm)" in typst
+    assert "#let month_grid = month_grid.with(week-rows: 6, hline-stroke: regular_stroke + black)" in typst
     assert "#let dotted = dotted(regular_height: regular_height)" in typst
     assert "#let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)" in typst
     assert "#let scratch_pad = rect_pattern(dotted)" in typst
@@ -40,6 +42,13 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "columns: (10mm, 1fr)" not in typst
     assert "rows: (10mm, 1fr)" not in typst
     assert "rowspan" not in typst
+    assert "align: center + horizon" not in typst
+    assert "(auto, auto) + (1fr,)" not in typst
+    assert "grid.hline(y: 1" not in typst
+    assert "grid.hline(y: 2" not in typst
+    # Little-calendar chrome lives in house.typ, not inlined as `rows: 1fr`.
+    assert "rows: 1fr," not in typst
+    assert "rows: 1fr\n" not in typst
     house = house_typ_resource().read_text(encoding="utf-8")
     assert "#set page" not in house
     assert "#let contents_bars(" in house
@@ -49,6 +58,12 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let trail_heading(" in house
     assert "#let mos_frame(" in house
     assert "#let well_frame(" in house
+    assert "#let month_grid(" in house
+    assert "rows: (auto, auto) + (1fr,) * week-rows" in house
+    assert "grid.hline(y: 1, stroke: hline-stroke)" in house
+    assert "grid.hline(y: 2, stroke: hline-stroke)" in house
+    month_grid_sig = house[house.index("#let month_grid(") : house.index("..cells,")]
+    assert "side" not in month_grid_sig
     assert "rowspan" not in house
     assert "dir: ltr" in house
     assert "calc.max(measure(seated_title).height, measure(seated_mark).height)" in house
@@ -68,6 +83,7 @@ def test_copy_house_typ_writes_workdir(tmp_path):
     assert "#let trail_heading(" in text
     assert "#let mos_frame(" in text
     assert "#let well_frame(" in text
+    assert "#let month_grid(" in text
 
 
 def test_press_copies_house_typ_next_to_index(tmp_path, monkeypatch):

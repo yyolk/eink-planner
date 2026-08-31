@@ -1,7 +1,10 @@
 from parch.i18n import I18n
-from parch.mos.components.little_calendar import LittleCalendar
+from parch.mos.components.little_calendar import WEEK_ROWS, LittleCalendar
 from parch.mos.manifest import Manifest
 from tests.helpers import make_day, make_month
+
+PAD8 = "[], [], [], [], [], [], [], []"
+PAD7 = "[], [], [], [], [], [], []"
 
 TRANSLATIONS = {
     "en": {
@@ -35,12 +38,16 @@ def test_february_2021_monday_start_no_padding():
         inset="5pt",
     )
     typst = component.generate()
-    assert "rows: 1fr" in typst
+    assert "month_grid(" in typst
+    assert "rows: 1fr" not in typst
+    assert "grid.hline" not in typst
     assert "columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in typst
     assert "if x == 1" in typst
     assert "[W], [M], [T], [W], [T], [F], [S], [S]" in typst
     assert "[5], [1], [2], [3], [4], [5], [6], [7]" in typst
     assert "[8], [22], [23], [24], [25], [26], [27], [28]" in typst
+    assert typst.count(PAD8) == WEEK_ROWS - 4
+    assert len(component._month_in_weeks()) == WEEK_ROWS
 
 
 def test_january_2026_nil_padded_outside_days():
@@ -54,6 +61,8 @@ def test_january_2026_nil_padded_outside_days():
     typst = component.generate()
     assert "[1], [], [], [], [1], [2], [3], [4]" in typst
     assert "[5], [26], [27], [28], [29], [30], [31], []" in typst
+    assert typst.count(PAD8) == WEEK_ROWS - 5
+    assert len(component._month_in_weeks()) == WEEK_ROWS
 
 
 def test_links_and_highlight():
@@ -95,6 +104,7 @@ def test_week_placement_right_and_none():
     assert "stroke: none" in none
     assert "columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in none
     assert "[M], [T], [W], [T], [F], [S], [S]" in none
+    assert none.count(PAD7) >= WEEK_ROWS - 4
 
 
 def test_structural_strokes_are_black():
@@ -106,10 +116,38 @@ def test_structural_strokes_are_black():
         inset="5pt",
         show_month_name=True,
     ).generate()
-    assert "grid.hline(stroke: regular_stroke + black)" in named
+    assert "month_grid(" in named
+    assert "grid.hline" not in named
     assert "left: regular_stroke + black" in named
-    assert named.count("grid.hline(stroke: regular_stroke + black)") == 2
+    assert "[February]" in named
     assert "grid.hline(stroke: regular_stroke)," not in named.replace("regular_stroke + black", "")
+
+
+def test_every_month_emits_six_week_rows():
+    # 4-week Feb, 5-week Jan, 6-week Mar, leap Feb — same week-rows contract.
+    months = ("2021-02", "2026-01", "2026-02", "2026-03", "2024-02")
+    for yyyy_mm in months:
+        component = LittleCalendar(
+            i18n=_i18n(),
+            manifest=Manifest(),
+            week_placement="left",
+            month=make_month(yyyy_mm),
+            inset="5pt",
+        )
+        weeks = component._month_in_weeks()
+        assert len(weeks) == WEEK_ROWS, yyyy_mm
+        typst = component.generate()
+        assert "month_grid(" in typst, yyyy_mm
+        assert "rows: 1fr" not in typst, yyyy_mm
+        assert "grid.hline" not in typst, yyyy_mm
+    march = LittleCalendar(
+        i18n=_i18n(),
+        manifest=Manifest(),
+        week_placement="left",
+        month=make_month("2026-03"),
+        inset="5pt",
+    ).generate()
+    assert PAD8 not in march
 
 
 def test_hides_week_letter():
