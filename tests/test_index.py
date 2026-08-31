@@ -329,14 +329,21 @@ def test_builder_trail_and_raw_headings_call_trail_heading():
     assert "box(height: band, align(horizon + left, seated_title))" in helper
     assert "box(height: band, align(horizon + left, seated_mark))" in helper
     assert "trail_strip(" in helper
-    assert "edge is HeadingMark.FOLLOW" in helper
-    assert "edge is HeadingMark.TRAIL" in helper
+    assert "match edge:" in helper
+    assert "case HeadingMark.FOLLOW:" in helper
+    assert "case HeadingMark.TRAIL:" in helper
     assert typing.get_type_hints(trail_heading)["edge"] is HeadingMark
     builder = inspect.getsource(Builder._heading_stack)
     assert "trail_heading(" in builder
     assert "trail_strip(" not in builder
     assert "edge=HeadingMark.FOLLOW" in builder
     assert "edge=HeadingMark.TRAIL" in builder
+    assert "if mos_right or chip:" in builder
+    assert "match heading_mark:" in builder
+    assert builder.index("if mos_right or chip:") < builder.index("match heading_mark:")
+    assert "case HeadingMark.FOLLOW:" in builder
+    assert "case HeadingMark.TRAIL:" in builder
+    assert "case HeadingMark.LEAD:" in builder
     for cls in (Habits, Tasks, Meetings, Projects, Review, Colophon):
         heading = inspect.getsource(cls._heading)
         assert "trail_heading(" in heading
@@ -362,6 +369,49 @@ def test_trail_heading_rejects_string_edge_fallthrough():
         manifest, "h1", "text(size: h1)[Tasks]", edge=HeadingMark.TRAIL,
     )
     assert "spacing: 1fr" in trail
-    for bad in ("follow", "trail", "FOLLOW", HeadingMark.LEAD):
+    for bad in ("FOLLOW", HeadingMark.LEAD):
         with pytest.raises(ValueError, match="TRAIL or FOLLOW"):
             trail_heading(manifest, "h1", "text(size: h1)[Tasks]", edge=bad)
+
+
+def test_heading_stack_matches_follow_trail_lead_after_mos_right_or_chip_guard():
+    from parch.compose.coordinator import Coordinator
+    from parch.mos.builder import Builder
+
+    title = "text(size: h1)[Title]"
+    dto = load(NOMAD)
+    coord = Coordinator(dto, i18n=load_default())
+    builder = Builder(
+        i18n=coord.i18n, configurator=coord.configurator, manifest=coord.manifest,
+    )
+    builder.manifest.register_source("index")
+    follow = builder._heading_stack(None, title, None, None, HeadingMark.FOLLOW)
+    assert "spacing: 0.5em" in follow
+    assert "spacing: 1fr" not in follow
+    trail = builder._heading_stack(None, title, None, None, HeadingMark.TRAIL)
+    assert "spacing: 1fr" in trail
+    lead = builder._heading_stack(None, title, None, None, HeadingMark.LEAD)
+    assert "columns: (auto, auto)" in lead
+    assert "spacing: 0.5em" not in lead
+    assert "spacing: 1fr" not in lead
+    assert builder._heading_stack(None, None, None, None, HeadingMark.LEAD) == ""
+    with pytest.raises(ValueError, match="FOLLOW, TRAIL, or LEAD"):
+        builder._heading_stack(None, title, None, None, "nope")
+    builder.manifest.register_source("chip-page")
+    chipped = builder._heading_stack(
+        None, title, [("chip-page", "Chip")], None, HeadingMark.LEAD,
+    )
+    assert "spacing: 1fr" in chipped
+    assert "let seated_title =" in chipped
+
+    right = load(NOMAD_MOS_RIGHT)
+    right_coord = Coordinator(right, i18n=load_default())
+    right_builder = Builder(
+        i18n=right_coord.i18n,
+        configurator=right_coord.configurator,
+        manifest=right_coord.manifest,
+    )
+    right_builder.manifest.register_source("index")
+    glued = right_builder._heading_stack(None, title, None, None, HeadingMark.LEAD)
+    assert "spacing: 1fr" in glued
+    assert "columns: (auto, auto)" not in glued

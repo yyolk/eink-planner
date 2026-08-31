@@ -113,19 +113,21 @@ class Builder:
                 self.manifest, height, title, body,
                 direction=direction, chip=chip, edge=HeadingMark.TRAIL,
             )
-        if heading_mark is HeadingMark.FOLLOW:
-            return trail_heading(
-                self.manifest, height, title, body,
-                direction="rtl", edge=HeadingMark.FOLLOW,
-            )
-        if heading_mark is HeadingMark.TRAIL:
-            return trail_heading(
-                self.manifest, height, title, body,
-                direction=direction, edge=HeadingMark.TRAIL,
-            )
-        if title:
-            return lead_title(self.manifest, height, title, body)
-        return ""
+        match heading_mark:
+            case HeadingMark.FOLLOW:
+                return trail_heading(
+                    self.manifest, height, title, body,
+                    direction="rtl", edge=HeadingMark.FOLLOW,
+                )
+            case HeadingMark.TRAIL:
+                return trail_heading(
+                    self.manifest, height, title, body,
+                    direction=direction, edge=HeadingMark.TRAIL,
+                )
+            case HeadingMark.LEAD:
+                return lead_title(self.manifest, height, title, body) if title else ""
+            case _:
+                raise ValueError(f"heading_mark must be FOLLOW, TRAIL, or LEAD, not {heading_mark!r}")
 
 
 def _v(mapping, key: str):
