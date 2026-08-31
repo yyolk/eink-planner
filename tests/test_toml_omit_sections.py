@@ -103,13 +103,15 @@ def missing_ref_kinds(stderr: str) -> frozenset[str]:
     return frozenset(kinds)
 
 
-def compile_pdf(typst_src: str, workdir: Path) -> tuple[Path, str]:
+def compile_pdf(
+    typst_src: str, workdir: Path, device: str = "supernote-nomad"
+) -> tuple[Path, str]:
     """Compile Typst. A PDF on disk is success; stderr warnings are returned."""
     workdir.mkdir(parents=True, exist_ok=True)
     src = workdir / "index.typst"
     pdf = workdir / "index.pdf"
     src.write_text(typst_src, encoding="utf-8")
-    copy_house_typ(workdir)
+    copy_house_typ(workdir, device=device)
     typst = ensure_typst(tools_dir=REPO / ".tools")
     result = subprocess.run(
         [str(typst), "compile", str(src), str(pdf)],

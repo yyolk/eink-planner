@@ -1,4 +1,4 @@
-"""parch new: copy a shipped TOML and overlay year / sections."""
+"""parch new writes a complete job from a device; parch edit reopens it."""
 
 import tomllib
 
@@ -7,25 +7,8 @@ import pytest
 from parch import ConfigError
 from parch.cli import build_parser, main
 from parch.config import load
-from parch.services.config_file import overlay_toml
-from tests.helpers import base_config
-
-NOMAD = base_config("supernote-nomad")
-
-
-@pytest.mark.parametrize(
-    "stem",
-    ["supernote-nomad-lined", "kindle-scribe-lined"],
-)
-def test_new_from_lined_siblings(tmp_path, stem):
-    out = tmp_path / f"{stem}.toml"
-    rc = main(["new", "--from", stem, "--yes", "-o", str(out)])
-    assert rc == 0
-    data = tomllib.loads(out.read_text(encoding="utf-8"))
-    assert data["device"]["name"] == stem
-    assert data["style"]["scratch_pad"] == "lined"
-    assert "pattern" not in data["section"]["daily_notes"]
-    load(out)
+from parch.devices import get_device
+from parch.services.job_file import emit_job, spec_from_data, spec_from_device
 
 
 def test_new_yes_year(tmp_path, capsys):
@@ -48,10 +31,31 @@ def test_new_yes_year(tmp_path, capsys):
     data = tomllib.loads(text)
     assert data["calendar"]["year"] == 2027
     assert data["section"]["cover"]["title"] == "2027"
+    assert data["device"]["name"] == "supernote-nomad"
+    assert data["style"]["scratch_pad"] == "dotted"
     assert "cover" in data["sections"]
     assert "colophon" in data["sections"]
     load(out)
     assert "SuperNote Nomad" in text
+
+
+def test_new_from_is_device_id_not_path(tmp_path, capsys):
+    src = tmp_path / "last.toml"
+    src.write_text(emit_job(spec_from_device("supernote-nomad")), encoding="utf-8")
+    out = tmp_path / "out.toml"
+    rc = main(["new", "--from", str(src), "--year", "2027", "--yes", str(out)])
+    assert rc == 1
+    assert "device id" in capsys.readouterr().err
+    assert not out.exists()
+
+
+def test_new_from_lined_stem_is_unknown(tmp_path, capsys):
+    out = tmp_path / "lined.toml"
+    rc = main(["new", "--from", "supernote-nomad-lined", "--yes", "-o", str(out)])
+    assert rc == 1
+    err = capsys.readouterr().err
+    assert "unknown device" in err
+    assert not out.exists()
 
 
 def test_new_sections(tmp_path):
@@ -71,6 +75,10 @@ def test_new_sections(tmp_path):
     assert rc == 0
     data = tomllib.loads(out.read_text(encoding="utf-8"))
     assert data["sections"] == ["cover", "annual", "colophon"]
+    assert "section" in data
+    assert "cover" in data["section"]
+    assert "annual" in data["section"]
+    assert "daily" not in data["section"]
     load(out)
 
 
@@ -118,27 +126,6 @@ def test_new_yes_without_outfile_errors(capsys):
     assert "outfile is required" in capsys.readouterr().err
 
 
-def test_new_from_existing_path_year_rollover(tmp_path):
-    src = tmp_path / "last.toml"
-    src.write_text(NOMAD.read_text(encoding="utf-8"), encoding="utf-8")
-    out = tmp_path / "out.toml"
-    rc = main(
-        [
-            "new",
-            "--from",
-            str(src),
-            "--year",
-            "2027",
-            "--yes",
-            str(out),
-        ]
-    )
-    assert rc == 0
-    data = tomllib.loads(out.read_text(encoding="utf-8"))
-    assert data["calendar"]["year"] == 2027
-    assert data["section"]["cover"]["title"] == "2027"
-
-
 def test_parser_new_and_top_help():
     parser = build_parser()
     args = parser.parse_args(
@@ -149,9 +136,10 @@ def test_parser_new_and_top_help():
     assert args.yes is True
     help_text = parser.format_help()
     assert "new" in help_text
+    assert "edit" in help_text
     assert "press" in help_text
     assert "proof" in help_text
-    assert "Write a profile from a shipped template." in help_text
+    assert "Write a job file from a device and defaults." in help_text
 
 
 def test_new_help_lists_device_names(capsys):
@@ -160,19 +148,19 @@ def test_new_help_lists_device_names(capsys):
         parser.parse_args(["new", "--help"])
     assert exc.value.code == 0
     out = capsys.readouterr().out
-    assert "Write a profile from a shipped template." in out
-    assert "Starting profile or path (default supernote-nomad)." in out
+    assert "Write a complete job file from a device record plus defaults." in out
+    assert "Device id (default supernote-nomad)." in out
     assert "Year. Also updates a year-only cover title." in out
     assert "Sections to keep, comma-separated." in out
     assert "SuperNote Nomad" in out
-    assert "SuperNote Nomad lined" in out
     assert "Kindle Scribe" in out
-    assert "Kindle Scribe lined" in out
-    assert "158×210 lined" in out
+    assert "158 × 210" in out
+    assert "lined" not in out.lower()
     assert "left-handed" not in out
     assert "MOS-left" not in out
     assert "MOS-right" not in out
     assert "--hand" in out
+    assert "--paper" not in out
 
 
 def test_no_config_or_mos_flags():
@@ -185,8 +173,8 @@ def test_no_config_or_mos_flags():
     assert args.hand == "right"
     with pytest.raises(SystemExit):
         parser.parse_args(["new", "--paper", "lined", "--yes", "-o", "x.toml"])
-    with pytest.raises(SystemExit):
-        parser.parse_args(["edit", "x.toml"])
+    edit = parser.parse_args(["edit", "x.toml"])
+    assert edit.command == "edit"
 
 
 def test_new_year_zero_rejected(tmp_path, capsys):
@@ -209,7 +197,7 @@ def test_new_year_zero_rejected(tmp_path, capsys):
     assert not (tmp_path / "mine.toml.tmp.toml").exists()
 
 
-def test_new_hand_overlays_side_menu_only(tmp_path):
+def test_new_hand_writes_side_menu_only(tmp_path):
     out = tmp_path / "mine.toml"
     rc = main(
         [
@@ -239,104 +227,6 @@ def test_new_hand_overlays_side_menu_only(tmp_path):
     load(out)
 
 
-def test_overlay_hand_rewrites_mos_side_menu():
-    text = (
-        "[mos] # nav\n"
-        'side_menu = "left"\n'
-        "reverse_months_quarters = true\n"
-    )
-    written = overlay_toml(text, hand="right")
-    data = tomllib.loads(written)
-    assert data["mos"]["side_menu"] == "right"
-    assert data["mos"]["reverse_months_quarters"] is True
-    assert "side_menu_width" not in data["mos"]
-
-
-def test_overlay_table_headers_allow_space_and_comment():
-    text = (
-        "[device]\n"
-        "year = 1999\n"
-        "name = \"x\"\n"
-        "\n"
-        "[ calendar ] # hi\n"
-        "year = 2026\n"
-        "week_starts = \"Monday\"\n"
-        "\n"
-        "[section.cover] # x\n"
-        'title = "2026"\n'
-    )
-    written = overlay_toml(text, year=2027)
-    data = tomllib.loads(written)
-    assert data["calendar"]["year"] == 2027
-    assert data["device"]["year"] == 1999
-    assert data["section"]["cover"]["title"] == "2027"
-
-
-def test_new_force_keeps_dest_when_source_invalid(tmp_path, capsys):
-    dest = tmp_path / "mine.toml"
-    dest.write_text(NOMAD.read_text(encoding="utf-8"), encoding="utf-8")
-    before = dest.read_bytes()
-    src = tmp_path / "bad.toml"
-    src.write_text("[device]\nname = \"x\"\n", encoding="utf-8")
-    rc = main(
-        [
-            "new",
-            "--from",
-            str(src),
-            "--yes",
-            "--force",
-            "-o",
-            str(dest),
-        ]
-    )
-    assert rc == 1
-    assert dest.read_bytes() == before
-    assert not (tmp_path / "mine.toml.tmp.toml").exists()
-    err = capsys.readouterr().err
-    assert err
-
-
-def test_overlay_indented_calendar_year_leaves_other_tables():
-    text = (
-        "    [calendar]\n"
-        "    year = 2026\n"
-        '    week_starts = "Monday"\n'
-        "\n"
-        "    [device]\n"
-        "    year = 1999\n"
-        '    name = "x"\n'
-    )
-    written = overlay_toml(text, year=2027)
-    data = tomllib.loads(written)
-    assert data["calendar"]["year"] == 2027
-    assert data["device"]["year"] == 1999
-
-
-def test_overlay_indented_cover_title_year():
-    text = (
-        "    [section.cover]\n"
-        '    title = "2020"\n'
-    )
-    written = overlay_toml(text, year=2027)
-    data = tomllib.loads(written)
-    assert data["section"]["cover"]["title"] == "2027"
-
-
-def test_overlay_indented_sections_replaced_in_place():
-    text = (
-        '    sections = ["cover", "annual"]\n'
-        "\n"
-        "    [device]\n"
-        '    name = "x"\n'
-    )
-    written = overlay_toml(
-        text, sections=["cover"], source_sections=["cover", "annual"]
-    )
-    assert written.count("sections =") == 1
-    data = tomllib.loads(written)
-    assert data["sections"] == ["cover"]
-
-
 def test_new_dest_parent_is_file(tmp_path, capsys):
     parent = tmp_path / "existing_file"
     parent.write_text("keep\n", encoding="utf-8")
@@ -360,136 +250,21 @@ def test_new_dest_parent_is_file(tmp_path, capsys):
     assert parent.is_file()
 
 
-def _nomad_text() -> str:
-    return NOMAD.read_text(encoding="utf-8")
-
-
-def test_overlay_paper_inserts_style_and_rewrites_daily_notes_pattern():
-    text = _nomad_text()
-    written = overlay_toml(text, paper="lined")
-    assert "SuperNote Nomad" in written
-    assert written.index("[device]") < written.index("[calendar]")
-    assert 'title_height = "4mm"' in written
-    assert 'daily_cell_height = "16mm"' in written
-    data = tomllib.loads(written)
+def test_emit_job_is_complete_resume_state():
+    text = emit_job(spec_from_device("supernote-nomad", paper="lined", week_placement="none"))
+    data = tomllib.loads(text)
     assert data["style"]["scratch_pad"] == "lined"
-    assert data["section"]["daily_notes"]["pattern"] == "lined"
-    assert data["section"]["daily"]["right"]["notes"]["pattern"] == "dotted"
-    assert data["section"]["daily"]["right"]["notes"]["title_height"] == "4mm"
-    assert data["mos"]["reverse_months_quarters"] is True
-    assert "week_placement" not in data["section"]["monthly"]
-
-
-def test_overlay_paper_rewrites_existing_style_scratch_pad():
-    text = (
-        "[style] # house\n"
-        'scratch_pad = "dotted"\n'
-        'link_padding = "2pt"\n'
-        "\n"
-        "[style.stroke]\n"
-        'regular = "0.3pt"\n'
-        "\n"
-        "[section.daily_notes]\n"
-        "pages = 2\n"
-        'pattern = "dotted"\n'
-    )
-    written = overlay_toml(text, paper="lined")
-    assert "# house" in written
-    assert 'link_padding = "2pt"' in written
-    assert written.index("# house") < written.index("scratch_pad")
-    data = tomllib.loads(written)
-    assert data["style"]["scratch_pad"] == "lined"
-    assert data["style"]["link_padding"] == "2pt"
-    assert data["section"]["daily_notes"]["pattern"] == "lined"
-
-
-def test_overlay_week_placement_none_vs_omit():
-    text = (
-        "[section.monthly] # month\n"
-        'week_label_rotation = "90deg"\n'
-        'daily_cell_height = "16mm"\n'
-    )
-    none = overlay_toml(text, week_placement="none")
-    assert "# month" in none
-    assert 'week_label_rotation = "90deg"' in none
-    assert 'daily_cell_height = "16mm"\nweek_placement = "none"' in none
-    data = tomllib.loads(none)
     assert data["section"]["monthly"]["week_placement"] == "none"
-
-    omitted = overlay_toml(none, week_placement="omit")
-    assert "# month" in omitted
-    data = tomllib.loads(omitted)
-    assert "week_placement" not in data["section"]["monthly"]
-    assert data["section"]["monthly"]["daily_cell_height"] == "16mm"
-
-
-def test_overlay_paper_rejects_unknown():
-    with pytest.raises(ConfigError, match="paper"):
-        overlay_toml(_nomad_text(), paper="mesh")
-
-
-def test_overlay_week_placement_omit_on_nomad_leaves_key_out():
-    written = overlay_toml(_nomad_text(), week_placement="omit")
-    data = tomllib.loads(written)
-    assert "week_placement" not in data["section"]["monthly"]
-    assert "SuperNote Nomad" in written
-
-
-def test_overlay_week_placement_rejects_left_right():
-    text = (
-        "[section.monthly]\n"
-        'week_label_rotation = "90deg"\n'
-        'daily_cell_height = "16mm"\n'
-    )
-    with pytest.raises(ConfigError, match="week_placement"):
-        overlay_toml(text, week_placement="left")
-    with pytest.raises(ConfigError, match="week_placement"):
-        overlay_toml(text, week_placement="right")
-
-
-def test_overlay_hours_and_counts_keep_neighbors():
-    text = _nomad_text()
-    written = overlay_toml(
-        text,
-        hour_from=7,
-        hour_to=19,
-        priorities_count=3,
-        daily_notes_pages=4,
-        projects_pages=8,
-        projects_card_rows=2,
-        habit_columns=6,
-        meetings_index_pages=2,
-    )
-    assert "SuperNote Nomad (A6 X2)" in written
-    assert 'time_format = "%k"' in written
-    assert "trailing_half_hour = true" in written
-    assert 'title_height = "4mm"' in written
-    assert 'daily_cell_height = "16mm"' in written
-    assert "reverse_months_quarters = true" in written
-    data = tomllib.loads(written)
-    schedule = data["section"]["daily"]["left"]["schedule"]
-    assert schedule["hour_from"] == 7
-    assert schedule["hour_to"] == 19
-    assert schedule["time_format"] == "%k"
-    assert data["section"]["daily"]["right"]["priorities"]["count"] == 3
-    assert data["section"]["daily_notes"]["pages"] == 4
-    assert data["section"]["projects"]["pages"] == 8
-    assert data["section"]["projects"]["card_rows"] == 2
-    assert data["section"]["habits"]["habit_columns"] == 6
-    assert data["section"]["meetings"]["index_pages"] == 2
-    assert data["section"]["monthly"]["daily_cell_height"] == "16mm"
+    assert data["section"]["daily"]["right"]["notes"]["pattern"] == "dotted"
+    assert data["section"]["daily_notes"]["pattern"] == "lined"
     assert data["section"]["daily"]["right"]["notes"]["title_height"] == "4mm"
-    assert "week_placement" not in data["section"]["monthly"]
-    assert "model_dump" not in written
-    assert written.count("[section.daily.left.schedule]") == 1
+    assert data["section"]["monthly"]["daily_cell_height"] == "16mm"
+    spec = spec_from_data(data)
+    assert spec.paper == "lined"
+    assert spec.week_placement == "none"
 
 
-def test_overlay_hours_rejects_inverted_range():
-    with pytest.raises(ConfigError, match="hour_from"):
-        overlay_toml(_nomad_text(), hour_from=20, hour_to=8)
-
-
-def test_new_yes_does_not_apply_questionary_overlays(tmp_path):
+def test_new_yes_writes_device_defaults(tmp_path):
     out = tmp_path / "mine.toml"
     rc = main(
         [
@@ -507,7 +282,7 @@ def test_new_yes_does_not_apply_questionary_overlays(tmp_path):
     text = out.read_text(encoding="utf-8")
     data = tomllib.loads(text)
     assert data["calendar"]["year"] == 2027
-    assert "scratch_pad" not in data.get("style", {})
+    assert data["style"]["scratch_pad"] == "dotted"
     assert data["section"]["daily"]["left"]["schedule"]["hour_from"] == 8
     assert data["section"]["daily"]["left"]["schedule"]["hour_to"] == 20
     assert data["section"]["daily"]["right"]["priorities"]["count"] == 5
@@ -516,6 +291,19 @@ def test_new_yes_does_not_apply_questionary_overlays(tmp_path):
     assert data["mos"]["reverse_months_quarters"] is True
     assert 'title_height = "4mm"' in text
     assert 'daily_cell_height = "16mm"' in text
+    load(out)
+
+
+def test_scribe_and_158_defaults_omit_nomad_extras(tmp_path):
+    for device in ("kindle-scribe", "158x210"):
+        out = tmp_path / f"{device}.toml"
+        rc = main(["new", "--from", device, "--yes", "-o", str(out)])
+        assert rc == 0
+        data = tomllib.loads(out.read_text(encoding="utf-8"))
+        assert data["device"]["name"] == device
+        assert "projects" not in data["sections"]
+        assert data["device"]["ppi"] == get_device(device).ppi
+        load(out)
 
 
 class _Ask:
@@ -559,7 +347,7 @@ class _FakeQuestionary:
         return _Ask(self.answers[message])
 
 
-def test_interactive_overlays_write_without_regenerating(tmp_path, monkeypatch):
+def test_interactive_new_writes_complete_job(tmp_path, monkeypatch):
     out = tmp_path / "mine.toml"
     fake = _FakeQuestionary(
         {
@@ -656,3 +444,53 @@ def test_interactive_hand_flag_skips_side_prompt(tmp_path, monkeypatch):
     assert "week_placement" not in data["section"]["monthly"]
     assert "projects" not in data["sections"]
     load(out)
+
+
+def test_edit_reopens_same_file(tmp_path, monkeypatch):
+    dest = tmp_path / "job.toml"
+    dest.write_text(emit_job(spec_from_device("kindle-scribe", year=2026)), encoding="utf-8")
+    fake = _FakeQuestionary(
+        {
+            "Year": 2028,
+            "Sections": ["cover", "monthly", "daily", "colophon"],
+            "MOS side": "right",
+            "Paper": "lined",
+            "Week rail": "none",
+            "Hour from": 9,
+            "Hour to": 17,
+            "Priority rows": 4,
+        }
+    )
+    monkeypatch.setattr("parch.services.config_file._questionary", lambda: fake)
+    monkeypatch.setattr("sys.stdin.isatty", lambda: True)
+    rc = main(["edit", str(dest)])
+    assert rc == 0
+    data = tomllib.loads(dest.read_text(encoding="utf-8"))
+    assert data["device"]["name"] == "kindle-scribe"
+    assert data["calendar"]["year"] == 2028
+    assert data["style"]["scratch_pad"] == "lined"
+    assert data["mos"]["side_menu"] == "right"
+    assert data["section"]["monthly"]["week_placement"] == "none"
+    assert data["section"]["daily"]["left"]["schedule"]["hour_from"] == 9
+    assert data["sections"] == ["cover", "monthly", "daily", "colophon"]
+    load(dest)
+
+
+def test_edit_without_tty_errors(tmp_path, capsys, monkeypatch):
+    dest = tmp_path / "job.toml"
+    dest.write_text(emit_job(spec_from_device("supernote-nomad")), encoding="utf-8")
+    monkeypatch.setattr("sys.stdin.isatty", lambda: False)
+    rc = main(["edit", str(dest)])
+    assert rc == 1
+    assert "TTY" in capsys.readouterr().err
+
+
+def test_hand_edit_still_loads(tmp_path):
+    dest = tmp_path / "hand.toml"
+    dest.write_text(emit_job(spec_from_device("158x210", year=2026)), encoding="utf-8")
+    text = dest.read_text(encoding="utf-8")
+    text = text.replace('scratch_pad = "dotted"', 'scratch_pad = "lined"')
+    dest.write_text(text, encoding="utf-8")
+    dto = load(dest)
+    assert dto["planner"]["params"]["scratch_pad"] == "lined"
+    assert dto["device"] == "158x210"

@@ -1,1 +1,1 @@
-"""Packaged planner profiles and locales."""
+"""Packaged locales and Typst house library."""

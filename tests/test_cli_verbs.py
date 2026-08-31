@@ -1,8 +1,8 @@
-"""Thin dispatch smoke: press, proof, and new."""
+"""Thin dispatch smoke: press, proof, new, and edit."""
 
 import pytest
 
-from parch.cli import build_parser, generate_cmd, main, new_cmd, preview_svg_cmd
+from parch.cli import build_parser, edit_cmd, generate_cmd, main, new_cmd, preview_svg_cmd
 
 
 def test_top_help_lists_canonical_verbs():
@@ -10,9 +10,10 @@ def test_top_help_lists_canonical_verbs():
     assert "press" in help_text
     assert "proof" in help_text
     assert "new" in help_text
+    assert "edit" in help_text
     assert "Press a profile to PDF" in help_text
     assert "Pull SVG proofs of selected pages" in help_text
-    assert "Write a profile from a shipped template." in help_text
+    assert "Write a job file from a device and defaults." in help_text
 
 
 def test_press_dispatch_handler():
@@ -36,8 +37,15 @@ def test_new_dispatch_handler():
     assert args.command == "new"
 
 
+def test_edit_dispatch_handler():
+    parser = build_parser()
+    args = parser.parse_args(["edit", "mine.toml"])
+    assert args.run is edit_cmd
+    assert args.command == "edit"
+
+
 def test_verb_help_smokes(capsys):
-    for verb in ("press", "proof", "new"):
+    for verb in ("press", "proof", "new", "edit"):
         with pytest.raises(SystemExit) as exc:
             main([verb, "--help"])
         assert exc.value.code == 0

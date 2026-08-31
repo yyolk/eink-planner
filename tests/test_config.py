@@ -2,7 +2,7 @@ import pytest
 
 from parch import ConfigError
 from parch.config import StrictDict
-from parch.devices import KINDLE_SCRIBE, SUPERNOTE_NOMAD
+from parch.devices import KINDLE_SCRIBE, PAPER_158X210, SUPERNOTE_NOMAD
 from parch.mos.configurator import Configurator
 from parch.mos.preamble import Preamble
 
@@ -49,3 +49,11 @@ def test_device_presets_match_glass():
     assert KINDLE_SCRIBE.height_mm == 209.97
     assert KINDLE_SCRIBE.width_pt == 446.4
     assert KINDLE_SCRIBE.height_pt == 595.2
+    assert SUPERNOTE_NOMAD.toolbar_edge == "top"
+    assert KINDLE_SCRIBE.toolbar_edge == "none"
+    assert PAPER_158X210.id == "158x210"
+    assert PAPER_158X210.page_width == "158mm"
+    assert PAPER_158X210.page_height == "210mm"
+    assert PAPER_158X210.toolbar_edge == "none"
+    assert PAPER_158X210.width_mm == 158.0
+    assert PAPER_158X210.height_mm == 210.0

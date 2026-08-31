@@ -12,19 +12,16 @@ from tests.toml_fixtures import _minimal, omit_toml_sections
 from tests.helpers import base_config, load_default
 
 NOMAD = base_config("supernote-nomad")
-NOMAD_LINED = base_config("supernote-nomad-lined")
+NOMAD_LINED = base_config("supernote-nomad", paper="lined")
 PAPER_158 = base_config("158x210")
-PAPER_158_LINED = base_config("158x210-lined")
+PAPER_158_LINED = base_config("158x210", paper="lined")
 SCRIBE = base_config("kindle-scribe")
-SCRIBE_LINED = base_config("kindle-scribe-lined")
+SCRIBE_LINED = base_config("kindle-scribe", paper="lined")
 
-_SHIPPED = [
+_DEVICES = [
     NOMAD,
-    NOMAD_LINED,
     PAPER_158,
-    PAPER_158_LINED,
     SCRIBE,
-    SCRIBE_LINED,
 ]
 _NOMAD = {NOMAD, NOMAD_LINED}
 _NOMAD_SECTIONS = [
@@ -50,14 +47,14 @@ _LINED = {
 }
 
 
-@pytest.mark.parametrize("path", _SHIPPED)
-def test_parse_shipped_toml_profiles(path: Path):
+@pytest.mark.parametrize("path", _DEVICES)
+def test_parse_device_job_defaults(path: Path):
     dto = load(path)
     assert dto["chase"] == "mos"
     assert "debug" not in dto
     cfg = Configurator(dto)
     names = [section["name"] for section in cfg.enabled_sections()]
-    if path in _NOMAD:
+    if path == NOMAD:
         expected = list(_NOMAD_SECTIONS)
     else:
         expected = ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "colophon"]
@@ -80,10 +77,11 @@ def test_parse_shipped_toml_profiles(path: Path):
     assert "columns = [" not in text
     assert "\nwidth = " not in text
     assert "\nheight = " not in text
-    assert scale["mos_width"] != scale["toolbar_clearance"] or path.name.startswith("supernote-nomad")
     assert DEVICE_SCALE["kindle-scribe"]["mos_width"] == "10mm"
+    assert DEVICE_SCALE["kindle-scribe"]["toolbar_edge"] == "none"
     assert DEVICE_SCALE["kindle-scribe"]["toolbar_clearance"] == "5mm"
     assert DEVICE_SCALE["supernote-nomad"]["mos_width"] == "8mm"
+    assert DEVICE_SCALE["supernote-nomad"]["toolbar_edge"] == "top"
 
 
 def test_load_rejects_yaml_and_kdl_device_profiles():
@@ -585,7 +583,7 @@ name = "158x210"
     assert dto["device"] == "158x210"
     assert dto["document"]["layout"]["dimensions"]["width"] == "158mm"
     assert dto["document"]["layout"]["dimensions"]["height"] == "210mm"
-    assert dto["document"]["layout"]["margin"]["top"] == "5mm"
+    assert dto["document"]["layout"]["margin"]["top"] == "0mm"
     assert dto["document"]["layout"]["margin"]["right"] == "5mm"
 
 

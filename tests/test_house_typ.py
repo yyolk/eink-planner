@@ -6,14 +6,14 @@ from pathlib import Path
 from parch.config import load
 from parch.mos.configurator import Configurator
 from parch.toml_config import apply_hand
+from parch.devices import get_device
 from parch.mos.preamble import (
-    KNOWN_DEVICE_TYP,
+    DEVICE_TYP,
     Preamble,
-    copy_device_typ,
     copy_house_typ,
-    device_typ_filename,
-    device_typ_resource,
     house_typ_resource,
+    render_device_typ,
+    write_device_typ,
 )
 from tests.helpers import base_config
 
@@ -26,7 +26,8 @@ def _preamble_set_page(typst: str) -> str:
 
 def test_preamble_imports_house_and_does_not_inline_bodies():
     typst = Preamble(Configurator(load(base_config("158x210")))).generate()
-    assert '#import "158x210.typ": page-width, page-height, page-margin, mos-width' in typst
+    assert '#import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width' in typst
+    assert "page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)" in typst
     assert "#include" not in typst
     set_page = _preamble_set_page(typst)
     assert set_page == "#set page(width: page-width, height: page-height, margin: page-margin(left))\n\n"
@@ -115,7 +116,8 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     house = house_typ_resource().read_text(encoding="utf-8")
     assert "#set page" not in house
     assert "page-width" not in house
-    assert "page-margin" not in house
+    assert "#let page-margin(side, toolbar-edge: none, toolbar-clearance: none, writing-clearance: none)" in house
+    assert "if toolbar-edge == top { toolbar-clearance } else { 0mm }" in house
     assert "#let contents_bars(" in house
     assert "#let lead_pair(" in house
     assert "#let lead_pair(mark, title, spacing: 6pt)" in house
@@ -237,55 +239,61 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
 def test_preamble_mos_right_uses_page_margin_right():
     dto = apply_hand(load(base_config("158x210")), "right")
     typst = Preamble(Configurator(dto)).generate()
-    assert '#import "158x210.typ": page-width, page-height, page-margin, mos-width' in typst
+    assert '#import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width' in typst
     assert "page-margin(right)" in _preamble_set_page(typst)
     assert "page-margin(left)" not in _preamble_set_page(typst)
 
 
-def test_preamble_nomad_and_scribe_import_matching_device_file():
+def test_preamble_devices_import_parameterized_device_typ():
     nomad = Preamble(Configurator(load(base_config("supernote-nomad")))).generate()
     scribe = Preamble(Configurator(load(base_config("kindle-scribe")))).generate()
-    lined = Preamble(Configurator(load(base_config("supernote-nomad-lined")))).generate()
+    lined = Preamble(Configurator(load(base_config("supernote-nomad", paper="lined")))).generate()
     right = Preamble(Configurator(apply_hand(load(base_config("kindle-scribe")), "right"))).generate()
-    assert '#import "supernote-nomad.typ": page-width, page-height, page-margin, mos-width' in nomad
-    assert '#import "kindle-scribe.typ": page-width, page-height, page-margin, mos-width' in scribe
-    assert '#import "supernote-nomad.typ": page-width, page-height, page-margin, mos-width' in lined
-    assert '#import "kindle-scribe.typ": page-width, page-height, page-margin, mos-width' in right
+    import_line = '#import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width'
+    assert import_line in nomad
+    assert import_line in scribe
+    assert import_line in lined
+    assert import_line in right
+    assert "page-margin(left)" in _preamble_set_page(nomad)
+    assert "page-margin(right)" in _preamble_set_page(right)
     assert "118.87" not in _preamble_set_page(nomad)
     assert "157.48" not in _preamble_set_page(scribe)
     assert "height: auto" not in nomad
     assert "height: auto" not in scribe
-    assert device_typ_filename(Configurator(load(base_config("supernote-nomad-lined")))) == (
-        "supernote-nomad.typ"
+
+
+def test_device_typ_is_parameterized_from_python_record():
+    nomad = render_device_typ(get_device("supernote-nomad"))
+    scribe = render_device_typ(get_device("kindle-scribe"))
+    paper = render_device_typ(get_device("158x210"))
+    assert nomad == (
+        "#let page-width = 118.87mm\n"
+        "#let page-height = 158.5mm\n"
+        "#let toolbar-edge = top\n"
+        "#let toolbar-clearance = 8mm\n"
+        "#let writing-clearance = 4mm\n"
+        "#let mos-width = 8mm\n"
     )
-    assert device_typ_filename(Configurator(load(base_config("158x210-lined")))) == "158x210.typ"
-
-
-def test_device_typ_files_share_page_margin_shape():
-    expected = """#let page-margin(side) = (
-  top: toolbar-clearance,
-  bottom: 0mm,
-  left: if side == right { writing-clearance } else { 0mm },
-  right: if side == left { writing-clearance } else { 0mm },
-)
-"""
-    sizes = {
-        "supernote-nomad.typ": ("118.87mm", "158.5mm", "8mm", "4mm", "8mm"),
-        "kindle-scribe.typ": ("157.48mm", "209.97mm", "5mm", "5mm", "10mm"),
-        "158x210.typ": ("158mm", "210mm", "5mm", "5mm", "10mm"),
-    }
-    assert KNOWN_DEVICE_TYP == frozenset(sizes)
-    for name, (width, height, toolbar, writing, mos) in sizes.items():
-        text = device_typ_resource(name).read_text(encoding="utf-8")
-        assert f"#let page-width = {width}" in text
-        assert f"#let page-height = {height}" in text
-        assert f"#let toolbar-clearance = {toolbar}" in text
-        assert f"#let writing-clearance = {writing}" in text
-        assert f"#let mos-width = {mos}" in text
+    assert scribe == (
+        "#let page-width = 157.48mm\n"
+        "#let page-height = 209.97mm\n"
+        "#let toolbar-edge = none\n"
+        "#let toolbar-clearance = 5mm\n"
+        "#let writing-clearance = 5mm\n"
+        "#let mos-width = 10mm\n"
+    )
+    assert paper == (
+        "#let page-width = 158mm\n"
+        "#let page-height = 210mm\n"
+        "#let toolbar-edge = none\n"
+        "#let toolbar-clearance = 5mm\n"
+        "#let writing-clearance = 5mm\n"
+        "#let mos-width = 10mm\n"
+    )
+    for text in (nomad, scribe, paper):
+        assert "page-margin" not in text
         assert "#let mos-width = toolbar-clearance" not in text
-        assert expected in text
-        assert "height: auto" not in text
-        assert "#include" not in text
+        assert "ppi" not in text
         assert "lined" not in text
         assert "dotted" not in text
 
@@ -294,6 +302,7 @@ def test_copy_house_typ_writes_workdir(tmp_path):
     dest = copy_house_typ(tmp_path)
     assert dest == tmp_path / "house.typ"
     assert dest.is_file()
+    assert not (tmp_path / DEVICE_TYP).exists()
     assert not (tmp_path / "158x210.typ").exists()
     text = dest.read_text(encoding="utf-8")
     packaged = house_typ_resource().read_text(encoding="utf-8")
@@ -344,16 +353,17 @@ def test_press_copies_house_typ_next_to_index(tmp_path, monkeypatch):
     assert generate_cmd(ns, argv=["parch", "press", str(path)]) == 0
     workdir = tmp_path / "out"
     assert (workdir / "house.typ").is_file()
-    assert (workdir / "158x210.typ").is_file()
+    assert (workdir / DEVICE_TYP).is_file()
     index = (workdir / "index.typst").read_text(encoding="utf-8")
     assert '#import "house.typ"' in index
-    assert '#import "158x210.typ": page-width, page-height, page-margin, mos-width' in index
+    assert '#import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width' in index
     assert (workdir / "house.typ").read_text(encoding="utf-8") == house_typ_resource().read_text(
         encoding="utf-8"
     )
-    assert (workdir / "158x210.typ").read_text(encoding="utf-8") == device_typ_resource(
-        "158x210.typ"
-    ).read_text(encoding="utf-8")
+    assert (workdir / DEVICE_TYP).read_text(encoding="utf-8") == render_device_typ(
+        get_device("158x210")
+    )
+    assert not (workdir / "158x210.typ").exists()
     assert not (workdir / "lined.typ").exists()
     assert not (workdir / "158x210-mos-left.typ").exists()
 
@@ -374,43 +384,27 @@ def test_wheel_includes_house_typ(tmp_path):
     assert "parch/data/typst/house.typ" in names
     assert names.count("parch/data/typst/house.typ") == 1
     for device in ("supernote-nomad.typ", "kindle-scribe.typ", "158x210.typ"):
-        assert f"parch/data/typst/{device}" in names
-        assert names.count(f"parch/data/typst/{device}") == 1
+        assert f"parch/data/typst/{device}" not in names
     assert not any(name.endswith("-lined.typ") for name in names)
     assert not any("mos-left.typ" in name or "mos-right.typ" in name for name in names)
+    assert not any(name.startswith("parch/data/configs/") and name.endswith(".toml") for name in names)
 
 
-def test_copy_house_typ_copies_imported_device_file(tmp_path):
-    (tmp_path / "index.typst").write_text(
-        '#import "kindle-scribe.typ": page-width, page-height, page-margin, mos-width\n',
-        encoding="utf-8",
-    )
-    copy_house_typ(tmp_path)
-    dest = tmp_path / "kindle-scribe.typ"
-    assert dest.is_file()
-    assert dest.read_text(encoding="utf-8") == device_typ_resource("kindle-scribe.typ").read_text(
-        encoding="utf-8"
+def test_write_device_typ_fills_workdir(tmp_path):
+    dest = write_device_typ(tmp_path, "kindle-scribe")
+    assert dest == tmp_path / DEVICE_TYP
+    assert dest.read_text(encoding="utf-8") == render_device_typ(get_device("kindle-scribe"))
+    copy_house_typ(tmp_path, device="supernote-nomad")
+    assert (tmp_path / DEVICE_TYP).read_text(encoding="utf-8") == render_device_typ(
+        get_device("supernote-nomad")
     )
 
 
-def test_copy_device_typ_writes_named_file(tmp_path):
-    dest = copy_device_typ(tmp_path, "supernote-nomad.typ")
-    assert dest == tmp_path / "supernote-nomad.typ"
-    assert dest.read_text(encoding="utf-8") == device_typ_resource("supernote-nomad.typ").read_text(
-        encoding="utf-8"
-    )
-
-
-def test_six_toml_configs_remain():
+def test_no_shipped_job_tomls():
     from importlib.resources import files
 
-    configs = sorted(p.name for p in (files("parch.data") / "configs").iterdir() if str(p).endswith(".toml"))
-    assert configs == [
-        "158x210-lined.toml",
-        "158x210.toml",
-        "kindle-scribe-lined.toml",
-        "kindle-scribe.toml",
-        "supernote-nomad-lined.toml",
-        "supernote-nomad.toml",
-    ]
-    assert not any("mos-left" in name or "mos-right" in name for name in configs)
+    configs_dir = files("parch.data") / "configs"
+    if not configs_dir.is_dir():
+        return
+    configs = [p.name for p in configs_dir.iterdir() if str(p).endswith(".toml")]
+    assert configs == []

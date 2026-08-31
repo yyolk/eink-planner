@@ -43,20 +43,17 @@ parch press supernote-nomad
 parch new --from supernote-nomad --year 2027 --yes -o mine.toml
 ```
 
-Without `--yes`, `parch new` asks for starting profile, year, sections, and output path, then overlays MOS side, paper, week rail, hours, and counts/pages onto the copied file. Sections live in the profile `sections` list. Comment a name out to disable it.
+`--from` is a device id. Without `--yes`, `parch new` asks for device, year, sections, MOS side, paper (dotted or lined), week rail, hours, and counts/pages, then writes a complete job file. `parch edit mine.toml` reopens that file. Hand-edit still loads. Sections live in the job `sections` list. Comment a name out to disable it.
 
 ## Devices
 
-Six shipped profiles: physical device × paper. MOS strip side is `mos.side_menu` (default left). Override with `--hand left|right` on `press`, `proof`, and `new`. `--hand` does not reverse the well.
+Three devices. Lined is paper (`style.scratch_pad`), not a device. MOS strip side is `mos.side_menu` (default left). Override with `--hand left|right` on `press`, `proof`, `new`, and `edit`. `--hand` does not reverse the well.
 
-| Profile | Device |
+| Device | Notes |
 | --- | --- |
-| `supernote-nomad` | SuperNote Nomad (A6 X2) |
-| `supernote-nomad-lined` | SuperNote Nomad lined |
-| `kindle-scribe` | Kindle Scribe |
-| `kindle-scribe-lined` | Kindle Scribe lined |
-| `158x210` | 158×210 |
-| `158x210-lined` | 158×210 lined |
+| `supernote-nomad` | SuperNote Nomad (A6 X2). Toolbar top 8mm |
+| `kindle-scribe` | Kindle Scribe. No toolbar |
+| `158x210` | 158×210 mm. No toolbar |
 
 ## Development
 

@@ -227,7 +227,7 @@ def test_large_rect_pattern_svg_stamps_dots_not_pattern_paint(tmp_path):
         + "\n#rect_pattern(dotted)\n",
         encoding="utf-8",
     )
-    copy_house_typ(tmp_path)
+    copy_house_typ(tmp_path, device="158x210")
     paths = Compile().compile_svg(
         tmp_path,
         pages=[1],

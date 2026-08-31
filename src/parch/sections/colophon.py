@@ -16,11 +16,10 @@ DEFAULT_TITLE = "About this notebook"
 # Human names for shipped device slugs. Do not invent a device TOML field.
 _DEVICE_NAMES = {
     "supernote-nomad": "SuperNote Nomad",
-    "supernote-nomad-lined": "SuperNote Nomad",
+    "nomad": "SuperNote Nomad",
     "kindle-scribe": "Kindle Scribe",
-    "kindle-scribe-lined": "Kindle Scribe",
+    "scribe": "Kindle Scribe",
     "158x210": "158 × 210",
-    "158x210-lined": "158 × 210",
 }
 
 _TABLE_HEADER = re.compile(r"(?m)^[ \t]*\[(\[?)([^\]]+)\](\]?)[ \t]*\r?\n")

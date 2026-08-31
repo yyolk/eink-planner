@@ -9,13 +9,16 @@
 # stays Python item order. Well helpers still take side only. Python still
 # data + side. Do not derive reverse_months_quarters from side.
 #
-# Device .typ (physical, not per-section): page-width / page-height,
-# toolbar-clearance, writing-clearance, page-margin(side), and mos-width.
+# Device record (Python): id, ppi, mm lengths, toolbar-edge top|none.
+# One parameterized device.typ: page-width / page-height, toolbar-edge,
+# toolbar-clearance, writing-clearance, mos-width. ppi stays off Typst.
+# page-margin(side) lives in house. Toolbar is not side; L/R parked.
 # MOS is not toolbar — Nomad 8mm vs Scribe 10mm. Do not alias mos-width
-# to toolbar-clearance.
+# to toolbar-clearance. Lined is paper (style.scratch_pad), not a device.
 #
 # House: tracks from side only (mos_frame, daily_well 3/5, quarter_well 2/3,
-# week rail, trail_heading ltr). No new length knobs.
+# week rail, trail_heading ltr). page-margin(side) uses toolbar-edge == top
+# for top clearance else 0mm. No new length knobs.
 #
 # Preamble book: regular_stroke / thick_stroke, regular_height,
 # regular_column_gutter, type (size, h1), link_padding, heading-height, MOS
@@ -30,9 +33,9 @@
 # colophon needs them), months_column, week_placement left|right,
 # section.daily.columns 3fr/5fr, side_menu_width. Do not drop
 # reverse_months_quarters.
-# --hand stays a press/proof overlay. parch new Questionary writes
-# side_menu / paper / week_placement none|omit / hours / counts onto
-# the copied file. --paper CLI stays parked.
+# --hand stays a press/proof overlay. parch new writes a complete job
+# from device + defaults. parch edit reopens that file. --paper CLI stays
+# parked. Lined is Questionary / style.scratch_pad.
 
 import tomllib
 from pathlib import Path
@@ -48,51 +51,30 @@ from pydantic import (
     model_validator,
 )
 
+from parch.devices import DEVICES, TOOLBAR_TOP, get_device
 from parch.models.base import StrictModel
 
 _PATTERNS = frozenset({"dotted", "lined"})
 
-# Physical tokens copied from device .typ. Not TOML. MOS is not toolbar.
-DEVICE_SCALE = {
-    "supernote-nomad": {
-        "width": "118.87mm",
-        "height": "158.5mm",
-        "toolbar_clearance": "8mm",
-        "writing_clearance": "4mm",
-        "mos_width": "8mm",
-    },
-    "kindle-scribe": {
-        "width": "157.48mm",
-        "height": "209.97mm",
-        "toolbar_clearance": "5mm",
-        "writing_clearance": "5mm",
-        "mos_width": "10mm",
-    },
-    "158x210": {
-        "width": "158mm",
-        "height": "210mm",
-        "toolbar_clearance": "5mm",
-        "writing_clearance": "5mm",
-        "mos_width": "10mm",
-    },
-}
+# Physical tokens from the Python device record. Not TOML. MOS is not toolbar.
+DEVICE_SCALE = {device.id: device.scale() for device in DEVICES}
 
 
 def device_scale(name: str) -> dict[str, str]:
-    """Physical-device tokens for *name* (prefix match, including -lined)."""
-    lowered = name.strip().lower()
-    for prefix, scale in DEVICE_SCALE.items():
-        if lowered == prefix or lowered.startswith(prefix + "-"):
-            return scale
-    raise ValueError(
-        "unknown physical device; expected supernote-nomad, kindle-scribe, or 158x210"
-    )
+    """Physical-device tokens for *name* (device id or alias; not a -lined stem)."""
+    try:
+        return get_device(name).scale()
+    except KeyError as exc:
+        raise ValueError(
+            "unknown physical device; expected supernote-nomad, kindle-scribe, or 158x210"
+        ) from exc
 
 
 def device_page_margin(scale: dict[str, str]) -> dict[str, str]:
     """MOS-left page-margin copy. page-margin(side) owns the writing-edge flip."""
+    top = scale["toolbar_clearance"] if scale.get("toolbar_edge") == TOOLBAR_TOP else "0mm"
     return {
-        "top": scale["toolbar_clearance"],
+        "top": top,
         "bottom": "0mm",
         "left": "0mm",
         "right": scale["writing_clearance"],
