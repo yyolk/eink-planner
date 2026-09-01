@@ -6,6 +6,7 @@ from parch.calendar.dated_note import DatedNote
 from parch.calendar.day import Day
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
+from parch.sections._shared import _WELL_PATTERN
 
 
 class DailyNotes:
@@ -37,11 +38,11 @@ class DailyNotes:
   rows: ({self.title_height}, {self.notes_height}),
   grid.cell(align: horizon, {rule}, [{notes}]),
   grid.cell(align: horizon + right, {rule}, {more}),
-  grid.cell(colspan: 2, rect_pattern({self.pattern}))
+  grid.cell(colspan: 2, lined_well({_WELL_PATTERN.get(self.pattern, self.pattern)}))
 )"""
         return f"""grid(
   columns: 1fr,
   rows: ({self.title_height}, {self.notes_height}),
   grid.cell(align: horizon, {rule}, [{notes}]),
-  rect_pattern({self.pattern})
+  lined_well({_WELL_PATTERN.get(self.pattern, self.pattern)})
 )"""

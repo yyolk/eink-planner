@@ -37,37 +37,11 @@ class Navigation:
     ) -> str:
         months = self._months_menu(highlight_months, month_link_id=month_link_id)
         if not show_quarters:
-            return f"""rotate(
-    {_v(self.mos_layout, 'menu_rotate')},
-    origin: center + horizon,
-    reflow: true,
-
-    {months}
-  )"""
-        cols = ["1fr", "3fr"]
-        items = [
-            self._quarters_menu(highlight_quarters),
-            months,
-        ]
-        # MOS-strip overlay. Independent of side; do not derive from side.
+            return months
+        quarters = self._quarters_menu(highlight_quarters)
         if _v(self.mos_layout, "reverse_months_quarters"):
-            cols.reverse()
-            items.reverse()
-        return f"""rotate(
-    {_v(self.mos_layout, 'menu_rotate')},
-    origin: center + horizon,
-    reflow: true,
-
-    table(
-      columns: ({", ".join(cols)}),
-      rows: 1fr,
-      inset: 0pt,
-      column-gutter: regular_column_gutter,
-      stroke: 0pt,
-
-      {",\n".join(items)}
-    )
-  )"""
+            return f"mos_rail({quarters}, {months}, reverse: true)"
+        return f"mos_rail({quarters}, {months})"
 
     def heading_menu_grid(
         self,

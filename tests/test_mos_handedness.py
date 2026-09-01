@@ -192,7 +192,7 @@ def test_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert well.index("[Schedule]") < well.index("[Priorities]")
     quarter = typst_src[typst_src.index("quarter_well(") :]
     assert quarter.index("right,") < quarter.index("rows: (1fr, 1fr, 1fr)")
-    assert quarter.index("rows: (1fr, 1fr, 1fr)") < quarter.index("rect_pattern(")
+    assert quarter.index("rows: (1fr, 1fr, 1fr)") < quarter.index("lined_well(")
     pdf, stderr = compile_pdf(typst_src, tmp_path / "hand-right")
     assert pdf.is_file() and pdf.stat().st_size > 0, stderr
 

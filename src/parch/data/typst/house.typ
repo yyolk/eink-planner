@@ -77,12 +77,12 @@
   ),
 )
 
-#let lined_fill(regular_height: none, regular_stroke: none) = tiling(
+#let lined_fill(regular_height: none, regular_stroke: none, paint: luma(130)) = tiling(
   size: (regular_height, regular_height),
   line(
     start: (0pt, regular_height - 0.15mm),
     end: (regular_height, regular_height - 0.15mm),
-    stroke: regular_stroke + luma(130),
+    stroke: regular_stroke + paint,
   ),
 )
 
@@ -143,18 +143,22 @@
   align(horizon, title),
 )
 
-// Title shrinks in the 1fr (scale + reflow), one line, never grow.
+// Title shrinks in the 1fr when it overflows; skip scale when it fits.
 #let trail_heading(title, mark) = grid(
   columns: (1fr, auto),
   align: horizon + start,
   layout(size => context {
     let wanted = measure(title)
-    let factor = if wanted.width == 0pt {
-      100%
+    if wanted.width == 0pt or wanted.width <= size.width {
+      title
     } else {
-      calc.min(100%, size.width / wanted.width * 100%)
+      scale(
+        size.width / wanted.width * 100%,
+        origin: start + horizon,
+        reflow: true,
+        title,
+      )
     }
-    scale(factor, origin: start + horizon, reflow: true, title)
   }),
   mark,
 )
@@ -196,19 +200,36 @@
   )
 }
 
-// MOS strip table. Descender floor; air under the tail is stroke thickness.
-#let mos_tabs(stroke: none, columns: none, ..cells) = {
+// MOS strip: one column, n 1fr rows; rotate each cell body.
+#let mos_tabs(stroke: none, turn: none, columns: none, ..cells) = {
   let gap = if stroke == none { 0pt } else { std.stroke(stroke).thickness }
+  let items = cells.pos()
   set text(bottom-edge: "descender")
   table(
     stroke: stroke,
     inset: gap,
-    columns: columns,
-    rows: 1fr,
+    columns: 1fr,
+    rows: (1fr,) * items.len(),
     align: horizon + center,
-    ..cells.pos(),
+    ..items.map(c => if c.func() == table.cell {
+      table.cell(
+        fill: c.fill,
+        align: horizon + center,
+        rotate(turn, origin: center + horizon, reflow: true, c.body),
+      )
+    } else {
+      rotate(turn, origin: center + horizon, reflow: true, c)
+    }),
   )
 }
+
+// Q/month split; house owns the 1fr/3fr tracks.
+#let mos_rail(quarters, months, reverse: false, gutter: none) = grid(
+  columns: 1fr,
+  rows: if reverse { (3fr, 1fr) } else { (1fr, 3fr) },
+  row-gutter: gutter,
+  ..if reverse { (months, quarters) } else { (quarters, months) },
+)
 
 // Week cell is always first in each 8-cell row. MOS-right moves it to the end.
 #let _order_week_rows(side, cells) = if side == left {

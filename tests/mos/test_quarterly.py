@@ -82,7 +82,7 @@ def test_q1_emits_three_equal_month_rows():
     assert "stack(" not in content
     assert "columns: (2fr" not in content
     assert "columns: (3fr" not in content
-    assert content.index("rows: (1fr, 1fr, 1fr)") < content.index("rect_pattern(dotted)")
+    assert content.index("rows: (1fr, 1fr, 1fr)") < content.index("lined_well(dotted_centered)")
     for name in Q1_MONTHS:
         assert f"[{name}]" in content
     assert content.count("colspan:") == 3
@@ -103,7 +103,7 @@ def test_hand_right_still_emits_months_then_pad():
     content = _page("2026-07-01", side="right").content()
     assert "quarter_well(right," in content
     assert "month_grid(right," in content
-    assert content.index("rows: (1fr, 1fr, 1fr)") < content.index("rect_pattern(dotted)")
+    assert content.index("rows: (1fr, 1fr, 1fr)") < content.index("lined_well(dotted_centered)")
     assert "quarter_well(left," not in content
     assert "columns: (3fr" not in content
     assert "columns: (2fr" not in content

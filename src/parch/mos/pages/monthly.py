@@ -7,6 +7,7 @@ from parch.calendar.day import Day
 from parch.calendar.month import Month
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
+from parch.sections._shared import _WELL_PATTERN
 from parch.typst_emit import typst_emit
 
 WEEK_PLACEMENTS = ("left", "right", "none")
@@ -44,7 +45,7 @@ class Monthly:
   rows: (1fr, 1fr),
   grid.hline(y: 1, stroke: regular_stroke + black),
   {calendar},
-  rect_pattern({self.pattern})
+  lined_well({_WELL_PATTERN.get(self.pattern, self.pattern)})
 )"""
 
     def _calendar(self) -> str:

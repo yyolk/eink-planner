@@ -189,11 +189,11 @@ def test_mixed_profile_typst_emits_both_rect_patterns():
     extra_pages = [page for page in pages if " <daily-note-" in page]
     assert daily_pages
     assert extra_pages
-    assert any("rect_pattern(lined)" in page for page in daily_pages)
+    assert any("lined_well(lined_fill)" in page for page in daily_pages)
     assert any("lined_well(dotted_centered)" in page for page in extra_pages)
     assert all("rect_pattern(lined)" not in page for page in extra_pages)
     assert all("lined_well(lined)" not in page for page in extra_pages)
-    assert all("lined_well(lined_fill)" not in page for page in extra_pages)
+    assert all("rect_pattern(" not in page for page in extra_pages)
 
 
 @pytest.mark.parametrize("path", [NOMAD, PAPER_158, SCRIBE])
@@ -207,14 +207,14 @@ def test_device_jobs_keep_dotted_scratch_areas(path: Path):
     names = [s["name"] for s in dto["planner"]["sections"]]
     if "review" in names:
         for page in typst.split("#pagebreak()"):
-            if "rect_pattern(lined)" in page:
-                assert "rotate(" not in page
+            if "lined_well(review_lined)" in page:
+                assert "mos_rail(" not in page
                 assert "<review-" in page
     else:
-        assert "rect_pattern(lined)" not in typst
-    assert "rect_pattern(dotted)" in typst
+        assert "lined_well(review_lined)" not in typst
+    assert "lined_well(dotted_centered)" in typst
     assert "grid.cell(colspan: 3, scratch_pad)" not in typst
-    assert "#let scratch_pad = rect_pattern(dotted)" in typst
+    assert "#let scratch_pad = lined_well(dotted_centered)" in typst
 
 
 @pytest.mark.parametrize("path", _LINED)
@@ -225,18 +225,18 @@ def test_lined_paper_keeps_daily_on_page_notes_dotted(path: Path):
     for name in ("daily_notes", "quarterly", "monthly", "weekly"):
         assert _section(dto, name)["params"]["pattern"] == "lined"
     typst = _generate(short_january(dto))
-    assert "rect_pattern(dotted)" in typst
-    assert "rect_pattern(lined)" in typst
+    assert "lined_well(dotted_centered)" in typst
+    assert "lined_well(lined_fill)" in typst
     pages = typst.split("#pagebreak()")
     daily_pages = [page for page in pages if " <2026-01-01>" in page]
     extra_pages = [page for page in pages if " <daily-note-" in page]
     assert daily_pages
     assert extra_pages
-    assert any("rect_pattern(dotted)" in page for page in daily_pages)
+    assert any("lined_well(dotted_centered)" in page for page in daily_pages)
     assert any("lined_well(lined_fill)" in page for page in extra_pages)
     assert all("rect_pattern(dotted)" not in page for page in extra_pages)
     assert all("lined_well(dotted)" not in page for page in extra_pages)
-    assert all("lined_well(dotted_centered)" not in page for page in extra_pages)
+    assert all("rect_pattern(" not in page for page in extra_pages)
 
 
 def test_week_month_quarter_accept_pattern_lined():
@@ -262,8 +262,8 @@ pattern = "lined"
     quarter = next(page for page in pages if "Quarter 1 <quarter-2026-1>" in page)
     month = next(page for page in pages if "<month-2026-01-01>" in page)
     week = next(page for page in pages if "Week 1 <2026W01>" in page)
-    assert "rect_pattern(lined)" in quarter
-    assert "rect_pattern(lined)" in month
+    assert "lined_well(lined_fill)" in quarter
+    assert "lined_well(lined_fill)" in month
     assert "week_matrix(" in week
     assert "pattern: lined" in week
     assert "rect_pattern(lined)" not in week

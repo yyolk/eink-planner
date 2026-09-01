@@ -203,13 +203,13 @@ def test_locale_strings_and_line_counts():
     assert "Due by" not in typst
     assert "rows: (" + ", ".join(["regular_height"] * 4) + ")" in typst
     assert "rows: (" + ", ".join(["regular_height"] * 5) + ")" in typst
-    assert "rect_pattern(dotted)" in typst
-    assert "rect_pattern(review_lined)" not in typst
-    assert "#let review_lined =" not in typst
+    assert "lined_well(dotted_centered)" in typst
+    assert "lined_well(review_lined)" not in typst
+    assert "rect_pattern(dotted)" not in typst
     meeting = _meeting_page(typst)
     assert meeting.count("rows: (" + ", ".join(["regular_height"] * 4) + ")") == 1
     assert meeting.count("rows: (" + ", ".join(["regular_height"] * 5) + ")") == 1
-    assert meeting.count("rect_pattern(dotted)") == 1
+    assert meeting.count("lined_well(dotted_centered)") == 1
     assert "$square.stroked$" in meeting
     assert meeting.count("$square.stroked$") == 9
     assert _TICK_STROKE in meeting

@@ -59,9 +59,11 @@ def _nav(reverse: bool = False) -> Navigation:
 
 def test_side_menu_default_quarters_then_months():
     typst = _nav(reverse=False).side_menu_cell(highlight_months=[], highlight_quarters=[])
-    assert "rotate(" in typst
-    assert "270deg" in typst
-    assert "columns: (1fr, 3fr)" in typst
+    assert typst.startswith("mos_rail(")
+    assert "reverse: true" not in typst
+    assert "rotate(" not in typst
+    assert "270deg" not in typst
+    assert "columns: (1fr, 3fr)" not in typst
     assert "mos_tabs(columns: (" in typst
     # Q cells appear before month cells in default order
     assert typst.index("Q1") < typst.index("Jan")
@@ -69,7 +71,10 @@ def test_side_menu_default_quarters_then_months():
 
 def test_side_menu_reversed_months_then_quarters():
     typst = _nav(reverse=True).side_menu_cell(highlight_months=[], highlight_quarters=[])
-    assert "columns: (3fr, 1fr)" in typst
+    assert typst.startswith("mos_rail(")
+    assert "reverse: true" in typst
+    assert "columns: (3fr, 1fr)" not in typst
+    assert "rotate(" not in typst
     assert typst.index("Jan") < typst.index("Q1")
 
 
@@ -119,8 +124,10 @@ def test_side_menu_months_only_omits_quarters_and_two_column_table():
         highlight_quarters=[],
         show_quarters=False,
     )
-    assert "rotate(" in typst
-    assert "270deg" in typst
+    assert typst.startswith("mos_tabs(columns: (")
+    assert "mos_rail(" not in typst
+    assert "rotate(" not in typst
+    assert "270deg" not in typst
     assert "columns: (1fr, 3fr)" not in typst
     assert "columns: (3fr, 1fr)" not in typst
     assert "Q1" not in typst

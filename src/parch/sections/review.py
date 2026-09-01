@@ -11,7 +11,7 @@ from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.contents_mark import body_size_token, heading_height_token, trail_heading
 from parch.compose.page_data import HeadingMark, PageData
-from parch.sections._shared import _REVIEW_LINED
+from parch.sections._shared import _WELL_PATTERN
 
 _INDEX_LEFT_INSET = "4mm"
 _INDEX_BOTTOM_INSET = "4mm"
@@ -227,12 +227,10 @@ class Review:
   line(length: 100%, stroke: regular_stroke)
 )"""
         if self.pattern == "dotted":
-            field = "rect_pattern(dotted)"
-            prefix = ""
+            field = f"lined_well({_WELL_PATTERN['dotted']})"
         else:
-            field = "rect_pattern(review_lined)"
-            prefix = f"#let review_lined = {_REVIEW_LINED}\n"
-        return f"""{prefix}#grid(
+            field = "lined_well(review_lined)"
+        return f"""#grid(
   columns: 1fr,
   rows: (auto, auto, auto, 1fr),
   row-gutter: {_INDEX_ROW_GUTTER},

@@ -44,6 +44,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "mos_frame" in imported
     assert "well_frame" in imported
     assert "mos_tabs" in imported
+    assert "mos_rail" in imported
     assert "month_grid" in imported
     assert "month_weeks" in imported
     assert "week_matrix" in imported
@@ -61,7 +62,8 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "spacing: 1fr" not in typst
     assert "#let mos_frame = mos_frame.with(mos-width: mos-width, column-gutter: 2mm)" in typst
     assert "#let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm, heading-stroke: regular_stroke)" in typst
-    assert "#let mos_tabs = mos_tabs.with(stroke: regular_stroke)" in typst
+    assert "#let mos_tabs = mos_tabs.with(stroke: regular_stroke, turn: 270deg)" in typst
+    assert "#let mos_rail = mos_rail.with(gutter: regular_column_gutter)" in typst
     assert "#let month_grid = month_grid.with(hline-stroke: regular_stroke + black)" in typst
     assert "week-rows:" not in typst
     assert "#let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)" in typst
@@ -76,8 +78,10 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let dotted = dotted(regular_height: regular_height)" in typst
     assert "#let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)" in typst
     assert "#let dotted_centered = dotted_centered(regular_height: regular_height)" in typst
-    assert "#let lined_fill = lined_fill(regular_height: regular_height, regular_stroke: regular_stroke)" in typst
-    assert "#let scratch_pad = rect_pattern(dotted)" in typst
+    assert "#let lined_fill = lined_fill.with(regular_height: regular_height, regular_stroke: regular_stroke)" in typst
+    assert "#let review_lined = lined_fill(paint: black)" in typst
+    assert "#let lined_fill = lined_fill()" in typst
+    assert "#let scratch_pad = lined_well(dotted_centered)" in typst
     assert "here().position()" not in typst
     assert "link(target)[#box(inset: padding, content)]" not in typst
     assert "#let rect_pattern(pattern) = rect(" not in typst
@@ -130,16 +134,18 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let lead_pair(left, right" not in house
     assert "#let trail_heading(" in house
     assert "#let trail_heading(title, mark) = grid(" in house
-    assert "Title shrinks in the 1fr (scale + reflow), one line, never grow." in house
+    assert "Title shrinks in the 1fr when it overflows; skip scale when it fits." in house
     assert "spacing:" not in house[house.index("#let trail_heading(") : house.index("#let mos_frame(")]
     trail_heading = house[house.index("#let trail_heading(") : house.index("#let mos_frame(")]
     assert "columns: (1fr, auto)" in trail_heading
     assert "align: horizon + start" in trail_heading
     assert "layout(size => context {" in trail_heading
     assert "let wanted = measure(title)" in trail_heading
-    assert "calc.min(100%, size.width / wanted.width * 100%)" in trail_heading
-    assert "scale(factor, origin: start + horizon, reflow: true, title)" in trail_heading
+    assert "wanted.width == 0pt or wanted.width <= size.width" in trail_heading
+    assert "size.width / wanted.width * 100%" in trail_heading
+    assert "origin: start + horizon" in trail_heading
     assert "reflow: true" in trail_heading
+    assert "calc.min(" not in trail_heading
     assert "clip:" not in trail_heading
     assert "box(width: 100%, clip: true, title)" not in trail_heading
     assert trail_heading.rstrip().endswith("  mark,\n)")
@@ -177,23 +183,32 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "rows: (heading-height + gap, 1fr)" in well_frame
     assert "inset: (bottom: gap)" in well_frame
     assert "#let mos_tabs(" in house
-    mos_tabs = house[house.index("#let mos_tabs(") : house.index("#let _order_week_rows(")]
+    mos_tabs = house[house.index("#let mos_tabs(") : house.index("#let mos_rail(")]
     assert mos_tabs.startswith(
-        "#let mos_tabs(stroke: none, columns: none, ..cells) = {\n"
+        "#let mos_tabs(stroke: none, turn: none, columns: none, ..cells) = {\n"
         "  let gap = if stroke == none { 0pt } else { std.stroke(stroke).thickness }\n"
+        "  let items = cells.pos()\n"
         '  set text(bottom-edge: "descender")\n'
         "  table(\n"
         "    stroke: stroke,\n"
         "    inset: gap,\n"
-        "    columns: columns,\n"
-        "    rows: 1fr,\n"
+        "    columns: 1fr,\n"
+        "    rows: (1fr,) * items.len(),\n"
         "    align: horizon + center,\n"
-        "    ..cells.pos(),\n"
-        "  )\n"
-        "}\n"
     )
+    assert "columns: columns" not in mos_tabs
+    assert "rotate(turn, origin: center + horizon, reflow: true, c.body)" in mos_tabs
     assert 'bottom-edge: "descender"' in mos_tabs
     assert "inset: gap" in mos_tabs
+    mos_rail = house[house.index("#let mos_rail(") : house.index("#let _order_week_rows(")]
+    assert mos_rail.startswith(
+        "#let mos_rail(quarters, months, reverse: false, gutter: none) = grid(\n"
+        "  columns: 1fr,\n"
+        "  rows: if reverse { (3fr, 1fr) } else { (1fr, 3fr) },\n"
+        "  row-gutter: gutter,\n"
+        "  ..if reverse { (months, quarters) } else { (quarters, months) },\n"
+        ")\n"
+    )
     assert "#let month_grid(" in house
     assert "rows: (auto, auto) + (1fr,) * week-rows" in house
     assert "grid.hline(y: 1, stroke: hline-stroke)" in house
@@ -260,6 +275,10 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "row-gutter" not in week_matrix_sig
     assert "#let lined(" in house
     assert "#let lined_fill(" in house
+    lined_fill = house[house.index("#let lined_fill(") : house.index("#let rect_pattern_centered(")]
+    assert "paint: luma(130)" in lined_fill
+    assert "regular_stroke + paint" in lined_fill
+    assert "regular_stroke + luma(130)" not in lined_fill
     assert "#let lined_well(" in house
     lined_start = house.index("#let lined_well(")
     lined_well = house[lined_start : house.index("\n\n", lined_start)]
@@ -385,6 +404,7 @@ def test_copy_house_typ_writes_workdir(tmp_path):
     assert "#let mos_frame(" in text
     assert "#let well_frame(" in text
     assert "#let mos_tabs(" in text
+    assert "#let mos_rail(" in text
     assert "#let month_grid(" in text
     assert "#let month_weeks(" in text
     assert "#let week_matrix(" in text

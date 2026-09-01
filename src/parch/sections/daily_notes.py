@@ -6,12 +6,7 @@ from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.compose.page_data import HeadingMark, PageData
-
-# Full-bleed wells use tiling fills, not rect_pattern's place-tiles.
-_WELL_PATTERN = {
-    "lined": "lined_fill",
-    "dotted": "dotted_centered",
-}
+from parch.sections._shared import _WELL_PATTERN
 
 
 class DailyNotes:

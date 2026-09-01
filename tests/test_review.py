@@ -66,9 +66,9 @@ def _review_pages(typst: str) -> list[str]:
     """Pages that belong to Review (raw Typst: no MOS rotate)."""
     out = []
     for page in _pages(typst):
-        if "rotate(" in page:
+        if "mos_rail(" in page or "mos_frame(" in page:
             continue
-        if "<review" in page or "review_lined" in page:
+        if "<review" in page:
             out.append(page)
     return out
 
@@ -76,7 +76,7 @@ def _review_pages(typst: str) -> list[str]:
 def _index_page(typst: str, page_id: str = "review") -> str:
     needle = f"[{'Review'} <{page_id}>]"
     for page in _pages(typst):
-        if needle in page and "rotate(" not in page:
+        if needle in page and "mos_rail(" not in page and "mos_frame(" not in page:
             return page
     raise AssertionError(f"no Review index page {page_id}")
 
@@ -85,7 +85,7 @@ def _week_page(typst: str, week_id: str) -> str:
     # Week pages define the label next to #h(0.6em); index pages only link to it.
     marker = f"<review-{week_id}> #h(0.6em)"
     for page in _pages(typst):
-        if marker in page and "rotate(" not in page:
+        if marker in page and "mos_rail(" not in page and "mos_frame(" not in page:
             return page
     raise AssertionError(f"no Review week page {week_id}")
 
@@ -291,11 +291,12 @@ def test_week_page_is_raw_typst_lined_not_mos():
     week = _week_page(typst, "2026W01")
     assert "rotate(" not in week
     assert "rect_pattern(lined)" not in week
-    assert "rect_pattern(review_lined)" in week
-    assert "regular_stroke + black" in week
+    assert "lined_well(review_lined)" in week
+    assert "#let review_lined =" not in week
     assert "regular_stroke + luma(130)" not in week
     assert "luma(130)" not in week
     assert "rect_pattern(dotted)" not in week
+    assert "lined_well(dotted_centered)" not in week
     assert "Q4" not in week
     assert "Q1" not in week
     assert "→" not in week
@@ -308,7 +309,7 @@ def test_week_page_is_raw_typst_lined_not_mos():
     assert "columns: (1fr, 1fr, 1fr)" not in week
     assert "columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in week
     # writing field is one full-width lined column, not 7 or 3 day columns
-    assert week.count("rect_pattern(review_lined)") == 1
+    assert week.count("lined_well(review_lined)") == 1
     assert "grid.cell(colspan: 3, rect_pattern" not in week
     assert "What went" not in week
     assert "prompt" not in week.lower()
@@ -381,7 +382,7 @@ column_gutter = "4pt"
     assert "2026W01" in labels
     assert "review-2026W01" in labels
     assert "review" in labels
-    weekly = next(page for page in _pages(typst) if "<2026W01>" in page and "rotate(" in page)
+    weekly = next(page for page in _pages(typst) if "<2026W01>" in page and "week_matrix(" in page)
     review = _week_page(typst, "2026W01")
     assert "padded_link(<review-2026W01>" in _index_page(typst)
     assert "padded_link(<2026W01>" not in _index_page(typst)
@@ -531,9 +532,10 @@ column = "8pt"
     assert dto["planner"]["sections"][0]["params"]["pattern"] == "lined"
     typst = _generate(short_january(dto))
     week = _week_page(typst, "2026W01")
-    assert "rect_pattern(review_lined)" in week
+    assert "lined_well(review_lined)" in week
     assert "rect_pattern(lined)" not in week
     assert "rect_pattern(dotted)" not in week
+    assert "lined_well(dotted_centered)" not in week
 
 
 def test_review_pattern_dotted_uses_house_dotted_tiling():
@@ -544,12 +546,13 @@ def test_review_pattern_dotted_uses_house_dotted_tiling():
     assert dto["planner"]["sections"][0]["params"]["pattern"] == "dotted"
     typst = _generate(short_january(dto))
     week = _week_page(typst, "2026W01")
-    assert "rect_pattern(dotted)" in week
-    assert "review_lined" not in week
+    assert "lined_well(dotted_centered)" in week
+    assert "lined_well(review_lined)" not in week
     assert "rect_pattern(review_lined)" not in week
     assert "rect_pattern(lined)" not in week
+    assert "rect_pattern(dotted)" not in week
     index = _index_page(typst)
-    assert "review_lined" not in index
+    assert "lined_well(review_lined)" not in index
     assert "rect_pattern(review_lined)" not in index
 
 

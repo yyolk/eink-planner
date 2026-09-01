@@ -211,7 +211,7 @@ def test_notes_more_has_no_pipe_when_daily_notes_registered():
     assert "[| " not in content
     assert "padded_link(<daily-note-2026-01-01-page-1>)[More]" in content
     assert "columns: (1fr, auto)" in content
-    assert "grid.cell(colspan: 2, rect_pattern(dotted))" in content
+    assert "grid.cell(colspan: 2, lined_well(dotted_centered))" in content
     assert "[Notes]" in content
 
 
@@ -222,12 +222,18 @@ def test_notes_alone_when_daily_notes_off():
     assert "columns: (1fr, auto)" not in content
     assert "colspan: 2" not in content
     assert "[Notes]" in content
-    assert "rect_pattern(dotted)" in content
+    assert "lined_well(dotted_centered)" in content
     assert "stroke: (bottom: regular_stroke + black)" in content
 
 
 def test_notes_pattern_switches():
-    for pattern in ("lined", "review_lined", "dotted", "dotted_centered"):
+    mapped = {
+        "lined": "lined_fill",
+        "review_lined": "review_lined",
+        "dotted": "dotted_centered",
+        "dotted_centered": "dotted_centered",
+    }
+    for pattern, well in mapped.items():
         right = [
             {"class": "priorities", "enabled": True, "params": {"number": 5}},
             {
@@ -237,7 +243,8 @@ def test_notes_pattern_switches():
             },
         ]
         content = _page("2026-01-01", right_column=right).content()
-        assert f"rect_pattern({pattern})" in content
+        assert f"lined_well({well})" in content
+        assert "rect_pattern(" not in content
 
 
 def test_calendar_appears_nowhere_on_title_or_content():
