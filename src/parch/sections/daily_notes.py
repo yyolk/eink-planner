@@ -7,6 +7,12 @@ from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.compose.page_data import HeadingMark, PageData
 
+# Full-bleed wells use tiling fills, not rect_pattern's place-tiles.
+_WELL_PATTERN = {
+    "lined": "lined_fill",
+    "dotted": "dotted_centered",
+}
+
 
 class DailyNotes:
     def __init__(
@@ -33,7 +39,7 @@ class DailyNotes:
             out.append(
                 PageData(
                     title=self._title(manifest, note),
-                    content=f"lined_well({self.pattern})",
+                    content=f"lined_well({_WELL_PATTERN.get(self.pattern, self.pattern)})",
                     highlight_months=[note.day.month()],
                     highlight_quarters=[],
                     nav_links=[],

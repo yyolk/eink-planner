@@ -190,9 +190,10 @@ def test_mixed_profile_typst_emits_both_rect_patterns():
     assert daily_pages
     assert extra_pages
     assert any("rect_pattern(lined)" in page for page in daily_pages)
-    assert any("lined_well(dotted)" in page for page in extra_pages)
+    assert any("lined_well(dotted_centered)" in page for page in extra_pages)
     assert all("rect_pattern(lined)" not in page for page in extra_pages)
     assert all("lined_well(lined)" not in page for page in extra_pages)
+    assert all("lined_well(lined_fill)" not in page for page in extra_pages)
 
 
 @pytest.mark.parametrize("path", [NOMAD, PAPER_158, SCRIBE])
@@ -232,9 +233,10 @@ def test_lined_paper_keeps_daily_on_page_notes_dotted(path: Path):
     assert daily_pages
     assert extra_pages
     assert any("rect_pattern(dotted)" in page for page in daily_pages)
-    assert any("lined_well(lined)" in page for page in extra_pages)
+    assert any("lined_well(lined_fill)" in page for page in extra_pages)
     assert all("rect_pattern(dotted)" not in page for page in extra_pages)
     assert all("lined_well(dotted)" not in page for page in extra_pages)
+    assert all("lined_well(dotted_centered)" not in page for page in extra_pages)
 
 
 def test_week_month_quarter_accept_pattern_lined():
