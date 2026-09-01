@@ -70,9 +70,17 @@ def test_device_typ_toolbar_edges():
 
 
 def test_manta_generate_succeeds_and_device_typ_binds_x2_chrome():
+    device = get_device("manta")
+    assert device.id == "supernote-manta"
+    assert device.width_px == 1920
+    assert device.height_px == 2560
     dto = load(base_config("supernote-manta"))
     names = [section["name"] for section in Configurator(dto).enabled_sections()]
     assert names == list(DEFAULT_SECTIONS)
+    assert dto["document"]["layout"]["dimensions"].to_plain() == {
+        "width": "162.56mm",
+        "height": "216.75mm",
+    }
     assert dto["document"]["layout"]["margin"].to_plain() == {
         "top": "8mm",
         "bottom": "0mm",
@@ -85,7 +93,7 @@ def test_manta_generate_succeeds_and_device_typ_binds_x2_chrome():
     typst = Preamble(Configurator(dto)).generate()
     assert "margin: page-margin(left)" in typst
     assert "toolbar-clearance)" not in typst.split("#set page", 1)[1].split("\n", 1)[0]
-    manta = render_device_typ(get_device("manta"))
+    manta = render_device_typ(device)
     assert manta == (
         "#let page-width = 162.56mm\n"
         "#let page-height = 216.75mm\n"
