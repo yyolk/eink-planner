@@ -128,8 +128,15 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "spacing:" not in house[house.index("#let trail_heading(") : house.index("#let mos_frame(")]
     trail_heading = house[house.index("#let trail_heading(") : house.index("#let mos_frame(")]
     assert "columns: (1fr, auto)" in trail_heading
-    assert "grid.cell(align: horizon + start, box(width: 100%, clip: true, title))" in trail_heading
-    assert "align(horizon + start, mark)" in trail_heading
+    assert "align: horizon + start" in trail_heading
+    assert "layout(size => context {" in trail_heading
+    assert "let wanted = measure(title)" in trail_heading
+    assert "calc.min(100%, size.width / wanted.width * 100%)" in trail_heading
+    assert "scale(factor, origin: start + horizon, reflow: true, title)" in trail_heading
+    assert "reflow: true" in trail_heading
+    assert "clip:" not in trail_heading
+    assert "box(width: 100%, clip: true, title)" not in trail_heading
+    assert trail_heading.rstrip().endswith("  mark,\n)")
     assert "stack(" not in trail_heading
     assert "dir: ltr" not in trail_heading
     assert "direction" not in trail_heading

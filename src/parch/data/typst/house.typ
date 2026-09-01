@@ -136,10 +136,17 @@
 
 #let trail_heading(title, mark) = grid(
   columns: (1fr, auto),
-  // title clipped in the 1fr, mark auto
-  // Typst 0.15.1 grid.cell has no clip; box clips the 1fr title.
-  grid.cell(align: horizon + start, box(width: 100%, clip: true, title)),
-  align(horizon + start, mark),
+  align: horizon + start,
+  layout(size => context {
+    let wanted = measure(title)
+    let factor = if wanted.width == 0pt {
+      100%
+    } else {
+      calc.min(100%, size.width / wanted.width * 100%)
+    }
+    scale(factor, origin: start + horizon, reflow: true, title)
+  }),
+  mark,
 )
 
 #let mos_frame(side, mos, well, mos-width: none, column-gutter: none) = if side == left {
