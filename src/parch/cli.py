@@ -13,7 +13,8 @@ from parch.mos.configurator import Configurator
 from parch.mos.preamble import copy_house_typ
 from parch.services.compile import Compile, CompileError
 from parch.services.generate import Generate
-from parch.services.config_file import DEFAULT_FROM, open_resolved, run_edit, run_new, shipped_help
+from parch.services.config_file import open_resolved, run_edit, run_new, shipped_help
+from parch.services.job_file import DEFAULT_DEVICE
 from parch.services.preview_svg import DEFAULT_SCALE, parse_pages, preview_svg, sample_page_numbers
 
 
@@ -48,11 +49,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Output path (alias for outfile)",
     )
     new.add_argument(
-        "--from",
-        dest="from_profile",
+        "-d",
+        "--device",
+        dest="device",
         default=None,
         metavar="DEVICE",
-        help=f"Device id (default {DEFAULT_FROM}).",
+        help=f"Device id (default {DEFAULT_DEVICE}).",
     )
     new.add_argument(
         "--year",
@@ -188,7 +190,7 @@ def new_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
         outfile = args.output
     return run_new(
         outfile=outfile,
-        from_profile=args.from_profile,
+        device=args.device,
         year=args.year,
         sections=args.sections,
         yes=bool(args.yes),
