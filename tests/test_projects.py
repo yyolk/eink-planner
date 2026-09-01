@@ -547,10 +547,10 @@ pages = 1
         source="boards-vs-notes.toml",
     )
     typst = _generate(dto)
-    assert "#let dotted =" in typst
+    assert "#let dotted =" not in typst
     assert '#import "house.typ"' in typst
-    assert "#let rect_pattern = rect_pattern.with(regular_height: regular_height)" in typst
-    assert "rect_pattern_centered(dotted_centered)" not in typst
+    assert "rect_pattern" not in typst
+    assert "#let dotted_centered = dotted_centered(regular_height: regular_height)" in typst
     assert "#let scratch_pad = lined_well(dotted_centered)" in typst
     pages = _pages(typst)
     board_pages = [page for page in pages if "#[] <project-1>" in page]

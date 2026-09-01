@@ -38,27 +38,33 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "height: auto" not in typst
     assert '#import "house.typ"' in typst
     imported = typst[typst.index('#import "house.typ"') :].splitlines()[0]
-    assert "contents_bars" in imported
-    assert "lead_pair" in imported
-    assert "trail_heading" in imported
-    assert "mos_frame" in imported
-    assert "well_frame" in imported
-    assert "mos_tabs" in imported
-    assert "mos_rail" in imported
-    assert "month_grid" in imported
-    assert "month_weeks" in imported
-    assert "week_matrix" in imported
-    assert "lined_fill" in imported
-    assert "lined_well" in imported
-    assert "daily_well" in imported
-    assert "quarter_well" in imported
-    assert "week_cell" not in imported
-    assert "_order_week_rows" not in imported
+    names = imported.split(":", 1)[1].strip().split(", ")
+    assert "contents_bars" in names
+    assert "lead_pair" in names
+    assert "trail_heading" in names
+    assert "mos_frame" in names
+    assert "well_frame" in names
+    assert "mos_tabs" in names
+    assert "mos_rail" in names
+    assert "month_grid" in names
+    assert "month_weeks" in names
+    assert "week_matrix" in names
+    assert "dotted_centered" in names
+    assert "lined_fill" in names
+    assert "lined_well" in names
+    assert "daily_well" in names
+    assert "quarter_well" in names
+    assert "dotted" not in names
+    assert "lined" not in names
+    assert "rect_pattern" not in names
+    assert "rect_pattern_centered" not in names
+    assert "week_cell" not in names
+    assert "_order_week_rows" not in names
     assert "#let link_padding =" in typst
-    assert "#let rect_pattern = rect_pattern.with(regular_height: regular_height)" in typst
+    assert "rect_pattern" not in typst
     assert "#let padded_link = padded_link.with(padding: link_padding)" in typst
     assert "#let contents_bars = contents_bars.with(thick_stroke: thick_stroke)" in typst
-    assert "trail_heading.with(" not in typst
+    assert "#let trail_heading = trail_heading.with(shrink: page-width < 100mm)" in typst
     assert "spacing: 1fr" not in typst
     assert "#let mos_frame = mos_frame.with(mos-width: mos-width, column-gutter: 2mm)" in typst
     assert "#let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm, heading-stroke: regular_stroke)" in typst
@@ -76,8 +82,8 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "3fr" not in typst
     assert "5fr" not in typst
     assert "2fr" not in typst
-    assert "#let dotted = dotted(regular_height: regular_height)" in typst
-    assert "#let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)" in typst
+    assert "#let dotted =" not in typst
+    assert "#let lined =" not in typst
     assert "#let dotted_centered = dotted_centered(regular_height: regular_height)" in typst
     assert "#let lined_fill = lined_fill.with(regular_height: regular_height, regular_stroke: regular_stroke)" in typst
     assert "#let review_lined = lined_fill(paint: black)" in typst
@@ -134,12 +140,13 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let lead_pair(mark, title, spacing: 6pt)" in house
     assert "#let lead_pair(left, right" not in house
     assert "#let trail_heading(" in house
-    assert "#let trail_heading(title, mark) = grid(" in house
+    assert "#let trail_heading(title, mark, shrink: false) = grid(" in house
     assert "Title shrinks in the 1fr when it overflows; skip scale when it fits." in house
     assert "spacing:" not in house[house.index("#let trail_heading(") : house.index("#let mos_frame(")]
     trail_heading = house[house.index("#let trail_heading(") : house.index("#let mos_frame(")]
     assert "columns: (1fr, auto)" in trail_heading
     assert "align: horizon + start" in trail_heading
+    assert "if shrink {" in trail_heading
     assert "layout(size => context {" in trail_heading
     assert "let wanted = measure(title)" in trail_heading
     assert "wanted.width == 0pt or wanted.width <= size.width" in trail_heading
@@ -284,9 +291,14 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     week_matrix = house[house.index("#let week_matrix(") : house.index("#let daily_well(")]
     assert "regular-height" not in week_matrix
     assert "regular_height" not in week_matrix
-    assert "#let lined(" in house
+    assert "House paper is a tiling fill." in house
+    assert "placed tiles" not in house
+    assert "#let dotted(" not in house
+    assert "#let lined(" not in house
+    assert "#let rect_pattern(" not in house
+    assert "#let rect_pattern_centered(" not in house
     assert "#let lined_fill(" in house
-    lined_fill = house[house.index("#let lined_fill(") : house.index("#let rect_pattern_centered(")]
+    lined_fill = house[house.index("#let lined_fill(") : house.index("#let padded_link(")]
     assert "paint: luma(130)" in lined_fill
     assert "regular_stroke + paint" in lined_fill
     assert "regular_stroke + luma(130)" not in lined_fill
@@ -358,6 +370,15 @@ def test_preamble_devices_import_parameterized_device_typ():
     assert "page-margin(right)" in _preamble_set_page(right)
     assert "118.87" not in _preamble_set_page(nomad)
     assert "157.48" not in _preamble_set_page(scribe)
+    move = Preamble(Configurator(load(base_config("remarkable-paper-pro-move")))).generate()
+    shrink = "#let trail_heading = trail_heading.with(shrink: page-width < 100mm)"
+    assert shrink in nomad
+    assert shrink in scribe
+    assert shrink in lined
+    assert shrink in right
+    assert shrink in move
+    assert "NOMAD_STYLE" not in move
+    assert "91.79" not in move
     assert "height: auto" not in nomad
     assert "height: auto" not in scribe
 
@@ -407,7 +428,9 @@ def test_copy_house_typ_writes_workdir(tmp_path):
     text = dest.read_text(encoding="utf-8")
     packaged = house_typ_resource().read_text(encoding="utf-8")
     assert text == packaged
-    assert "#let rect_pattern(" in text
+    assert "#let dotted_centered(" in text
+    assert "#let lined_fill(" in text
+    assert "#let rect_pattern(" not in text
     assert "#let padded_link(" in text
     assert "#let contents_bars(" in text
     assert "#let lead_pair(" in text

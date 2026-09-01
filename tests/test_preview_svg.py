@@ -192,40 +192,38 @@ def test_sample_page_numbers_missing_label():
         sample_page_numbers("cover only", year=2026, week_id="2026W01", jan1="2026-01-01")
 
 
-def _house_rect_pattern() -> str:
+def _house_paper() -> str:
     text = house_typ_resource().read_text(encoding="utf-8")
-    start = text.index("#let rect_pattern(")
-    end = text.index("#let dotted_centered")
+    start = text.index("#let dotted_centered(")
+    end = text.index("#let padded_link(")
     return text[start:end]
 
 
-def test_rect_pattern_helper_stamps_tiles_not_fill():
+def test_house_paper_is_tiling_fill():
     house = house_typ_resource().read_text(encoding="utf-8")
-    helper = _house_rect_pattern()
+    paper = _house_paper()
     typst = Preamble(Configurator(load(base_config("158x210")))).generate()
-    assert "fill: pattern" not in helper
-    assert "tiling(" not in helper
-    assert "layout(size =>" in helper
-    assert "place(" in helper
-    assert "for iy in range(rows)" in helper
-    assert "box(width: cell, height: cell, pattern)" in helper
-    assert "clip: true" in helper
-    assert "here().position()" in helper
-    assert "#let rect_pattern(regular_height: none, pattern) = rect(" in helper
-    assert "#let dotted(regular_height: none) = place(" in house
-    assert "#let lined(regular_height: none, regular_stroke: none) = place(" in house
-    assert "rect_pattern.with(regular_height: regular_height)" in typst
+    assert "tiling(" in paper
+    assert "#let dotted_centered(" in paper
+    assert "#let lined_fill(" in paper
+    assert "#let dotted(" not in house
+    assert "#let lined(" not in house
+    assert "#let rect_pattern(" not in house
+    assert "#let rect_pattern_centered(" not in house
+    assert "here().position()" not in house
+    assert "rect_pattern" not in typst
+    assert "#let trail_heading = trail_heading.with(shrink: page-width < 100mm)" in typst
     assert "lined_well(dotted_centered)" in typst
     assert "PageData" not in typst
     assert "heading_mark" not in typst
     assert "let seated_title" not in typst
 
 
-def test_large_rect_pattern_svg_stamps_dots_not_pattern_paint(tmp_path):
+def test_lined_well_svg_uses_tiling_fill(tmp_path):
     src = tmp_path / "index.typst"
     src.write_text(
         Preamble(Configurator(load(base_config("158x210")))).generate()
-        + "\n#rect_pattern(dotted)\n",
+        + "\n#lined_well(dotted_centered)\n",
         encoding="utf-8",
     )
     copy_house_typ(tmp_path, device="158x210")
@@ -237,13 +235,11 @@ def test_large_rect_pattern_svg_stamps_dots_not_pattern_paint(tmp_path):
     )
     raw = paths[0].read_text(encoding="utf-8")
     out = preview_svg(raw, scale=DEFAULT_SCALE, crop=False)
-    assert "<pattern" not in raw
-    assert 'fill="url(#' not in raw
-    assert "<pattern" not in out
-    assert 'fill="url(#' not in out
+    assert "<pattern" in raw
+    assert 'fill="url(#' in raw
+    assert "<pattern" in out
+    assert 'fill="url(#' in out
     assert 'viewBox="0 0 447.874015748 595.275590551"' in raw
-    dots = raw.count("0.399685039")
-    assert dots >= 100, f"expected stamped dots, found {dots}"
 
 
 def test_compile_svg_tiny_two_pages_py(tmp_path, monkeypatch):
