@@ -228,7 +228,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "columns: columns" not in month_grid
     assert "columns: none" not in month_grid
     assert "reverse" not in month_grid
-    month_weeks = house[house.index("#let month_weeks(") : house.index("#let week_cell(")]
+    month_weeks = house[house.index("#let month_weeks(") : house.index("#let lined_well(")]
     assert month_weeks.startswith(
         "#let month_weeks(side, rows: none, week-col: none, stroke: none, ..cells) = block(\n"
         "  width: 100%,\n"
@@ -241,6 +241,8 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "reverse" not in month_weeks
     assert "#let week_cell(" in house
     assert "#let week_matrix(" in house
+    # Typst 0.15 does not hoist; week_cell looks up lined_well at call time.
+    assert house.index("#let lined_well(") < house.index("#let week_cell(")
     assert "rows: (auto, 1fr)" in house
     assert "columns: (1fr, 1fr, 1fr)" in house
     assert "rows: (1fr, 1fr, 1fr)" in house
@@ -279,7 +281,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "side" not in week_matrix_sig
     assert "row-gutter" not in week_matrix_sig
     assert "regular-height" not in week_matrix_sig
-    week_matrix = house[house.index("#let week_matrix(") : house.index("#let lined_well(")]
+    week_matrix = house[house.index("#let week_matrix(") : house.index("#let daily_well(")]
     assert "regular-height" not in week_matrix
     assert "regular_height" not in week_matrix
     assert "#let lined(" in house

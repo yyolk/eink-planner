@@ -279,6 +279,11 @@
   ),
 )
 
+// Full-bleed writing field. Parent is well_frame's 1fr body (bounded).
+// Tiling fill. rect_pattern's context+layout+O(rows*cols) place loop
+// OOMs a year of extra notes at two pages.
+#let lined_well(pattern) = box(width: 100%, height: 100%, fill: pattern)
+
 // Header on auto; bottom inset is the rule's own thickness. Clipped
 // lined_well fills the 1fr.
 // Not exported — week_matrix is the only weekly overview entry.
@@ -324,11 +329,6 @@
     grid.cell(colspan: 2, painted.at(7)),
   )
 }
-
-// Full-bleed writing field. Parent is well_frame's 1fr body (bounded).
-// Tiling fill. rect_pattern's context+layout+O(rows*cols) place loop
-// OOMs a year of extra notes at two pages.
-#let lined_well(pattern) = box(width: 100%, height: 100%, fill: pattern)
 
 // Parent is well_frame's 1fr body (bounded). House owns the 3fr/5fr
 // split. Same side token as mos_frame.
