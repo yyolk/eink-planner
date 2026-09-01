@@ -265,6 +265,6 @@ pattern = "lined"
     assert "lined_well(lined_fill)" in quarter
     assert "lined_well(lined_fill)" in month
     assert "week_matrix(" in week
-    assert "pattern: lined" in week
+    assert "pattern: lined_fill" in week
     assert "rect_pattern(lined)" not in week
     assert "grid.cell(colspan: 3, rect_pattern" not in week

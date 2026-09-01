@@ -4,6 +4,7 @@ from parch.calendar.day import Day
 from parch.calendar.week import Week
 from parch.i18n import I18n
 from parch.mos.manifest import Manifest
+from parch.mos.preamble import _WELL_PATTERN
 
 
 class Weekly:
@@ -30,7 +31,7 @@ class Weekly:
         notes = f"[{self.i18n.t('notes')}]"
         return f"""week_matrix(
   column-gutter: {self.column_gutter},
-  pattern: {self.pattern},
+  pattern: {_WELL_PATTERN.get(self.pattern, self.pattern)},
   {cells},
   {notes},
 )"""
