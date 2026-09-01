@@ -9,6 +9,7 @@ import pytest
 from parch import ConfigError, __version__
 from parch.compose.page_data import HeadingMark
 from parch.config import StrictDict, load
+from parch.devices import DEVICES, known_device_ids
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.provenance import apply_provenance, collect_provenance
@@ -257,18 +258,21 @@ def test_year_is_plain_text_when_annual_omitted(tmp_path):
 
 
 def test_device_label_is_human_name():
-    nomad = Colophon(**_colo_kwargs(device="supernote-nomad")).pages(None)[0].content
-    assert "SuperNote Nomad" in nomad
-    assert "supernote-nomad" not in nomad
-    scribe = Colophon(**_colo_kwargs(device="kindle-scribe")).pages(None)[0].content
-    assert "Kindle Scribe" in scribe
-    assert "kindle-scribe" not in scribe
-    paper = Colophon(**_colo_kwargs(device="158x210")).pages(None)[0].content
-    assert "158 × 210" in paper
-    assert "158x210" not in paper
-    manta = Colophon(**_colo_kwargs(device="supernote-manta")).pages(None)[0].content
-    assert "SuperNote Manta" in manta
-    assert "supernote-manta" not in manta
+    for device in DEVICES:
+        content = Colophon(**_colo_kwargs(device=device.id)).pages(None)[0].content
+        assert device.name in content
+        assert device.id not in content
+
+
+def test_empty_device_slug_stays_empty():
+    content = Colophon(**_colo_kwargs(device="")).pages(None)[0].content
+    assert "[*Device*], []," in content
+
+
+def test_unknown_device_slug_raises():
+    colo = Colophon(**_colo_kwargs(device="not-a-device"))
+    with pytest.raises(KeyError, match="unknown device"):
+        colo.pages(None)
 
 
 def test_colophon_between_cover_and_annual_keeps_links(tmp_path):
@@ -364,7 +368,7 @@ def test_generate_cmd_attaches_provenance_but_page_stays_quiet(tmp_path, monkeyp
 
 
 def test_device_jobs_include_colophon():
-    for name in ("supernote-nomad", "kindle-scribe", "158x210", "supernote-manta"):
+    for name in known_device_ids():
         dto = load(base_config(name))
         names = [s["name"] for s in Configurator(dto).enabled_sections()]
         assert names[-1] == "colophon", name

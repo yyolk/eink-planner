@@ -5,6 +5,7 @@ from typing import Any
 
 from parch import __version__
 from parch.config import StrictDict, _to_plain
+from parch.devices import get_device
 from parch.i18n import I18n
 from parch.mos.configurator import Configurator
 from parch.mos.contents_mark import body_size_token, heading_height_token, trail_heading
@@ -12,17 +13,6 @@ from parch.compose.page_data import HeadingMark, PageData
 from parch.sections.annual import Annual
 
 DEFAULT_TITLE = "About this notebook"
-
-# Human names for shipped device slugs. Do not invent a device TOML field.
-_DEVICE_NAMES = {
-    "supernote-nomad": "SuperNote Nomad",
-    "nomad": "SuperNote Nomad",
-    "kindle-scribe": "Kindle Scribe",
-    "scribe": "Kindle Scribe",
-    "158x210": "158 × 210",
-    "supernote-manta": "SuperNote Manta",
-    "manta": "SuperNote Manta",
-}
 
 _TABLE_HEADER = re.compile(r"(?m)^[ \t]*\[(\[?)([^\]]+)\](\]?)[ \t]*\r?\n")
 _BARE_KEY = r"[A-Za-z0-9_-]+"
@@ -76,9 +66,7 @@ def drop_empty_tables(text: str) -> str:
 def _human_device(slug: str) -> str:
     if not slug:
         return ""
-    if slug in _DEVICE_NAMES:
-        return _DEVICE_NAMES[slug]
-    return slug.replace("-", " ").replace("_", " ").strip()
+    return get_device(slug).name
 
 
 # Command / SHA values: Typst raw() (mono) with wrap opportunities. Do not shrink.
