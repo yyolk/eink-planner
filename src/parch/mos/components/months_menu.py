@@ -27,12 +27,7 @@ class MonthsMenu:
 
     def generate(self) -> str:
         cols = ", ".join(["1fr"] * len(self.range))
-        return f"""table(
-  stroke: regular_stroke,
-  columns: ({cols}),
-  rows: 1fr,
-  align: horizon + center,
-
+        return f"""mos_tabs(columns: ({cols}),
   {self._months()}
 )"""
 
