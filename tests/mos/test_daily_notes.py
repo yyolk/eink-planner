@@ -140,7 +140,7 @@ def test_calendar_appears_nowhere_on_title_or_content():
 
 def test_content_is_lined_well_dotted_by_default():
     page = _section().pages(Manifest())[0]
-    assert page.content == "lined_well(dotted)"
+    assert page.content == "lined_well(dotted_centered)"
     assert "regular-height" not in page.content
     assert "rect_pattern(" not in page.content
     for banned in _BANNED_BODY:
@@ -149,9 +149,15 @@ def test_content_is_lined_well_dotted_by_default():
 
 
 def test_pattern_switches():
-    for pattern in ("lined", "review_lined", "dotted", "dotted_centered"):
+    mapped = {
+        "lined": "lined_fill",
+        "review_lined": "review_lined",
+        "dotted": "dotted_centered",
+        "dotted_centered": "dotted_centered",
+    }
+    for pattern, well in mapped.items():
         page = _section(pattern=pattern).pages(Manifest())[0]
-        assert page.content == f"lined_well({pattern})"
+        assert page.content == f"lined_well({well})"
         assert "rect_pattern(" not in page.content
         assert "regular-height" not in page.content
         assert "lined_well(grid)" not in page.content
@@ -236,7 +242,7 @@ def test_generated_trail_mark_alone_and_inverts_january_only():
     assert "[Schedule]" not in p1
     assert "[Priorities]" not in p1
     assert "Top priorities" not in p1
-    assert "lined_well(dotted)" in p1
+    assert "lined_well(dotted_centered)" in p1
     assert "rect_pattern(" not in p1
     assert "padded_link(<daily-note-2026-01-01-page-2>)[1/2]" not in p1
     assert "padded_link(<daily-note-2026-01-01-page-1>)[2/2]" not in p2

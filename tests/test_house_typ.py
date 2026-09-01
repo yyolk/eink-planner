@@ -46,6 +46,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "month_grid" in imported
     assert "month_weeks" in imported
     assert "week_matrix" in imported
+    assert "lined_fill" in imported
     assert "lined_well" in imported
     assert "daily_well" in imported
     assert "quarter_well" in imported
@@ -64,7 +65,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)" in typst
     assert "month_weeks.with(rows" not in typst
     assert "#let week_matrix = week_matrix.with(header-stroke: regular_stroke + black, regular-height: regular_height)" in typst
-    assert "#let lined_well = lined_well.with(regular-height: regular_height)" in typst
+    assert "#let lined_well = lined_well.with(regular-height: regular_height)" not in typst
     assert "#let daily_well = daily_well.with(column-gutter: regular_column_gutter)" in typst
     assert "#let quarter_well = quarter_well.with(column-gutter: regular_column_gutter)" in typst
     assert "3fr" not in typst
@@ -72,6 +73,8 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "2fr" not in typst
     assert "#let dotted = dotted(regular_height: regular_height)" in typst
     assert "#let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)" in typst
+    assert "#let dotted_centered = dotted_centered(regular_height: regular_height)" in typst
+    assert "#let lined_fill = lined_fill(regular_height: regular_height, regular_stroke: regular_stroke)" in typst
     assert "#let scratch_pad = rect_pattern(dotted)" in typst
     assert "here().position()" not in typst
     assert "link(target)[#box(inset: padding, content)]" not in typst
@@ -211,12 +214,20 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     week_matrix_sig = house[house.index("#let week_matrix(") : house.index("..contents,")]
     assert "side" not in week_matrix_sig
     assert "row-gutter" not in week_matrix_sig
+    assert "#let lined(" in house
+    assert "#let lined_fill(" in house
     assert "#let lined_well(" in house
     lined_start = house.index("#let lined_well(")
     lined_well = house[lined_start : house.index("\n\n", lined_start)]
-    assert "width: 100%" in lined_well
-    assert "height: 100%" in lined_well
-    assert "rect_pattern(regular_height: regular-height, pattern)" in lined_well
+    assert lined_well == "#let lined_well(pattern) = box(width: 100%, height: 100%, fill: pattern)"
+    assert "fill: pattern" in lined_well
+    assert "rect_pattern" not in lined_well
+    assert "regular-height" not in lined_well
+    assert "regular_height" not in lined_well
+    assert "clip" not in lined_well
+    assert "layout" not in lined_well
+    assert "for " not in lined_well
+    assert "range(" not in lined_well
     assert "inset" not in lined_well
     assert "side" not in lined_well
     assert "grid(" not in lined_well
@@ -334,6 +345,7 @@ def test_copy_house_typ_writes_workdir(tmp_path):
     assert "#let week_matrix(" in text
     assert "#let quarter_well(" in text
     assert "#let week_cell(" in text
+    assert "#let lined_fill(" in text
     assert "#let lined_well(" in text
     assert "#let daily_well(" in text
 

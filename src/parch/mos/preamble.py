@@ -60,7 +60,7 @@ class Preamble:
         heading = _v(p, "heading")
         side = _v(mos_layout, "side_menu_position")
         return f"""#import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width
-#import "house.typ": dotted, lined, rect_pattern, dotted_centered, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
+#import "house.typ": dotted, lined, rect_pattern, dotted_centered, lined_fill, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
 #let page-margin = page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)
 #set page(width: page-width, height: page-height, margin: page-margin({side}))
 
@@ -80,6 +80,7 @@ class Preamble:
 #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
 #let rect_pattern = rect_pattern.with(regular_height: regular_height)
 #let dotted_centered = dotted_centered(regular_height: regular_height)
+#let lined_fill = lined_fill(regular_height: regular_height, regular_stroke: regular_stroke)
 #let rect_pattern_centered = rect_pattern_centered.with(regular_height: regular_height)
 #let scratch_pad = rect_pattern({_v(p, 'scratch_pad')})
 #let padded_link = padded_link.with(padding: link_padding)
@@ -89,7 +90,6 @@ class Preamble:
 #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
 #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
 #let week_matrix = week_matrix.with(header-stroke: regular_stroke + black, regular-height: regular_height)
-#let lined_well = lined_well.with(regular-height: regular_height)
 #let daily_well = daily_well.with(column-gutter: regular_column_gutter)
 #let quarter_well = quarter_well.with(column-gutter: regular_column_gutter)"""
 

@@ -77,6 +77,15 @@
   ),
 )
 
+#let lined_fill(regular_height: none, regular_stroke: none) = tiling(
+  size: (regular_height, regular_height),
+  line(
+    start: (0pt, regular_height - 0.15mm),
+    end: (regular_height, regular_height - 0.15mm),
+    stroke: regular_stroke + luma(130),
+  ),
+)
+
 #let rect_pattern_centered(regular_height: none, pattern) = box(
   width: 100%,
   height: 100%,
@@ -273,13 +282,9 @@
 }
 
 // Full-bleed writing field. Parent is well_frame's 1fr body (bounded).
-// One region; clip is rect_pattern's. No header, inset, side, or cells.
-#let lined_well(regular-height: none, pattern) = box(
-  width: 100%,
-  height: 100%,
-  clip: true,
-  rect_pattern(regular_height: regular-height, pattern),
-)
+// Tiling fill. rect_pattern's context+layout+O(rows*cols) place loop
+// OOMs a year of extra notes at two pages.
+#let lined_well(pattern) = box(width: 100%, height: 100%, fill: pattern)
 
 // Parent is well_frame's 1fr body (bounded). House owns the 3fr/5fr
 // split. Same side token as mos_frame.

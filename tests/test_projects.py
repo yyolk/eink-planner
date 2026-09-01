@@ -563,6 +563,6 @@ pages = 1
     notes_body_pages = [
         page
         for page in pages
-        if "lined_well(dotted)" in page
+        if "lined_well(dotted_centered)" in page
     ]
-    assert notes_body_pages, "daily notes pages must call lined_well(dotted)"
+    assert notes_body_pages, "daily notes pages must call lined_well(dotted_centered)"
