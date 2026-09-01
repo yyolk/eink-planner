@@ -294,7 +294,7 @@
       #let mos_rail = mos_rail.with(gutter: regular_column_gutter)
       #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
       #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
-      #let week_matrix = week_matrix.with(header-stroke: regular_stroke + black, regular-height: regular_height)
+      #let week_matrix = week_matrix.with(header-stroke: regular_stroke + black)
       #let daily_well = daily_well.with(column-gutter: regular_column_gutter)
       #let quarter_well = quarter_well.with(column-gutter: regular_column_gutter)
     ''',
@@ -310,7 +310,7 @@
           trail_heading(text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4], padded_link(padding: 0pt, <index>, contents_bars(size: h1))),
           week_matrix(
         column-gutter: 5pt,
-        pattern: dotted,
+        pattern: dotted_centered,
         [Monday 29],
         [Tuesday 30],
         [Wednesday 31],
@@ -540,7 +540,7 @@
       #let mos_rail = mos_rail.with(gutter: regular_column_gutter)
       #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
       #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
-      #let week_matrix = week_matrix.with(header-stroke: regular_stroke + black, regular-height: regular_height)
+      #let week_matrix = week_matrix.with(header-stroke: regular_stroke + black)
       #let daily_well = daily_well.with(column-gutter: regular_column_gutter)
       #let quarter_well = quarter_well.with(column-gutter: regular_column_gutter)
     ''',
@@ -556,7 +556,7 @@
           trail_heading(text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4], padded_link(padding: 0pt, <index>, contents_bars(size: h1))),
           week_matrix(
         column-gutter: 4pt,
-        pattern: dotted,
+        pattern: dotted_centered,
         [Monday 29],
         [Tuesday 30],
         [Wednesday 31],

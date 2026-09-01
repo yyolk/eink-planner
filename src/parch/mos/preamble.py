@@ -100,7 +100,7 @@ class Preamble:
 #let mos_rail = mos_rail.with(gutter: regular_column_gutter)
 #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
 #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
-#let week_matrix = week_matrix.with(header-stroke: regular_stroke + black, regular-height: regular_height)
+#let week_matrix = week_matrix.with(header-stroke: regular_stroke + black)
 #let daily_well = daily_well.with(column-gutter: regular_column_gutter)
 #let quarter_well = quarter_well.with(column-gutter: regular_column_gutter)"""
 

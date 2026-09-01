@@ -280,9 +280,9 @@
 )
 
 // Header on auto; bottom inset is the rule's own thickness. Clipped
-// pattern fills the 1fr.
+// lined_well fills the 1fr.
 // Not exported — week_matrix is the only weekly overview entry.
-#let week_cell(header, header-stroke: none, pattern: none, regular-height: none) = {
+#let week_cell(header, header-stroke: none, pattern: none) = {
   let gap = if header-stroke == none { 0pt } else { stroke(header-stroke).thickness }
   grid(
     columns: 1fr,
@@ -297,7 +297,7 @@
       height: 100%,
       clip: true,
       inset: (top: 0.25em, bottom: 0.25em),
-      rect_pattern(regular_height: regular-height, pattern),
+      lined_well(pattern),
     ),
   )
 }
@@ -308,7 +308,6 @@
   column-gutter: none,
   header-stroke: none,
   pattern: none,
-  regular-height: none,
   ..contents,
 ) = {
   let headers = contents.pos()
@@ -316,7 +315,6 @@
     header,
     header-stroke: header-stroke,
     pattern: pattern,
-    regular-height: regular-height,
   ))
   grid(
     columns: (1fr, 1fr, 1fr),

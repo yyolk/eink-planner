@@ -68,7 +68,8 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "week-rows:" not in typst
     assert "#let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)" in typst
     assert "month_weeks.with(rows" not in typst
-    assert "#let week_matrix = week_matrix.with(header-stroke: regular_stroke + black, regular-height: regular_height)" in typst
+    assert "#let week_matrix = week_matrix.with(header-stroke: regular_stroke + black)" in typst
+    assert "regular-height: regular_height" not in typst
     assert "#let lined_well = lined_well.with(regular-height: regular_height)" not in typst
     assert "#let daily_well = daily_well.with(column-gutter: regular_column_gutter)" in typst
     assert "#let quarter_well = quarter_well.with(column-gutter: regular_column_gutter)" in typst
@@ -247,7 +248,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert 'bottom-edge: "descender"' in house
     week_cell = house[house.index("#let week_cell(") : house.index("#let week_matrix(")]
     assert week_cell.startswith(
-        "#let week_cell(header, header-stroke: none, pattern: none, regular-height: none) = {\n"
+        "#let week_cell(header, header-stroke: none, pattern: none) = {\n"
         "  let gap = if header-stroke == none { 0pt } else { stroke(header-stroke).thickness }\n"
         "  grid(\n"
         "    columns: 1fr,\n"
@@ -262,7 +263,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
         "      height: 100%,\n"
         "      clip: true,\n"
         "      inset: (top: 0.25em, bottom: 0.25em),\n"
-        "      rect_pattern(regular_height: regular-height, pattern),\n"
+        "      lined_well(pattern),\n"
         "    ),\n"
         "  )\n"
         "}\n"
@@ -271,9 +272,16 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert 'text(bottom-edge: "descender"' in week_cell
     assert "inset: (top: 0.25em, bottom: 0.25em)" in week_cell
     assert "1.5 * gap" not in week_cell
+    assert "regular-height" not in week_cell
+    assert "rect_pattern" not in week_cell
+    assert "lined_well(pattern)" in week_cell
     week_matrix_sig = house[house.index("#let week_matrix(") : house.index("..contents,")]
     assert "side" not in week_matrix_sig
     assert "row-gutter" not in week_matrix_sig
+    assert "regular-height" not in week_matrix_sig
+    week_matrix = house[house.index("#let week_matrix(") : house.index("#let lined_well(")]
+    assert "regular-height" not in week_matrix
+    assert "regular_height" not in week_matrix
     assert "#let lined(" in house
     assert "#let lined_fill(" in house
     lined_fill = house[house.index("#let lined_fill(") : house.index("#let rect_pattern_centered(")]
