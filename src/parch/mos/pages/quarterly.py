@@ -6,7 +6,7 @@ from parch.calendar.quarter import Quarter
 from parch.i18n import I18n
 from parch.mos.components.little_calendar import LittleCalendar
 from parch.mos.manifest import Manifest
-from parch.sections._shared import _WELL_PATTERN
+from parch.mos.preamble import _WELL_PATTERN
 
 
 class Quarterly:

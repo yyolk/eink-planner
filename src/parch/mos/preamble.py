@@ -5,7 +5,12 @@ from pathlib import Path
 
 from parch.devices import Device, get_device
 from parch.mos.configurator import Configurator
-from parch.sections._shared import _WELL_PATTERN
+
+# Single-region wells: lined → lined_fill, dotted → dotted_centered.
+_WELL_PATTERN = {
+    "lined": "lined_fill",
+    "dotted": "dotted_centered",
+}
 
 HOUSE_TYP = "house.typ"
 DEVICE_TYP = "device.typ"

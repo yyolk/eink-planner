@@ -213,7 +213,7 @@
     align: horizon + center,
     ..items.map(c => if c.func() == table.cell {
       table.cell(
-        fill: c.fill,
+        fill: c.at("fill", default: none),
         align: horizon + center,
         rotate(turn, origin: center + horizon, reflow: true, c.body),
       )

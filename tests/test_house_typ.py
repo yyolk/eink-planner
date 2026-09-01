@@ -197,6 +197,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
         "    align: horizon + center,\n"
     )
     assert "columns: columns" not in mos_tabs
+    assert 'fill: c.at("fill", default: none)' in mos_tabs
     assert "rotate(turn, origin: center + horizon, reflow: true, c.body)" in mos_tabs
     assert 'bottom-edge: "descender"' in mos_tabs
     assert "inset: gap" in mos_tabs

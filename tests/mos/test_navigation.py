@@ -75,7 +75,8 @@ def test_side_menu_reversed_months_then_quarters():
     assert "reverse: true" in typst
     assert "columns: (3fr, 1fr)" not in typst
     assert "rotate(" not in typst
-    assert typst.index("Jan") < typst.index("Q1")
+    # House owns item order; emit stays quarters, months.
+    assert typst.index("Q1") < typst.index("Jan")
 
 
 def test_heading_menu_omitted_when_annual_unregistered():

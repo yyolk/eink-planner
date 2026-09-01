@@ -3,11 +3,6 @@
 import re
 
 _LENGTH = re.compile(r"^([+-]?(?:\d+(?:\.\d*)?|\.\d+))(mm|cm|pt)$")
-# Single-region wells: lined → lined_fill, dotted → dotted_centered.
-_WELL_PATTERN = {
-    "lined": "lined_fill",
-    "dotted": "dotted_centered",
-}
 
 
 def _side_menu_position(configurator) -> str:
