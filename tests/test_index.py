@@ -438,7 +438,9 @@ def test_trail_heading_rejects_string_edge_fallthrough():
     assert trail.startswith("trail_heading(")
     assert "spacing:" not in trail
     assert "direction:" not in trail
-    assert trail_heading(None, "h1", "text(size: h1)[Tasks]") == "text(size: h1)[Tasks]"
+    assert trail_heading(None, "h1", "text(size: h1)[Tasks]") == (
+        "trail_heading(text(size: h1)[Tasks], [])"
+    )
     assert trail_heading(manifest, "h1", None) == (
         "padded_link(padding: 0pt, <index>, contents_bars(size: h1))"
     )

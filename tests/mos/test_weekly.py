@@ -185,7 +185,7 @@ def test_title_is_week_and_range_without_year_and_kills_calendar_chip():
     pages = section.pages(manifest)
     first = pages[0]
     assert first.nav_links == []
-    assert first.heading_mark is HeadingMark.LEAD
+    assert first.heading_mark is HeadingMark.TRAIL
     assert first.show_quarters is True
     assert len(first.highlight_months) == 1
     assert first.highlight_months[0].id == "month-2026-01-01"
@@ -206,7 +206,7 @@ def test_title_is_week_and_range_without_year_and_kills_calendar_chip():
         assert len(page.highlight_months) == 1
         assert page.highlight_quarters == []
         assert page.show_quarters is True
-        assert page.heading_mark is HeadingMark.LEAD
+        assert page.heading_mark is HeadingMark.TRAIL
         assert "Calendar" not in page.title
         assert "text(size: h1)[/]" not in page.title
         assert "2026 /" not in page.title
@@ -223,8 +223,9 @@ def test_generated_week_title_is_range_and_inverts_thursday_month():
     assert "text(size: h1)[/]" not in w01
     assert "2026 /" not in w01
     assert f"Week 1 <2026W01> #h(0.6em) {_W01_RANGE}" in w01
-    heading = w01[w01.index("lead_pair(") : w01.index("Week 1 <2026W01>")]
-    assert "lead_pair(" in heading
+    heading = w01[w01.index("trail_heading(") : w01.index("week_matrix(")]
+    assert heading.startswith("trail_heading(")
+    assert "lead_pair(" not in heading
     assert "column-gutter: 6pt" not in heading
     assert "pad(right: 3mm" not in heading
     assert "contents_bars(size:" in heading

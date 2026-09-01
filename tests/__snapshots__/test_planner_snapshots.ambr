@@ -403,7 +403,7 @@
           )
         ),
         well_frame(
-          lead_pair(padded_link(<index>, contents_bars(size: h1)), text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4]),
+          trail_heading(text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4], padded_link(padding: 0pt, <index>, contents_bars(size: h1))),
           week_matrix(
         column-gutter: 5pt,
         pattern: dotted,
@@ -745,7 +745,7 @@
           )
         ),
         well_frame(
-          lead_pair(padded_link(<index>, contents_bars(size: h1)), text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4]),
+          trail_heading(text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4], padded_link(padding: 0pt, <index>, contents_bars(size: h1))),
           week_matrix(
         column-gutter: 4pt,
         pattern: dotted,

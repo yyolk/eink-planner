@@ -125,6 +125,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let lead_pair(left, right" not in house
     assert "#let trail_heading(" in house
     assert "#let trail_heading(title, mark) = grid(" in house
+    assert "Title shrinks in the 1fr (scale + reflow), one line, never grow." in house
     assert "spacing:" not in house[house.index("#let trail_heading(") : house.index("#let mos_frame(")]
     trail_heading = house[house.index("#let trail_heading(") : house.index("#let mos_frame(")]
     assert "columns: (1fr, auto)" in trail_heading

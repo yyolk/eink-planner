@@ -134,6 +134,7 @@
   align(horizon, title),
 )
 
+// Title shrinks in the 1fr (scale + reflow), one line, never grow.
 #let trail_heading(title, mark) = grid(
   columns: (1fr, auto),
   align: horizon + start,

@@ -94,6 +94,8 @@ def trail_heading(
     if not title:
         return mark or ""
     if not mark:
+        if edge is HeadingMark.TRAIL:
+            return f"trail_heading({title}, [])"
         return title
     match edge:
         case HeadingMark.FOLLOW:
