@@ -56,7 +56,7 @@ _CELL_CHROME = (
 
 _WRITING_PATTERN = (
     "box(width: 100%, height: 100%, clip: true, "
-    "inset: (top: 0.25em, bottom: 0.25em), rect_pattern("
+    "inset: (top: 0.25em, bottom: 0.25em), lined_well("
 )
 
 
@@ -160,16 +160,16 @@ def test_eight_contents_then_notes_no_python_grid_cell():
 def test_per_cell_pattern_is_house_owned():
     content = _page("2025-12-29").content()
     _assert_week_matrix_emit(content, gutter="4pt", pattern="dotted_centered")
-    assert "grid.cell(colspan: 3, rect_pattern" not in content
+    assert "grid.cell(colspan: 3, lined_well" not in content
     assert "colspan: 3" not in content
-    assert "rect_pattern(dotted)" not in content
+    assert "lined_well(" not in content
     assert "colspan:" not in content
 
 
 def test_writing_field_chrome_stays_in_house():
     content = _page("2025-12-29").content()
     assert _WRITING_PATTERN not in content
-    assert "rect_pattern(dotted)" not in content
+    assert "week_cell(" not in content
     assert 'bottom-edge: "descender"' not in content
 
 
@@ -178,8 +178,8 @@ def test_pattern_switches():
     _assert_week_matrix_emit(lined, gutter="4pt", pattern="lined_fill")
     assert "pattern: dotted" not in lined
     assert "pattern: dotted_centered" not in lined
-    assert "rect_pattern(lined)" not in lined
-    assert "rect_pattern(dotted)" not in lined
+    assert "week_cell(" not in lined
+    assert "lined_well(" not in lined
 
 
 def test_title_is_week_and_range_without_year_and_kills_calendar_chip():
@@ -243,8 +243,8 @@ def test_generated_week_title_is_range_and_inverts_thursday_month():
     assert "Thursday,  1" not in w01
     assert w01.count("contents_bars(size:") == 1
     assert "grid.cell(stroke: (bottom: thick_stroke" not in w01
-    assert "grid.cell(colspan: 3, rect_pattern" not in w01
-    assert "rect_pattern(dotted)" not in w01
+    assert "grid.cell(colspan: 3, lined_well" not in w01
+    assert "week_cell(" not in w01
     assert _WRITING_PATTERN not in w01
     assert "[Notes]" in w01
     assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in w01
@@ -257,7 +257,7 @@ def test_generated_week_title_is_range_and_inverts_thursday_month():
     assert "Monday 6" in w28
     assert w28.count("Calendar") == 0
     _assert_week_matrix_emit(w28, gutter="4pt", pattern="dotted_centered")
-    assert "rect_pattern(dotted)" not in w28
+    assert "week_cell(" not in w28
     assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-07-01>)[Jul]])" in w28
     assert "table.cell([#padded_link(<quarter-2026-3>)[Q3]])" in w28
     assert "table.cell(fill: black, text(white)[#padded_link(<quarter-" not in w28
