@@ -96,20 +96,10 @@
             column-gutter: regular_column_gutter,
             stroke: 0pt,
       
-            table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+            mos_tabs(columns: (1fr),
         table.cell([#padded_link(<month-2026-01-01>)[Jan]])
       ),
-      table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+      mos_tabs(columns: (1fr),
         table.cell([#padded_link(<quarter-2026-1>)[Q1]])
       )
           )
@@ -176,20 +166,10 @@
             column-gutter: regular_column_gutter,
             stroke: 0pt,
       
-            table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+            mos_tabs(columns: (1fr),
         table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
       ),
-      table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+      mos_tabs(columns: (1fr),
         table.cell([#padded_link(<quarter-2026-1>)[Q1]])
       )
           )
@@ -296,20 +276,10 @@
             column-gutter: regular_column_gutter,
             stroke: 0pt,
       
-            table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+            mos_tabs(columns: (1fr),
         table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
       ),
-      table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+      mos_tabs(columns: (1fr),
         table.cell([#padded_link(<quarter-2026-1>)[Q1]])
       )
           )
@@ -336,7 +306,7 @@
     ''',
     'preamble': '''
       #import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, lined_fill, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, lined_fill, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
       #let page-margin = page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)
       #set page(width: page-width, height: page-height, margin: page-margin(left))
       
@@ -362,7 +332,8 @@
       #let padded_link = padded_link.with(padding: link_padding)
       #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
       #let mos_frame = mos_frame.with(mos-width: mos-width, column-gutter: 2mm)
-      #let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm)
+      #let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm, heading-stroke: regular_stroke)
+      #let mos_tabs = mos_tabs.with(stroke: regular_stroke)
       #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
       #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
       #let week_matrix = week_matrix.with(header-stroke: regular_stroke + black, regular-height: regular_height)
@@ -384,20 +355,10 @@
             column-gutter: regular_column_gutter,
             stroke: 0pt,
       
-            table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+            mos_tabs(columns: (1fr),
         table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
       ),
-      table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+      mos_tabs(columns: (1fr),
         table.cell([#padded_link(<quarter-2026-1>)[Q1]])
       )
           )
@@ -438,20 +399,10 @@
             column-gutter: regular_column_gutter,
             stroke: 0pt,
       
-            table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+            mos_tabs(columns: (1fr),
         table.cell([#padded_link(<month-2026-01-01>)[Jan]])
       ),
-      table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+      mos_tabs(columns: (1fr),
         table.cell([#padded_link(<quarter-2026-1>)[Q1]])
       )
           )
@@ -518,20 +469,10 @@
             column-gutter: regular_column_gutter,
             stroke: 0pt,
       
-            table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+            mos_tabs(columns: (1fr),
         table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
       ),
-      table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+      mos_tabs(columns: (1fr),
         table.cell([#padded_link(<quarter-2026-1>)[Q1]])
       )
           )
@@ -638,20 +579,10 @@
             column-gutter: regular_column_gutter,
             stroke: 0pt,
       
-            table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+            mos_tabs(columns: (1fr),
         table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
       ),
-      table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+      mos_tabs(columns: (1fr),
         table.cell([#padded_link(<quarter-2026-1>)[Q1]])
       )
           )
@@ -678,7 +609,7 @@
     ''',
     'preamble': '''
       #import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width
-      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, lined_fill, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
+      #import "house.typ": dotted, lined, rect_pattern, dotted_centered, lined_fill, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
       #let page-margin = page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)
       #set page(width: page-width, height: page-height, margin: page-margin(left))
       
@@ -704,7 +635,8 @@
       #let padded_link = padded_link.with(padding: link_padding)
       #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
       #let mos_frame = mos_frame.with(mos-width: mos-width, column-gutter: 1.5mm)
-      #let well_frame = well_frame.with(heading-height: 8mm, row-gutter: 1.5mm)
+      #let well_frame = well_frame.with(heading-height: 8mm, row-gutter: 1.5mm, heading-stroke: regular_stroke)
+      #let mos_tabs = mos_tabs.with(stroke: regular_stroke)
       #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
       #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
       #let week_matrix = week_matrix.with(header-stroke: regular_stroke + black, regular-height: regular_height)
@@ -726,20 +658,10 @@
             column-gutter: regular_column_gutter,
             stroke: 0pt,
       
-            table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+            mos_tabs(columns: (1fr),
         table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
       ),
-      table(
-        stroke: regular_stroke,
-        columns: (1fr),
-        rows: 1fr,
-        align: horizon + center,
-      
+      mos_tabs(columns: (1fr),
         table.cell([#padded_link(<quarter-2026-1>)[Q1]])
       )
           )

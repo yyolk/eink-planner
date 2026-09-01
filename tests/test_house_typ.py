@@ -43,6 +43,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "trail_heading" in imported
     assert "mos_frame" in imported
     assert "well_frame" in imported
+    assert "mos_tabs" in imported
     assert "month_grid" in imported
     assert "month_weeks" in imported
     assert "week_matrix" in imported
@@ -59,7 +60,8 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "trail_heading.with(" not in typst
     assert "spacing: 1fr" not in typst
     assert "#let mos_frame = mos_frame.with(mos-width: mos-width, column-gutter: 2mm)" in typst
-    assert "#let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm)" in typst
+    assert "#let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm, heading-stroke: regular_stroke)" in typst
+    assert "#let mos_tabs = mos_tabs.with(stroke: regular_stroke)" in typst
     assert "#let month_grid = month_grid.with(hline-stroke: regular_stroke + black)" in typst
     assert "week-rows:" not in typst
     assert "#let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)" in typst
@@ -148,8 +150,50 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "seated_mark" not in trail_heading
     assert "#let mos_frame(" in house
     assert "#let well_frame(" in house
-    well_frame = house[house.index("#let well_frame(") : house.index("#let _order_week_rows(")]
-    assert "grid.cell(align: horizon, box(width: 100%, height: 100%, clip: true, heading))" in well_frame
+    well_frame = house[house.index("#let well_frame(") : house.index("#let mos_tabs(")]
+    assert well_frame.startswith(
+        "#let well_frame(heading, body, heading-height: none, row-gutter: none, heading-stroke: none) = {\n"
+        "  let gap = if heading-stroke == none { 0pt } else { stroke(heading-stroke).thickness }\n"
+        "  grid(\n"
+        "    columns: 1fr,\n"
+        "    rows: (heading-height + gap, 1fr),\n"
+        "    row-gutter: row-gutter,\n"
+        "    grid.cell(\n"
+        "      align: horizon,\n"
+        "      inset: (bottom: gap),\n"
+        "      {\n"
+        '        set text(bottom-edge: "descender")\n'
+        "        box(width: 100%, height: 100%, heading)\n"
+        "      },\n"
+        "    ),\n"
+        "    body,\n"
+        "  )\n"
+        "}\n"
+    )
+    assert "clip: true" not in well_frame
+    assert "clip:" not in well_frame
+    assert "heading-stroke" in well_frame
+    assert 'bottom-edge: "descender"' in well_frame
+    assert "rows: (heading-height + gap, 1fr)" in well_frame
+    assert "inset: (bottom: gap)" in well_frame
+    assert "#let mos_tabs(" in house
+    mos_tabs = house[house.index("#let mos_tabs(") : house.index("#let _order_week_rows(")]
+    assert mos_tabs.startswith(
+        "#let mos_tabs(stroke: none, columns: none, ..cells) = {\n"
+        "  let gap = if stroke == none { 0pt } else { std.stroke(stroke).thickness }\n"
+        '  set text(bottom-edge: "descender")\n'
+        "  table(\n"
+        "    stroke: stroke,\n"
+        "    inset: gap,\n"
+        "    columns: columns,\n"
+        "    rows: 1fr,\n"
+        "    align: horizon + center,\n"
+        "    ..cells.pos(),\n"
+        "  )\n"
+        "}\n"
+    )
+    assert 'bottom-edge: "descender"' in mos_tabs
+    assert "inset: gap" in mos_tabs
     assert "#let month_grid(" in house
     assert "rows: (auto, auto) + (1fr,) * week-rows" in house
     assert "grid.hline(y: 1, stroke: hline-stroke)" in house
@@ -340,6 +384,7 @@ def test_copy_house_typ_writes_workdir(tmp_path):
     assert "#let trail_heading(" in text
     assert "#let mos_frame(" in text
     assert "#let well_frame(" in text
+    assert "#let mos_tabs(" in text
     assert "#let month_grid(" in text
     assert "#let month_weeks(" in text
     assert "#let week_matrix(" in text

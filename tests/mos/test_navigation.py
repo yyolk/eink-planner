@@ -1,9 +1,12 @@
 from parch.config import StrictDict
 from parch.i18n import I18n
+from parch.mos.components.months_menu import MonthsMenu
+from parch.mos.components.quarters_menu import QuartersMenu
 from parch.mos.configurator import Configurator
 from parch.mos.manifest import Manifest
 from parch.mos.navigation import Navigation
 from parch.sections.annual import Annual
+from tests.helpers import make_month, make_quarter
 
 
 def _i18n() -> I18n:
@@ -59,6 +62,7 @@ def test_side_menu_default_quarters_then_months():
     assert "rotate(" in typst
     assert "270deg" in typst
     assert "columns: (1fr, 3fr)" in typst
+    assert "mos_tabs(columns: (" in typst
     # Q cells appear before month cells in default order
     assert typst.index("Q1") < typst.index("Jan")
 
@@ -125,6 +129,49 @@ def test_side_menu_months_only_omits_quarters_and_two_column_table():
     assert "Q4" not in typst
     assert "Jan" in typst
     assert "Dec" in typst
+    assert "mos_tabs(columns: (" in typst
+
+
+def test_months_menu_emits_mos_tabs_not_raw_table():
+    menu = MonthsMenu(
+        i18n=_i18n(),
+        manifest=Manifest(),
+        range=[make_month("2026-01"), make_month("2026-04")],
+    )
+    typst = menu.generate()
+    assert typst.startswith("mos_tabs(columns: (1fr, 1fr),")
+    assert "table(" not in typst
+    assert "table.cell([#[Jan]])" in typst
+    assert "table.cell([#[Apr]])" in typst
+    assert "text(bottom-edge:" not in typst
+    assert "stroke:" not in typst
+    jan = make_month("2026-01")
+    menu.highlight([jan])
+    highlighted = menu.generate()
+    assert "table.cell(fill: black, text(white)[#[Jan]])" in highlighted
+    assert highlighted.startswith("mos_tabs(columns: (1fr, 1fr),")
+    assert "text(bottom-edge:" not in highlighted
+
+
+def test_quarters_menu_emits_mos_tabs_not_raw_table():
+    menu = QuartersMenu(
+        i18n=_i18n(),
+        manifest=Manifest(),
+        range=[make_quarter("2026-01-01"), make_quarter("2026-10-01")],
+    )
+    typst = menu.generate()
+    assert typst.startswith("mos_tabs(columns: (1fr, 1fr),")
+    assert "table(" not in typst
+    assert "table.cell([#[Q1]])" in typst
+    assert "table.cell([#[Q4]])" in typst
+    assert "text(bottom-edge:" not in typst
+    assert "stroke:" not in typst
+    q4 = make_quarter("2026-10-01")
+    menu.highlight([q4])
+    highlighted = menu.generate()
+    assert "table.cell(fill: black, text(white)[#[Q4]])" in highlighted
+    assert highlighted.startswith("mos_tabs(columns: (1fr, 1fr),")
+    assert "text(bottom-edge:" not in highlighted
 
 
 def test_months_menu_can_retarget_month_ids():

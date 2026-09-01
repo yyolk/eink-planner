@@ -177,13 +177,38 @@
   )
 }
 
-#let well_frame(heading, body, heading-height: none, row-gutter: none) = grid(
-  columns: 1fr,
-  rows: (heading-height, 1fr),
-  row-gutter: row-gutter,
-  grid.cell(align: horizon, box(width: 100%, height: 100%, clip: true, heading)),
-  body,
-)
+// Descender floor: heading row grows by stroke air. No clip.
+#let well_frame(heading, body, heading-height: none, row-gutter: none, heading-stroke: none) = {
+  let gap = if heading-stroke == none { 0pt } else { stroke(heading-stroke).thickness }
+  grid(
+    columns: 1fr,
+    rows: (heading-height + gap, 1fr),
+    row-gutter: row-gutter,
+    grid.cell(
+      align: horizon,
+      inset: (bottom: gap),
+      {
+        set text(bottom-edge: "descender")
+        box(width: 100%, height: 100%, heading)
+      },
+    ),
+    body,
+  )
+}
+
+// MOS strip table. Descender floor; air under the tail is stroke thickness.
+#let mos_tabs(stroke: none, columns: none, ..cells) = {
+  let gap = if stroke == none { 0pt } else { std.stroke(stroke).thickness }
+  set text(bottom-edge: "descender")
+  table(
+    stroke: stroke,
+    inset: gap,
+    columns: columns,
+    rows: 1fr,
+    align: horizon + center,
+    ..cells.pos(),
+  )
+}
 
 // Week cell is always first in each 8-cell row. MOS-right moves it to the end.
 #let _order_week_rows(side, cells) = if side == left {

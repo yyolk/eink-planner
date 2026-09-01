@@ -60,7 +60,7 @@ class Preamble:
         heading = _v(p, "heading")
         side = _v(mos_layout, "side_menu_position")
         return f"""#import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width
-#import "house.typ": dotted, lined, rect_pattern, dotted_centered, lined_fill, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
+#import "house.typ": dotted, lined, rect_pattern, dotted_centered, lined_fill, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
 #let page-margin = page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)
 #set page(width: page-width, height: page-height, margin: page-margin({side}))
 
@@ -86,7 +86,8 @@ class Preamble:
 #let padded_link = padded_link.with(padding: link_padding)
 #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
 #let mos_frame = mos_frame.with(mos-width: mos-width, column-gutter: {_v(mos_layout, 'column_gutter')})
-#let well_frame = well_frame.with(heading-height: {_v(heading, 'height')}, row-gutter: {_v(mos_layout, 'row_gutter')})
+#let well_frame = well_frame.with(heading-height: {_v(heading, 'height')}, row-gutter: {_v(mos_layout, 'row_gutter')}, heading-stroke: regular_stroke)
+#let mos_tabs = mos_tabs.with(stroke: regular_stroke)
 #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
 #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
 #let week_matrix = week_matrix.with(header-stroke: regular_stroke + black, regular-height: regular_height)
