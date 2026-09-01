@@ -55,7 +55,8 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let rect_pattern = rect_pattern.with(regular_height: regular_height)" in typst
     assert "#let padded_link = padded_link.with(padding: link_padding)" in typst
     assert "#let contents_bars = contents_bars.with(thick_stroke: thick_stroke)" in typst
-    assert "#let trail_heading = trail_heading.with(spacing: 1fr)" in typst
+    assert "trail_heading.with(" not in typst
+    assert "spacing: 1fr" not in typst
     assert "#let mos_frame = mos_frame.with(mos-width: mos-width, column-gutter: 2mm)" in typst
     assert "#let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm)" in typst
     assert "#let month_grid = month_grid.with(hline-stroke: regular_stroke + black)" in typst
@@ -123,15 +124,29 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let lead_pair(mark, title, spacing: 6pt)" in house
     assert "#let lead_pair(left, right" not in house
     assert "#let trail_heading(" in house
-    assert "#let trail_heading(title, mark, spacing: none)" in house
-    assert "#let trail_heading(title, mark, spacing: none, direction:" not in house
+    assert "#let trail_heading(title, mark) = grid(" in house
+    assert "Title shrinks in the 1fr (scale + reflow), one line, never grow." in house
+    assert "spacing:" not in house[house.index("#let trail_heading(") : house.index("#let mos_frame(")]
     trail_heading = house[house.index("#let trail_heading(") : house.index("#let mos_frame(")]
-    assert "dir: ltr" in trail_heading
+    assert "columns: (1fr, auto)" in trail_heading
+    assert "align: horizon + start" in trail_heading
+    assert "layout(size => context {" in trail_heading
+    assert "let wanted = measure(title)" in trail_heading
+    assert "calc.min(100%, size.width / wanted.width * 100%)" in trail_heading
+    assert "scale(factor, origin: start + horizon, reflow: true, title)" in trail_heading
+    assert "reflow: true" in trail_heading
+    assert "clip:" not in trail_heading
+    assert "box(width: 100%, clip: true, title)" not in trail_heading
+    assert trail_heading.rstrip().endswith("  mark,\n)")
+    assert "stack(" not in trail_heading
+    assert "dir: ltr" not in trail_heading
     assert "direction" not in trail_heading
     assert "seated_title" not in trail_heading
     assert "seated_mark" not in trail_heading
     assert "#let mos_frame(" in house
     assert "#let well_frame(" in house
+    well_frame = house[house.index("#let well_frame(") : house.index("#let _order_week_rows(")]
+    assert "grid.cell(align: horizon, box(width: 100%, height: 100%, clip: true, heading))" in well_frame
     assert "#let month_grid(" in house
     assert "rows: (auto, auto) + (1fr,) * week-rows" in house
     assert "grid.hline(y: 1, stroke: hline-stroke)" in house
@@ -232,7 +247,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "reverse" not in quarter_well
     assert "rowspan" not in house
     assert "dir: ltr" in house
-    assert "calc.max(measure(title).height, measure(mark).height)" in house
+    assert "calc.max(measure(title).height, measure(mark).height)" not in house
     assert "measure(seated_title)" not in house
 
 
@@ -267,6 +282,8 @@ def test_device_typ_is_parameterized_from_python_record():
     scribe = render_device_typ(get_device("kindle-scribe"))
     paper = render_device_typ(get_device("158x210"))
     manta = render_device_typ(get_device("manta"))
+    rm2 = render_device_typ(get_device("rm2"))
+    move = render_device_typ(get_device("paper-pro-move"))
     assert nomad == (
         "#let page-width = 118.87mm\n"
         "#let page-height = 158.5mm\n"
@@ -299,7 +316,23 @@ def test_device_typ_is_parameterized_from_python_record():
         "#let writing-clearance = 4mm\n"
         "#let mos-width = 8mm\n"
     )
-    for text in (nomad, scribe, paper, manta):
+    assert rm2 == (
+        "#let page-width = 157.79mm\n"
+        "#let page-height = 210.39mm\n"
+        "#let toolbar-edge = none\n"
+        "#let toolbar-clearance = 0mm\n"
+        "#let writing-clearance = 5mm\n"
+        "#let mos-width = 10mm\n"
+    )
+    assert move == (
+        "#let page-width = 91.79mm\n"
+        "#let page-height = 163.18mm\n"
+        "#let toolbar-edge = none\n"
+        "#let toolbar-clearance = 0mm\n"
+        "#let writing-clearance = 5mm\n"
+        "#let mos-width = 10mm\n"
+    )
+    for text in (nomad, scribe, paper, manta, rm2, move):
         assert "page-margin" not in text
         assert "#let mos-width = toolbar-clearance" not in text
         assert "ppi" not in text

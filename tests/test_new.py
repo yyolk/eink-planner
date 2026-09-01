@@ -12,6 +12,8 @@ from parch.services.job_file import (
     CANONICAL_SECTIONS,
     COMPACT_STYLE,
     DEFAULT_SECTIONS,
+    JOB_DEFAULTS,
+    NOMAD_STYLE,
     emit_job,
     spec_from_data,
     spec_from_device,
@@ -324,6 +326,38 @@ def test_defaults_omit_extras_on_every_device(tmp_path):
         load(out)
     for extra in extras:
         assert extra in CANONICAL_SECTIONS
+
+
+@pytest.mark.parametrize(
+    ("alias", "canonical", "human", "style"),
+    [
+        ("rm1", "remarkable-1", "reMarkable 1", COMPACT_STYLE),
+        ("paper-pure", "remarkable-paper-pure", "reMarkable Paper Pure", COMPACT_STYLE),
+        ("paper-pro", "remarkable-paper-pro", "reMarkable Paper Pro", COMPACT_STYLE),
+        ("paper-pro-move", "remarkable-paper-pro-move", "reMarkable Paper Pro Move", NOMAD_STYLE),
+    ],
+)
+def test_new_remarkable_alias_writes_canonical_id(tmp_path, alias, canonical, human, style):
+    out = tmp_path / f"{alias}.toml"
+    rc = main(["new", "--yes", "--device", alias, "-o", str(out)])
+    assert rc == 0
+    text = out.read_text(encoding="utf-8")
+    data = tomllib.loads(text)
+    assert data["device"]["name"] == canonical
+    assert data["sections"] == list(DEFAULT_SECTIONS)
+    assert "projects" not in data["sections"]
+    assert data["style"]["stroke"]["regular"] == style.stroke_regular
+    assert data["style"]["type"]["body"] == style.type_body
+    assert data["style"]["type"]["h1"] == style.type_h1
+    assert data["section"]["cover"]["font_size"] == style.cover_font_size
+    assert data["section"]["monthly"]["daily_cell_height"] == style.monthly_daily_cell_height
+    assert data["section"]["daily"]["right"]["notes"]["title_height"] == style.notes_title_height
+    assert data["section"]["daily"]["item_spacing"] == style.daily_item_spacing
+    assert human in text
+    assert "# No toolbar." in text
+    assert get_device(alias).id == canonical
+    assert JOB_DEFAULTS[canonical].style is style
+    load(out)
 
 
 def test_new_from_manta_alias_writes_compact_style(tmp_path):

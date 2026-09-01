@@ -84,7 +84,6 @@ class Preamble:
 #let scratch_pad = rect_pattern({_v(p, 'scratch_pad')})
 #let padded_link = padded_link.with(padding: link_padding)
 #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
-#let trail_heading = trail_heading.with(spacing: 1fr)
 #let mos_frame = mos_frame.with(mos-width: mos-width, column-gutter: {_v(mos_layout, 'column_gutter')})
 #let well_frame = well_frame.with(heading-height: {_v(heading, 'height')}, row-gutter: {_v(mos_layout, 'row_gutter')})
 #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)

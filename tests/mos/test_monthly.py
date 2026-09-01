@@ -92,9 +92,13 @@ def test_january_keeps_full_weekdays_and_five_body_rows():
     assert "rows: (1fr, 1fr)" in content
     assert "rows: (1fr, auto, 1fr)" not in content
     assert "rows: (auto, auto, 1fr)" not in content
-    assert "[], align(center + horizon)[Monday]" in content
-    for name in ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"):
-        assert f"align(center + horizon)[{name}]" in content
+    assert (
+        "[], align(center + horizon)[M], align(center + horizon)[T], "
+        "align(center + horizon)[W], align(center + horizon)[T], "
+        "align(center + horizon)[F], align(center + horizon)[S], "
+        "align(center + horizon)[S]"
+    ) in content
+    assert "align(center + horizon)[Monday]" not in content
     assert "align(center + horizon)[Mon]" not in content
     assert not hasattr(_page("2026-01"), "_with_week_column")
 
@@ -103,8 +107,8 @@ def test_hand_right_still_emits_week_first():
     content = _page("2026-01", side="right").content()
     assert "month_weeks(right," in content
     assert "rows: (regular_height,) + (1fr,) * 5" in content
-    assert "[], align(center + horizon)[Monday]" in content
-    assert "align(center + horizon)[Sunday], []" not in content
+    assert "[], align(center + horizon)[M]" in content
+    assert "align(center + horizon)[S], []" not in content
     assert "month_weeks(left," not in content
     assert "columns: (regular_height" not in content
 
@@ -116,7 +120,8 @@ def test_week_placement_none_is_seven_col_without_side():
     assert "columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr)" in content
     assert "rows: (regular_height,) + (1fr,) * 5" in content
     assert "16mm" not in content
-    assert "align(center + horizon)[Monday]" in content
+    assert "align(center + horizon)[M]" in content
+    assert "align(center + horizon)[Monday]" not in content
     assert "rotate(90deg" not in content
     notes = content[content.index("rect_pattern") :]
     assert "block(" not in notes

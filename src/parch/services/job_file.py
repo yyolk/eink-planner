@@ -105,6 +105,11 @@ JOB_DEFAULTS: dict[str, DeviceJobDefaults] = {
     "kindle-scribe": DeviceJobDefaults(DEFAULT_SECTIONS, COMPACT_STYLE),
     "158x210": DeviceJobDefaults(DEFAULT_SECTIONS, COMPACT_STYLE),
     "supernote-manta": DeviceJobDefaults(DEFAULT_SECTIONS, COMPACT_STYLE),
+    "remarkable-1": DeviceJobDefaults(DEFAULT_SECTIONS, COMPACT_STYLE),
+    "remarkable-2": DeviceJobDefaults(DEFAULT_SECTIONS, COMPACT_STYLE),
+    "remarkable-paper-pure": DeviceJobDefaults(DEFAULT_SECTIONS, COMPACT_STYLE),
+    "remarkable-paper-pro": DeviceJobDefaults(DEFAULT_SECTIONS, COMPACT_STYLE),
+    "remarkable-paper-pro-move": DeviceJobDefaults(DEFAULT_SECTIONS, NOMAD_STYLE),
 }
 
 

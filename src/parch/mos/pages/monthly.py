@@ -74,7 +74,7 @@ class Monthly:
         weeks = self._month_in_weeks()
         sample = weeks[1] if len(weeks) > 1 else weeks[0]
         heading = [
-            f'align(center + horizon)[{self.i18n.t(f"weekday.full.{day.weekday_name}")}]'
+            f'align(center + horizon)[{self.i18n.t(f"weekday.letter.{day.weekday_name}")}]'
             for day in sample
         ]
         if self.week_placement == "none":

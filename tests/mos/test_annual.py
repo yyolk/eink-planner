@@ -66,12 +66,15 @@ def test_title_is_year_with_annual_label_not_calendar():
 
 def test_three_by_four_grid_has_three_black_quarter_row_hlines():
     content = _annual().pages(Manifest())[0].content
+    assert "block(\n  width: 100%,\n  height: 1fr,\n  grid(" in content
     assert "columns: (1fr, 1fr, 1fr)" in content
     assert "rows: (1fr, 1fr, 1fr, 1fr)" in content
     # Month name/weekday rules live in house month_grid; annual owns 3 quarter-row rules.
     assert content.count("grid.hline(stroke: regular_stroke + black)") == 3
     assert content.count("month_grid(") == 12
     assert content.count("month_grid(left,") == 12
+    assert content.count("block(width: 100%, height: 100%, month_grid(") == 12
+    assert "block(width: 100%, height: 100%, grid.hline" not in content
     assert "[], [M], [T], [W], [T], [F], [S], [S]" in content
     assert "columns:" not in content.split("month_grid(")[1].split(")")[0]
 
@@ -101,6 +104,7 @@ def test_quarter_hlines_follow_quarters_not_every_third_item():
     # 11 months + 3 quarter-row rules (month rules are in house month_grid).
     assert content.count("grid.hline(stroke: regular_stroke + black)") == 3
     assert content.count("month_grid(") == 11
+    assert content.count("block(width: 100%, height: 100%, month_grid(") == 11
     quarter = "),\ngrid.hline(stroke: regular_stroke + black)"
     # Feb–Dec: Q1 ends at Mar, then Jun and Sep — not every third item (Apr/Jul/Oct).
     assert quarter in _after_month(content, "March")

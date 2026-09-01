@@ -47,7 +47,7 @@ parch new --device supernote-nomad --year 2027 --yes -o mine.toml
 
 ## Devices
 
-Four devices. Lined is paper (`style.scratch_pad`), not a device. MOS strip side is `mos.side_menu` (default left). Override with `--hand left|right` on `press`, `proof`, `new`, and `edit`. `--hand` does not reverse the well.
+Nine devices. Lined is paper (`style.scratch_pad`), not a device. MOS strip side is `mos.side_menu` (default left). Override with `--hand left|right` on `press`, `proof`, `new`, and `edit`. `--hand` does not reverse the well.
 
 | Device | Notes |
 | --- | --- |
@@ -55,6 +55,11 @@ Four devices. Lined is paper (`style.scratch_pad`), not a device. MOS strip side
 | `kindle-scribe` | Kindle Scribe. No toolbar |
 | `158x210` | 158×210 mm. No toolbar |
 | `supernote-manta` | SuperNote Manta (A5 X2). Toolbar top 8mm |
+| `remarkable-1` | reMarkable 1. No toolbar (Scribe pack). Alias `rm1` |
+| `remarkable-2` | reMarkable 2. Same 10.3" canvas as rM1; own name. Alias `rm2` |
+| `remarkable-paper-pure` | reMarkable Paper Pure. Same 10.3" canvas (Carta 1300). Alias `paper-pure` |
+| `remarkable-paper-pro` | reMarkable Paper Pro. No toolbar (Scribe pack). Alias `paper-pro` |
+| `remarkable-paper-pro-move` | reMarkable Paper Pro Move. No toolbar (Scribe pack). Alias `paper-pro-move` |
 
 ## Development
 

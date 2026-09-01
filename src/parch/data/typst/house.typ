@@ -134,15 +134,21 @@
   align(horizon, title),
 )
 
-#let trail_heading(title, mark, spacing: none) = context {
-  let band = calc.max(measure(title).height, measure(mark).height)
-  stack(
-    dir: ltr,
-    spacing: spacing,
-    box(height: band, align(horizon + left, title)),
-    box(height: band, align(horizon + left, mark)),
-  )
-}
+// Title shrinks in the 1fr (scale + reflow), one line, never grow.
+#let trail_heading(title, mark) = grid(
+  columns: (1fr, auto),
+  align: horizon + start,
+  layout(size => context {
+    let wanted = measure(title)
+    let factor = if wanted.width == 0pt {
+      100%
+    } else {
+      calc.min(100%, size.width / wanted.width * 100%)
+    }
+    scale(factor, origin: start + horizon, reflow: true, title)
+  }),
+  mark,
+)
 
 #let mos_frame(side, mos, well, mos-width: none, column-gutter: none) = if side == left {
   grid(
@@ -166,7 +172,7 @@
   columns: 1fr,
   rows: (heading-height, 1fr),
   row-gutter: row-gutter,
-  grid.cell(align: horizon, heading),
+  grid.cell(align: horizon, box(width: 100%, height: 100%, clip: true, heading)),
   body,
 )
 
