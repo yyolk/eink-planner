@@ -118,14 +118,36 @@ PAPER_158X210 = Device(
     mos_width="10mm",
 )
 
-DEVICES: tuple[Device, ...] = (SUPERNOTE_NOMAD, KINDLE_SCRIBE, PAPER_158X210)
+# SuperNote Manta (A5 X2): 1920×2560 @ 300 PPI → 162.56×216.75 mm. Toolbar top 8mm.
+SUPERNOTE_MANTA = Device(
+    id="supernote-manta",
+    name="SuperNote Manta",
+    ppi=300,
+    page_width="162.56mm",
+    page_height="216.75mm",
+    toolbar_edge=TOOLBAR_TOP,
+    toolbar_clearance="8mm",
+    writing_clearance="4mm",
+    mos_width="8mm",
+    width_px=1920,
+    height_px=2560,
+)
+
+DEVICES: tuple[Device, ...] = (
+    SUPERNOTE_NOMAD,
+    KINDLE_SCRIBE,
+    PAPER_158X210,
+    SUPERNOTE_MANTA,
+)
 
 PRESETS: dict[str, Device] = {
     SUPERNOTE_NOMAD.id: SUPERNOTE_NOMAD,
     KINDLE_SCRIBE.id: KINDLE_SCRIBE,
     PAPER_158X210.id: PAPER_158X210,
+    SUPERNOTE_MANTA.id: SUPERNOTE_MANTA,
     "nomad": SUPERNOTE_NOMAD,
     "scribe": KINDLE_SCRIBE,
+    "manta": SUPERNOTE_MANTA,
 }
 
 DEFAULT_DEVICE = SUPERNOTE_NOMAD

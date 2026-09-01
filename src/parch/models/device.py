@@ -51,7 +51,7 @@ from pydantic import (
     model_validator,
 )
 
-from parch.devices import DEVICES, TOOLBAR_TOP, get_device
+from parch.devices import DEVICES, TOOLBAR_TOP, get_device, known_device_ids
 from parch.models.base import StrictModel
 
 _PATTERNS = frozenset({"dotted", "lined"})
@@ -66,7 +66,7 @@ def device_scale(name: str) -> dict[str, str]:
         return get_device(name).scale()
     except KeyError as exc:
         raise ValueError(
-            "unknown physical device; expected supernote-nomad, kindle-scribe, or 158x210"
+            f"unknown physical device; expected {', '.join(known_device_ids())}"
         ) from exc
 
 

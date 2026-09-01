@@ -2,7 +2,7 @@ import pytest
 
 from parch import ConfigError
 from parch.config import StrictDict
-from parch.devices import KINDLE_SCRIBE, PAPER_158X210, SUPERNOTE_NOMAD
+from parch.devices import KINDLE_SCRIBE, PAPER_158X210, SUPERNOTE_MANTA, SUPERNOTE_NOMAD, get_device
 from parch.mos.configurator import Configurator
 from parch.mos.preamble import Preamble
 
@@ -57,3 +57,12 @@ def test_device_presets_match_glass():
     assert PAPER_158X210.toolbar_edge == "none"
     assert PAPER_158X210.width_mm == 158.0
     assert PAPER_158X210.height_mm == 210.0
+    assert SUPERNOTE_MANTA.width_mm == 162.56
+    assert SUPERNOTE_MANTA.height_mm == 216.75
+    assert SUPERNOTE_MANTA.width_pt == 460.8
+    assert SUPERNOTE_MANTA.height_pt == 614.4
+    assert SUPERNOTE_MANTA.toolbar_edge == "top"
+    assert SUPERNOTE_MANTA.width_px == 1920
+    assert SUPERNOTE_MANTA.height_px == 2560
+    assert get_device("manta") is SUPERNOTE_MANTA
+    assert get_device("supernote-manta") is SUPERNOTE_MANTA

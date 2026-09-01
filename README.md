@@ -47,13 +47,14 @@ parch new --from supernote-nomad --year 2027 --yes -o mine.toml
 
 ## Devices
 
-Three devices. Lined is paper (`style.scratch_pad`), not a device. MOS strip side is `mos.side_menu` (default left). Override with `--hand left|right` on `press`, `proof`, `new`, and `edit`. `--hand` does not reverse the well.
+Four devices. Lined is paper (`style.scratch_pad`), not a device. MOS strip side is `mos.side_menu` (default left). Override with `--hand left|right` on `press`, `proof`, `new`, and `edit`. `--hand` does not reverse the well.
 
 | Device | Notes |
 | --- | --- |
 | `supernote-nomad` | SuperNote Nomad (A6 X2). Toolbar top 8mm |
 | `kindle-scribe` | Kindle Scribe. No toolbar |
 | `158x210` | 158×210 mm. No toolbar |
+| `supernote-manta` | SuperNote Manta (A5 X2). Toolbar top 8mm |
 
 ## Development
 

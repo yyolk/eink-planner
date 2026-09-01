@@ -266,6 +266,7 @@ def test_device_typ_is_parameterized_from_python_record():
     nomad = render_device_typ(get_device("supernote-nomad"))
     scribe = render_device_typ(get_device("kindle-scribe"))
     paper = render_device_typ(get_device("158x210"))
+    manta = render_device_typ(get_device("manta"))
     assert nomad == (
         "#let page-width = 118.87mm\n"
         "#let page-height = 158.5mm\n"
@@ -290,7 +291,15 @@ def test_device_typ_is_parameterized_from_python_record():
         "#let writing-clearance = 5mm\n"
         "#let mos-width = 10mm\n"
     )
-    for text in (nomad, scribe, paper):
+    assert manta == (
+        "#let page-width = 162.56mm\n"
+        "#let page-height = 216.75mm\n"
+        "#let toolbar-edge = top\n"
+        "#let toolbar-clearance = 8mm\n"
+        "#let writing-clearance = 4mm\n"
+        "#let mos-width = 8mm\n"
+    )
+    for text in (nomad, scribe, paper, manta):
         assert "page-margin" not in text
         assert "#let mos-width = toolbar-clearance" not in text
         assert "ppi" not in text
