@@ -19,7 +19,7 @@ from tests.helpers import base_config, load_default
 def _habit_header_src(name: str) -> str:
     return _habit_header(name)
 
-NOMAD = base_config("supernote-nomad")
+NOMAD = base_config("supernote-nomad", extras=True)
 MONTHS = (
     "january",
     "february",

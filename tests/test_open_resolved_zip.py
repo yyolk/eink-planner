@@ -1,38 +1,23 @@
-"""Zip-backed open_resolved keeps the extracted profile alive through load."""
+"""open_resolved yields a path for a job file or a device id."""
 
-import importlib
-import sys
 import tomllib
-from importlib.resources import as_file, files
-from pathlib import Path
-from zipfile import ZIP_DEFLATED, ZipFile
 
 from parch.services.config_file import open_resolved
+from parch.services.job_file import emit_job, spec_from_device
 
 
-def test_open_resolved_reads_zip_backed_toml(tmp_path, monkeypatch):
-    archive = tmp_path / "probe.zip"
-    with ZipFile(archive, "w", ZIP_DEFLATED) as package:
-        package.writestr("probe_pkg/__init__.py", "")
-        package.writestr("probe_pkg/configs/zip-probe.toml", "[calendar]\nyear = 2026\n")
+def test_open_resolved_device_id_writes_complete_job():
+    with open_resolved("supernote-nomad") as path:
+        data = tomllib.loads(path.read_text(encoding="utf-8"))
+        assert data["device"]["name"] == "supernote-nomad"
+        assert data["calendar"]["year"] == 2026
+        assert "sections" in data
 
-    sys.path.insert(0, str(archive))
-    importlib.invalidate_caches()
-    try:
-        resource = files("probe_pkg") / "configs" / "zip-probe.toml"
-        with as_file(resource) as path:
-            escaped = Path(path)
-            assert escaped.read_text(encoding="utf-8") == "[calendar]\nyear = 2026\n"
-        assert not escaped.exists()
 
-        monkeypatch.setattr(
-            "parch.services.config_file.files",
-            lambda _name: files("probe_pkg"),
-        )
-        with open_resolved("zip-probe") as path:
-            data = tomllib.loads(path.read_text(encoding="utf-8"))
-            assert data["calendar"]["year"] == 2026
-    finally:
-        sys.path.remove(str(archive))
-        sys.modules.pop("probe_pkg", None)
-        importlib.invalidate_caches()
+def test_open_resolved_existing_path(tmp_path):
+    dest = tmp_path / "job.toml"
+    dest.write_text(emit_job(spec_from_device("158x210")), encoding="utf-8")
+    with open_resolved(str(dest)) as path:
+        assert path == dest
+        data = tomllib.loads(path.read_text(encoding="utf-8"))
+        assert data["device"]["name"] == "158x210"

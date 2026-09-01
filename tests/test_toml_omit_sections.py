@@ -17,6 +17,7 @@ from parch.mos.configurator import Configurator
 from parch.mos.preamble import copy_house_typ
 from parch.services.compile import ensure_typst
 from parch.services.generate import Generate
+from parch.services.job_file import DEFAULT_SECTIONS
 from parch.toml_config import parse_toml
 from tests.toml_fixtures import omit_toml_sections, short_january
 from tests.helpers import base_config, load_default
@@ -24,22 +25,7 @@ from tests.helpers import base_config, load_default
 REPO = Path(__file__).resolve().parents[1]
 NOMAD = base_config("supernote-nomad")
 
-SECTIONS = (
-    "cover",
-    "index",
-    "annual",
-    "quarterly",
-    "monthly",
-    "weekly",
-    "daily",
-    "daily_notes",
-    "projects",
-    "habits",
-    "review",
-    "tasks",
-    "meetings",
-    "colophon",
-)
+SECTIONS = DEFAULT_SECTIONS
 
 _MISSING_LABEL = re.compile(
     r"(?:label|reference)\s+`?<([^>`]+)>`?|(?:unknown label)\s+`?<([^>`]+)>`?",
@@ -103,13 +89,15 @@ def missing_ref_kinds(stderr: str) -> frozenset[str]:
     return frozenset(kinds)
 
 
-def compile_pdf(typst_src: str, workdir: Path) -> tuple[Path, str]:
+def compile_pdf(
+    typst_src: str, workdir: Path, device: str = "supernote-nomad"
+) -> tuple[Path, str]:
     """Compile Typst. A PDF on disk is success; stderr warnings are returned."""
     workdir.mkdir(parents=True, exist_ok=True)
     src = workdir / "index.typst"
     pdf = workdir / "index.pdf"
     src.write_text(typst_src, encoding="utf-8")
-    copy_house_typ(workdir)
+    copy_house_typ(workdir, device=device)
     typst = ensure_typst(tools_dir=REPO / ".tools")
     result = subprocess.run(
         [str(typst), "compile", str(src), str(pdf)],
@@ -152,18 +140,18 @@ def test_omit_one_section_compiles_pdf(kind, tmp_path):
 @pytest.mark.parametrize(
     "omit,remain",
     [
-        (("annual", "quarterly"), ("cover", "index", "monthly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "tasks", "meetings", "colophon")),
-        (("weekly",), ("cover", "index", "annual", "quarterly", "monthly", "daily", "daily_notes", "projects", "habits", "review", "tasks", "meetings", "colophon")),
-        (("monthly",), ("cover", "index", "annual", "quarterly", "weekly", "daily", "daily_notes", "projects", "habits", "review", "tasks", "meetings", "colophon")),
-        (("daily",), ("cover", "index", "annual", "quarterly", "monthly", "weekly", "daily_notes", "projects", "habits", "review", "tasks", "meetings", "colophon")),
-        (("daily_notes",), ("cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "projects", "habits", "review", "tasks", "meetings", "colophon")),
+        (("annual", "quarterly"), ("cover", "index", "monthly", "weekly", "daily", "daily_notes", "colophon")),
+        (("weekly",), ("cover", "index", "annual", "quarterly", "monthly", "daily", "daily_notes", "colophon")),
+        (("monthly",), ("cover", "index", "annual", "quarterly", "weekly", "daily", "daily_notes", "colophon")),
+        (("daily",), ("cover", "index", "annual", "quarterly", "monthly", "weekly", "daily_notes", "colophon")),
+        (("daily_notes",), ("cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "colophon")),
         (
             ("cover", "annual", "quarterly", "monthly", "weekly", "daily_notes"),
-            ("index", "daily", "projects", "habits", "review", "tasks", "meetings", "colophon"),
+            ("index", "daily", "colophon"),
         ),
         (
             ("annual", "quarterly", "monthly", "weekly", "daily", "daily_notes"),
-            ("cover", "index", "projects", "habits", "review", "tasks", "meetings", "colophon"),
+            ("cover", "index", "colophon"),
         ),
     ],
     ids=[

@@ -360,17 +360,9 @@ def test_generate_cmd_attaches_provenance_but_page_stays_quiet(tmp_path, monkeyp
     assert __version__ in typst_src
 
 
-def test_shipped_profiles_include_colophon_where_shipped():
-    include = {
-        "supernote-nomad.toml",
-        "supernote-nomad-lined.toml",
-        "kindle-scribe.toml",
-        "kindle-scribe-lined.toml",
-        "158x210.toml",
-        "158x210-lined.toml",
-    }
-    for name in include:
-        dto = load(base_config(name.removesuffix(".toml")))
+def test_device_jobs_include_colophon():
+    for name in ("supernote-nomad", "kindle-scribe", "158x210"):
+        dto = load(base_config(name))
         names = [s["name"] for s in Configurator(dto).enabled_sections()]
         assert names[-1] == "colophon", name
 
@@ -652,11 +644,11 @@ def test_dump_pagination_seats_follow_below_profile_margin_top():
     assert "place(top + left, pad(top:" in n
     assert "#show: rest" not in n
     assert "header-ascent" not in n
-    assert "pad(top: 5mm" in s
-    assert "5mm + h1" in s
+    assert "pad(top: 0mm" in s
+    assert "0mm + h1" in s
     assert "8mm" not in s
-    assert "pad(top: 5mm" in x
-    assert "5mm + h1" in x
+    assert "pad(top: 0mm" in x
+    assert "0mm + h1" in x
     assert "8mm" not in x
 
 

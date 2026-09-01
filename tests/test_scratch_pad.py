@@ -12,11 +12,11 @@ from tests.toml_fixtures import _minimal, short_january
 from tests.helpers import base_config, load_default
 
 NOMAD = base_config("supernote-nomad")
-NOMAD_LINED = base_config("supernote-nomad-lined")
+NOMAD_LINED = base_config("supernote-nomad", paper="lined")
 PAPER_158 = base_config("158x210")
-PAPER_158_LINED = base_config("158x210-lined")
+PAPER_158_LINED = base_config("158x210", paper="lined")
 SCRIBE = base_config("kindle-scribe")
-SCRIBE_LINED = base_config("kindle-scribe-lined")
+SCRIBE_LINED = base_config("kindle-scribe", paper="lined")
 
 _LINED = [
     PAPER_158_LINED,
@@ -196,7 +196,7 @@ def test_mixed_profile_typst_emits_both_rect_patterns():
 
 
 @pytest.mark.parametrize("path", [NOMAD, PAPER_158, SCRIBE])
-def test_shipped_profiles_keep_dotted_scratch_areas(path: Path):
+def test_device_jobs_keep_dotted_scratch_areas(path: Path):
     dto = load(path)
     assert dto["planner"]["params"]["scratch_pad"] == "dotted"
     assert _notes_pattern(dto) == "dotted"
@@ -217,7 +217,7 @@ def test_shipped_profiles_keep_dotted_scratch_areas(path: Path):
 
 
 @pytest.mark.parametrize("path", _LINED)
-def test_lined_sibling_keeps_daily_notes_dotted(path: Path):
+def test_lined_paper_keeps_daily_on_page_notes_dotted(path: Path):
     dto = load(path)
     assert dto["planner"]["params"]["scratch_pad"] == "lined"
     assert _notes_pattern(dto) == "dotted"

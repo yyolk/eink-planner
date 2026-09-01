@@ -7,42 +7,26 @@ from parch.cli import build_parser
 from parch.config import load
 from parch.models.device import DEVICE_SCALE, device_page_margin, device_scale
 from parch.mos.configurator import Configurator
+from parch.services.job_file import DEFAULT_SECTIONS
 from parch.toml_config import apply_debug, apply_hand, apply_year, load_toml, parse_toml
 from tests.toml_fixtures import _minimal, omit_toml_sections
 from tests.helpers import base_config, load_default
 
 NOMAD = base_config("supernote-nomad")
-NOMAD_LINED = base_config("supernote-nomad-lined")
+NOMAD_LINED = base_config("supernote-nomad", paper="lined")
 PAPER_158 = base_config("158x210")
-PAPER_158_LINED = base_config("158x210-lined")
+PAPER_158_LINED = base_config("158x210", paper="lined")
 SCRIBE = base_config("kindle-scribe")
-SCRIBE_LINED = base_config("kindle-scribe-lined")
+SCRIBE_LINED = base_config("kindle-scribe", paper="lined")
 
-_SHIPPED = [
+_DEVICES = [
     NOMAD,
-    NOMAD_LINED,
     PAPER_158,
-    PAPER_158_LINED,
     SCRIBE,
-    SCRIBE_LINED,
 ]
 _NOMAD = {NOMAD, NOMAD_LINED}
-_NOMAD_SECTIONS = [
-    "cover",
-    "index",
-    "annual",
-    "quarterly",
-    "monthly",
-    "weekly",
-    "daily",
-    "daily_notes",
-    "projects",
-    "habits",
-    "review",
-    "tasks",
-    "meetings",
-    "colophon",
-]
+_DEFAULT_SECTIONS = list(DEFAULT_SECTIONS)
+_EXTRAS = ("projects", "habits", "review", "tasks", "meetings")
 _LINED = {
     PAPER_158_LINED,
     NOMAD_LINED,
@@ -50,18 +34,14 @@ _LINED = {
 }
 
 
-@pytest.mark.parametrize("path", _SHIPPED)
-def test_parse_shipped_toml_profiles(path: Path):
+@pytest.mark.parametrize("path", _DEVICES)
+def test_parse_device_job_defaults(path: Path):
     dto = load(path)
     assert dto["chase"] == "mos"
     assert "debug" not in dto
     cfg = Configurator(dto)
     names = [section["name"] for section in cfg.enabled_sections()]
-    if path in _NOMAD:
-        expected = list(_NOMAD_SECTIONS)
-    else:
-        expected = ["cover", "index", "annual", "quarterly", "monthly", "weekly", "daily", "daily_notes", "colophon"]
-    assert names == expected
+    assert names == _DEFAULT_SECTIONS
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["reverse_months_quarters"] is True
     assert "side_menu_width" not in mos
@@ -80,10 +60,11 @@ def test_parse_shipped_toml_profiles(path: Path):
     assert "columns = [" not in text
     assert "\nwidth = " not in text
     assert "\nheight = " not in text
-    assert scale["mos_width"] != scale["toolbar_clearance"] or path.name.startswith("supernote-nomad")
     assert DEVICE_SCALE["kindle-scribe"]["mos_width"] == "10mm"
-    assert DEVICE_SCALE["kindle-scribe"]["toolbar_clearance"] == "5mm"
+    assert DEVICE_SCALE["kindle-scribe"]["toolbar_edge"] == "none"
+    assert DEVICE_SCALE["kindle-scribe"]["toolbar_clearance"] == "0mm"
     assert DEVICE_SCALE["supernote-nomad"]["mos_width"] == "8mm"
+    assert DEVICE_SCALE["supernote-nomad"]["toolbar_edge"] == "top"
 
 
 def test_load_rejects_yaml_and_kdl_device_profiles():
@@ -159,15 +140,27 @@ def test_apply_hand_right_does_not_flip_daily_tracks():
 
 
 @pytest.mark.parametrize("path", sorted(_NOMAD, key=lambda p: p.name))
-def test_nomad_projects_pages_and_card_rows(path: Path):
+def test_nomad_defaults_omit_extras(path: Path):
+    dto = load(path)
+    names = [s["name"] for s in Configurator(dto).enabled_sections()]
+    assert names == _DEFAULT_SECTIONS
+    for extra in _EXTRAS:
+        assert extra not in names
+        assert f"[section.{extra}]" not in path.read_text(encoding="utf-8")
+
+
+def test_nomad_projects_pages_and_card_rows_when_selected():
+    path = base_config("supernote-nomad", extras=True)
     dto = load(path)
     projects = next(s for s in dto["planner"]["sections"] if s["name"] == "projects")
     assert projects["params"]["pages"] == 16
     assert projects["params"]["card_rows"] == 5
     names = [s["name"] for s in Configurator(dto).enabled_sections()]
-    assert names == _NOMAD_SECTIONS
     assert names.index("projects") == names.index("daily_notes") + 1
     assert names.index("habits") == names.index("projects") + 1
+    for extra in _EXTRAS:
+        assert extra in names
+        assert f"[section.{extra}]" in path.read_text(encoding="utf-8")
 
 
 def _daily_notes_params(dto):
@@ -585,7 +578,7 @@ name = "158x210"
     assert dto["device"] == "158x210"
     assert dto["document"]["layout"]["dimensions"]["width"] == "158mm"
     assert dto["document"]["layout"]["dimensions"]["height"] == "210mm"
-    assert dto["document"]["layout"]["margin"]["top"] == "5mm"
+    assert dto["document"]["layout"]["margin"]["top"] == "0mm"
     assert dto["document"]["layout"]["margin"]["right"] == "5mm"
 
 

@@ -1,4 +1,4 @@
-"""CLI: `parch press`, `parch proof`, and `parch new`."""
+"""CLI: `parch press`, `parch proof`, `parch new`, and `parch edit`."""
 
 import argparse
 import sys
@@ -13,7 +13,7 @@ from parch.mos.configurator import Configurator
 from parch.mos.preamble import copy_house_typ
 from parch.services.compile import Compile, CompileError
 from parch.services.generate import Generate
-from parch.services.config_file import DEFAULT_FROM, open_resolved, run_new, shipped_help
+from parch.services.config_file import DEFAULT_FROM, open_resolved, run_edit, run_new, shipped_help
 from parch.services.preview_svg import DEFAULT_SCALE, parse_pages, preview_svg, sample_page_numbers
 
 
@@ -32,13 +32,13 @@ def build_parser() -> argparse.ArgumentParser:
         description="Generate a yearly e-ink planner PDF from a TOML config.",
     )
     parser.add_argument("--version", action="version", version=f"parch {__version__}")
-    sub = parser.add_subparsers(dest="command", required=True, metavar="{press,proof,new}")
+    sub = parser.add_subparsers(dest="command", required=True, metavar="{press,proof,new,edit}")
 
     new = sub.add_parser(
         "new",
-        help="Write a profile from a shipped template.",
-        description="Write a profile from a shipped template.",
-        epilog="Shipped profiles: " + shipped_help() + ".",
+        help="Write a job file from a device and defaults.",
+        description="Write a complete job file from a device record plus defaults.",
+        epilog="Devices: " + shipped_help() + ".",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     new.add_argument("outfile", nargs="?", help="Output path")
@@ -51,8 +51,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--from",
         dest="from_profile",
         default=None,
-        metavar="PROFILE",
-        help=f"Starting profile or path (default {DEFAULT_FROM}).",
+        metavar="DEVICE",
+        help=f"Device id (default {DEFAULT_FROM}).",
     )
     new.add_argument(
         "--year",
@@ -68,7 +68,7 @@ def build_parser() -> argparse.ArgumentParser:
     new.add_argument(
         "--yes",
         action="store_true",
-        help="No prompts; use flags and source-file defaults",
+        help="No prompts; use flags and device defaults",
     )
     new.add_argument(
         "--force",
@@ -77,8 +77,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_hand_flag(new)
 
+    edit = sub.add_parser(
+        "edit",
+        help="Reopen a job file in Questionary.",
+        description="Reopen a job file in Questionary and write complete resume state back.",
+    )
+    edit.add_argument("infile", help="Existing job file")
+    _add_hand_flag(edit)
+
     press = sub.add_parser("press", help="Press a profile to PDF")
-    press.add_argument("config", help="Planner profile (path or shipped stem)")
+    press.add_argument("config", help="Planner job file or device id")
     press.add_argument(
         "-w",
         "--workdir",
@@ -114,7 +122,7 @@ def build_parser() -> argparse.ArgumentParser:
         "proof",
         help="Pull SVG proofs of selected pages",
     )
-    proof.add_argument("config", help="Planner profile (path or shipped stem)")
+    proof.add_argument("config", help="Planner job file or device id")
     proof.add_argument(
         "-w",
         "--workdir",
@@ -157,6 +165,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_hand_flag(proof)
     new.set_defaults(run=new_cmd)
+    edit.set_defaults(run=edit_cmd)
     press.set_defaults(run=generate_cmd)
     proof.set_defaults(run=preview_svg_cmd)
     return parser
@@ -188,6 +197,10 @@ def new_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
     )
 
 
+def edit_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
+    return run_edit(infile=args.infile, hand=getattr(args, "hand", None))
+
+
 def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
     with open_resolved(args.config) as config_path:
         i18n = I18n.load_default(args.locale)
@@ -204,7 +217,7 @@ def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
     typst_source = Generate(i18n=i18n).generate(dto)
 
     workdir = Path(args.workdir)
-    _write_generated_book(workdir, typst_source)
+    _write_generated_book(workdir, typst_source, device=str(dto["device"]))
 
     pdf = Compile().compile(
         workdir=workdir,
@@ -232,7 +245,7 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
         )
     typst_source = Generate(i18n=i18n).generate(dto)
     workdir = Path(args.workdir)
-    _write_generated_book(workdir, typst_source)
+    _write_generated_book(workdir, typst_source, device=str(dto["device"]))
 
     if args.samples:
         if args.crop:
@@ -276,11 +289,11 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
     return 0
 
 
-def _write_generated_book(workdir: Path, typst_source: str) -> None:
-    """Write index.typst and copy house.typ plus the device .typ into the workdir."""
+def _write_generated_book(workdir: Path, typst_source: str, device: str) -> None:
+    """Write index.typst, house.typ, and the parameterized device.typ."""
     workdir.mkdir(parents=True, exist_ok=True)
     (workdir / "index.typst").write_text(typst_source, encoding="utf-8")
-    copy_house_typ(workdir)
+    copy_house_typ(workdir, device=device)
     print(f"Wrote {workdir / 'index.typst'}")
 
 

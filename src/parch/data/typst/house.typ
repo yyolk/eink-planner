@@ -1,3 +1,10 @@
+#let page-margin(side, toolbar-edge: none, toolbar-clearance: none, writing-clearance: none) = (
+  top: if toolbar-edge == top { toolbar-clearance } else { 0mm },
+  bottom: 0mm,
+  left: if side == right { writing-clearance } else { 0mm },
+  right: if side == left { writing-clearance } else { 0mm },
+)
+
 #let dotted(regular_height: none) = place(
   dx: 0.5pt,
   dy: regular_height - 0.3mm,
