@@ -137,7 +137,8 @@
 #let trail_heading(title, mark) = grid(
   columns: (1fr, auto),
   // title clipped in the 1fr, mark auto
-  grid.cell(clip: true, align: horizon + start, title),
+  // Typst 0.15.1 grid.cell has no clip; box clips the 1fr title.
+  grid.cell(align: horizon + start, box(width: 100%, clip: true, title)),
   align(horizon + start, mark),
 )
 
@@ -163,7 +164,7 @@
   columns: 1fr,
   rows: (heading-height, 1fr),
   row-gutter: row-gutter,
-  grid.cell(align: horizon, clip: true, heading),
+  grid.cell(align: horizon, box(width: 100%, height: 100%, clip: true, heading)),
   body,
 )
 

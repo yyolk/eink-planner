@@ -128,7 +128,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "spacing:" not in house[house.index("#let trail_heading(") : house.index("#let mos_frame(")]
     trail_heading = house[house.index("#let trail_heading(") : house.index("#let mos_frame(")]
     assert "columns: (1fr, auto)" in trail_heading
-    assert "grid.cell(clip: true, align: horizon + start, title)" in trail_heading
+    assert "grid.cell(align: horizon + start, box(width: 100%, clip: true, title))" in trail_heading
     assert "align(horizon + start, mark)" in trail_heading
     assert "stack(" not in trail_heading
     assert "dir: ltr" not in trail_heading
@@ -138,7 +138,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let mos_frame(" in house
     assert "#let well_frame(" in house
     well_frame = house[house.index("#let well_frame(") : house.index("#let _order_week_rows(")]
-    assert "grid.cell(align: horizon, clip: true, heading)" in well_frame
+    assert "grid.cell(align: horizon, box(width: 100%, height: 100%, clip: true, heading))" in well_frame
     assert "#let month_grid(" in house
     assert "rows: (auto, auto) + (1fr,) * week-rows" in house
     assert "grid.hline(y: 1, stroke: hline-stroke)" in house
@@ -239,7 +239,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "reverse" not in quarter_well
     assert "rowspan" not in house
     assert "dir: ltr" in house
-    assert "calc.max(measure(title).height, measure(mark).height)" in house
+    assert "calc.max(measure(title).height, measure(mark).height)" not in house
     assert "measure(seated_title)" not in house
 
 
