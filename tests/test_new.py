@@ -10,6 +10,7 @@ from parch.config import load
 from parch.devices import get_device
 from parch.services.job_file import (
     CANONICAL_SECTIONS,
+    COMPACT_STYLE,
     DEFAULT_SECTIONS,
     emit_job,
     spec_from_data,
@@ -161,6 +162,7 @@ def test_new_help_lists_device_names(capsys):
     assert "SuperNote Nomad" in out
     assert "Kindle Scribe" in out
     assert "158 × 210" in out
+    assert "SuperNote Manta" in out
     assert "lined" not in out.lower()
     assert "left-handed" not in out
     assert "MOS-left" not in out
@@ -302,7 +304,7 @@ def test_new_yes_writes_device_defaults(tmp_path):
 
 def test_defaults_omit_extras_on_every_device(tmp_path):
     extras = ("projects", "habits", "review", "tasks", "meetings")
-    for device in ("supernote-nomad", "kindle-scribe", "158x210"):
+    for device in ("supernote-nomad", "kindle-scribe", "158x210", "supernote-manta"):
         out = tmp_path / f"{device}.toml"
         rc = main(["new", "--from", device, "--yes", "-o", str(out)])
         assert rc == 0
@@ -316,6 +318,29 @@ def test_defaults_omit_extras_on_every_device(tmp_path):
         load(out)
     for extra in extras:
         assert extra in CANONICAL_SECTIONS
+
+
+def test_new_from_manta_alias_writes_compact_style(tmp_path):
+    out = tmp_path / "manta.toml"
+    rc = main(["new", "--yes", "--from", "manta", "-o", str(out)])
+    assert rc == 0
+    text = out.read_text(encoding="utf-8")
+    data = tomllib.loads(text)
+    assert data["device"]["name"] == "supernote-manta"
+    assert data["sections"] == list(DEFAULT_SECTIONS)
+    assert "projects" not in data["sections"]
+    style = COMPACT_STYLE
+    assert data["style"]["stroke"]["regular"] == style.stroke_regular
+    assert data["style"]["type"]["body"] == style.type_body
+    assert data["style"]["type"]["h1"] == style.type_h1
+    assert data["section"]["cover"]["font_size"] == style.cover_font_size
+    assert data["section"]["monthly"]["daily_cell_height"] == style.monthly_daily_cell_height
+    assert data["section"]["daily"]["right"]["notes"]["title_height"] == style.notes_title_height
+    assert data["section"]["daily"]["item_spacing"] == style.daily_item_spacing
+    assert "SuperNote Manta" in text
+    assert "Toolbar top 8mm." in text
+    assert get_device("manta").id == "supernote-manta"
+    load(out)
 
 
 def test_sections_checkbox_offers_extras_unchecked(tmp_path, monkeypatch):

@@ -67,3 +67,30 @@ def test_device_typ_toolbar_edges():
     assert "toolbar-clearance = 0mm" in scribe
     assert "toolbar-edge = none" in paper
     assert "toolbar-clearance = 0mm" in paper
+
+
+def test_manta_generate_succeeds_and_device_typ_binds_x2_chrome():
+    dto = load(base_config("supernote-manta"))
+    names = [section["name"] for section in Configurator(dto).enabled_sections()]
+    assert names == list(DEFAULT_SECTIONS)
+    assert dto["document"]["layout"]["margin"].to_plain() == {
+        "top": "8mm",
+        "bottom": "0mm",
+        "left": "0mm",
+        "right": "4mm",
+    }
+    now = _generate("supernote-manta")
+    assert "page-margin(left)" in now
+    assert "toolbar-edge" in now.split("#set page", 1)[0]
+    typst = Preamble(Configurator(dto)).generate()
+    assert "margin: page-margin(left)" in typst
+    assert "toolbar-clearance)" not in typst.split("#set page", 1)[1].split("\n", 1)[0]
+    manta = render_device_typ(get_device("manta"))
+    assert manta == (
+        "#let page-width = 162.56mm\n"
+        "#let page-height = 216.75mm\n"
+        "#let toolbar-edge = top\n"
+        "#let toolbar-clearance = 8mm\n"
+        "#let writing-clearance = 4mm\n"
+        "#let mos-width = 8mm\n"
+    )

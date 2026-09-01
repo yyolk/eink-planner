@@ -20,6 +20,8 @@ _DEVICE_NAMES = {
     "kindle-scribe": "Kindle Scribe",
     "scribe": "Kindle Scribe",
     "158x210": "158 × 210",
+    "supernote-manta": "SuperNote Manta",
+    "manta": "SuperNote Manta",
 }
 
 _TABLE_HEADER = re.compile(r"(?m)^[ \t]*\[(\[?)([^\]]+)\](\]?)[ \t]*\r?\n")

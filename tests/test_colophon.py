@@ -266,6 +266,9 @@ def test_device_label_is_human_name():
     paper = Colophon(**_colo_kwargs(device="158x210")).pages(None)[0].content
     assert "158 × 210" in paper
     assert "158x210" not in paper
+    manta = Colophon(**_colo_kwargs(device="supernote-manta")).pages(None)[0].content
+    assert "SuperNote Manta" in manta
+    assert "supernote-manta" not in manta
 
 
 def test_colophon_between_cover_and_annual_keeps_links(tmp_path):
@@ -361,7 +364,7 @@ def test_generate_cmd_attaches_provenance_but_page_stays_quiet(tmp_path, monkeyp
 
 
 def test_device_jobs_include_colophon():
-    for name in ("supernote-nomad", "kindle-scribe", "158x210"):
+    for name in ("supernote-nomad", "kindle-scribe", "158x210", "supernote-manta"):
         dto = load(base_config(name))
         names = [s["name"] for s in Configurator(dto).enabled_sections()]
         assert names[-1] == "colophon", name

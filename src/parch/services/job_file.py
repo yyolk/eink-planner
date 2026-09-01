@@ -104,6 +104,7 @@ JOB_DEFAULTS: dict[str, DeviceJobDefaults] = {
     "supernote-nomad": DeviceJobDefaults(DEFAULT_SECTIONS, NOMAD_STYLE),
     "kindle-scribe": DeviceJobDefaults(DEFAULT_SECTIONS, COMPACT_STYLE),
     "158x210": DeviceJobDefaults(DEFAULT_SECTIONS, COMPACT_STYLE),
+    "supernote-manta": DeviceJobDefaults(DEFAULT_SECTIONS, COMPACT_STYLE),
 }
 
 

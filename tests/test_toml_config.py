@@ -18,11 +18,13 @@ PAPER_158 = base_config("158x210")
 PAPER_158_LINED = base_config("158x210", paper="lined")
 SCRIBE = base_config("kindle-scribe")
 SCRIBE_LINED = base_config("kindle-scribe", paper="lined")
+MANTA = base_config("supernote-manta")
 
 _DEVICES = [
     NOMAD,
     PAPER_158,
     SCRIBE,
+    MANTA,
 ]
 _NOMAD = {NOMAD, NOMAD_LINED}
 _DEFAULT_SECTIONS = list(DEFAULT_SECTIONS)
@@ -65,6 +67,10 @@ def test_parse_device_job_defaults(path: Path):
     assert DEVICE_SCALE["kindle-scribe"]["toolbar_clearance"] == "0mm"
     assert DEVICE_SCALE["supernote-nomad"]["mos_width"] == "8mm"
     assert DEVICE_SCALE["supernote-nomad"]["toolbar_edge"] == "top"
+    assert DEVICE_SCALE["supernote-manta"]["mos_width"] == "8mm"
+    assert DEVICE_SCALE["supernote-manta"]["toolbar_edge"] == "top"
+    assert DEVICE_SCALE["supernote-manta"]["toolbar_clearance"] == "8mm"
+    assert DEVICE_SCALE["supernote-manta"]["writing_clearance"] == "4mm"
 
 
 def test_load_rejects_yaml_and_kdl_device_profiles():
