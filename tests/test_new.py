@@ -7,7 +7,7 @@ import pytest
 from parch import ConfigError
 from parch.cli import build_parser, main
 from parch.config import load
-from parch.devices import get_device
+from parch.devices import DEVICES, get_device, known_device_ids
 from parch.services.job_file import (
     CANONICAL_SECTIONS,
     COMPACT_STYLE,
@@ -159,10 +159,8 @@ def test_new_help_lists_device_names(capsys):
     assert "Device id (default supernote-nomad)." in out
     assert "Year. Also updates a year-only cover title." in out
     assert "Sections to keep, comma-separated." in out
-    assert "SuperNote Nomad" in out
-    assert "Kindle Scribe" in out
-    assert "158 × 210" in out
-    assert "SuperNote Manta" in out
+    for device in DEVICES:
+        assert device.name in out
     assert "lined" not in out.lower()
     assert "left-handed" not in out
     assert "MOS-left" not in out
@@ -304,7 +302,7 @@ def test_new_yes_writes_device_defaults(tmp_path):
 
 def test_defaults_omit_extras_on_every_device(tmp_path):
     extras = ("projects", "habits", "review", "tasks", "meetings")
-    for device in ("supernote-nomad", "kindle-scribe", "158x210", "supernote-manta"):
+    for device in known_device_ids():
         out = tmp_path / f"{device}.toml"
         rc = main(["new", "--from", device, "--yes", "-o", str(out)])
         assert rc == 0
