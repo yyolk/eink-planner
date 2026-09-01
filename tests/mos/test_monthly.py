@@ -150,8 +150,8 @@ def test_week_rail_is_number_only():
     assert "Week 1" not in content
     assert "Week 5" not in content
     assert "[Week " not in content
-    assert "rotate(90deg, reflow: true)[#[1]]" in content
-    assert "rotate(90deg, reflow: true)[#[5]]" in content
+    assert "rotate(90deg)[#[1]]" in content
+    assert "rotate(90deg)[#[5]]" in content
 
 
 def test_day_numbers_sit_unboxed_in_the_corner():
@@ -231,7 +231,7 @@ def test_generated_title_is_january_without_year_and_inverts_only_the_month():
     assert "Notes" not in jan
     assert INNER_DAY_BOX not in jan
     assert "Week 1" not in jan
-    assert "rotate(90deg, reflow: true)[#padded_link(<2026W01>)[1]]" in jan
+    assert "rotate(90deg)[#padded_link(<2026W01>)[1]]" in jan
     assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in jan
     assert "table.cell(fill: black, text(white)[#padded_link(<quarter-2026-1>)[Q1]])" not in jan
     assert "table.cell([#padded_link(<quarter-2026-1>)[Q1]])" in jan

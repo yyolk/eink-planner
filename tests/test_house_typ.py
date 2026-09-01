@@ -51,6 +51,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "week_matrix" in names
     assert "dotted_centered" in names
     assert "lined_fill" in names
+    assert "task_fill" in names
     assert "lined_well" in names
     assert "daily_well" in names
     assert "quarter_well" in names
@@ -88,6 +89,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let lined_fill = lined_fill.with(regular_height: regular_height, regular_stroke: regular_stroke)" in typst
     assert "#let review_lined = lined_fill(paint: black)" in typst
     assert "#let lined_fill = lined_fill()" in typst
+    assert "#let task_fill = task_fill(page-width: page-width, regular_height: regular_height, regular_stroke: regular_stroke)" in typst
     assert "#let scratch_pad = lined_well(dotted_centered)" in typst
     assert "here().position()" not in typst
     assert "link(target)[#box(inset: padding, content)]" not in typst
@@ -132,7 +134,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "(1fr,) * 8" not in typst
     house = house_typ_resource().read_text(encoding="utf-8")
     assert "#set page" not in house
-    assert "page-width" not in house
+    assert "#let page-width" not in house
     assert "#let page-margin(side, toolbar-edge: none, toolbar-clearance: none, writing-clearance: none)" in house
     assert "if toolbar-edge == top { toolbar-clearance } else { 0mm }" in house
     assert "#let contents_bars(" in house
@@ -326,10 +328,28 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let rect_pattern(" not in house
     assert "#let rect_pattern_centered(" not in house
     assert "#let lined_fill(" in house
-    lined_fill = house[house.index("#let lined_fill(") : house.index("#let padded_link(")]
+    lined_fill = house[house.index("#let lined_fill(") : house.index("#let task_fill(")]
     assert "paint: luma(130)" in lined_fill
     assert "regular_stroke + paint" in lined_fill
     assert "regular_stroke + luma(130)" not in lined_fill
+    assert "#let task_fill(" in house
+    task_fill = house[house.index("#let task_fill(") : house.index("#let padded_link(")]
+    assert task_fill.startswith(
+        "#let task_fill(page-width: none, regular_height: none, regular_stroke: none) = tiling(\n"
+        "  size: (page-width, regular_height),\n"
+        "  block(\n"
+        "    width: page-width,\n"
+        "    height: regular_height,\n"
+        "    stroke: (bottom: regular_stroke + black),\n"
+        "    align(\n"
+        "      horizon + start,\n"
+        "      $square.stroked$,\n"
+        "    )\n"
+        "  ),\n"
+        ")\n"
+    )
+    assert "layout(" not in task_fill
+    assert "calc.floor" not in task_fill
     assert "#let lined_well(" in house
     lined_start = house.index("#let lined_well(")
     lined_well = house[lined_start : house.index("\n\n", lined_start)]
@@ -458,6 +478,7 @@ def test_copy_house_typ_writes_workdir(tmp_path):
     assert text == packaged
     assert "#let dotted_centered(" in text
     assert "#let lined_fill(" in text
+    assert "#let task_fill(" in text
     assert "#let rect_pattern(" not in text
     assert "#let padded_link(" in text
     assert "#let contents_bars(" in text

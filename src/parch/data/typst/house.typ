@@ -5,8 +5,8 @@
   right: if side == left { writing-clearance } else { 0mm },
 )
 
-// House paper is a tiling fill. dotted_centered and lined_fill are
-// the live tiles; lined_well is the full-bleed writing field.
+// House paper is a tiling fill. dotted_centered, lined_fill, and
+// task_fill are the live tiles; lined_well is the full-bleed writing field.
 #let dotted_centered(regular_height: none) = tiling(
   size: (regular_height, regular_height),
   // place(center + horizon) does not resolve against a tiling cell
@@ -31,6 +31,19 @@
     start: (0pt, regular_height - 0.15mm),
     end: (regular_height, regular_height - 0.15mm),
     stroke: regular_stroke + paint,
+  ),
+)
+
+#let task_fill(page-width: none, regular_height: none, regular_stroke: none) = tiling(
+  size: (page-width, regular_height),
+  block(
+    width: page-width,
+    height: regular_height,
+    stroke: (bottom: regular_stroke + black),
+    align(
+      horizon + start,
+      $square.stroked$,
+    )
   ),
 )
 

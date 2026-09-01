@@ -220,7 +220,7 @@ class Tasks:
   {self._heading(manifest, tasks_cell)},
   {quiet},
   {day_strip},
-  {_TASK_FIELD}
+  lined_well(task_fill)
 )"""
 
     def _day_cell(self, manifest: Manifest, day: Day) -> str:
@@ -238,17 +238,3 @@ class Tasks:
         if manifest.source(day.id):
             band = f"padded_link(<{day.id}>, {band})"
         return f"grid.cell(align: horizon + center, {band})"
-
-
-_TASK_FIELD = """layout(size => {
-  let n = calc.max(0, calc.floor(size.height / regular_height))
-  if n == 0 { [] } else {
-    grid(
-      columns: 1fr,
-      rows: n * (regular_height,),
-      stroke: (_, _) => (bottom: regular_stroke + black),
-      inset: 0pt,
-      ..n * (box(height: regular_height, align(horizon, [$square.stroked$])),),
-    )
-  }
-})"""

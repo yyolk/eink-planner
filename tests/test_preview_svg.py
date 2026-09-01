@@ -206,6 +206,7 @@ def test_house_paper_is_tiling_fill():
     assert "tiling(" in paper
     assert "#let dotted_centered(" in paper
     assert "#let lined_fill(" in paper
+    assert "#let task_fill(" in paper
     assert "#let dotted(" not in house
     assert "#let lined(" not in house
     assert "#let rect_pattern(" not in house

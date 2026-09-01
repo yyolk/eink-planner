@@ -248,11 +248,11 @@
         month_weeks(left,
           rows: (regular_height,) + (1fr,) * 5,
           [], align(center + horizon)[M], align(center + horizon)[T], align(center + horizon)[W], align(center + horizon)[T], align(center + horizon)[F], align(center + horizon)[S], align(center + horizon)[S],
-          align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W01>)[1]]), [], [], [], grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-01>)[1]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-03>)[3]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-04>)[4]]),
-      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-05>)[5]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-06>)[6]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-07>)[7]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-08>)[8]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-09>)[9]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-10>)[10]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-11>)[11]]),
-      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W03>)[3]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-12>)[12]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-13>)[13]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-14>)[14]]), grid.cell(align: top + left, inset: 3pt, [#[15]]), grid.cell(align: top + left, inset: 3pt, [#[16]]), grid.cell(align: top + left, inset: 3pt, [#[17]]), grid.cell(align: top + left, inset: 3pt, [#[18]]),
-      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W04>)[4]]), grid.cell(align: top + left, inset: 3pt, [#[19]]), grid.cell(align: top + left, inset: 3pt, [#[20]]), grid.cell(align: top + left, inset: 3pt, [#[21]]), grid.cell(align: top + left, inset: 3pt, [#[22]]), grid.cell(align: top + left, inset: 3pt, [#[23]]), grid.cell(align: top + left, inset: 3pt, [#[24]]), grid.cell(align: top + left, inset: 3pt, [#[25]]),
-      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W05>)[5]]), grid.cell(align: top + left, inset: 3pt, [#[26]]), grid.cell(align: top + left, inset: 3pt, [#[27]]), grid.cell(align: top + left, inset: 3pt, [#[28]]), grid.cell(align: top + left, inset: 3pt, [#[29]]), grid.cell(align: top + left, inset: 3pt, [#[30]]), grid.cell(align: top + left, inset: 3pt, [#[31]]), []
+          align(center + horizon, rotate(90deg)[#padded_link(<2026W01>)[1]]), [], [], [], grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-01>)[1]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-03>)[3]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-04>)[4]]),
+      align(center + horizon, rotate(90deg)[#padded_link(<2026W02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-05>)[5]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-06>)[6]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-07>)[7]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-08>)[8]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-09>)[9]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-10>)[10]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-11>)[11]]),
+      align(center + horizon, rotate(90deg)[#padded_link(<2026W03>)[3]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-12>)[12]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-13>)[13]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-14>)[14]]), grid.cell(align: top + left, inset: 3pt, [#[15]]), grid.cell(align: top + left, inset: 3pt, [#[16]]), grid.cell(align: top + left, inset: 3pt, [#[17]]), grid.cell(align: top + left, inset: 3pt, [#[18]]),
+      align(center + horizon, rotate(90deg)[#padded_link(<2026W04>)[4]]), grid.cell(align: top + left, inset: 3pt, [#[19]]), grid.cell(align: top + left, inset: 3pt, [#[20]]), grid.cell(align: top + left, inset: 3pt, [#[21]]), grid.cell(align: top + left, inset: 3pt, [#[22]]), grid.cell(align: top + left, inset: 3pt, [#[23]]), grid.cell(align: top + left, inset: 3pt, [#[24]]), grid.cell(align: top + left, inset: 3pt, [#[25]]),
+      align(center + horizon, rotate(90deg)[#padded_link(<2026W05>)[5]]), grid.cell(align: top + left, inset: 3pt, [#[26]]), grid.cell(align: top + left, inset: 3pt, [#[27]]), grid.cell(align: top + left, inset: 3pt, [#[28]]), grid.cell(align: top + left, inset: 3pt, [#[29]]), grid.cell(align: top + left, inset: 3pt, [#[30]]), grid.cell(align: top + left, inset: 3pt, [#[31]]), []
         ),
         lined_well(dotted_centered)
       ),
@@ -261,7 +261,7 @@
     ''',
     'preamble': '''
       #import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width
-      #import "house.typ": dotted_centered, lined_fill, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
+      #import "house.typ": dotted_centered, lined_fill, task_fill, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
       #let page-margin = page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)
       #set page(width: page-width, height: page-height, margin: page-margin(left))
       
@@ -281,6 +281,7 @@
       #let lined_fill = lined_fill.with(regular_height: regular_height, regular_stroke: regular_stroke)
       #let review_lined = lined_fill(paint: black)
       #let lined_fill = lined_fill()
+      #let task_fill = task_fill(page-width: page-width, regular_height: regular_height, regular_stroke: regular_stroke)
       #let scratch_pad = lined_well(dotted_centered)
       #let padded_link = padded_link.with(padding: link_padding)
       #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
@@ -491,11 +492,11 @@
         month_weeks(left,
           rows: (regular_height,) + (1fr,) * 5,
           [], align(center + horizon)[M], align(center + horizon)[T], align(center + horizon)[W], align(center + horizon)[T], align(center + horizon)[F], align(center + horizon)[S], align(center + horizon)[S],
-          align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W01>)[1]]), [], [], [], grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-01>)[1]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-03>)[3]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-04>)[4]]),
-      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-05>)[5]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-06>)[6]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-07>)[7]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-08>)[8]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-09>)[9]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-10>)[10]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-11>)[11]]),
-      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W03>)[3]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-12>)[12]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-13>)[13]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-14>)[14]]), grid.cell(align: top + left, inset: 3pt, [#[15]]), grid.cell(align: top + left, inset: 3pt, [#[16]]), grid.cell(align: top + left, inset: 3pt, [#[17]]), grid.cell(align: top + left, inset: 3pt, [#[18]]),
-      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W04>)[4]]), grid.cell(align: top + left, inset: 3pt, [#[19]]), grid.cell(align: top + left, inset: 3pt, [#[20]]), grid.cell(align: top + left, inset: 3pt, [#[21]]), grid.cell(align: top + left, inset: 3pt, [#[22]]), grid.cell(align: top + left, inset: 3pt, [#[23]]), grid.cell(align: top + left, inset: 3pt, [#[24]]), grid.cell(align: top + left, inset: 3pt, [#[25]]),
-      align(center + horizon, rotate(90deg, reflow: true)[#padded_link(<2026W05>)[5]]), grid.cell(align: top + left, inset: 3pt, [#[26]]), grid.cell(align: top + left, inset: 3pt, [#[27]]), grid.cell(align: top + left, inset: 3pt, [#[28]]), grid.cell(align: top + left, inset: 3pt, [#[29]]), grid.cell(align: top + left, inset: 3pt, [#[30]]), grid.cell(align: top + left, inset: 3pt, [#[31]]), []
+          align(center + horizon, rotate(90deg)[#padded_link(<2026W01>)[1]]), [], [], [], grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-01>)[1]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-03>)[3]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-04>)[4]]),
+      align(center + horizon, rotate(90deg)[#padded_link(<2026W02>)[2]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-05>)[5]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-06>)[6]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-07>)[7]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-08>)[8]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-09>)[9]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-10>)[10]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-11>)[11]]),
+      align(center + horizon, rotate(90deg)[#padded_link(<2026W03>)[3]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-12>)[12]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-13>)[13]]), grid.cell(align: top + left, inset: 3pt, [#padded_link(<2026-01-14>)[14]]), grid.cell(align: top + left, inset: 3pt, [#[15]]), grid.cell(align: top + left, inset: 3pt, [#[16]]), grid.cell(align: top + left, inset: 3pt, [#[17]]), grid.cell(align: top + left, inset: 3pt, [#[18]]),
+      align(center + horizon, rotate(90deg)[#padded_link(<2026W04>)[4]]), grid.cell(align: top + left, inset: 3pt, [#[19]]), grid.cell(align: top + left, inset: 3pt, [#[20]]), grid.cell(align: top + left, inset: 3pt, [#[21]]), grid.cell(align: top + left, inset: 3pt, [#[22]]), grid.cell(align: top + left, inset: 3pt, [#[23]]), grid.cell(align: top + left, inset: 3pt, [#[24]]), grid.cell(align: top + left, inset: 3pt, [#[25]]),
+      align(center + horizon, rotate(90deg)[#padded_link(<2026W05>)[5]]), grid.cell(align: top + left, inset: 3pt, [#[26]]), grid.cell(align: top + left, inset: 3pt, [#[27]]), grid.cell(align: top + left, inset: 3pt, [#[28]]), grid.cell(align: top + left, inset: 3pt, [#[29]]), grid.cell(align: top + left, inset: 3pt, [#[30]]), grid.cell(align: top + left, inset: 3pt, [#[31]]), []
         ),
         lined_well(dotted_centered)
       ),
@@ -504,7 +505,7 @@
     ''',
     'preamble': '''
       #import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width
-      #import "house.typ": dotted_centered, lined_fill, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
+      #import "house.typ": dotted_centered, lined_fill, task_fill, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
       #let page-margin = page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)
       #set page(width: page-width, height: page-height, margin: page-margin(left))
       
@@ -524,6 +525,7 @@
       #let lined_fill = lined_fill.with(regular_height: regular_height, regular_stroke: regular_stroke)
       #let review_lined = lined_fill(paint: black)
       #let lined_fill = lined_fill()
+      #let task_fill = task_fill(page-width: page-width, regular_height: regular_height, regular_stroke: regular_stroke)
       #let scratch_pad = lined_well(dotted_centered)
       #let padded_link = padded_link.with(padding: link_padding)
       #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
