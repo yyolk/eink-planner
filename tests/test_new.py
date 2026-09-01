@@ -329,17 +329,24 @@ def test_defaults_omit_extras_on_every_device(tmp_path):
 
 
 @pytest.mark.parametrize(
-    ("alias", "canonical", "human", "style"),
+    ("alias", "canonical", "style"),
     [
-        ("rm1", "remarkable-1", "reMarkable 1", COMPACT_STYLE),
-        ("paper-pure", "remarkable-paper-pure", "reMarkable Paper Pure", COMPACT_STYLE),
-        ("paper-pro", "remarkable-paper-pro", "reMarkable Paper Pro", COMPACT_STYLE),
-        ("paper-pro-move", "remarkable-paper-pro-move", "reMarkable Paper Pro Move", NOMAD_STYLE),
+        ("rm1", "remarkable-1", COMPACT_STYLE),
+        ("paper-pure", "remarkable-paper-pure", COMPACT_STYLE),
+        ("paper-pro", "remarkable-paper-pro", COMPACT_STYLE),
+        ("paper-pro-move", "remarkable-paper-pro-move", NOMAD_STYLE),
+        ("a5", "supernote-a5", COMPACT_STYLE),
+        ("a5x", "supernote-a5x", COMPACT_STYLE),
+        ("a6", "supernote-a6", NOMAD_STYLE),
+        ("a6x", "supernote-a6x", NOMAD_STYLE),
+        ("scribe-11", "kindle-scribe-11", COMPACT_STYLE),
+        ("colorsoft", "kindle-scribe-colorsoft", COMPACT_STYLE),
     ],
 )
-def test_new_remarkable_alias_writes_canonical_id(tmp_path, alias, canonical, human, style):
+def test_new_alias_writes_canonical_id(tmp_path, alias, canonical, style):
+    device = get_device(alias)
     out = tmp_path / f"{alias}.toml"
-    rc = main(["new", "--yes", "--device", alias, "-o", str(out)])
+    rc = main(["new", "--yes", "-d", alias, "-o", str(out)])
     assert rc == 0
     text = out.read_text(encoding="utf-8")
     data = tomllib.loads(text)
@@ -353,9 +360,12 @@ def test_new_remarkable_alias_writes_canonical_id(tmp_path, alias, canonical, hu
     assert data["section"]["monthly"]["daily_cell_height"] == style.monthly_daily_cell_height
     assert data["section"]["daily"]["right"]["notes"]["title_height"] == style.notes_title_height
     assert data["section"]["daily"]["item_spacing"] == style.daily_item_spacing
-    assert human in text
-    assert "# No toolbar." in text
-    assert get_device(alias).id == canonical
+    assert device.name in text
+    if device.toolbar_edge == "top":
+        assert f"# Toolbar top {device.toolbar_clearance}." in text
+    else:
+        assert "# No toolbar." in text
+    assert device.id == canonical
     assert JOB_DEFAULTS[canonical].style is style
     load(out)
 

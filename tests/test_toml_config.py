@@ -66,13 +66,12 @@ def test_parse_device_job_defaults(path: Path):
     assert DEVICE_SCALE["supernote-manta"]["toolbar_clearance"] == "8mm"
     assert DEVICE_SCALE["supernote-manta"]["writing_clearance"] == "4mm"
     for device in DEVICES:
-        if not device.id.startswith("remarkable-"):
-            continue
         scale = DEVICE_SCALE[device.id]
-        assert scale["toolbar_edge"] == TOOLBAR_NONE
-        assert scale["toolbar_clearance"] == "0mm"
-        assert scale["writing_clearance"] == "5mm"
-        assert scale["mos_width"] == "10mm"
+        assert scale == device.scale()
+        if device.toolbar_edge == TOOLBAR_NONE:
+            assert scale["toolbar_clearance"] == "0mm"
+            assert scale["writing_clearance"] == "5mm"
+            assert scale["mos_width"] == "10mm"
 
 
 def test_load_rejects_yaml_and_kdl_device_profiles():

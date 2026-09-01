@@ -47,7 +47,7 @@ parch new --device supernote-nomad --year 2027 --yes -o mine.toml
 
 ## Devices
 
-Nine devices. Lined is paper (`style.scratch_pad`), not a device. MOS strip side is `mos.side_menu` (default left). Override with `--hand left|right` on `press`, `proof`, `new`, and `edit`. `--hand` does not reverse the well.
+Fifteen devices. Lined is paper (`style.scratch_pad`), not a device. MOS strip side is `mos.side_menu` (default left). Override with `--hand left|right` on `press`, `proof`, `new`, and `edit`. `--hand` does not reverse the well.
 
 | Device | Notes |
 | --- | --- |
@@ -60,6 +60,12 @@ Nine devices. Lined is paper (`style.scratch_pad`), not a device. MOS strip side
 | `remarkable-paper-pure` | reMarkable Paper Pure. Same 10.3" canvas (Carta 1300). Alias `paper-pure` |
 | `remarkable-paper-pro` | reMarkable Paper Pro. No toolbar (Scribe pack). Alias `paper-pro` |
 | `remarkable-paper-pro-move` | reMarkable Paper Pro Move. No toolbar (Scribe pack). Alias `paper-pro-move` |
+| `supernote-a5` | SuperNote A5. Toolbar top 8mm (Nomad pack). Alias `a5` |
+| `supernote-a5x` | SuperNote A5 X. Same canvas as A5; own name. Alias `a5x` |
+| `supernote-a6` | SuperNote A6. Toolbar top 8mm (Nomad pack). Alias `a6` |
+| `supernote-a6x` | SuperNote A6 X. Same canvas as A6; own name. Alias `a6x` |
+| `kindle-scribe-11` | Kindle Scribe 11. No toolbar (Scribe pack). Alias `scribe-11` |
+| `kindle-scribe-colorsoft` | Kindle Scribe Colorsoft. Same B&W canvas as Scribe 11. Alias `colorsoft` |
 
 ## Development
 

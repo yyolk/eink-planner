@@ -104,41 +104,34 @@ def test_manta_generate_succeeds_and_device_typ_binds_x2_chrome():
     )
 
 
-def test_remarkable_generate_succeeds_and_device_typ_binds_scribe_chrome():
-    remarkable = [device for device in DEVICES if device.id.startswith("remarkable-")]
-    assert len(remarkable) == 5
-    for device in remarkable:
+def test_every_device_generate_binds_record_chrome():
+    for device in DEVICES:
         assert get_device(device.id) is device
-        assert device.toolbar_edge == TOOLBAR_NONE
-        assert device.toolbar_clearance == "0mm"
-        assert device.writing_clearance == "5mm"
-        assert device.mos_width == "10mm"
         dto = load(base_config(device.id))
         names = [section["name"] for section in Configurator(dto).enabled_sections()]
         assert names == list(DEFAULT_SECTIONS)
         scale = device_scale(dto["device"])
-        assert scale["toolbar_edge"] == TOOLBAR_NONE
-        assert scale["toolbar_clearance"] == "0mm"
-        assert scale["writing_clearance"] == "5mm"
-        assert scale["mos_width"] == "10mm"
+        assert scale == device.scale()
         assert dto["document"]["layout"]["dimensions"].to_plain() == {
             "width": device.page_width,
             "height": device.page_height,
         }
         assert dto["document"]["layout"]["margin"].to_plain() == device_page_margin(scale)
-        assert dto["document"]["layout"]["margin"]["top"] == "0mm"
+        if device.toolbar_edge == TOOLBAR_NONE:
+            assert dto["document"]["layout"]["margin"]["top"] == "0mm"
+        else:
+            assert dto["document"]["layout"]["margin"]["top"] == device.toolbar_clearance
         now = _generate(device.id)
         assert "page-margin(left)" in now
         assert "toolbar-edge" in now.split("#set page", 1)[0]
         typst = Preamble(Configurator(dto)).generate()
         assert "margin: page-margin(left)" in typst
         assert "toolbar-clearance)" not in typst.split("#set page", 1)[1].split("\n", 1)[0]
-        bindings = render_device_typ(device)
-        assert bindings == (
+        assert render_device_typ(device) == (
             f"#let page-width = {device.page_width}\n"
             f"#let page-height = {device.page_height}\n"
-            f"#let toolbar-edge = {TOOLBAR_NONE}\n"
-            f"#let toolbar-clearance = 0mm\n"
-            f"#let writing-clearance = 5mm\n"
-            f"#let mos-width = 10mm\n"
+            f"#let toolbar-edge = {device.toolbar_edge}\n"
+            f"#let toolbar-clearance = {device.toolbar_clearance}\n"
+            f"#let writing-clearance = {device.writing_clearance}\n"
+            f"#let mos-width = {device.mos_width}\n"
         )

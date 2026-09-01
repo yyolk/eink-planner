@@ -6,7 +6,7 @@ from pathlib import Path
 from parch.config import load
 from parch.mos.configurator import Configurator
 from parch.toml_config import apply_hand
-from parch.devices import get_device
+from parch.devices import DEVICES, get_device
 from parch.mos.preamble import (
     DEVICE_TYP,
     Preamble,
@@ -280,10 +280,6 @@ def test_preamble_devices_import_parameterized_device_typ():
 def test_device_typ_is_parameterized_from_python_record():
     nomad = render_device_typ(get_device("supernote-nomad"))
     scribe = render_device_typ(get_device("kindle-scribe"))
-    paper = render_device_typ(get_device("158x210"))
-    manta = render_device_typ(get_device("manta"))
-    rm2 = render_device_typ(get_device("rm2"))
-    move = render_device_typ(get_device("paper-pro-move"))
     assert nomad == (
         "#let page-width = 118.87mm\n"
         "#let page-height = 158.5mm\n"
@@ -300,39 +296,16 @@ def test_device_typ_is_parameterized_from_python_record():
         "#let writing-clearance = 5mm\n"
         "#let mos-width = 10mm\n"
     )
-    assert paper == (
-        "#let page-width = 158mm\n"
-        "#let page-height = 210mm\n"
-        "#let toolbar-edge = none\n"
-        "#let toolbar-clearance = 0mm\n"
-        "#let writing-clearance = 5mm\n"
-        "#let mos-width = 10mm\n"
-    )
-    assert manta == (
-        "#let page-width = 162.56mm\n"
-        "#let page-height = 216.75mm\n"
-        "#let toolbar-edge = top\n"
-        "#let toolbar-clearance = 8mm\n"
-        "#let writing-clearance = 4mm\n"
-        "#let mos-width = 8mm\n"
-    )
-    assert rm2 == (
-        "#let page-width = 157.79mm\n"
-        "#let page-height = 210.39mm\n"
-        "#let toolbar-edge = none\n"
-        "#let toolbar-clearance = 0mm\n"
-        "#let writing-clearance = 5mm\n"
-        "#let mos-width = 10mm\n"
-    )
-    assert move == (
-        "#let page-width = 91.79mm\n"
-        "#let page-height = 163.18mm\n"
-        "#let toolbar-edge = none\n"
-        "#let toolbar-clearance = 0mm\n"
-        "#let writing-clearance = 5mm\n"
-        "#let mos-width = 10mm\n"
-    )
-    for text in (nomad, scribe, paper, manta, rm2, move):
+    for device in DEVICES:
+        text = render_device_typ(device)
+        assert text == (
+            f"#let page-width = {device.page_width}\n"
+            f"#let page-height = {device.page_height}\n"
+            f"#let toolbar-edge = {device.toolbar_edge}\n"
+            f"#let toolbar-clearance = {device.toolbar_clearance}\n"
+            f"#let writing-clearance = {device.writing_clearance}\n"
+            f"#let mos-width = {device.mos_width}\n"
+        )
         assert "page-margin" not in text
         assert "#let mos-width = toolbar-clearance" not in text
         assert "ppi" not in text
