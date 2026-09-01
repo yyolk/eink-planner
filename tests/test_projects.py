@@ -107,7 +107,7 @@ def test_omit_pages_defaults_to_sixteen():
         assert "rows: (" + ", ".join(["1fr"] * leftover) + ")" not in typst
     assert "rows: (" + ", ".join(["1fr"] * 16) + ")" not in typst
     board = _board_page(typst)
-    assert board.count("rect_pattern(dotted)") == 3
+    assert board.count("lined_well(dotted_centered)") == 3
     assert _CARD_STROKE not in board
     assert _CARD_LINE not in board
     assert "1/4 * size.height" not in typst
@@ -231,7 +231,7 @@ def test_locale_strings_appear():
     assert "DONE" not in typst
     assert "$square.stroked$" not in typst
     board = _board_page(typst)
-    assert board.count("rect_pattern(dotted)") == 3
+    assert board.count("lined_well(dotted_centered)") == 3
     assert "rect_pattern_centered(dotted_centered)" not in typst
     assert _CARD_STROKE not in board
     assert _CARD_LINE not in board
@@ -306,7 +306,7 @@ def test_index_rows_are_fixed_line_height_and_boards_use_three_dotted_columns():
     assert "rows: (" + ", ".join(["1fr"] * 8) + ")" not in typst
     board = _board_page(typst)
     assert "columns: (1fr, 1fr, 1fr)" in board
-    assert board.count("rect_pattern(dotted)") == 3
+    assert board.count("lined_well(dotted_centered)") == 3
     assert _CARD_STROKE not in board
     assert _CARD_LINE not in board
     assert "rect_pattern_centered(dotted_centered)" not in typst
@@ -327,7 +327,7 @@ def test_card_rows_eight_is_parsed_but_does_not_draw_cards():
     typst = _generate(dto)
     board = _board_page(typst)
     assert "rows: (" + ", ".join(["1fr"] * 8) + ")" not in typst
-    assert board.count("rect_pattern(dotted)") == 3
+    assert board.count("lined_well(dotted_centered)") == 3
     assert _CARD_LINE not in board
 
 
@@ -551,11 +551,11 @@ pages = 1
     assert '#import "house.typ"' in typst
     assert "#let rect_pattern = rect_pattern.with(regular_height: regular_height)" in typst
     assert "rect_pattern_centered(dotted_centered)" not in typst
-    assert "#let scratch_pad = rect_pattern(dotted)" in typst
+    assert "#let scratch_pad = lined_well(dotted_centered)" in typst
     pages = _pages(typst)
     board_pages = [page for page in pages if "#[] <project-1>" in page]
     assert board_pages
-    assert all(page.count("rect_pattern(dotted)") == 3 for page in board_pages)
+    assert all(page.count("lined_well(dotted_centered)") == 3 for page in board_pages)
     assert all(_CARD_STROKE not in page for page in board_pages)
     assert all(_CARD_LINE not in page for page in board_pages)
     assert all("1/16" not in page for page in board_pages)

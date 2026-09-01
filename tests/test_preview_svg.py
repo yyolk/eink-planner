@@ -214,7 +214,8 @@ def test_rect_pattern_helper_stamps_tiles_not_fill():
     assert "#let rect_pattern(regular_height: none, pattern) = rect(" in helper
     assert "#let dotted(regular_height: none) = place(" in house
     assert "#let lined(regular_height: none, regular_stroke: none) = place(" in house
-    assert "rect_pattern(dotted)" in typst
+    assert "rect_pattern.with(regular_height: regular_height)" in typst
+    assert "lined_well(dotted_centered)" in typst
     assert "PageData" not in typst
     assert "heading_mark" not in typst
     assert "let seated_title" not in typst

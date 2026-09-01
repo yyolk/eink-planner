@@ -3,14 +3,6 @@
 import re
 
 _LENGTH = re.compile(r"^([+-]?(?:\d+(?:\.\d*)?|\.\d+))(mm|cm|pt)$")
-# Review week field only — do not touch global `#let lined` (luma grey).
-_REVIEW_LINED = """place(
-  line(
-    start: (0%, regular_height - 0.15mm),
-    end: (100%, regular_height - 0.15mm),
-    stroke: regular_stroke + black
-  )
-)"""
 
 
 def _side_menu_position(configurator) -> str:

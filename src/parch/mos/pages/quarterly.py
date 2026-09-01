@@ -6,6 +6,7 @@ from parch.calendar.quarter import Quarter
 from parch.i18n import I18n
 from parch.mos.components.little_calendar import LittleCalendar
 from parch.mos.manifest import Manifest
+from parch.mos.preamble import _WELL_PATTERN
 
 
 class Quarterly:
@@ -30,7 +31,7 @@ class Quarterly:
 
     def content(self) -> str:
         months = self._months_grid()
-        pad = f"rect_pattern({self.pattern})"
+        pad = f"lined_well({_WELL_PATTERN.get(self.pattern, self.pattern)})"
         return f"quarter_well({self.side}, {months}, {pad})"
 
     def _months_grid(self) -> str:

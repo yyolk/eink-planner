@@ -208,6 +208,6 @@ class Meetings:
   {name_line},
   {topics},
   {self._label("notes")},
-  rect_pattern(dotted),
+  lined_well(dotted_centered),
   {actions}
 )"""

@@ -123,9 +123,9 @@ def test_week_placement_none_is_seven_col_without_side():
     assert "align(center + horizon)[M]" in content
     assert "align(center + horizon)[Monday]" not in content
     assert "rotate(90deg" not in content
-    notes = content[content.index("rect_pattern") :]
+    notes = content[content.index("lined_well") :]
     assert "block(" not in notes
-    assert "rect_pattern(dotted)" in notes
+    assert "lined_well(dotted_centered)" in notes
     assert "layout(" not in content
     assert "grid.hline(y: 1, stroke: regular_stroke + black)" in content
     assert "rows: (1fr, 1fr)" in content
@@ -168,8 +168,8 @@ def test_notes_are_thin_rule_plus_pattern_without_label():
     assert "Notes" not in content
     assert "thick_stroke" not in content
     assert "grid.hline(y: 1, stroke: regular_stroke + black)" in content
-    assert "rect_pattern(dotted)" in content
-    notes = content[content.index("rect_pattern") :]
+    assert "lined_well(dotted_centered)" in content
+    notes = content[content.index("lined_well") :]
     assert "block(" not in notes
     assert "layout(" not in content
 

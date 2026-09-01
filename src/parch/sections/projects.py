@@ -178,9 +178,9 @@ class Projects:
   align(center)[*{todo}*],
   align(center)[*{doing}*],
   align(center)[*{done}*],
-  rect_pattern(dotted),
-  rect_pattern(dotted),
-  rect_pattern(dotted)
+  lined_well(dotted_centered),
+  lined_well(dotted_centered),
+  lined_well(dotted_centered)
 )"""
         return f"""#[] <{bid}>
 #grid(

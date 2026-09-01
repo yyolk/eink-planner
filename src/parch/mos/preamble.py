@@ -6,6 +6,12 @@ from pathlib import Path
 from parch.devices import Device, get_device
 from parch.mos.configurator import Configurator
 
+# Single-region wells: lined → lined_fill, dotted → dotted_centered.
+_WELL_PATTERN = {
+    "lined": "lined_fill",
+    "dotted": "dotted_centered",
+}
+
 HOUSE_TYP = "house.typ"
 DEVICE_TYP = "device.typ"
 
@@ -59,8 +65,9 @@ class Preamble:
         mos_layout = _v(p, "mos_layout")
         heading = _v(p, "heading")
         side = _v(mos_layout, "side_menu_position")
+        scratch = _v(p, "scratch_pad")
         return f"""#import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width
-#import "house.typ": dotted, lined, rect_pattern, dotted_centered, lined_fill, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
+#import "house.typ": dotted, lined, rect_pattern, dotted_centered, lined_fill, rect_pattern_centered, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
 #let page-margin = page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)
 #set page(width: page-width, height: page-height, margin: page-margin({side}))
 
@@ -80,14 +87,17 @@ class Preamble:
 #let lined = lined(regular_height: regular_height, regular_stroke: regular_stroke)
 #let rect_pattern = rect_pattern.with(regular_height: regular_height)
 #let dotted_centered = dotted_centered(regular_height: regular_height)
-#let lined_fill = lined_fill(regular_height: regular_height, regular_stroke: regular_stroke)
+#let lined_fill = lined_fill.with(regular_height: regular_height, regular_stroke: regular_stroke)
+#let review_lined = lined_fill(paint: black)
+#let lined_fill = lined_fill()
 #let rect_pattern_centered = rect_pattern_centered.with(regular_height: regular_height)
-#let scratch_pad = rect_pattern({_v(p, 'scratch_pad')})
+#let scratch_pad = lined_well({_WELL_PATTERN.get(scratch, scratch)})
 #let padded_link = padded_link.with(padding: link_padding)
 #let contents_bars = contents_bars.with(thick_stroke: thick_stroke)
 #let mos_frame = mos_frame.with(mos-width: mos-width, column-gutter: {_v(mos_layout, 'column_gutter')})
 #let well_frame = well_frame.with(heading-height: {_v(heading, 'height')}, row-gutter: {_v(mos_layout, 'row_gutter')}, heading-stroke: regular_stroke)
-#let mos_tabs = mos_tabs.with(stroke: regular_stroke)
+#let mos_tabs = mos_tabs.with(stroke: regular_stroke, turn: {_v(mos_layout, 'menu_rotate')})
+#let mos_rail = mos_rail.with(gutter: regular_column_gutter)
 #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
 #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
 #let week_matrix = week_matrix.with(header-stroke: regular_stroke + black, regular-height: regular_height)

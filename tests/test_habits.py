@@ -81,7 +81,7 @@ def _pages(typst: str) -> list[str]:
 
 def _index_page(typst: str) -> str:
     for page in _pages(typst):
-        if "[Habits <habits>]" in page and "rotate(" not in page:
+        if "[Habits <habits>]" in page and "mos_rail(" not in page and "mos_frame(" not in page:
             return page
     raise AssertionError("no Habits index page")
 
@@ -89,7 +89,7 @@ def _index_page(typst: str) -> str:
 def _month_page(typst: str, name: str = "january") -> str:
     needle = f"{name.title()}<habits-{name}>"
     for page in _pages(typst):
-        if needle in page and "rotate(" in page:
+        if needle in page and "mos_frame(" in page:
             return page
     raise AssertionError(f"no Habits month page {name}")
 
@@ -200,12 +200,14 @@ daily_cell_height = "16mm"
     cal_jan = next(
         page
         for page in _pages(typst)
-        if "<month-2026-01-01>" in page and "rotate(" in page and "<habits-january>" not in page
+        if "<month-2026-01-01>" in page and "mos_rail(" in page and "<habits-january>" not in page
     )
     assert "padded_link(<month-2026-02-01>)" in cal_jan
     assert "padded_link(<habits-february>)" not in cal_jan
     assert "Q1" in cal_jan
-    assert "columns: (1fr, 3fr)" in cal_jan or "columns: (3fr, 1fr)" in cal_jan
+    assert "mos_rail(" in cal_jan
+    assert "columns: (1fr, 3fr)" not in cal_jan
+    assert "columns: (3fr, 1fr)" not in cal_jan
 
 
 def test_habit_month_mos_is_months_only():
@@ -219,6 +221,8 @@ def test_habit_month_mos_is_months_only():
     assert "Q2" not in habit_jan
     assert "Q3" not in habit_jan
     assert "Q4" not in habit_jan
+    assert "mos_tabs(" in habit_jan
+    assert "mos_rail(" not in habit_jan
     assert "columns: (1fr, 3fr)" not in habit_jan
     assert "columns: (3fr, 1fr)" not in habit_jan
     assert ", [Calendar])" not in habit_jan
@@ -407,7 +411,9 @@ def test_index_is_raw_typst_month_pages_use_mos():
     typst = _generate(short_january(dto))
     index = _index_page(typst)
     month = _month_page(typst)
-    assert "rotate(" in month
+    assert "mos_tabs(" in month
+    assert "mos_rail(" not in month
+    assert "rotate(" not in month
     assert "January" in index
     assert "JAN" not in index
     assert "→" not in index
@@ -543,7 +549,8 @@ def test_same_names_on_every_month_page():
     for page in named:
         assert "align(center + horizon, text[Move])" in page
         assert _HEADER_LINE not in page
-        assert "rotate(" in page
+        assert "mos_tabs(" in page
+        assert "mos_rail(" not in page
         sleep_cell = page[page.index("align(center + horizon, text[Sleep])") :]
         sleep_cell = sleep_cell[: sleep_cell.index("grid.cell(stroke: regular_stroke, [])")]
         assert "rotate(" not in sleep_cell
@@ -596,7 +603,7 @@ def test_habit_month_follows_side_menu_dates_stay_left():
         source="habits-mos-right.toml",
     )
     right_typst = _generate(right)
-    right_jan = _mos_page(right_typst, "January<habits-january>", "rotate(")
+    right_jan = _mos_page(right_typst, "January<habits-january>", "mos_frame(")
     assert "#mos_frame(\n  right," in right_jan
     assert "#mos_frame(\n  left," not in right_jan
     right_grid = right_jan[right_jan.index("columns: (auto, 1fr") :]
@@ -605,14 +612,14 @@ def test_habit_month_follows_side_menu_dates_stay_left():
     assert "columns: (auto, 1fr, 1fr, 1fr, 1fr)" in right_jan
     thu = right_grid.index("Thu 1")
     assert right_grid.index(_BOX, thu) > thu
-    right_june = _mos_page(right_typst, "June<habits-june>", "rotate(")
+    right_june = _mos_page(right_typst, "June<habits-june>", "mos_frame(")
     june_grid = right_june[right_june.index("columns: (auto, 1fr") :]
     assert "Mon 1" in june_grid
     mon = june_grid.index("Mon 1")
     assert june_grid.index(_BOX, mon) > mon
 
     left = parse_toml(_minimal(enable=["habits"], sections=""), source="habits-mos-left.toml")
-    left_jan = _mos_page(_generate(left), "January<habits-january>", "rotate(")
+    left_jan = _mos_page(_generate(left), "January<habits-january>", "mos_frame(")
     assert "#mos_frame(\n  left," in left_jan
     assert "#mos_frame(\n  right," not in left_jan
     left_grid = left_jan[left_jan.index("columns: (auto, 1fr") :]
@@ -641,10 +648,10 @@ daily_cell_height = "16mm"
     cal_both = _mos_page(
         _generate(both_right),
         "<month-2026-01-01>",
-        "rotate(",
+        "mos_rail(",
         exclude="<habits-january>",
     )
-    cal_only = _mos_page(_generate(monthly_only), "<month-2026-01-01>", "rotate(")
+    cal_only = _mos_page(_generate(monthly_only), "<month-2026-01-01>", "mos_rail(")
     assert "#mos_frame(\n  right," in cal_both
     assert "#mos_frame(\n  left," not in cal_both
     assert "Q1" in cal_both

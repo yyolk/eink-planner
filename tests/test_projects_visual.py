@@ -114,7 +114,7 @@ def test_nomad_board_is_three_dotted_columns(tmp_path):
     )
     assert "1/16" not in chunk
     assert "text(size: 0.85em)[1]" in chunk
-    assert chunk.count("rect_pattern(dotted)") == 3
+    assert chunk.count("lined_well(dotted_centered)") == 3
     page = _page_index(typst, "project-1")
     png = raster_page(pdf, page, tmp_path / "nomad-board.png", dpi=_DPI)
     _assert_three_dotted_columns(png)
