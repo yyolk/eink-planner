@@ -14,7 +14,7 @@ from parch.config import load
 from parch.devices import DEVICES, get_device, known_device_ids
 from parch.services.job_file import (
     CANONICAL_SECTIONS,
-    DEFAULT_FROM,
+    DEFAULT_DEVICE,
     JobSpec,
     _PAPERS,
     _WEEK_RAIL_NONE,
@@ -90,7 +90,7 @@ def parse_sections(raw: str) -> list[str]:
 def run_new(
     *,
     outfile: str | Path | None,
-    from_profile: str | None,
+    device: str | None,
     year: int | None,
     sections: str | None,
     yes: bool,
@@ -99,16 +99,16 @@ def run_new(
 ) -> int:
     interactive = (not yes) and sys.stdin.isatty()
 
-    if from_profile is None and interactive:
-        from_profile = _prompt_device()
-    if from_profile is None:
-        from_profile = DEFAULT_FROM
-    if Path(from_profile).is_file():
-        raise ConfigError("--from is a device id, not a job file; use parch edit to reopen a file")
+    if device is None and interactive:
+        device = _prompt_device()
+    if device is None:
+        device = DEFAULT_DEVICE
+    if Path(device).is_file():
+        raise ConfigError("--device is a device id, not a job file; use parch edit to reopen a file")
     try:
-        spec = spec_from_device(from_profile)
+        spec = spec_from_device(device)
     except KeyError as exc:
-        raise _unknown_device(from_profile) from exc
+        raise _unknown_device(device) from exc
 
     if year is None and interactive:
         year = _prompt_year(spec.year)
@@ -364,7 +364,7 @@ def _prompt_device() -> str:
     answer = questionary.select(
         "Device",
         choices=[questionary.Choice(title=device.name, value=device.id) for device in DEVICES],
-        default=DEFAULT_FROM,
+        default=DEFAULT_DEVICE,
     ).ask()
     if answer is None:
         raise ConfigError("cancelled")

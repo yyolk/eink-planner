@@ -365,7 +365,7 @@ def test_hand_cli_flag():
     assert "--hand" in _press_parser().format_help()
     proof = parser.parse_args(["proof", "158x210", "--pages", "1", "--hand", "left"])
     assert proof.hand == "left"
-    new = parser.parse_args(["new", "--from", "supernote-nomad", "--hand", "right", "--yes", "-o", "x.toml"])
+    new = parser.parse_args(["new", "--device", "supernote-nomad", "--hand", "right", "--yes", "-o", "x.toml"])
     assert new.hand == "right"
 
 

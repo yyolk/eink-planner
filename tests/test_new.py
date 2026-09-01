@@ -23,7 +23,7 @@ def test_new_yes_year(tmp_path, capsys):
     rc = main(
         [
             "new",
-            "--from",
+            "--device",
             "supernote-nomad",
             "--year",
             "2027",
@@ -50,7 +50,7 @@ def test_new_from_is_device_id_not_path(tmp_path, capsys):
     src = tmp_path / "last.toml"
     src.write_text(emit_job(spec_from_device("supernote-nomad")), encoding="utf-8")
     out = tmp_path / "out.toml"
-    rc = main(["new", "--from", str(src), "--year", "2027", "--yes", str(out)])
+    rc = main(["new", "--device", str(src), "--year", "2027", "--yes", str(out)])
     assert rc == 1
     assert "device id" in capsys.readouterr().err
     assert not out.exists()
@@ -58,7 +58,7 @@ def test_new_from_is_device_id_not_path(tmp_path, capsys):
 
 def test_new_from_lined_stem_is_unknown(tmp_path, capsys):
     out = tmp_path / "lined.toml"
-    rc = main(["new", "--from", "supernote-nomad-lined", "--yes", "-o", str(out)])
+    rc = main(["new", "--device", "supernote-nomad-lined", "--yes", "-o", str(out)])
     assert rc == 1
     err = capsys.readouterr().err
     assert "unknown device" in err
@@ -70,7 +70,7 @@ def test_new_sections(tmp_path):
     rc = main(
         [
             "new",
-            "--from",
+            "--device",
             "supernote-nomad",
             "--sections",
             "cover,annual,colophon",
@@ -95,7 +95,7 @@ def test_new_refuses_overwrite_without_force(tmp_path, capsys):
     rc = main(
         [
             "new",
-            "--from",
+            "--device",
             "supernote-nomad",
             "--year",
             "2027",
@@ -112,7 +112,7 @@ def test_new_refuses_overwrite_without_force(tmp_path, capsys):
     rc = main(
         [
             "new",
-            "--from",
+            "--device",
             "supernote-nomad",
             "--year",
             "2027",
@@ -128,7 +128,7 @@ def test_new_refuses_overwrite_without_force(tmp_path, capsys):
 
 
 def test_new_yes_without_outfile_errors(capsys):
-    rc = main(["new", "--from", "supernote-nomad", "--year", "2027", "--yes"])
+    rc = main(["new", "--device", "supernote-nomad", "--year", "2027", "--yes"])
     assert rc == 1
     assert "outfile is required" in capsys.readouterr().err
 
@@ -136,9 +136,10 @@ def test_new_yes_without_outfile_errors(capsys):
 def test_parser_new_and_top_help():
     parser = build_parser()
     args = parser.parse_args(
-        ["new", "--from", "supernote-nomad", "--year", "2027", "--yes", "-o", "mine.toml"]
+        ["new", "--device", "supernote-nomad", "--year", "2027", "--yes", "-o", "mine.toml"]
     )
     assert args.command == "new"
+    assert args.device == "supernote-nomad"
     assert args.year == 2027
     assert args.yes is True
     help_text = parser.format_help()
@@ -157,6 +158,8 @@ def test_new_help_lists_device_names(capsys):
     out = capsys.readouterr().out
     assert "Write a complete job file from a device record plus defaults." in out
     assert "Device id (default supernote-nomad)." in out
+    assert "-d DEVICE, --device DEVICE" in out
+    assert "--from" not in out
     assert "Year. Also updates a year-only cover title." in out
     assert "Sections to keep, comma-separated." in out
     for device in DEVICES:
@@ -175,8 +178,12 @@ def test_no_config_or_mos_flags():
         parser.parse_args(["config", "new"])
     with pytest.raises(SystemExit):
         parser.parse_args(["new", "--mos", "right", "--yes", "-o", "x.toml"])
+    with pytest.raises(SystemExit):
+        parser.parse_args(["new", "--from", "supernote-nomad", "--yes", "-o", "x.toml"])
     args = parser.parse_args(["new", "--hand", "right", "--yes", "-o", "x.toml"])
     assert args.hand == "right"
+    short = parser.parse_args(["new", "-d", "nomad", "--yes", "-o", "x.toml"])
+    assert short.device == "nomad"
     with pytest.raises(SystemExit):
         parser.parse_args(["new", "--paper", "lined", "--yes", "-o", "x.toml"])
     edit = parser.parse_args(["edit", "x.toml"])
@@ -188,7 +195,7 @@ def test_new_year_zero_rejected(tmp_path, capsys):
     rc = main(
         [
             "new",
-            "--from",
+            "--device",
             "supernote-nomad",
             "--year",
             "0",
@@ -208,7 +215,7 @@ def test_new_hand_writes_side_menu_only(tmp_path):
     rc = main(
         [
             "new",
-            "--from",
+            "--device",
             "supernote-nomad",
             "--hand",
             "right",
@@ -240,7 +247,7 @@ def test_new_dest_parent_is_file(tmp_path, capsys):
     rc = main(
         [
             "new",
-            "--from",
+            "--device",
             "supernote-nomad",
             "--yes",
             "-o",
@@ -275,7 +282,7 @@ def test_new_yes_writes_device_defaults(tmp_path):
     rc = main(
         [
             "new",
-            "--from",
+            "--device",
             "supernote-nomad",
             "--year",
             "2027",
@@ -304,7 +311,7 @@ def test_defaults_omit_extras_on_every_device(tmp_path):
     extras = ("projects", "habits", "review", "tasks", "meetings")
     for device in known_device_ids():
         out = tmp_path / f"{device}.toml"
-        rc = main(["new", "--from", device, "--yes", "-o", str(out)])
+        rc = main(["new", "--device", device, "--yes", "-o", str(out)])
         assert rc == 0
         data = tomllib.loads(out.read_text(encoding="utf-8"))
         assert data["device"]["name"] == device
@@ -320,7 +327,7 @@ def test_defaults_omit_extras_on_every_device(tmp_path):
 
 def test_new_from_manta_alias_writes_compact_style(tmp_path):
     out = tmp_path / "manta.toml"
-    rc = main(["new", "--yes", "--from", "manta", "-o", str(out)])
+    rc = main(["new", "--yes", "--device", "manta", "-o", str(out)])
     assert rc == 0
     text = out.read_text(encoding="utf-8")
     data = tomllib.loads(text)
@@ -365,7 +372,7 @@ def test_sections_checkbox_offers_extras_unchecked(tmp_path, monkeypatch):
     )
     monkeypatch.setattr("parch.services.config_file._questionary", lambda: fake)
     monkeypatch.setattr("sys.stdin.isatty", lambda: True)
-    rc = main(["new", "--from", "supernote-nomad", "--year", "2026", "-o", str(out)])
+    rc = main(["new", "--device", "supernote-nomad", "--year", "2026", "-o", str(out)])
     assert rc == 0
     assert "Sections" in fake.asked
     checked = {choice.value: choice.checked for choice in fake.captured}
@@ -443,7 +450,7 @@ def test_interactive_new_writes_complete_job(tmp_path, monkeypatch):
     rc = main(
         [
             "new",
-            "--from",
+            "--device",
             "supernote-nomad",
             "--year",
             "2027",
@@ -499,7 +506,7 @@ def test_interactive_hand_flag_skips_side_prompt(tmp_path, monkeypatch):
     rc = main(
         [
             "new",
-            "--from",
+            "--device",
             "supernote-nomad",
             "--year",
             "2027",

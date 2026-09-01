@@ -6,7 +6,7 @@ from typing import Any
 from parch.devices import Device, get_device
 
 DEFAULT_YEAR = 2026
-DEFAULT_FROM = "supernote-nomad"
+DEFAULT_DEVICE = "supernote-nomad"
 _WEEK_RAIL_NONE = "none"
 _WEEK_RAIL_OMIT = "omit"
 _PAPERS = frozenset({"dotted", "lined"})

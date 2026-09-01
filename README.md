@@ -40,10 +40,10 @@ parch press supernote-nomad
 `--year` also rewrites the cover title year when the old year is in the title.
 
 ```shell
-parch new --from supernote-nomad --year 2027 --yes -o mine.toml
+parch new --device supernote-nomad --year 2027 --yes -o mine.toml
 ```
 
-`--from` is a device id. Without `--yes`, `parch new` asks for device, year, sections, MOS side, paper (dotted or lined), week rail, hours, and counts/pages, then writes a complete job file. `parch edit mine.toml` reopens that file. Hand-edit still loads. Sections live in the job `sections` list. Comment a name out to disable it.
+`--device` is a device id. Without `--yes`, `parch new` asks for device, year, sections, MOS side, paper (dotted or lined), week rail, hours, and counts/pages, then writes a complete job file. `parch edit mine.toml` reopens that file. Hand-edit still loads. Sections live in the job `sections` list. Comment a name out to disable it.
 
 ## Devices
 
