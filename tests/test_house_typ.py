@@ -267,6 +267,8 @@ def test_device_typ_is_parameterized_from_python_record():
     scribe = render_device_typ(get_device("kindle-scribe"))
     paper = render_device_typ(get_device("158x210"))
     manta = render_device_typ(get_device("manta"))
+    rm2 = render_device_typ(get_device("rm2"))
+    move = render_device_typ(get_device("paper-pro-move"))
     assert nomad == (
         "#let page-width = 118.87mm\n"
         "#let page-height = 158.5mm\n"
@@ -299,7 +301,23 @@ def test_device_typ_is_parameterized_from_python_record():
         "#let writing-clearance = 4mm\n"
         "#let mos-width = 8mm\n"
     )
-    for text in (nomad, scribe, paper, manta):
+    assert rm2 == (
+        "#let page-width = 157.79mm\n"
+        "#let page-height = 210.39mm\n"
+        "#let toolbar-edge = none\n"
+        "#let toolbar-clearance = 0mm\n"
+        "#let writing-clearance = 5mm\n"
+        "#let mos-width = 10mm\n"
+    )
+    assert move == (
+        "#let page-width = 91.79mm\n"
+        "#let page-height = 163.18mm\n"
+        "#let toolbar-edge = none\n"
+        "#let toolbar-clearance = 0mm\n"
+        "#let writing-clearance = 5mm\n"
+        "#let mos-width = 10mm\n"
+    )
+    for text in (nomad, scribe, paper, manta, rm2, move):
         assert "page-margin" not in text
         assert "#let mos-width = toolbar-clearance" not in text
         assert "ppi" not in text

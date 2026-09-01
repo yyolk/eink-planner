@@ -133,11 +133,91 @@ SUPERNOTE_MANTA = Device(
     height_px=2560,
 )
 
+# reMarkable 1: 1404×1872 @ 226 PPI → 157.79×210.39 mm. No toolbar (Scribe pack).
+REMARKABLE_1 = Device(
+    id="remarkable-1",
+    name="reMarkable 1",
+    ppi=226,
+    page_width="157.79mm",
+    page_height="210.39mm",
+    toolbar_edge=TOOLBAR_NONE,
+    toolbar_clearance="0mm",
+    writing_clearance="5mm",
+    mos_width="10mm",
+    width_px=1404,
+    height_px=1872,
+)
+
+# reMarkable 2: same canvas as reMarkable 1. Colophon name stays honest.
+REMARKABLE_2 = Device(
+    id="remarkable-2",
+    name="reMarkable 2",
+    ppi=226,
+    page_width="157.79mm",
+    page_height="210.39mm",
+    toolbar_edge=TOOLBAR_NONE,
+    toolbar_clearance="0mm",
+    writing_clearance="5mm",
+    mos_width="10mm",
+    width_px=1404,
+    height_px=1872,
+)
+
+# reMarkable Paper Pure: Carta 1300, still 226 PPI, same canvas as reMarkable 1.
+REMARKABLE_PAPER_PURE = Device(
+    id="remarkable-paper-pure",
+    name="reMarkable Paper Pure",
+    ppi=226,
+    page_width="157.79mm",
+    page_height="210.39mm",
+    toolbar_edge=TOOLBAR_NONE,
+    toolbar_clearance="0mm",
+    writing_clearance="5mm",
+    mos_width="10mm",
+    width_px=1404,
+    height_px=1872,
+)
+
+# reMarkable Paper Pro: 1620×2160 @ 229 PPI → 179.69×239.58 mm. No toolbar (Scribe pack).
+REMARKABLE_PAPER_PRO = Device(
+    id="remarkable-paper-pro",
+    name="reMarkable Paper Pro",
+    ppi=229,
+    page_width="179.69mm",
+    page_height="239.58mm",
+    toolbar_edge=TOOLBAR_NONE,
+    toolbar_clearance="0mm",
+    writing_clearance="5mm",
+    mos_width="10mm",
+    width_px=1620,
+    height_px=2160,
+)
+
+# reMarkable Paper Pro Move: 954×1696 @ 264 PPI → 91.79×163.18 mm. No toolbar (Scribe pack).
+REMARKABLE_PAPER_PRO_MOVE = Device(
+    id="remarkable-paper-pro-move",
+    name="reMarkable Paper Pro Move",
+    ppi=264,
+    page_width="91.79mm",
+    page_height="163.18mm",
+    toolbar_edge=TOOLBAR_NONE,
+    toolbar_clearance="0mm",
+    writing_clearance="5mm",
+    mos_width="10mm",
+    width_px=954,
+    height_px=1696,
+)
+
 DEVICES: tuple[Device, ...] = (
     SUPERNOTE_NOMAD,
     KINDLE_SCRIBE,
     PAPER_158X210,
     SUPERNOTE_MANTA,
+    REMARKABLE_1,
+    REMARKABLE_2,
+    REMARKABLE_PAPER_PURE,
+    REMARKABLE_PAPER_PRO,
+    REMARKABLE_PAPER_PRO_MOVE,
 )
 
 PRESETS: dict[str, Device] = {
@@ -145,9 +225,19 @@ PRESETS: dict[str, Device] = {
     KINDLE_SCRIBE.id: KINDLE_SCRIBE,
     PAPER_158X210.id: PAPER_158X210,
     SUPERNOTE_MANTA.id: SUPERNOTE_MANTA,
+    REMARKABLE_1.id: REMARKABLE_1,
+    REMARKABLE_2.id: REMARKABLE_2,
+    REMARKABLE_PAPER_PURE.id: REMARKABLE_PAPER_PURE,
+    REMARKABLE_PAPER_PRO.id: REMARKABLE_PAPER_PRO,
+    REMARKABLE_PAPER_PRO_MOVE.id: REMARKABLE_PAPER_PRO_MOVE,
     "nomad": SUPERNOTE_NOMAD,
     "scribe": KINDLE_SCRIBE,
     "manta": SUPERNOTE_MANTA,
+    "rm1": REMARKABLE_1,
+    "rm2": REMARKABLE_2,
+    "paper-pure": REMARKABLE_PAPER_PURE,
+    "paper-pro": REMARKABLE_PAPER_PRO,
+    "paper-pro-move": REMARKABLE_PAPER_PRO_MOVE,
 }
 
 DEFAULT_DEVICE = SUPERNOTE_NOMAD

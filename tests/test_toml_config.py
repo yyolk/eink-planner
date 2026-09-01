@@ -5,6 +5,7 @@ import pytest
 from parch import ConfigError
 from parch.cli import build_parser
 from parch.config import load
+from parch.devices import DEVICES, TOOLBAR_NONE
 from parch.models.device import DEVICE_SCALE, device_page_margin, device_scale
 from parch.mos.configurator import Configurator
 from parch.services.job_file import DEFAULT_SECTIONS
@@ -16,16 +17,9 @@ NOMAD = base_config("supernote-nomad")
 NOMAD_LINED = base_config("supernote-nomad", paper="lined")
 PAPER_158 = base_config("158x210")
 PAPER_158_LINED = base_config("158x210", paper="lined")
-SCRIBE = base_config("kindle-scribe")
 SCRIBE_LINED = base_config("kindle-scribe", paper="lined")
-MANTA = base_config("supernote-manta")
 
-_DEVICES = [
-    NOMAD,
-    PAPER_158,
-    SCRIBE,
-    MANTA,
-]
+_DEVICES = [base_config(device.id) for device in DEVICES]
 _NOMAD = {NOMAD, NOMAD_LINED}
 _DEFAULT_SECTIONS = list(DEFAULT_SECTIONS)
 _EXTRAS = ("projects", "habits", "review", "tasks", "meetings")
@@ -71,6 +65,14 @@ def test_parse_device_job_defaults(path: Path):
     assert DEVICE_SCALE["supernote-manta"]["toolbar_edge"] == "top"
     assert DEVICE_SCALE["supernote-manta"]["toolbar_clearance"] == "8mm"
     assert DEVICE_SCALE["supernote-manta"]["writing_clearance"] == "4mm"
+    for device in DEVICES:
+        if not device.id.startswith("remarkable-"):
+            continue
+        scale = DEVICE_SCALE[device.id]
+        assert scale["toolbar_edge"] == TOOLBAR_NONE
+        assert scale["toolbar_clearance"] == "0mm"
+        assert scale["writing_clearance"] == "5mm"
+        assert scale["mos_width"] == "10mm"
 
 
 def test_load_rejects_yaml_and_kdl_device_profiles():
