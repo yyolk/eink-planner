@@ -102,7 +102,7 @@ class Monthly:
         current_week = self._first_present_day(week).week()
         label = self.manifest.link_or_content(current_week.id, str(current_week.number))
         rotation = self.month_params.get("week_label_rotation", "90deg")
-        return f"align(center + horizon, rotate({rotation}, reflow: true)[#{label}])"
+        return f"align(center + horizon, rotate({rotation})[#{label}])"
 
     def _first_present_day(self, week: list[Day | None]) -> Day:
         for day in week:
