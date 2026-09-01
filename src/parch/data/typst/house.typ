@@ -39,20 +39,20 @@
   link(target)[#box(inset: padding, content)]
 )
 
-#let contents_bars(thick_stroke: none, size: none) = text(size: size, context {
-  let cap = 0.7em.to-absolute()
+#let contents_bars(thick_stroke: none, size: none) = text(size: size, {
+  let cap = 0.7 * size
   let gap = (cap - 5 * thick_stroke) / 4
   box(
-    width: 0.844em,
+    width: 0.844 * size,
     height: cap,
     align(horizon + left, stack(
       dir: ttb,
       spacing: gap,
-      line(length: 0.844em, stroke: thick_stroke + black),
-      line(length: 0.844em, stroke: thick_stroke + black),
-      line(length: 0.844em, stroke: thick_stroke + black),
-      line(length: 0.844em, stroke: thick_stroke + black),
-      line(length: 0.844em, stroke: thick_stroke + black),
+      line(length: 0.844 * size, stroke: thick_stroke + black),
+      line(length: 0.844 * size, stroke: thick_stroke + black),
+      line(length: 0.844 * size, stroke: thick_stroke + black),
+      line(length: 0.844 * size, stroke: thick_stroke + black),
+      line(length: 0.844 * size, stroke: thick_stroke + black),
     ))
   )
 })
@@ -140,10 +140,10 @@
       table.cell(
         fill: c.at("fill", default: none),
         align: horizon + center,
-        rotate(turn, origin: center + horizon, reflow: true, c.body),
+        rotate(turn, origin: center + horizon, c.body),
       )
     } else {
-      rotate(turn, origin: center + horizon, reflow: true, c)
+      rotate(turn, origin: center + horizon, c)
     }),
   )
 }
