@@ -158,7 +158,8 @@ def test_new_help_lists_device_names(capsys):
     out = capsys.readouterr().out
     assert "Write a complete job file from a device record plus defaults." in out
     assert "Device id (default supernote-nomad)." in out
-    assert "-d DEVICE, --device DEVICE" in out
+    assert "-d DEVICE" in out
+    assert "--device DEVICE" in out
     assert "--from" not in out
     assert "Year. Also updates a year-only cover title." in out
     assert "Sections to keep, comma-separated." in out
