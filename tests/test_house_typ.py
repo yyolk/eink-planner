@@ -136,6 +136,31 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let page-margin(side, toolbar-edge: none, toolbar-clearance: none, writing-clearance: none)" in house
     assert "if toolbar-edge == top { toolbar-clearance } else { 0mm }" in house
     assert "#let contents_bars(" in house
+    contents_bars = house[house.index("#let contents_bars(") : house.index("#let lead_pair(")]
+    assert contents_bars.startswith(
+        "#let contents_bars(thick_stroke: none, size: none) = text(size: size, {\n"
+        "  let cap = 0.7 * size\n"
+        "  let gap = (cap - 5 * thick_stroke) / 4\n"
+        "  box(\n"
+        "    width: 0.844 * size,\n"
+        "    height: cap,\n"
+        "    align(horizon + left, stack(\n"
+        "      dir: ttb,\n"
+        "      spacing: gap,\n"
+        "      line(length: 0.844 * size, stroke: thick_stroke + black),\n"
+        "      line(length: 0.844 * size, stroke: thick_stroke + black),\n"
+        "      line(length: 0.844 * size, stroke: thick_stroke + black),\n"
+        "      line(length: 0.844 * size, stroke: thick_stroke + black),\n"
+        "      line(length: 0.844 * size, stroke: thick_stroke + black),\n"
+        "    ))\n"
+        "  )\n"
+        "})\n"
+    )
+    assert "context" not in contents_bars
+    assert "to-absolute" not in contents_bars
+    assert "0.7em" not in contents_bars
+    assert "0.844em" not in contents_bars
+    assert contents_bars.count("thick_stroke + black") == 5
     assert "#let lead_pair(" in house
     assert "#let lead_pair(mark, title, spacing: 6pt)" in house
     assert "#let lead_pair(left, right" not in house
@@ -206,7 +231,10 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     )
     assert "columns: columns" not in mos_tabs
     assert 'fill: c.at("fill", default: none)' in mos_tabs
-    assert "rotate(turn, origin: center + horizon, reflow: true, c.body)" in mos_tabs
+    assert "rotate(turn, origin: center + horizon, c.body)" in mos_tabs
+    assert "rotate(turn, origin: center + horizon, c)" in mos_tabs
+    assert "reflow: true" not in mos_tabs
+    assert "reflow:" not in mos_tabs
     assert 'bottom-edge: "descender"' in mos_tabs
     assert "inset: gap" in mos_tabs
     mos_rail = house[house.index("#let mos_rail(") : house.index("#let _order_week_rows(")]
