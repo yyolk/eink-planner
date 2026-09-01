@@ -208,6 +208,96 @@ REMARKABLE_PAPER_PRO_MOVE = Device(
     height_px=1696,
 )
 
+# SuperNote A5: 1404×1872 @ 226 PPI → 157.79×210.39 mm. Toolbar top 8mm (Nomad pack).
+SUPERNOTE_A5 = Device(
+    id="supernote-a5",
+    name="SuperNote A5",
+    ppi=226,
+    page_width="157.79mm",
+    page_height="210.39mm",
+    toolbar_edge=TOOLBAR_TOP,
+    toolbar_clearance="8mm",
+    writing_clearance="4mm",
+    mos_width="8mm",
+    width_px=1404,
+    height_px=1872,
+)
+
+# SuperNote A5 X: same canvas as SuperNote A5. Colophon name stays honest.
+SUPERNOTE_A5X = Device(
+    id="supernote-a5x",
+    name="SuperNote A5 X",
+    ppi=226,
+    page_width="157.79mm",
+    page_height="210.39mm",
+    toolbar_edge=TOOLBAR_TOP,
+    toolbar_clearance="8mm",
+    writing_clearance="4mm",
+    mos_width="8mm",
+    width_px=1404,
+    height_px=1872,
+)
+
+# SuperNote A6: 1404×1872 @ 300 PPI → 118.87×158.5 mm. Toolbar top 8mm (Nomad pack).
+SUPERNOTE_A6 = Device(
+    id="supernote-a6",
+    name="SuperNote A6",
+    ppi=300,
+    page_width="118.87mm",
+    page_height="158.5mm",
+    toolbar_edge=TOOLBAR_TOP,
+    toolbar_clearance="8mm",
+    writing_clearance="4mm",
+    mos_width="8mm",
+    width_px=1404,
+    height_px=1872,
+)
+
+# SuperNote A6 X: same canvas as SuperNote A6. Colophon name stays honest.
+SUPERNOTE_A6X = Device(
+    id="supernote-a6x",
+    name="SuperNote A6 X",
+    ppi=300,
+    page_width="118.87mm",
+    page_height="158.5mm",
+    toolbar_edge=TOOLBAR_TOP,
+    toolbar_clearance="8mm",
+    writing_clearance="4mm",
+    mos_width="8mm",
+    width_px=1404,
+    height_px=1872,
+)
+
+# Kindle Scribe 11: 1980×2640 @ 300 PPI → 167.64×223.52 mm. No toolbar (Scribe pack).
+KINDLE_SCRIBE_11 = Device(
+    id="kindle-scribe-11",
+    name="Kindle Scribe 11",
+    ppi=300,
+    page_width="167.64mm",
+    page_height="223.52mm",
+    toolbar_edge=TOOLBAR_NONE,
+    toolbar_clearance="0mm",
+    writing_clearance="5mm",
+    mos_width="10mm",
+    width_px=1980,
+    height_px=2640,
+)
+
+# Kindle Scribe Colorsoft: same B&W canvas as Kindle Scribe 11. Planner is one-ink.
+KINDLE_SCRIBE_COLORSOFT = Device(
+    id="kindle-scribe-colorsoft",
+    name="Kindle Scribe Colorsoft",
+    ppi=300,
+    page_width="167.64mm",
+    page_height="223.52mm",
+    toolbar_edge=TOOLBAR_NONE,
+    toolbar_clearance="0mm",
+    writing_clearance="5mm",
+    mos_width="10mm",
+    width_px=1980,
+    height_px=2640,
+)
+
 DEVICES: tuple[Device, ...] = (
     SUPERNOTE_NOMAD,
     KINDLE_SCRIBE,
@@ -218,6 +308,12 @@ DEVICES: tuple[Device, ...] = (
     REMARKABLE_PAPER_PURE,
     REMARKABLE_PAPER_PRO,
     REMARKABLE_PAPER_PRO_MOVE,
+    SUPERNOTE_A5,
+    SUPERNOTE_A5X,
+    SUPERNOTE_A6,
+    SUPERNOTE_A6X,
+    KINDLE_SCRIBE_11,
+    KINDLE_SCRIBE_COLORSOFT,
 )
 
 PRESETS: dict[str, Device] = {
@@ -230,6 +326,12 @@ PRESETS: dict[str, Device] = {
     REMARKABLE_PAPER_PURE.id: REMARKABLE_PAPER_PURE,
     REMARKABLE_PAPER_PRO.id: REMARKABLE_PAPER_PRO,
     REMARKABLE_PAPER_PRO_MOVE.id: REMARKABLE_PAPER_PRO_MOVE,
+    SUPERNOTE_A5.id: SUPERNOTE_A5,
+    SUPERNOTE_A5X.id: SUPERNOTE_A5X,
+    SUPERNOTE_A6.id: SUPERNOTE_A6,
+    SUPERNOTE_A6X.id: SUPERNOTE_A6X,
+    KINDLE_SCRIBE_11.id: KINDLE_SCRIBE_11,
+    KINDLE_SCRIBE_COLORSOFT.id: KINDLE_SCRIBE_COLORSOFT,
     "nomad": SUPERNOTE_NOMAD,
     "scribe": KINDLE_SCRIBE,
     "manta": SUPERNOTE_MANTA,
@@ -238,6 +340,12 @@ PRESETS: dict[str, Device] = {
     "paper-pure": REMARKABLE_PAPER_PURE,
     "paper-pro": REMARKABLE_PAPER_PRO,
     "paper-pro-move": REMARKABLE_PAPER_PRO_MOVE,
+    "a5": SUPERNOTE_A5,
+    "a5x": SUPERNOTE_A5X,
+    "a6": SUPERNOTE_A6,
+    "a6x": SUPERNOTE_A6X,
+    "scribe-11": KINDLE_SCRIBE_11,
+    "colorsoft": KINDLE_SCRIBE_COLORSOFT,
 }
 
 DEFAULT_DEVICE = SUPERNOTE_NOMAD

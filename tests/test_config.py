@@ -5,19 +5,26 @@ from parch.config import StrictDict
 from parch.devices import (
     DEVICES,
     KINDLE_SCRIBE,
+    KINDLE_SCRIBE_11,
+    KINDLE_SCRIBE_COLORSOFT,
     PAPER_158X210,
     REMARKABLE_1,
     REMARKABLE_2,
     REMARKABLE_PAPER_PRO,
     REMARKABLE_PAPER_PRO_MOVE,
     REMARKABLE_PAPER_PURE,
+    SUPERNOTE_A5,
+    SUPERNOTE_A5X,
+    SUPERNOTE_A6,
+    SUPERNOTE_A6X,
     SUPERNOTE_MANTA,
     SUPERNOTE_NOMAD,
     TOOLBAR_NONE,
+    TOOLBAR_TOP,
     get_device,
     known_device_ids,
 )
-from parch.services.job_file import JOB_DEFAULTS
+from parch.services.job_file import COMPACT_STYLE, DEFAULT_SECTIONS, JOB_DEFAULTS, NOMAD_STYLE
 from parch.mos.configurator import Configurator
 from parch.mos.preamble import Preamble
 
@@ -181,3 +188,99 @@ def test_remarkable_ten_point_three_stay_three_records():
 def test_job_defaults_cover_every_canonical_id():
     assert set(JOB_DEFAULTS) == set(known_device_ids())
     assert tuple(d.id for d in DEVICES) == known_device_ids()
+    for device_id, defaults in JOB_DEFAULTS.items():
+        assert defaults.sections == DEFAULT_SECTIONS
+        assert defaults.style in (NOMAD_STYLE, COMPACT_STYLE)
+        assert get_device(device_id).id == device_id
+
+
+_LINEAGE = (
+    (SUPERNOTE_A5, "a5", 226, 1404, 1872, "157.79mm", "210.39mm", 157.79, 210.39, 447.29, 596.39, TOOLBAR_TOP),
+    (SUPERNOTE_A5X, "a5x", 226, 1404, 1872, "157.79mm", "210.39mm", 157.79, 210.39, 447.29, 596.39, TOOLBAR_TOP),
+    (SUPERNOTE_A6, "a6", 300, 1404, 1872, "118.87mm", "158.5mm", 118.87, 158.5, 336.96, 449.28, TOOLBAR_TOP),
+    (SUPERNOTE_A6X, "a6x", 300, 1404, 1872, "118.87mm", "158.5mm", 118.87, 158.5, 336.96, 449.28, TOOLBAR_TOP),
+    (KINDLE_SCRIBE_11, "scribe-11", 300, 1980, 2640, "167.64mm", "223.52mm", 167.64, 223.52, 475.2, 633.6, TOOLBAR_NONE),
+    (
+        KINDLE_SCRIBE_COLORSOFT,
+        "colorsoft",
+        300,
+        1980,
+        2640,
+        "167.64mm",
+        "223.52mm",
+        167.64,
+        223.52,
+        475.2,
+        633.6,
+        TOOLBAR_NONE,
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    "device, alias, ppi, width_px, height_px, page_width, page_height, width_mm, height_mm, width_pt, height_pt, toolbar_edge",
+    _LINEAGE,
+    ids=[row[0].id for row in _LINEAGE],
+)
+def test_lineage_records_match_glass(
+    device,
+    alias,
+    ppi,
+    width_px,
+    height_px,
+    page_width,
+    page_height,
+    width_mm,
+    height_mm,
+    width_pt,
+    height_pt,
+    toolbar_edge,
+):
+    assert device.ppi == ppi
+    assert device.width_px == width_px
+    assert device.height_px == height_px
+    assert device.page_width == page_width
+    assert device.page_height == page_height
+    assert device.width_mm == width_mm
+    assert device.height_mm == height_mm
+    assert device.width_pt == width_pt
+    assert device.height_pt == height_pt
+    assert device.toolbar_edge == toolbar_edge
+    if toolbar_edge == TOOLBAR_TOP:
+        assert device.toolbar_clearance == "8mm"
+        assert device.writing_clearance == "4mm"
+        assert device.mos_width == "8mm"
+    else:
+        assert device.toolbar_clearance == "0mm"
+        assert device.writing_clearance == "5mm"
+        assert device.mos_width == "10mm"
+    assert get_device(device.id) is device
+    assert get_device(alias) is device
+    assert get_device(alias).id == device.id
+
+
+def test_lineage_twins_stay_separate_records():
+    assert SUPERNOTE_A5 is not SUPERNOTE_A5X
+    assert SUPERNOTE_A6 is not SUPERNOTE_A6X
+    assert KINDLE_SCRIBE_11 is not KINDLE_SCRIBE_COLORSOFT
+    assert KINDLE_SCRIBE is not KINDLE_SCRIBE_11
+    assert KINDLE_SCRIBE.width_px == 1860
+    assert KINDLE_SCRIBE.height_px == 2480
+    assert SUPERNOTE_NOMAD.width_px == 1404
+    assert SUPERNOTE_NOMAD.height_px == 1872
+    assert SUPERNOTE_NOMAD.ppi == 300
+    assert SUPERNOTE_MANTA.width_px == 1920
+    assert SUPERNOTE_MANTA.height_px == 2560
+
+
+def test_every_device_scale_matches_record():
+    for device in DEVICES:
+        scale = device.scale()
+        assert scale["width"] == device.page_width
+        assert scale["height"] == device.page_height
+        assert scale["toolbar_edge"] == device.toolbar_edge
+        assert scale["toolbar_clearance"] == device.toolbar_clearance
+        assert scale["writing_clearance"] == device.writing_clearance
+        assert scale["mos_width"] == device.mos_width
+        assert JOB_DEFAULTS[device.id].sections is not None
+        assert get_device(device.id) is device
