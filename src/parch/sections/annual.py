@@ -51,27 +51,30 @@ class Annual:
         months = list(self._range())
         parts: list[str] = []
         for i, month in enumerate(months):
-            parts.append(
-                LittleCalendar(
-                    i18n=self.i18n,
-                    manifest=manifest,
-                    month=month,
-                    **self.little_calendar,
-                    show_week_letter=False,
-                    side=self.side,
-                ).generate()
-            )
+            cal = LittleCalendar(
+                i18n=self.i18n,
+                manifest=manifest,
+                month=month,
+                **self.little_calendar,
+                show_week_letter=False,
+                side=self.side,
+            ).generate()
+            parts.append(f"block(width: 100%, height: 100%, {cal})")
             nxt = months[i + 1] if i + 1 < len(months) else None
             if nxt is not None and nxt.quarter() != month.quarter():
                 parts.append("grid.hline(stroke: regular_stroke + black)")
         rows = ", ".join(["1fr"] * math.ceil(len(months) / 3))
-        return f"""grid(
-  columns: (1fr, 1fr, 1fr),
-  rows: ({rows}),
-  column-gutter: regular_column_gutter,
-  row-gutter: {self.row_gutter},
+        return f"""block(
+  width: 100%,
+  height: 1fr,
+  grid(
+    columns: (1fr, 1fr, 1fr),
+    rows: ({rows}),
+    column-gutter: regular_column_gutter,
+    row-gutter: {self.row_gutter},
 
-  {",\n".join(parts)}
+    {",\n".join(parts)}
+  )
 )"""
 
     def _range(self):

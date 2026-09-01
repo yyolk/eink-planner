@@ -134,15 +134,12 @@
   align(horizon, title),
 )
 
-#let trail_heading(title, mark, spacing: none) = context {
-  let band = calc.max(measure(title).height, measure(mark).height)
-  stack(
-    dir: ltr,
-    spacing: spacing,
-    box(height: band, align(horizon + left, title)),
-    box(height: band, align(horizon + left, mark)),
-  )
-}
+#let trail_heading(title, mark) = grid(
+  columns: (1fr, auto),
+  // title clipped in the 1fr, mark auto
+  grid.cell(clip: true, align: horizon + start, title),
+  align(horizon + start, mark),
+)
 
 #let mos_frame(side, mos, well, mos-width: none, column-gutter: none) = if side == left {
   grid(
@@ -166,7 +163,7 @@
   columns: 1fr,
   rows: (heading-height, 1fr),
   row-gutter: row-gutter,
-  grid.cell(align: horizon, heading),
+  grid.cell(align: horizon, clip: true, heading),
   body,
 )
 
