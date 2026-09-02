@@ -46,6 +46,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "well_frame" in names
     assert "mos_tabs" in names
     assert "mos_rail" in names
+    assert "mos_strip" in names
     assert "month_grid" in names
     assert "month_weeks" in names
     assert "week_matrix" in names
@@ -71,6 +72,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "#let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm, heading-stroke: regular_stroke)" in typst
     assert "#let mos_tabs = mos_tabs.with(stroke: regular_stroke, turn: 270deg)" in typst
     assert "#let mos_rail = mos_rail.with(gutter: regular_column_gutter)" in typst
+    assert "#let mos_strip = mos_strip.with(stroke: regular_stroke, turn: 270deg, gutter: regular_column_gutter, padding: link_padding)" in typst
     assert "#let month_grid = month_grid.with(hline-stroke: regular_stroke + black)" in typst
     assert "week-rows:" not in typst
     assert "#let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)" in typst
@@ -240,7 +242,7 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
     assert "reflow:" not in mos_tabs
     assert 'bottom-edge: "descender"' in mos_tabs
     assert "inset: gap" in mos_tabs
-    mos_rail = house[house.index("#let mos_rail(") : house.index("#let _order_week_rows(")]
+    mos_rail = house[house.index("#let mos_rail(") : house.index("#let mos_strip(")]
     assert mos_rail.startswith(
         "#let mos_rail(quarters, months, reverse: false, gutter: none) = grid(\n"
         "  columns: 1fr,\n"
@@ -249,6 +251,21 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
         "  ..if reverse { (months, quarters) } else { (quarters, months) },\n"
         ")\n"
     )
+    assert "#let mos_strip(" in house
+    mos_strip = house[house.index("#let mos_strip(") : house.index("#let _order_week_rows(")]
+    assert mos_strip.startswith(
+        "#let mos_strip(months: none, quarters: none, highlight-months: (), highlight-quarters: (), reverse: false, show-quarters: true, stroke: none, turn: none, gutter: none, padding: none) = {\n"
+    )
+    assert "if dest != none { padded_link(padding: padding, dest, label) } else { label }" in mos_strip
+    assert "highlights.contains(dest)" in mos_strip
+    assert "table.cell(fill: black, text(white)[#body])" in mos_strip
+    assert "table.cell([#body])" in mos_strip
+    assert "mos_rail(tabs(quarters, highlight-quarters), month-tabs, reverse: reverse, gutter: gutter)" in mos_strip
+    assert "mos_tabs(\n    stroke: stroke,\n    turn: turn," in mos_strip
+    assert "show-quarters" in mos_strip
+    assert "items.rev(" not in mos_strip
+    assert ".rev()" not in mos_strip
+    assert "reverse(" not in mos_strip
     assert "#let month_grid(" in house
     assert "rows: (auto, auto) + (1fr,) * week-rows" in house
     assert "grid.hline(y: 1, stroke: hline-stroke)" in house
@@ -489,6 +506,7 @@ def test_copy_house_typ_writes_workdir(tmp_path):
     assert "#let well_frame(" in text
     assert "#let mos_tabs(" in text
     assert "#let mos_rail(" in text
+    assert "#let mos_strip(" in text
     assert "#let month_grid(" in text
     assert "#let month_weeks(" in text
     assert "#let week_matrix(" in text

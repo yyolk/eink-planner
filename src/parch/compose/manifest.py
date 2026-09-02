@@ -14,6 +14,12 @@ class Manifest:
     def source(self, source_id: str) -> bool:
         return source_id in self._sources
 
+    def dest(self, source_id: str) -> str:
+        """Typst dest `<id>` when the page exists, otherwise `none`."""
+        if self.source(source_id):
+            return f"<{source_id}>"
+        return "none"
+
     def link_or_content(self, source_id: str, text: str) -> str:
         """Typst content, optionally a padded_link if that page exists.
 

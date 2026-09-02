@@ -291,8 +291,10 @@ def test_mos_right_mark_sits_next_to_strip():
     assert "#mos_frame(\n  right," in page
     assert "padded_link(<annual>, [Calendar])" not in page
     assert "[Calendar]" not in page
+    bind = typst[typst.index("#let mos_strip = mos_strip.with(months:") :].split("\n", 1)[0]
     for label in ("Q1", "Q2", "Q3", "Q4"):
-        assert label in page
+        assert f"[{label}]" in bind
+    assert "mos_strip(highlight-months: (), highlight-quarters: ())" in page
     assert page.count(_MARK_RULE) == 1
 
 
@@ -313,8 +315,10 @@ def test_mos_left_annual_mark_is_trail_strip_sibling():
     assert "rowspan" not in page
     assert "padded_link(<annual>, [Calendar])" not in page
     assert "[Calendar]" not in page
+    bind = typst[typst.index("#let mos_strip = mos_strip.with(months:") :].split("\n", 1)[0]
     for label in ("Q1", "Q2", "Q3", "Q4"):
-        assert label in page
+        assert f"[{label}]" in bind
+    assert "mos_strip(highlight-months: (), highlight-quarters: ())" in page
     assert page.count(_MARK_RULE) == 1
 
 

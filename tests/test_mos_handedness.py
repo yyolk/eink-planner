@@ -237,7 +237,8 @@ def test_nomad_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
     assert "#mos_frame(\n  right," in typst_src
     assert "#mos_frame(\n  left," not in typst_src
     assert "mos-width: mos-width" in typst_src
-    assert "mos_rail(" in typst_src
+    assert "mos_strip(" in typst_src
+    assert "mos_tabs(" not in typst_src
     assert "rows: (auto, 1fr)" in typst_src
     assert "daily_well(right," in typst_src
     well = typst_src[typst_src.index("daily_well(") :]

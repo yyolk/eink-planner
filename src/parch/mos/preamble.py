@@ -67,7 +67,7 @@ class Preamble:
         side = _v(mos_layout, "side_menu_position")
         scratch = _v(p, "scratch_pad")
         return f"""#import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width
-#import "house.typ": dotted_centered, lined_fill, task_fill, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
+#import "house.typ": dotted_centered, lined_fill, task_fill, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, mos_strip, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
 #let page-margin = page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)
 #set page(width: page-width, height: page-height, margin: page-margin({side}))
 
@@ -96,6 +96,7 @@ class Preamble:
 #let well_frame = well_frame.with(heading-height: {_v(heading, 'height')}, row-gutter: {_v(mos_layout, 'row_gutter')}, heading-stroke: regular_stroke)
 #let mos_tabs = mos_tabs.with(stroke: regular_stroke, turn: {_v(mos_layout, 'menu_rotate')})
 #let mos_rail = mos_rail.with(gutter: regular_column_gutter)
+#let mos_strip = mos_strip.with(stroke: regular_stroke, turn: {_v(mos_layout, 'menu_rotate')}, gutter: regular_column_gutter, padding: link_padding)
 #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
 #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
 #let week_matrix = week_matrix.with(header-stroke: regular_stroke + black)

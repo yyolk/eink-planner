@@ -16,6 +16,22 @@ def _generate(stem: str) -> str:
     return Generate(i18n=load_default()).generate(dto)
 
 
+def test_nomad_year_pages_call_mos_strip_highlights():
+    dto = load(base_config("supernote-nomad"))
+    typst = Generate(i18n=load_default()).generate(dto)
+    assert typst.count("mos_tabs(") == 0
+    assert typst.count("#let mos_strip = mos_strip.with(months:") == 1
+    assert typst.count("mos_strip(highlight-months:") > 100
+    assert "mos_rail(mos_tabs" not in typst
+    bind = typst[typst.index("#let mos_strip = mos_strip.with(months:") :].split("\n", 1)[0]
+    assert "(<month-2026-01-01>, [Jan])" in bind
+    assert "(<month-2026-12-01>, [Dec])" in bind
+    assert bind.index("[Jan]") < bind.index("[Dec]")
+    assert "(<quarter-2026-1>, [Q1])" in bind
+    assert "reverse: false)" in bind
+    assert "padded_link" not in bind
+
+
 def test_nomad_keeps_top_toolbar_and_compact_sections():
     dto = load(base_config("supernote-nomad"))
     names = [section["name"] for section in Configurator(dto).enabled_sections()]
