@@ -5,7 +5,7 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
-from parch.device_frame import FRAME_DEVICE_IDS, HATCH_ID, frame_svg
+from parch.device_frame import FRAME_DEVICE_IDS, HATCH_ID, HATCH_STRIPE, frame_svg
 from parch.devices import DEVICES, MM_PER_INCH, PT_PER_INCH, TOOLBAR_NONE, TOOLBAR_TOP, get_device
 
 _SNAPSHOTS = Path(__file__).resolve().parent / "__snapshots__" / "device_frames"
@@ -176,10 +176,32 @@ def test_toolbar_band_or_absent(device_id):
         assert th == pytest.approx(round(mm / MM_PER_INCH * PT_PER_INCH, 2))
         assert toolbar.get("fill") == f"url(#{HATCH_ID})"
         assert _has_pattern(root)
+        assert HATCH_STRIPE == "#ccc"
+        assert any(
+            el.get("fill") == "#ccc"
+            for el in root.iter()
+            if _local(el.tag) == "rect" and el.get("id") is None
+        )
+        labels = [
+            el
+            for el in root.iter()
+            if _local(el.tag) == "text" and (el.text or "").strip() == "toolbar"
+        ]
+        assert len(labels) == 1
+        label = labels[0]
+        assert label.get("text-anchor") == "middle"
+        assert label.get("dominant-baseline") == "middle"
+        assert label.get("fill") == "#000"
+        assert float(label.get("x")) == pytest.approx(tx + tw / 2)
+        assert float(label.get("y")) == pytest.approx(ty + th / 2)
+        size = float((label.get("font-size") or "").removesuffix("pt"))
+        assert 8.0 <= size <= 10.0
+        assert size < th
     else:
         assert device.toolbar_edge == TOOLBAR_NONE
         assert toolbar is None
         assert not _has_pattern(root)
+        assert not any(_local(el.tag) == "text" for el in root.iter())
 
 
 @pytest.mark.parametrize("device_id", _SUPERNOTE)

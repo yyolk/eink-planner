@@ -2,7 +2,7 @@
   <defs>
     <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
       <rect width="6" height="6" fill="#fff"/>
-      <rect width="3" height="6" fill="#000"/>
+      <rect width="3" height="6" fill="#ccc"/>
     </pattern>
   </defs>
   <path fill="#c8c8c8" fill-rule="evenodd" d="M 11.34 3.12 H 506.16 A 11.34 11.34 0 0 1 517.50 14.46 V 662.88 A 11.34 11.34 0 0 1 506.16 674.22 H 11.34 A 11.34 11.34 0 0 1 0.00 662.88 V 14.46 A 11.34 11.34 0 0 1 11.34 3.12 Z M 28.35 31.47 H 489.15 V 645.87 H 28.35 Z"/>
@@ -11,5 +11,6 @@
   <line x1="14.18" y1="133.87" x2="14.18" y2="543.47" stroke="#000" stroke-width="1"/>
   <line x1="503.33" y1="133.87" x2="503.33" y2="543.47" stroke="#000" stroke-width="1"/>
   <rect id="toolbar" x="28.35" y="8.79" width="460.80" height="22.68" fill="url(#hatch)" stroke="#000" stroke-width="1"/>
+  <text x="258.75" y="20.13" text-anchor="middle" dominant-baseline="middle" fill="#000" font-size="9.07" font-family="sans-serif">toolbar</text>
   <rect id="screen" x="28.35" y="31.47" width="460.80" height="614.40" fill="none" stroke="#000" stroke-width="1"/>
 </svg>

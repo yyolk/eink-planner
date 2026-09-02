@@ -18,6 +18,7 @@ CORNER_MM = 4.0
 NUB_LEN_MM = 3.5
 NUB_THICK_MM = 1.1
 HATCH_ID = "hatch"
+HATCH_STRIPE = "#ccc"
 
 
 def _mm_to_pt(mm: float) -> float:
@@ -65,7 +66,7 @@ def _hatch_defs() -> list[str]:
         f'    <pattern id="{HATCH_ID}" patternUnits="userSpaceOnUse"'
         ' width="6" height="6" patternTransform="rotate(45)">',
         '      <rect width="6" height="6" fill="#fff"/>',
-        '      <rect width="3" height="6" fill="#000"/>',
+        f'      <rect width="3" height="6" fill="{HATCH_STRIPE}"/>',
         "    </pattern>",
         "  </defs>",
     ]
@@ -184,6 +185,12 @@ def _supernote_frame(device: Device) -> str:
             f'  <rect id="toolbar" x="{_pt(sx)}" y="{_pt(toolbar_y)}"'
             f' width="{_pt(sw)}" height="{_pt(toolbar_h)}"'
             f' fill="url(#{HATCH_ID})" stroke="#000" stroke-width="1"/>'
+        ),
+        (
+            f'  <text x="{_pt(sx + sw / 2)}" y="{_pt(toolbar_y + toolbar_h / 2)}"'
+            f' text-anchor="middle" dominant-baseline="middle" fill="#000"'
+            f' font-size="{_pt(min(10.0, max(8.0, toolbar_h * 0.4)))}"'
+            f' font-family="sans-serif">toolbar</text>'
         ),
         _screen_rect(sx, sy, sw, sh),
     ]
