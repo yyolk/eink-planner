@@ -12,7 +12,7 @@ Manual TestPyPI-only: **Actions → Publish → `testpypi`**.
 
 ## Version bumps
 
-`uv version` writes `[project].version`. Exact string: `uv version 0.1.2rc1 --no-sync`. Do not hand-edit the field.
+`uv version` writes `[project].version`. Exact string: `uv version 0.1.2rc1 --no-sync`. Do not hand-edit the field. `parch --version` and `__version__` read the installed package metadata, not a second string.
 
 From a checkout on a bump branch:
 
