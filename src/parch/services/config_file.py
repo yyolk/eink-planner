@@ -293,15 +293,15 @@ def _prompt_reverse_months_quarters(default: bool) -> bool:
     answer = questionary.select(
         "Year strip",
         choices=[
-            questionary.Choice("months-then-quarters / Jan→Dec", value=False),
-            questionary.Choice("quarters-under-months / Dec→Jan", value=True),
+            questionary.Choice("Q on top / Jan→Dec", value=False),
+            questionary.Choice("Q under months / Dec→Jan", value=True),
         ],
         default=default,
     ).ask()
     if answer is None:
         raise ConfigError("cancelled")
     if answer not in {True, False}:
-        raise ConfigError("year strip: expected months-then-quarters or quarters-under-months")
+        raise ConfigError("year strip: expected Q on top or Q under months")
     return bool(answer)
 
 
