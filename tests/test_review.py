@@ -58,6 +58,13 @@ def _review(dto) -> Review:
     )
 
 
+def _without_mos_bind(page: str) -> str:
+    marker = "#let mos_strip = mos_strip.with(months:"
+    if marker not in page:
+        return page
+    return page.split(marker, 1)[1].split("\n", 1)[-1]
+
+
 def _pages(typst: str) -> list[str]:
     return typst.split("#pagebreak()")
 
@@ -77,7 +84,7 @@ def _index_page(typst: str, page_id: str = "review") -> str:
     needle = f"[{'Review'} <{page_id}>]"
     for page in _pages(typst):
         if needle in page and "mos_rail(" not in page and "mos_frame(" not in page:
-            return page
+            return _without_mos_bind(page)
     raise AssertionError(f"no Review index page {page_id}")
 
 

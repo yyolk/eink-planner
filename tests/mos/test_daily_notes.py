@@ -246,13 +246,15 @@ def test_generated_trail_mark_alone_and_inverts_january_only():
     assert "rect_pattern(" not in p1
     assert "padded_link(<daily-note-2026-01-01-page-2>)[1/2]" not in p1
     assert "padded_link(<daily-note-2026-01-01-page-1>)[2/2]" not in p2
-    assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in p1
-    assert "table.cell([#padded_link(<quarter-2026-1>)[Q1]])" in p1
-    assert "table.cell(fill: black, text(white)[#padded_link(<quarter-" not in p1
-    assert "Q1" in p1 and "Q4" in p1
-    assert "Jan" in p1 and "Dec" in p1
-    assert p1.count("table.cell(fill: black") == 1
-    assert p2.count("table.cell(fill: black") == 1
+    bind = typst[typst.index("#let mos_strip = mos_strip.with(months:") :].split("\n", 1)[0]
+    assert "(<month-2026-01-01>, [Jan])" in bind
+    assert "(<month-2026-12-01>, [Dec])" in bind
+    assert "(<quarter-2026-1>, [Q1])" in bind
+    assert "(<quarter-2026-4>, [Q4])" in bind
+    assert "mos_strip(highlight-months: (<month-2026-01-01>,), highlight-quarters: ())" in p1
+    assert "mos_tabs(" not in p1
+    assert "table.cell(fill: black" not in p1
+    assert "table.cell(fill: black" not in p2
 
 
 def test_generated_hand_right_trail_mark_alone_left_of_q1():
@@ -274,6 +276,5 @@ def test_generated_hand_right_trail_mark_alone_left_of_q1():
     assert "text(size: h1)[/]" not in p1
     assert "1/2" not in p1
     assert p1.count("Calendar") == 0
-    assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in p1
-    assert "table.cell([#padded_link(<quarter-2026-1>)[Q1]])" in p1
-    assert p1.count("table.cell(fill: black") == 1
+    assert "mos_strip(highlight-months: (<month-2026-01-01>,), highlight-quarters: ())" in p1
+    assert "table.cell(fill: black" not in p1

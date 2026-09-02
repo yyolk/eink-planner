@@ -84,11 +84,7 @@
     'annual': '''
       #mos_frame(
         left,
-        mos_rail(mos_tabs(columns: (1fr),
-        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
-      ), mos_tabs(columns: (1fr),
-        table.cell([#padded_link(<month-2026-01-01>)[Jan]])
-      )),
+        mos_strip(highlight-months: (), highlight-quarters: ()),
         well_frame(
           trail_heading(text(size: h1)[2026<annual>], padded_link(padding: 0pt, <index>, contents_bars(size: h1))),
           block(
@@ -139,11 +135,7 @@
     'daily': '''
       #mos_frame(
         left,
-        mos_rail(mos_tabs(columns: (1fr),
-        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
-      ), mos_tabs(columns: (1fr),
-        table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
-      )),
+        mos_strip(highlight-months: (<month-2026-01-01>,), highlight-quarters: ()),
         well_frame(
           trail_heading(grid(
         columns: (auto, auto),
@@ -234,11 +226,7 @@
     'monthly': '''
       #mos_frame(
         left,
-        mos_rail(mos_tabs(columns: (1fr),
-        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
-      ), mos_tabs(columns: (1fr),
-        table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
-      )),
+        mos_strip(highlight-months: (<month-2026-01-01>,), highlight-quarters: ()),
         well_frame(
           lead_pair(padded_link(<index>, contents_bars(size: h1)), text(size: h1)[January<month-2026-01-01>]),
           grid(
@@ -261,7 +249,7 @@
     ''',
     'preamble': '''
       #import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width
-      #import "house.typ": dotted_centered, lined_fill, task_fill, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
+      #import "house.typ": dotted_centered, lined_fill, task_fill, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, mos_strip, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
       #let page-margin = page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)
       #set page(width: page-width, height: page-height, margin: page-margin(left))
       
@@ -290,6 +278,7 @@
       #let well_frame = well_frame.with(heading-height: 10mm, row-gutter: 2mm, heading-stroke: regular_stroke)
       #let mos_tabs = mos_tabs.with(stroke: regular_stroke, turn: 270deg)
       #let mos_rail = mos_rail.with(gutter: regular_column_gutter)
+      #let mos_strip = mos_strip.with(stroke: regular_stroke, turn: 270deg, gutter: regular_column_gutter, padding: link_padding)
       #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
       #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
       #let week_matrix = week_matrix.with(header-stroke: regular_stroke + black)
@@ -299,11 +288,7 @@
     'weekly': '''
       #mos_frame(
         left,
-        mos_rail(mos_tabs(columns: (1fr),
-        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
-      ), mos_tabs(columns: (1fr),
-        table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
-      )),
+        mos_strip(highlight-months: (<month-2026-01-01>,), highlight-quarters: ()),
         well_frame(
           trail_heading(text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4], padded_link(padding: 0pt, <index>, contents_bars(size: h1))),
           week_matrix(
@@ -328,11 +313,7 @@
     'annual': '''
       #mos_frame(
         left,
-        mos_rail(mos_tabs(columns: (1fr),
-        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
-      ), mos_tabs(columns: (1fr),
-        table.cell([#padded_link(<month-2026-01-01>)[Jan]])
-      )),
+        mos_strip(highlight-months: (), highlight-quarters: ()),
         well_frame(
           trail_heading(text(size: h1)[2026<annual>], padded_link(padding: 0pt, <index>, contents_bars(size: h1))),
           block(
@@ -383,11 +364,7 @@
     'daily': '''
       #mos_frame(
         left,
-        mos_rail(mos_tabs(columns: (1fr),
-        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
-      ), mos_tabs(columns: (1fr),
-        table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
-      )),
+        mos_strip(highlight-months: (<month-2026-01-01>,), highlight-quarters: ()),
         well_frame(
           trail_heading(grid(
         columns: (auto, auto),
@@ -478,11 +455,7 @@
     'monthly': '''
       #mos_frame(
         left,
-        mos_rail(mos_tabs(columns: (1fr),
-        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
-      ), mos_tabs(columns: (1fr),
-        table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
-      )),
+        mos_strip(highlight-months: (<month-2026-01-01>,), highlight-quarters: ()),
         well_frame(
           lead_pair(padded_link(<index>, contents_bars(size: h1)), text(size: h1)[January<month-2026-01-01>]),
           grid(
@@ -505,7 +478,7 @@
     ''',
     'preamble': '''
       #import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width
-      #import "house.typ": dotted_centered, lined_fill, task_fill, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
+      #import "house.typ": dotted_centered, lined_fill, task_fill, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, mos_strip, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
       #let page-margin = page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)
       #set page(width: page-width, height: page-height, margin: page-margin(left))
       
@@ -534,6 +507,7 @@
       #let well_frame = well_frame.with(heading-height: 8mm, row-gutter: 1.5mm, heading-stroke: regular_stroke)
       #let mos_tabs = mos_tabs.with(stroke: regular_stroke, turn: 270deg)
       #let mos_rail = mos_rail.with(gutter: regular_column_gutter)
+      #let mos_strip = mos_strip.with(stroke: regular_stroke, turn: 270deg, gutter: regular_column_gutter, padding: link_padding)
       #let month_grid = month_grid.with(hline-stroke: regular_stroke + black)
       #let month_weeks = month_weeks.with(week-col: regular_height, stroke: regular_stroke)
       #let week_matrix = week_matrix.with(header-stroke: regular_stroke + black)
@@ -543,11 +517,7 @@
     'weekly': '''
       #mos_frame(
         left,
-        mos_rail(mos_tabs(columns: (1fr),
-        table.cell([#padded_link(<quarter-2026-1>)[Q1]])
-      ), mos_tabs(columns: (1fr),
-        table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])
-      )),
+        mos_strip(highlight-months: (<month-2026-01-01>,), highlight-quarters: ()),
         well_frame(
           trail_heading(text(size: h1)[Week 1 <2026W01> #h(0.6em) Dec 29 – Jan 4], padded_link(padding: 0pt, <index>, contents_bars(size: h1))),
           week_matrix(

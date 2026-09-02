@@ -232,10 +232,13 @@ def test_generated_title_is_january_without_year_and_inverts_only_the_month():
     assert INNER_DAY_BOX not in jan
     assert "Week 1" not in jan
     assert "rotate(90deg)[#padded_link(<2026W01>)[1]]" in jan
-    assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in jan
-    assert "table.cell(fill: black, text(white)[#padded_link(<quarter-2026-1>)[Q1]])" not in jan
-    assert "table.cell([#padded_link(<quarter-2026-1>)[Q1]])" in jan
-    assert "Q1" in jan and "Q4" in jan
+    bind = typst[typst.index("#let mos_strip = mos_strip.with(months:") :].split("\n", 1)[0]
+    assert "(<month-2026-01-01>, [Jan])" in bind
+    assert "(<quarter-2026-1>, [Q1])" in bind
+    assert "(<quarter-2026-4>, [Q4])" in bind
+    assert "mos_strip(highlight-months: (<month-2026-01-01>,), highlight-quarters: ())" in jan
+    assert "mos_tabs(" not in jan
+    assert "table.cell(fill: black" not in jan
     assert "August<month-2026-08-01>" in aug
     assert aug.count("rotate(90deg") == 6
     assert "rows: (1fr, 1fr)" in aug

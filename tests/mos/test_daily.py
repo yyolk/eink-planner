@@ -287,12 +287,14 @@ def test_generated_contents_mark_alone_and_inverts_january_only():
     assert "[W], [M], [T], [W], [T], [F], [S], [S]" not in jan1
     assert "| More" not in jan1
     assert "padded_link(<daily-note-2026-01-01-page-1>)[More]" in jan1
-    assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in jan1
-    assert "table.cell([#padded_link(<quarter-2026-1>)[Q1]])" in jan1
-    assert "table.cell(fill: black, text(white)[#padded_link(<quarter-" not in jan1
-    assert "Q1" in jan1 and "Q4" in jan1
-    assert "Jan" in jan1 and "Dec" in jan1
-    assert jan1.count("table.cell(fill: black") == 1
+    bind = typst[typst.index("#let mos_strip = mos_strip.with(months:") :].split("\n", 1)[0]
+    assert "(<month-2026-01-01>, [Jan])" in bind
+    assert "(<month-2026-12-01>, [Dec])" in bind
+    assert "(<quarter-2026-1>, [Q1])" in bind
+    assert "(<quarter-2026-4>, [Q4])" in bind
+    assert "mos_strip(highlight-months: (<month-2026-01-01>,), highlight-quarters: ())" in jan1
+    assert "mos_tabs(" not in jan1
+    assert "table.cell(fill: black" not in jan1
     assert "daily_well(" in jan1
     assert "daily_well(left," in jan1
     well = jan1[jan1.index("daily_well(") :]
@@ -318,9 +320,8 @@ def test_generated_hand_right_contents_mark_alone_left_of_q1():
     assert "2026 /" not in jan1
     assert "text(size: h1)[/]" not in jan1
     assert jan1.count("Calendar") == 0
-    assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in jan1
-    assert "table.cell([#padded_link(<quarter-2026-1>)[Q1]])" in jan1
-    assert jan1.count("table.cell(fill: black") == 1
+    assert "mos_strip(highlight-months: (<month-2026-01-01>,), highlight-quarters: ())" in jan1
+    assert "table.cell(fill: black" not in jan1
     assert "daily_well(" in jan1
     assert "daily_well(right," in jan1
     well = jan1[jan1.index("daily_well(") :]

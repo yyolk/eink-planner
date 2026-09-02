@@ -247,18 +247,18 @@ def test_generated_week_title_is_range_and_inverts_thursday_month():
     assert "week_cell(" not in w01
     assert _WRITING_PATTERN not in w01
     assert "[Notes]" in w01
-    assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-01-01>)[Jan]])" in w01
-    assert "table.cell([#padded_link(<quarter-2026-1>)[Q1]])" in w01
-    assert "table.cell(fill: black, text(white)[#padded_link(<quarter-" not in w01
-    assert "table.cell(fill: black, text(white)[#padded_link(<month-2025-12-01>)" not in w01
-    assert "Q1" in w01 and "Q4" in w01
-    assert w01.count("table.cell(fill: black") == 1
+    bind = typst[typst.index("#let mos_strip = mos_strip.with(months:") :].split("\n", 1)[0]
+    assert "(<month-2026-01-01>, [Jan])" in bind
+    assert "(<quarter-2026-1>, [Q1])" in bind
+    assert "(<quarter-2026-4>, [Q4])" in bind
+    assert "mos_strip(highlight-months: (<month-2026-01-01>,), highlight-quarters: ())" in w01
+    assert "mos_tabs(" not in w01
+    assert "table.cell(fill: black" not in w01
+    assert "highlight-months: (<month-2025-12-01>," not in w01
     assert f"Week 28 <2026W28> #h(0.6em) {_W28_RANGE}" in w28
     assert "Monday 6" in w28
     assert w28.count("Calendar") == 0
     _assert_week_matrix_emit(w28, gutter="4pt", pattern="dotted_centered")
     assert "week_cell(" not in w28
-    assert "table.cell(fill: black, text(white)[#padded_link(<month-2026-07-01>)[Jul]])" in w28
-    assert "table.cell([#padded_link(<quarter-2026-3>)[Q3]])" in w28
-    assert "table.cell(fill: black, text(white)[#padded_link(<quarter-" not in w28
-    assert w28.count("table.cell(fill: black") == 1
+    assert "mos_strip(highlight-months: (<month-2026-07-01>,), highlight-quarters: ())" in w28
+    assert "table.cell(fill: black" not in w28

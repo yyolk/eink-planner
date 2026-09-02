@@ -1,4 +1,4 @@
-"""Rotated quarters strip in the side menu."""
+"""Year quarter dest/label pairs for mos_strip."""
 
 from collections.abc import Sequence
 
@@ -12,25 +12,12 @@ class QuartersMenu:
         self.i18n = i18n
         self.manifest = manifest
         self.range = list(range)
-        self.highlighted: list[Quarter] = []
-
-    def highlight(self, items: list[Quarter] | None = None) -> list[Quarter]:
-        self.highlighted = list(items or [])
-        return self.highlighted
 
     def generate(self) -> str:
-        cols = ", ".join(["1fr"] * len(self.range))
-        return f"""mos_tabs(columns: ({cols}),
-  {self._quarters()}
-)"""
+        items = ", ".join(self._pair(quarter) for quarter in self.range)
+        return f"({items},)" if self.range else "()"
 
-    def _quarters(self) -> str:
-        return ",\n".join(self._format(quarter) for quarter in self.range)
-
-    def _format(self, quarter: Quarter) -> str:
-        label = self.manifest.link_or_content(
-            quarter.id, f"{self.i18n.t('quarter.short')}{quarter.number}"
-        )
-        if quarter in self.highlighted:
-            return f"table.cell(fill: black, text(white)[#{label}])"
-        return f"table.cell([#{label}])"
+    def _pair(self, quarter: Quarter) -> str:
+        dest = self.manifest.dest(quarter.id)
+        label = f"{self.i18n.t('quarter.short')}{quarter.number}"
+        return f"({dest}, [{label}])"

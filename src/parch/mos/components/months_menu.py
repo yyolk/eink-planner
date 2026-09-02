@@ -1,4 +1,4 @@
-"""Rotated months strip in the side menu."""
+"""Year month dest/label pairs for mos_strip."""
 
 from collections.abc import Callable, Sequence
 
@@ -18,29 +18,18 @@ class MonthsMenu:
         self.i18n = i18n
         self.manifest = manifest
         self.range = list(range)
-        self.highlighted: list[Month] = []
         self.month_link_id = month_link_id
 
-    def highlight(self, items: list[Month] | None = None) -> list[Month]:
-        self.highlighted = list(items or [])
-        return self.highlighted
-
     def generate(self) -> str:
-        cols = ", ".join(["1fr"] * len(self.range))
-        return f"""mos_tabs(columns: ({cols}),
-  {self._months()}
-)"""
-
-    def _months(self) -> str:
-        return ",\n".join(self._format(month) for month in self.range)
+        items = ", ".join(self._pair(month) for month in self.range)
+        return f"({items},)" if self.range else "()"
 
     def _target(self, month: Month) -> str:
         if self.month_link_id is None:
             return month.id
         return self.month_link_id(month)
 
-    def _format(self, month: Month) -> str:
-        label = self.manifest.link_or_content(self._target(month), self.i18n.t(f"months.short.{month.name}"))
-        if month in self.highlighted:
-            return f"table.cell(fill: black, text(white)[#{label}])"
-        return f"table.cell([#{label}])"
+    def _pair(self, month: Month) -> str:
+        dest = self.manifest.dest(self._target(month))
+        label = self.i18n.t(f"months.short.{month.name}")
+        return f"({dest}, [{label}])"

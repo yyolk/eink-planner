@@ -21,7 +21,16 @@ class Builder:
 
     def generate(self) -> str:
         body = "\n#pagebreak()\n".join(self.pages)
-        return f"{self.preamble.generate()}\n{body}"
+        return f"{self.preamble.generate()}\n{self._mos_strip_bind()}\n{body}"
+
+    def _mos_strip_bind(self) -> str:
+        months = self.navigation.year_month_items()
+        quarters = self.navigation.year_quarter_items()
+        reverse = "true" if _v(self.mos_layout, "reverse_months_quarters") else "false"
+        return (
+            "#let mos_strip = mos_strip.with("
+            f"months: {months}, quarters: {quarters}, reverse: {reverse})"
+        )
 
     def render(self, page: PageData) -> str:
         if page.raw_typst:

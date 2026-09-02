@@ -81,7 +81,7 @@ def _pages(typst: str) -> list[str]:
 
 def _index_page(typst: str) -> str:
     for page in _pages(typst):
-        if "[Habits <habits>]" in page and "mos_rail(" not in page and "mos_frame(" not in page:
+        if "[Habits <habits>]" in page and "mos_strip(" not in page and "mos_frame(" not in page:
             return page
     raise AssertionError("no Habits index page")
 
@@ -193,19 +193,22 @@ daily_cell_height = "16mm"
     )
     typst = _generate(dto)
     habit_jan = _month_page(typst)
-    assert "padded_link(<habits-january>)" in habit_jan
-    assert "padded_link(<habits-february>)" in habit_jan
-    assert "padded_link(<month-2026-01-01>)" not in habit_jan
-    assert habit_jan.count("padded_link(<habits-january>)") >= 1
+    assert "(<habits-january>, [Jan])" in habit_jan
+    assert "(<habits-february>, [Feb])" in habit_jan
+    assert "(<month-2026-01-01>, [Jan])" not in habit_jan
+    assert "show-quarters: false" in habit_jan
+    assert "mos_strip(" in habit_jan
     cal_jan = next(
         page
         for page in _pages(typst)
-        if "<month-2026-01-01>" in page and "mos_rail(" in page and "<habits-january>" not in page
+        if "January<month-2026-01-01>" in page and "mos_strip(" in page
     )
-    assert "padded_link(<month-2026-02-01>)" in cal_jan
-    assert "padded_link(<habits-february>)" not in cal_jan
-    assert "Q1" in cal_jan
-    assert "mos_rail(" in cal_jan
+    bind = typst[typst.index("#let mos_strip = mos_strip.with(months:") :].split("\n", 1)[0]
+    assert "(<month-2026-02-01>, [Feb])" in bind
+    assert "(<habits-february>, [Feb])" not in bind
+    assert "(none, [Q1])" in bind
+    assert "mos_strip(highlight-months: (<month-2026-01-01>,), highlight-quarters: ())" in cal_jan
+    assert "show-quarters: false" not in cal_jan
     assert "columns: (1fr, 3fr)" not in cal_jan
     assert "columns: (3fr, 1fr)" not in cal_jan
 
@@ -216,12 +219,10 @@ def test_habit_month_mos_is_months_only():
     typst = _generate(dto)
     habit_jan = _month_page(typst)
     for name in MONTHS:
-        assert f"padded_link(<habits-{name}>)" in habit_jan
-    assert "Q1" not in habit_jan
-    assert "Q2" not in habit_jan
-    assert "Q3" not in habit_jan
-    assert "Q4" not in habit_jan
-    assert "mos_tabs(" in habit_jan
+        assert f"(<habits-{name}>, " in habit_jan
+    assert "show-quarters: false" in habit_jan
+    assert "mos_strip(" in habit_jan
+    assert "mos_tabs(" not in habit_jan
     assert "mos_rail(" not in habit_jan
     assert "columns: (1fr, 3fr)" not in habit_jan
     assert "columns: (3fr, 1fr)" not in habit_jan
@@ -411,7 +412,9 @@ def test_index_is_raw_typst_month_pages_use_mos():
     typst = _generate(short_january(dto))
     index = _index_page(typst)
     month = _month_page(typst)
-    assert "mos_tabs(" in month
+    assert "mos_strip(" in month
+    assert "show-quarters: false" in month
+    assert "mos_tabs(" not in month
     assert "mos_rail(" not in month
     assert "rotate(" not in month
     assert "January" in index
@@ -549,7 +552,9 @@ def test_same_names_on_every_month_page():
     for page in named:
         assert "align(center + horizon, text[Move])" in page
         assert _HEADER_LINE not in page
-        assert "mos_tabs(" in page
+        assert "mos_strip(" in page
+        assert "show-quarters: false" in page
+        assert "mos_tabs(" not in page
         assert "mos_rail(" not in page
         sleep_cell = page[page.index("align(center + horizon, text[Sleep])") :]
         sleep_cell = sleep_cell[: sleep_cell.index("grid.cell(stroke: regular_stroke, [])")]
@@ -645,22 +650,27 @@ daily_cell_height = "16mm"
         _minimal(enable=["monthly"], mos=_RIGHT_MOS, sections=monthly),
         source="monthly-right.toml",
     )
+    both_typst = _generate(both_right)
+    only_typst = _generate(monthly_only)
     cal_both = _mos_page(
-        _generate(both_right),
-        "<month-2026-01-01>",
-        "mos_rail(",
+        both_typst,
+        "January<month-2026-01-01>",
+        "mos_strip(",
         exclude="<habits-january>",
     )
-    cal_only = _mos_page(_generate(monthly_only), "<month-2026-01-01>", "mos_rail(")
+    cal_only = _mos_page(only_typst, "January<month-2026-01-01>", "mos_strip(")
     assert "#mos_frame(\n  right," in cal_both
     assert "#mos_frame(\n  left," not in cal_both
-    assert "Q1" in cal_both
-    assert "padded_link(<month-2026-02-01>)" in cal_both
-    assert "padded_link(<habits-february>)" not in cal_both
+    both_bind = both_typst[both_typst.index("#let mos_strip = mos_strip.with(months:") :].split("\n", 1)[0]
+    assert "(none, [Q1])" in both_bind
+    assert "(<month-2026-02-01>, [Feb])" in both_bind
+    assert "(<habits-february>, [Feb])" not in both_bind
     assert "columns: (auto, 1fr, 1fr" not in cal_both
     assert "#mos_frame(\n  right," in cal_only
-    assert "Q1" in cal_only
-    assert "padded_link(<month-2026-02-01>)" in cal_only
+    only_bind = only_typst[only_typst.index("#let mos_strip = mos_strip.with(months:") :].split("\n", 1)[0]
+    assert "(none, [Q1])" in only_bind
+    assert "(<month-2026-02-01>, [Feb])" in only_bind
+    assert "mos_strip(highlight-months: (<month-2026-01-01>,), highlight-quarters: ())" in cal_only
 
 
 def test_named_header_is_upright_blank_is_empty_cell():

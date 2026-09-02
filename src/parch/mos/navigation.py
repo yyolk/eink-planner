@@ -28,6 +28,23 @@ class Navigation:
         self.start_date = configurator.start_date()
         self.end_date = configurator.end_date()
 
+    def year_month_items(self, month_link_id: Callable[[Month], str] | None = None) -> str:
+        months = list(walk(self.start_date.month(), self.end_date.month()))
+        if _v(self.mos_layout, "reverse_months_quarters_items"):
+            months.reverse()
+        return MonthsMenu(
+            i18n=self.i18n,
+            manifest=self.manifest,
+            range=months,
+            month_link_id=month_link_id,
+        ).generate()
+
+    def year_quarter_items(self) -> str:
+        quarters = list(walk(self.start_date.quarter(), self.end_date.quarter()))
+        if _v(self.mos_layout, "reverse_months_quarters_items"):
+            quarters.reverse()
+        return QuartersMenu(i18n=self.i18n, manifest=self.manifest, range=quarters).generate()
+
     def side_menu_cell(
         self,
         highlight_months: list[Any],
@@ -35,13 +52,17 @@ class Navigation:
         month_link_id: Callable[[Month], str] | None = None,
         show_quarters: bool = True,
     ) -> str:
-        months = self._months_menu(highlight_months, month_link_id=month_link_id)
+        month_dests = self._highlight_dests(highlight_months, month_link_id)
+        quarter_dests = self._highlight_dests(highlight_quarters)
+        parts = [
+            f"highlight-months: {_dest_array(month_dests)}",
+            f"highlight-quarters: {_dest_array(quarter_dests)}",
+        ]
+        if month_link_id is not None:
+            parts.insert(0, f"months: {self.year_month_items(month_link_id)}")
         if not show_quarters:
-            return months
-        quarters = self._quarters_menu(highlight_quarters)
-        if _v(self.mos_layout, "reverse_months_quarters"):
-            return f"mos_rail({quarters}, {months}, reverse: true)"
-        return f"mos_rail({quarters}, {months})"
+            parts.append("show-quarters: false")
+        return f"mos_strip({', '.join(parts)})"
 
     def heading_menu_grid(
         self,
@@ -90,30 +111,24 @@ class Navigation:
                 out.append(link)
         return out
 
-    def _months_menu(
+    def _highlight_dests(
         self,
-        highlight_months: list[Any],
+        items: list[Any],
         month_link_id: Callable[[Month], str] | None = None,
-    ) -> str:
-        months = list(walk(self.start_date.month(), self.end_date.month()))
-        if _v(self.mos_layout, "reverse_months_quarters_items"):
-            months.reverse()
-        menu = MonthsMenu(
-            i18n=self.i18n,
-            manifest=self.manifest,
-            range=months,
-            month_link_id=month_link_id,
-        )
-        menu.highlight(highlight_months)
-        return menu.generate()
+    ) -> list[str]:
+        dests: list[str] = []
+        for item in items:
+            source_id = month_link_id(item) if month_link_id is not None else item.id
+            dest = self.manifest.dest(source_id)
+            if dest != "none":
+                dests.append(dest)
+        return dests
 
-    def _quarters_menu(self, highlight_quarters: list[Any]) -> str:
-        quarters = list(walk(self.start_date.quarter(), self.end_date.quarter()))
-        if _v(self.mos_layout, "reverse_months_quarters_items"):
-            quarters.reverse()
-        menu = QuartersMenu(i18n=self.i18n, manifest=self.manifest, range=quarters)
-        menu.highlight(highlight_quarters)
-        return menu.generate()
+
+def _dest_array(dests: list[str]) -> str:
+    if not dests:
+        return "()"
+    return f"({', '.join(dests)},)"
 
 
 def _v(mapping, key: str):

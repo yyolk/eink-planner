@@ -169,6 +169,32 @@
   ..if reverse { (months, quarters) } else { (quarters, months) },
 )
 
+// Year dests bind once; per page is highlights only.
+#let mos_strip(months: none, quarters: none, highlight-months: (), highlight-quarters: (), reverse: false, show-quarters: true, stroke: none, turn: none, gutter: none, padding: none) = {
+  // months/quarters: array of (dest, label). dest is none when the page does not exist.
+  // highlight-* are dests. show-quarters: false is habits (months only).
+  let tabs(items, highlights) = mos_tabs(
+    stroke: stroke,
+    turn: turn,
+    ..items.map(item => {
+      let dest = item.at(0)
+      let label = item.at(1)
+      let body = if dest != none { padded_link(padding: padding, dest, label) } else { label }
+      if highlights.contains(dest) {
+        table.cell(fill: black, text(white)[#body])
+      } else {
+        table.cell([#body])
+      }
+    }),
+  )
+  let month-tabs = tabs(months, highlight-months)
+  if show-quarters {
+    mos_rail(tabs(quarters, highlight-quarters), month-tabs, reverse: reverse, gutter: gutter)
+  } else {
+    month-tabs
+  }
+}
+
 // Week cell is always first in each 8-cell row. MOS-right moves it to the end.
 #let _order_week_rows(side, cells) = if side == left {
   cells
