@@ -1,6 +1,6 @@
 """Line-drawing device frames generated from the Device record."""
 
-from parch.devices import MM_PER_INCH, PT_PER_INCH, TOOLBAR_TOP, Device
+from parch.devices import MM_PER_INCH, PT_PER_INCH, Device
 
 FRAME_DEVICE_IDS = frozenset(
     {
@@ -199,13 +199,13 @@ def _supernote_frame(device: Device) -> str:
 
 def frame_svg(device: Device) -> str:
     """Emit a line-drawing whose #screen is 1:1 with a Typst page."""
-    if device.id not in FRAME_DEVICE_IDS:
-        known = ", ".join(sorted(FRAME_DEVICE_IDS))
-        raise ValueError(f"no device frame for {device.id!r}; this slice: {known}")
-    if device.id == "158x210":
-        return _paper_frame(device)
-    if device.id == "kindle-scribe":
-        return _scribe_frame(device)
-    if device.toolbar_edge != TOOLBAR_TOP:
-        raise ValueError(f"no SuperNote chrome for {device.id!r}")
-    return _supernote_frame(device)
+    match device.id:
+        case "158x210":
+            return _paper_frame(device)
+        case "kindle-scribe":
+            return _scribe_frame(device)
+        case "supernote-nomad" | "supernote-manta":
+            return _supernote_frame(device)
+        case _:
+            known = ", ".join(sorted(FRAME_DEVICE_IDS))
+            raise ValueError(f"no device frame for {device.id!r}; this slice: {known}")
