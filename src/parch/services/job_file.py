@@ -141,6 +141,7 @@ class JobSpec:
     habit_columns: int = 4
     meetings_index_pages: int = 1
     habit_names_len: int = 0
+    reverse_months_quarters: bool = False
 
     def device(self) -> Device:
         return get_device(self.device_id)
@@ -182,6 +183,9 @@ def spec_from_data(data: dict[str, Any]) -> JobSpec:
     side = mos.get("side_menu")
     if isinstance(side, str) and side.lower() in {"left", "right"}:
         spec.hand = side.lower()
+    reverse = mos.get("reverse_months_quarters")
+    if isinstance(reverse, bool):
+        spec.reverse_months_quarters = reverse
     style = data.get("style") if isinstance(data.get("style"), dict) else {}
     paper = style.get("scratch_pad")
     if isinstance(paper, str) and paper in _PAPERS:
@@ -249,7 +253,7 @@ def emit_job(spec: JobSpec) -> str:
         "",
         "[mos]",
         f'side_menu = "{spec.hand}"',
-        "reverse_months_quarters = true",
+        f"reverse_months_quarters = {_toml_bool(spec.reverse_months_quarters)}",
         'menu_rotate = "270deg"',
         f'column_gutter = "{style.mos_column_gutter}"',
         f'row_gutter = "{style.mos_row_gutter}"',

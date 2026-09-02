@@ -18,7 +18,7 @@ def test_happy_path_mos_left():
     assert profile.device.name == "158x210"
     assert profile.mos.side_menu == "left"
     assert "side_menu_width" not in type(profile.mos).model_fields
-    assert profile.mos.reverse_months_quarters is True
+    assert profile.mos.reverse_months_quarters is False
     assert profile.sections[-1] == "colophon"
     assert profile.section.daily is not None
     assert profile.section.daily.left is not None

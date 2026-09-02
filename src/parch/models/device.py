@@ -163,8 +163,8 @@ class Style(StrictModel):
 
 class Mos(StrictModel):
     side_menu: str
-    # MOS-strip overlay. True on every shipped device; not derived from side.
-    reverse_months_quarters: StrictBool
+    # MOS-strip overlay. Omit-default False: missing key is not reverse.
+    reverse_months_quarters: StrictBool = False
     menu_rotate: str
     column_gutter: str
     row_gutter: str
