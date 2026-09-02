@@ -141,7 +141,7 @@ class JobSpec:
     habit_columns: int = 4
     meetings_index_pages: int = 1
     habit_names_len: int = 0
-    reverse_months_quarters: bool = False
+    reverse_months_quarters: bool = True
 
     def device(self) -> Device:
         return get_device(self.device_id)

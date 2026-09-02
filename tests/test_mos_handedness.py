@@ -162,7 +162,7 @@ def test_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["side_menu_position"] == "right"
     assert "side_menu_width" not in mos
-    assert mos["reverse_months_quarters"] is False
+    assert mos["reverse_months_quarters"] is True
     assert mos["menu_rotate"] == "270deg"
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
     assert "columns_width" not in daily
@@ -209,7 +209,7 @@ def test_nomad_hand_right_generate_compiles_with_mos_on_the_right(tmp_path):
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["side_menu_position"] == "right"
     assert "side_menu_width" not in mos
-    assert mos["reverse_months_quarters"] is False
+    assert mos["reverse_months_quarters"] is True
     assert mos["menu_rotate"] == "270deg"
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
     assert "columns_width" not in daily

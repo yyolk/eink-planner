@@ -236,7 +236,7 @@ def test_new_hand_writes_side_menu_only(tmp_path):
     assert "week_placement" not in data["section"]["monthly"]
     assert "columns" not in data["section"]["daily"]
     assert "side_menu_width" not in data["mos"]
-    assert data["mos"]["reverse_months_quarters"] is False
+    assert data["mos"]["reverse_months_quarters"] is True
     assert "reverse_months_quarters_items" not in data["mos"]
     assert "left" in data["section"]["daily"]
     assert "right" in data["section"]["daily"]
@@ -280,7 +280,7 @@ def test_emit_job_is_complete_resume_state():
     spec = spec_from_data(data)
     assert spec.paper == "lined"
     assert spec.week_placement == "none"
-    assert spec.reverse_months_quarters is False
+    assert spec.reverse_months_quarters is True
 
 
 def test_emit_job_override_reverse_months_quarters_omits_items():
@@ -291,11 +291,16 @@ def test_emit_job_override_reverse_months_quarters_omits_items():
     assert data["mos"]["reverse_months_quarters"] is True
     assert "reverse_months_quarters_items" not in data["mos"]
     assert "reverse_months_quarters_items" not in text
+    flipped = emit_job(
+        with_overrides(spec_from_device("supernote-nomad"), reverse_months_quarters=False)
+    )
+    assert tomllib.loads(flipped)["mos"]["reverse_months_quarters"] is False
+    assert "reverse_months_quarters_items" not in flipped
 
 
 def test_spec_from_data_resumes_reverse_months_quarters():
     missing = spec_from_data({"device": {"name": "supernote-nomad"}, "mos": {}})
-    assert missing.reverse_months_quarters is False
+    assert missing.reverse_months_quarters is True
     false_spec = spec_from_data(
         {"device": {"name": "supernote-nomad"}, "mos": {"reverse_months_quarters": False}}
     )
@@ -330,7 +335,7 @@ def test_new_yes_writes_device_defaults(tmp_path):
     assert data["section"]["daily"]["right"]["priorities"]["count"] == 5
     assert "week_placement" not in data["section"]["monthly"]
     assert data["mos"]["side_menu"] == "left"
-    assert data["mos"]["reverse_months_quarters"] is False
+    assert data["mos"]["reverse_months_quarters"] is True
     assert "reverse_months_quarters_items" not in data["mos"]
     assert 'title_height = "4mm"' in text
     assert 'daily_cell_height = "16mm"' in text
