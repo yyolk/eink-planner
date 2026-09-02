@@ -19,6 +19,7 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2.13.4",
+    "pypdf>=6.16.2",
     "questionary",
 ]
 
