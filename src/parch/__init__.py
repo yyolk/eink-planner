@@ -1,6 +1,11 @@
 """parch: Python port of kudrykv/LYP yearly e-ink planner."""
 
-__version__ = "0.1.1"
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("parch")
+except PackageNotFoundError:
+    __version__ = "unknown"
 
 
 class Error(Exception):

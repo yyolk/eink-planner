@@ -1,7 +1,10 @@
 """Thin dispatch smoke: press, proof, new, and edit."""
 
+from importlib.metadata import version
+
 import pytest
 
+from parch import __version__
 from parch.cli import build_parser, edit_cmd, generate_cmd, main, new_cmd, preview_svg_cmd
 
 
@@ -80,3 +83,12 @@ def test_dropped_aliases_are_unknown(capsys):
         assert exc.value.code != 0
         err = capsys.readouterr().err
         assert "invalid choice" in err
+
+
+def test_cli_version_matches_package_metadata(capsys):
+    expected = version("parch")
+    assert __version__ == expected
+    with pytest.raises(SystemExit) as exc:
+        main(["--version"])
+    assert exc.value.code == 0
+    assert capsys.readouterr().out.strip() == f"parch {expected}"
