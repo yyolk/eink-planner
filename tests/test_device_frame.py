@@ -5,8 +5,8 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
-from parch.device_frame import FRAME_DEVICE_IDS, frame_svg
-from parch.devices import DEVICES, TOOLBAR_NONE, TOOLBAR_TOP, get_device
+from parch.device_frame import FRAME_DEVICE_IDS, HATCH_ID, frame_svg
+from parch.devices import DEVICES, MM_PER_INCH, PT_PER_INCH, TOOLBAR_NONE, TOOLBAR_TOP, get_device
 
 _SNAPSHOTS = Path(__file__).resolve().parent / "__snapshots__" / "device_frames"
 
@@ -16,6 +16,7 @@ _FRAME_IDS = (
     "kindle-scribe",
     "158x210",
 )
+_SUPERNOTE = ("supernote-nomad", "supernote-manta")
 
 
 def _local(tag: str) -> str:
@@ -54,6 +55,10 @@ def _rect_box(el: ET.Element) -> tuple[float, float, float, float]:
     )
 
 
+def _has_pattern(root: ET.Element) -> bool:
+    return any(_local(el.tag) == "pattern" for el in root.iter())
+
+
 @pytest.mark.parametrize("device_id", _FRAME_IDS)
 def test_screen_matches_device_page(device_id):
     device = get_device(device_id)
@@ -61,6 +66,7 @@ def test_screen_matches_device_page(device_id):
     screen = _by_id(root, "screen")
     assert screen is not None
     assert _local(screen.tag) == "rect"
+    assert screen.get("fill") == "none"
     width = float(screen.get("width"))
     height = float(screen.get("height"))
     assert width == pytest.approx(device.width_pt)
@@ -105,7 +111,6 @@ def test_page_overlay_is_identity_scale(device_id):
     page_h = device.height_pt
     assert sw / page_w == pytest.approx(1.0)
     assert sh / page_h == pytest.approx(1.0)
-    # Overlay is translate(sx, sy) only — no extra scale.
     placed_w, placed_h = page_w, page_h
     assert placed_w == pytest.approx(sw)
     assert placed_h == pytest.approx(sh)
@@ -115,28 +120,48 @@ def test_page_overlay_is_identity_scale(device_id):
 
 
 @pytest.mark.parametrize("device_id", _FRAME_IDS)
-def test_bezel_is_uniform_and_not_toolbar_clearance(device_id):
+def test_screen_not_inset_by_toolbar_clearance(device_id):
     device = get_device(device_id)
     root = _parse(frame_svg(device))
     screen = _by_id(root, "screen")
+    body = _by_id(root, "body")
     assert screen is not None
+    assert body is not None
     sx, sy, sw, sh = _rect_box(screen)
-    vx, vy, vw, vh = _viewbox(root)
-    left = sx - vx
-    top = sy - vy
-    right = (vx + vw) - (sx + sw)
-    bottom = (vy + vh) - (sy + sh)
-    assert left == pytest.approx(top)
-    assert top == pytest.approx(right)
-    assert right == pytest.approx(bottom)
+    bx, by, bw, bh = _rect_box(body)
+    left = sx - bx
+    top = sy - by
+    right = (bx + bw) - (sx + sw)
+    bottom = (by + bh) - (sy + sh)
+    assert left == pytest.approx(right)
+    assert top == pytest.approx(bottom)
     assert sw == pytest.approx(device.width_pt)
     assert sh == pytest.approx(device.height_pt)
 
 
-@pytest.mark.parametrize("device_id", _FRAME_IDS)
-def test_toolbar_mark_only_in_top_bezel(device_id):
+@pytest.mark.parametrize("device_id", ("kindle-scribe", "158x210"))
+def test_even_bezel_on_scribe_and_paper(device_id):
     device = get_device(device_id)
     root = _parse(frame_svg(device))
+    screen = _by_id(root, "screen")
+    body = _by_id(root, "body")
+    assert screen is not None and body is not None
+    sx, sy, sw, sh = _rect_box(screen)
+    bx, by, bw, bh = _rect_box(body)
+    left = sx - bx
+    top = sy - by
+    right = (bx + bw) - (sx + sw)
+    bottom = (by + bh) - (sy + sh)
+    assert left == pytest.approx(top)
+    assert top == pytest.approx(right)
+    assert right == pytest.approx(bottom)
+
+
+@pytest.mark.parametrize("device_id", _FRAME_IDS)
+def test_toolbar_band_or_absent(device_id):
+    device = get_device(device_id)
+    svg = frame_svg(device)
+    root = _parse(svg)
     screen = _by_id(root, "screen")
     toolbar = _by_id(root, "toolbar")
     assert screen is not None
@@ -144,13 +169,51 @@ def test_toolbar_mark_only_in_top_bezel(device_id):
     if device.toolbar_edge == TOOLBAR_TOP:
         assert toolbar is not None
         tx, ty, tw, th = _rect_box(toolbar)
-        assert ty + th <= sy
-        assert tx >= sx
-        assert tx + tw <= sx + sw
-        assert ty >= 0.0
+        assert tw == pytest.approx(sw)
+        assert tx == pytest.approx(sx)
+        assert ty + th <= sy + 1e-9
+        mm = float(device.toolbar_clearance.removesuffix("mm"))
+        assert th == pytest.approx(round(mm / MM_PER_INCH * PT_PER_INCH, 2))
+        assert toolbar.get("fill") == f"url(#{HATCH_ID})"
+        assert _has_pattern(root)
     else:
         assert device.toolbar_edge == TOOLBAR_NONE
         assert toolbar is None
+        assert not _has_pattern(root)
+
+
+@pytest.mark.parametrize("device_id", _SUPERNOTE)
+def test_supernote_chrome(device_id):
+    root = _parse(frame_svg(get_device(device_id)))
+    body = _by_id(root, "body")
+    assert body is not None
+    assert float(body.get("rx") or 0) > 0
+    assert _by_id(root, "power") is not None
+    assert _by_id(root, "sensor") is not None
+    lines = [el for el in root.iter() if _local(el.tag) == "line"]
+    assert len(lines) == 2
+
+
+def test_scribe_is_not_supernote_chrome():
+    root = _parse(frame_svg(get_device("kindle-scribe")))
+    body = _by_id(root, "body")
+    assert body is not None
+    assert float(body.get("rx") or 0) > 0
+    assert _by_id(root, "toolbar") is None
+    assert _by_id(root, "sensor") is None
+    assert not any(_local(el.tag) == "line" for el in root.iter())
+    assert _by_id(root, "power") is not None
+
+
+def test_paper_is_generic_two_rect():
+    root = _parse(frame_svg(get_device("158x210")))
+    body = _by_id(root, "body")
+    assert body is not None
+    assert body.get("rx") is None
+    assert _by_id(root, "toolbar") is None
+    assert _by_id(root, "sensor") is None
+    assert _by_id(root, "power") is None
+    assert not any(_local(el.tag) == "line" for el in root.iter())
 
 
 @pytest.mark.parametrize("device_id", _FRAME_IDS)
