@@ -19,7 +19,6 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2.13.4",
-    "pypdf>=6.16.2",
     "questionary",
 ]
 
@@ -49,6 +48,7 @@ package = true
 [dependency-groups]
 dev = [
     "pillow>=12.3.0",
+    "pypdf>=6.16.2",
     "pytest>=8.0",
     "syrupy>=6.0.0",
 ]
