@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="393.66pt" height="509.10pt" viewBox="0 0 393.66 509.10">
+  <defs>
+    <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+      <rect width="6" height="6" fill="#fff"/>
+      <rect width="3" height="6" fill="#ccc"/>
+    </pattern>
+  </defs>
+  <path fill="#c8c8c8" fill-rule="evenodd" d="M 11.34 3.12 H 382.32 A 11.34 11.34 0 0 1 393.66 14.46 V 497.76 A 11.34 11.34 0 0 1 382.32 509.10 H 11.34 A 11.34 11.34 0 0 1 0.00 497.76 V 14.46 A 11.34 11.34 0 0 1 11.34 3.12 Z M 28.35 31.47 H 365.31 V 480.75 H 28.35 Z"/>
+  <rect id="body" x="0.00" y="3.12" width="393.66" height="505.98" rx="11.34" ry="11.34" fill="none" stroke="#000" stroke-width="1"/>
+  <rect id="power" x="307.05" y="0" width="9.92" height="3.12" fill="#c8c8c8" stroke="#000" stroke-width="1"/>
+  <line x1="14.18" y1="106.35" x2="14.18" y2="405.87" stroke="#000" stroke-width="1"/>
+  <line x1="379.49" y1="106.35" x2="379.49" y2="405.87" stroke="#000" stroke-width="1"/>
+  <rect id="toolbar" x="28.35" y="8.79" width="336.96" height="22.68" fill="url(#hatch)" stroke="#000" stroke-width="1"/>
+  <text x="196.83" y="20.13" text-anchor="middle" dominant-baseline="middle" fill="#000" font-size="9.07" font-family="sans-serif">toolbar</text>
+  <rect id="screen" x="28.35" y="31.47" width="336.96" height="449.28" fill="none" stroke="#000" stroke-width="1"/>
+</svg>

@@ -1,4 +1,4 @@
-"""CLI: `parch press`, `parch proof`, `parch new`, and `parch edit`."""
+"""CLI: `parch press`, `parch proof`, `parch specimen`, `parch new`, and `parch edit`."""
 
 import argparse
 import sys
@@ -15,7 +15,16 @@ from parch.services.compile import Compile, CompileError
 from parch.services.generate import Generate
 from parch.services.config_file import open_resolved, run_edit, run_new, shipped_help
 from parch.services.job_file import DEFAULT_DEVICE
-from parch.services.preview_svg import DEFAULT_SCALE, parse_pages, preview_svg, sample_page_numbers
+from parch.devices import get_device
+from parch.device_frame import frame_svg
+from parch.services.preview_svg import (
+    DEFAULT_SCALE,
+    SAMPLE_STEMS,
+    parse_pages,
+    preview_svg,
+    sample_page_numbers,
+)
+from parch.services.specimen import specimens_dest, write_specimens
 
 
 def _repo_root() -> Path:
@@ -33,7 +42,9 @@ def build_parser() -> argparse.ArgumentParser:
         description="Generate a yearly e-ink planner PDF from a TOML config.",
     )
     parser.add_argument("--version", action="version", version=f"parch {__version__}")
-    sub = parser.add_subparsers(dest="command", required=True, metavar="{press,proof,new,edit}")
+    sub = parser.add_subparsers(
+        dest="command", required=True, metavar="{press,proof,specimen,new,edit}"
+    )
 
     new = sub.add_parser(
         "new",
@@ -166,10 +177,38 @@ def build_parser() -> argparse.ArgumentParser:
         help="Overlay planner year (dates and cover title; not a config key)",
     )
     _add_hand_flag(proof)
+
+    specimen = sub.add_parser(
+        "specimen",
+        help="Frame sample pages in a device line-drawing catalog",
+    )
+    specimen.add_argument("config", help="Planner job file or device id")
+    specimen.add_argument(
+        "-w",
+        "--workdir",
+        default="./out",
+        help="Working directory; catalog is <workdir>/specimens/<device-id>/",
+    )
+    specimen.add_argument(
+        "-l",
+        "--locale",
+        default="en",
+        help="Locale code (default: en)",
+    )
+    specimen.add_argument("--debug", action="store_true", help="Draw MOS debug strokes")
+    specimen.add_argument(
+        "--year",
+        type=int,
+        default=None,
+        help="Overlay planner year (dates and cover title; not a config key)",
+    )
+    _add_hand_flag(specimen)
+
     new.set_defaults(run=new_cmd)
     edit.set_defaults(run=edit_cmd)
     press.set_defaults(run=generate_cmd)
     proof.set_defaults(run=preview_svg_cmd)
+    specimen.set_defaults(run=specimen_cmd)
     return parser
 
 
@@ -288,6 +327,53 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
         dest = dest_dir / f"{stem}.svg"
         dest.write_text(preview_svg(raw, scale=args.scale, crop=False), encoding="utf-8")
         print(f"Wrote {dest} (page {number})")
+    return 0
+
+
+def specimen_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
+    repo = _repo_root()
+    with open_resolved(args.config) as config_path:
+        i18n = I18n.load_default(args.locale)
+        dto = apply_debug(load(config_path), debug=bool(args.debug))
+        dto = apply_year(dto, args.year)
+        dto = apply_hand(dto, getattr(args, "hand", None))
+        dto = apply_provenance(
+            dto,
+            collect_provenance(
+                config_path=config_path,
+                argv=list(argv) if argv is not None else list(sys.argv),
+            ),
+        )
+        device = get_device(str(dto["device"]))
+        try:
+            frame_svg(device)
+        except ValueError as exc:
+            raise ConfigError(str(exc)) from exc
+    typst_source = Generate(i18n=i18n).generate(dto)
+    workdir = Path(args.workdir)
+    _write_generated_book(workdir, typst_source, device=device.id)
+    cfg = Configurator(dto)
+    year = cfg.start_date().year
+    week_id = cfg.start_date().week().id
+    jan1 = f"{year:04d}-01-01"
+    stems = sample_page_numbers(typst_source, year=year, week_id=week_id, jan1=jan1)
+    pages = list(stems.values())
+    written = Compile().compile_svg(
+        workdir=workdir,
+        file="index.typst",
+        pages=pages,
+        dest_pattern="preview-{p}.svg",
+        tools_dir=repo / ".tools",
+    )
+    by_page = {int(path.stem.split("-")[-1]): path for path in written}
+    dest_dir = specimens_dest(workdir, device.id)
+    pages_by_stem = {
+        stem: by_page[stems[stem]].read_text(encoding="utf-8") for stem in SAMPLE_STEMS
+    }
+    write_specimens(dest_dir, device, pages_by_stem)
+    for stem in SAMPLE_STEMS:
+        print(f"Wrote {dest_dir / f'{stem}.svg'} (page {stems[stem]})")
+    print(f"Wrote {dest_dir / 'index.html'}")
     return 0
 
 

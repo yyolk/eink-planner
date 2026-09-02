@@ -1,4 +1,4 @@
-"""Thin dispatch smoke: press, proof, new, and edit."""
+"""Thin dispatch smoke: press, proof, specimen, new, and edit."""
 
 from importlib.metadata import version
 
@@ -12,6 +12,7 @@ def test_top_help_lists_canonical_verbs():
     help_text = build_parser().format_help()
     assert "press" in help_text
     assert "proof" in help_text
+    assert "specimen" in help_text
     assert "new" in help_text
     assert "edit" in help_text
     assert "Press a profile to PDF" in help_text
@@ -48,7 +49,7 @@ def test_edit_dispatch_handler():
 
 
 def test_verb_help_smokes(capsys):
-    for verb in ("press", "proof", "new", "edit"):
+    for verb in ("press", "proof", "specimen", "new", "edit"):
         with pytest.raises(SystemExit) as exc:
             main([verb, "--help"])
         assert exc.value.code == 0
