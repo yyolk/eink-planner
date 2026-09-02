@@ -52,7 +52,7 @@
   link(target)[#box(inset: padding, content)]
 )
 
-#let contents_bars(thick_stroke: none, size: none) = text(size: size, {
+#let contents_bars(thick_stroke: none, size: none) = {
   let cap = 0.7 * size
   let gap = (cap - 5 * thick_stroke) / 4
   box(
@@ -68,7 +68,7 @@
       line(length: 0.844 * size, stroke: thick_stroke + black),
     ))
   )
-})
+}
 
 #let lead_pair(mark, title, spacing: 6pt) = stack(
   dir: ltr,
