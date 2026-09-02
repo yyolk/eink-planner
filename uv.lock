@@ -44,7 +44,6 @@ version = "0.1.2"
 source = { editable = "." }
 dependencies = [
     { name = "pydantic" },
-    { name = "pypdf" },
     { name = "questionary" },
 ]
 
@@ -59,6 +58,7 @@ typst-native = [
 [package.dev-dependencies]
 dev = [
     { name = "pillow" },
+    { name = "pypdf" },
     { name = "pytest" },
     { name = "syrupy" },
 ]
@@ -66,7 +66,6 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "pydantic", specifier = ">=2.13.4" },
-    { name = "pypdf", specifier = ">=6.16.2" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "questionary" },
     { name = "typst", marker = "extra == 'typst-native'", specifier = "==0.15.0" },
@@ -76,6 +75,7 @@ provides-extras = ["dev", "typst-native"]
 [package.metadata.requires-dev]
 dev = [
     { name = "pillow", specifier = ">=12.3.0" },
+    { name = "pypdf", specifier = ">=6.16.2" },
     { name = "pytest", specifier = ">=8.0" },
     { name = "syrupy", specifier = ">=6.0.0" },
 ]
