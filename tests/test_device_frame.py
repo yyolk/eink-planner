@@ -189,7 +189,7 @@ def test_supernote_chrome(device_id):
     assert body is not None
     assert float(body.get("rx") or 0) > 0
     assert _by_id(root, "power") is not None
-    assert _by_id(root, "sensor") is not None
+    assert _by_id(root, "sensor") is None
     lines = [el for el in root.iter() if _local(el.tag) == "line"]
     assert len(lines) == 2
 

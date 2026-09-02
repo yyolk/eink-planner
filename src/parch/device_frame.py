@@ -17,8 +17,6 @@ BODY_FILL = "#c8c8c8"
 CORNER_MM = 4.0
 NUB_LEN_MM = 3.5
 NUB_THICK_MM = 1.1
-SENSOR_W_MM = 4.0
-SENSOR_H_MM = 1.4
 HATCH_ID = "hatch"
 
 
@@ -165,10 +163,6 @@ def _supernote_frame(device: Device) -> str:
     left_x = round(bx + bezel / 2, 2)
     right_x = round(sx + sw + bezel / 2, 2)
     nub_x = round(bx + bw * 0.78, 2)
-    pill_w = _mm_to_pt(SENSOR_W_MM)
-    pill_h = _mm_to_pt(SENSOR_H_MM)
-    pill_x = round(sx + _mm_to_pt(2.0), 2)
-    pill_y = round(by + (toolbar_y - by - pill_h) / 2, 2)
     inner = [
         *_hatch_defs(),
         _bezel_path(bx, by, bw, bh, rx, sx, sy, sw, sh),
@@ -177,12 +171,6 @@ def _supernote_frame(device: Device) -> str:
             f'  <rect id="power" x="{_pt(nub_x)}" y="0" width="{_pt(nub_w)}"'
             f' height="{_pt(nub_h)}" fill="{BODY_FILL}" stroke="#000"'
             f' stroke-width="1"/>'
-        ),
-        (
-            f'  <rect id="sensor" x="{_pt(pill_x)}" y="{_pt(pill_y)}"'
-            f' width="{_pt(pill_w)}" height="{_pt(pill_h)}"'
-            f' rx="{_pt(pill_h / 2)}" ry="{_pt(pill_h / 2)}"'
-            f' fill="none" stroke="#000" stroke-width="1"/>'
         ),
         (
             f'  <line x1="{_pt(left_x)}" y1="{_pt(slider_y)}" x2="{_pt(left_x)}"'
