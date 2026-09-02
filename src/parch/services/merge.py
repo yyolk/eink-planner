@@ -1,6 +1,6 @@
 """Concatenate section PDFs, drop dest-table pages, union named dests."""
 
-from collections.abc import AbstractSet, Sequence
+from collections.abc import Sequence
 from pathlib import Path
 
 from pypdf import PdfReader, PdfWriter
@@ -27,7 +27,7 @@ def merge_pdfs(
     sources: Sequence[Path],
     dest: Path,
     *,
-    drop_pages: Sequence[AbstractSet[int]] | None = None,
+    drop_pages: Sequence[set[int]] | None = None,
 ) -> Path:
     """Concatenate PDFs in order, drop dest-table pages, union named dests."""
     if not sources:
