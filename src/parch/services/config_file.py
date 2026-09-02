@@ -293,8 +293,8 @@ def _prompt_reverse_months_quarters(default: bool) -> bool:
     answer = questionary.select(
         "Year strip",
         choices=[
-            questionary.Choice("quarters-under-months / Dec→Jan", value=True),
             questionary.Choice("months-then-quarters / Jan→Dec", value=False),
+            questionary.Choice("quarters-under-months / Dec→Jan", value=True),
         ],
         default=default,
     ).ask()

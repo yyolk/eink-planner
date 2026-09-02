@@ -39,7 +39,7 @@ def test_parse_device_job_defaults(path: Path):
     names = [section["name"] for section in cfg.enabled_sections()]
     assert names == _DEFAULT_SECTIONS
     mos = dto["planner"]["params"]["mos_layout"]
-    assert mos["reverse_months_quarters"] is True
+    assert mos["reverse_months_quarters"] is False
     assert "side_menu_width" not in mos
     assert mos["side_menu_position"] in {"left", "right"}
     scale = device_scale(dto["device"])
@@ -47,7 +47,7 @@ def test_parse_device_job_defaults(path: Path):
     assert dto["document"]["layout"]["dimensions"]["height"] == scale["height"]
     assert dto["document"]["layout"]["margin"].to_plain() == device_page_margin(scale)
     text = path.read_text(encoding="utf-8")
-    assert "reverse_months_quarters = true" in text
+    assert "reverse_months_quarters = false" in text
     assert "reverse_months_quarters_items" not in text
     assert "side_menu =" in text
     assert "side_menu_width" not in text
@@ -381,7 +381,7 @@ def test_apply_hand_overlays_side_menu_only():
     dto = apply_hand(load(PAPER_158), "right")
     mos = dto["planner"]["params"]["mos_layout"]
     assert mos["side_menu_position"] == "right"
-    assert mos["reverse_months_quarters"] is True
+    assert mos["reverse_months_quarters"] is False
     daily = next(s for s in dto["planner"]["sections"] if s["name"] == "daily")["params"]
     assert "columns_width" not in daily
     quarterly = next(s for s in dto["planner"]["sections"] if s["name"] == "quarterly")["params"]
