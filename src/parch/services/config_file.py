@@ -231,6 +231,9 @@ def _prompt_overlays(spec: JobSpec, *, hand: str | None) -> dict[str, Any]:
     if hand is None:
         overlays["hand"] = _prompt_side_menu(spec.hand)
     overlays["paper"] = _prompt_paper(spec.paper)
+    overlays["reverse_months_quarters"] = _prompt_reverse_months_quarters(
+        spec.reverse_months_quarters
+    )
     names = set(spec.resolved_sections())
     if "monthly" in names:
         overlays["week_placement"] = _prompt_week_rail(spec.week_placement)
@@ -283,6 +286,23 @@ def _prompt_paper(default: str) -> str:
     if answer is None:
         raise ConfigError("cancelled")
     return _coerce_paper(str(answer))
+
+
+def _prompt_reverse_months_quarters(default: bool) -> bool:
+    questionary = _questionary()
+    answer = questionary.select(
+        "Year strip",
+        choices=[
+            questionary.Choice("months-then-quarters / Jan→Dec", value=False),
+            questionary.Choice("quarters-under-months / Dec→Jan", value=True),
+        ],
+        default=default,
+    ).ask()
+    if answer is None:
+        raise ConfigError("cancelled")
+    if answer not in {True, False}:
+        raise ConfigError("year strip: expected months-then-quarters or quarters-under-months")
+    return bool(answer)
 
 
 def _prompt_week_rail(default: str) -> str:
