@@ -4,9 +4,13 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
+import tomllib
+
 from parch.cli import build_parser, main, specimen_cmd
 from parch.device_frame import FRAME_DEVICE_IDS, frame_svg
 from parch.devices import DEVICES, get_device
+from parch.services.config_file import open_resolved
+from parch.services.job_file import CANONICAL_SECTIONS, DEFAULT_SECTIONS
 from parch.services.preview_svg import SAMPLE_STEMS
 from parch.services.specimen import (
     catalog_dest,
@@ -185,6 +189,8 @@ def test_write_specimens_catalog(tmp_path):
     assert "annual.svg" in html
     assert html.count("<figure>") == len(SAMPLE_STEMS)
     assert 'href="../"' in html
+    for stem in ("projects", "habits", "review", "tasks", "meetings"):
+        assert f'src="{stem}.svg"' in html
 
 
 def test_write_catalog_index_root(tmp_path):
@@ -198,6 +204,7 @@ def test_write_catalog_index_root(tmp_path):
     html = index.read_text(encoding="utf-8")
     assert 'href="158x210/"' in html
     assert 'src="158x210/cover.svg"' in html
+    assert 'src="158x210/projects.svg"' in html
     assert "<script" not in html
     assert listed_catalog_devices(root) == ["158x210"]
     assert 'href="#158x210"' in html
@@ -209,6 +216,7 @@ def test_catalog_index_html_is_dumb():
     html = catalog_index_html(ids)
     assert 'href="158x210/"' in html
     assert 'src="supernote-nomad/cover.svg"' in html
+    assert 'src="supernote-nomad/meetings.svg"' in html
     assert "<script" not in html
     assert html.count("<section") == 2
     nav = html[html.index("<nav>") : html.index("</nav>")]
@@ -241,3 +249,22 @@ def test_specimen_index_html_is_dumb():
     assert 'href="../"' in html
     for stem in SAMPLE_STEMS:
         assert f"{stem}.svg" in html
+    for stem in ("projects", "habits", "review", "tasks", "meetings"):
+        assert f"{stem}.svg" in html
+
+
+def test_specimen_job_uses_canonical_sections():
+    with open_resolved("158x210") as path:
+        default = tomllib.loads(path.read_text(encoding="utf-8"))
+    with open_resolved("kindle-scribe", sections=CANONICAL_SECTIONS) as path:
+        scribe = tomllib.loads(path.read_text(encoding="utf-8"))
+    with open_resolved("supernote-nomad", sections=CANONICAL_SECTIONS) as path:
+        nomad = tomllib.loads(path.read_text(encoding="utf-8"))
+    assert default["sections"] == list(DEFAULT_SECTIONS)
+    assert "projects" not in default["sections"]
+    for extra in ("projects", "habits", "review", "tasks", "meetings"):
+        assert extra in CANONICAL_SECTIONS
+        assert extra in scribe["sections"]
+        assert extra in nomad["sections"]
+    assert scribe["sections"] == list(CANONICAL_SECTIONS)
+    assert nomad["sections"] == list(CANONICAL_SECTIONS)

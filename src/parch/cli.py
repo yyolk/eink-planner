@@ -14,7 +14,7 @@ from parch.mos.preamble import copy_house_typ
 from parch.services.compile import Compile, CompileError
 from parch.services.generate import Generate
 from parch.services.config_file import open_resolved, run_edit, run_new, shipped_help
-from parch.services.job_file import DEFAULT_DEVICE
+from parch.services.job_file import CANONICAL_SECTIONS, DEFAULT_DEVICE
 from parch.devices import get_device
 from parch.device_frame import frame_svg
 from parch.services.preview_svg import (
@@ -338,7 +338,7 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
 
 def specimen_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
     repo = _repo_root()
-    with open_resolved(args.config) as config_path:
+    with open_resolved(args.config, sections=CANONICAL_SECTIONS) as config_path:
         i18n = I18n.load_default(args.locale)
         dto = apply_debug(load(config_path), debug=bool(args.debug))
         dto = apply_year(dto, args.year)

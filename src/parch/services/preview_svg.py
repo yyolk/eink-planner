@@ -203,6 +203,11 @@ SAMPLE_STEMS = (
     "weekly-w01",
     "daily-jan1",
     "notes-jan1",
+    "projects",
+    "habits",
+    "review",
+    "tasks",
+    "meetings",
     "colophon",
 )
 
@@ -250,5 +255,10 @@ def sample_page_numbers(typst: str, *, year: int, week_id: str, jan1: str) -> di
         "weekly-w01": _first_dest(chunks, week_id, "weekly"),
         "daily-jan1": _first_page(chunks, f"text(size: h1)[1 <{jan1}>]", "daily"),
         "notes-jan1": _first_page(chunks, f"<daily-note-{jan1}-page-1>]", "daily notes"),
+        "projects": _first_page(chunks, "<projects>]", "projects"),
+        "habits": _first_page(chunks, "<habits>]", "habits"),
+        "review": _first_page(chunks, "<review>]", "review"),
+        "tasks": _first_page(chunks, "<tasks>]", "tasks"),
+        "meetings": _first_page(chunks, "<meetings>]", "meetings"),
         "colophon": _first_page(chunks, "<colophon>]", "colophon"),
     }
