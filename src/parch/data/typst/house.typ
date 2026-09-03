@@ -42,7 +42,7 @@
     stroke: (bottom: regular_stroke + black),
     align(
       horizon + start,
-      square(size: 1em, fill: none, stroke: regular_stroke + black),
+      square(size: 0.8em, fill: none, stroke: regular_stroke + black),
     )
   ),
 )
