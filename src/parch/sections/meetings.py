@@ -157,7 +157,7 @@ class Meetings:
 
     def _ticked_lines(self, n: int) -> str:
         cells = ",\n    ".join(
-            ["box(height: regular_height, align(horizon + start, task_tick))"] * n
+            ["box(height: regular_height, align(horizon + start, task_tick()))"] * n
         )
         rows = ", ".join(["regular_height"] * n)
         return f"""grid(

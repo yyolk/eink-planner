@@ -197,7 +197,7 @@ def test_priorities_label_squares_and_thin_black_rule():
     content = _page("2026-01-01").content()
     assert "[Priorities]" in content
     assert "Top priorities" not in content
-    assert content.count("box(height: regular_height, align(horizon + start, task_tick))") == 5
+    assert content.count("box(height: regular_height, align(horizon + start, task_tick()))") == 5
     assert "$square.stroked$" not in content
     assert "task_fill" not in content
     assert "grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [Priorities])))" in content

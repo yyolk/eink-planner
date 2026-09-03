@@ -206,11 +206,11 @@
         stroke: (_, _) => (bottom: regular_stroke + black),
       
         grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [Priorities]))),
-        box(height: regular_height, align(horizon + start, task_tick)),
-      box(height: regular_height, align(horizon + start, task_tick)),
-      box(height: regular_height, align(horizon + start, task_tick)),
-      box(height: regular_height, align(horizon + start, task_tick)),
-      box(height: regular_height, align(horizon + start, task_tick))
+        box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick()))
       ),
       grid(
         columns: (1fr, auto),
@@ -436,11 +436,11 @@
         stroke: (_, _) => (bottom: regular_stroke + black),
       
         grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [Priorities]))),
-        box(height: regular_height, align(horizon + start, task_tick)),
-      box(height: regular_height, align(horizon + start, task_tick)),
-      box(height: regular_height, align(horizon + start, task_tick)),
-      box(height: regular_height, align(horizon + start, task_tick)),
-      box(height: regular_height, align(horizon + start, task_tick))
+        box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick()))
       ),
       grid(
         columns: (1fr, auto),

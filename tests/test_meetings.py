@@ -211,7 +211,7 @@ def test_locale_strings_and_line_counts():
     assert meeting.count("rows: (" + ", ".join(["regular_height"] * 5) + ")") == 1
     assert meeting.count("lined_well(dotted_centered)") == 1
     assert "task_tick" in meeting
-    assert meeting.count("box(height: regular_height, align(horizon + start, task_tick))") == 9
+    assert meeting.count("box(height: regular_height, align(horizon + start, task_tick()))") == 9
     assert "$square.stroked$" not in meeting
     assert "task_fill" not in meeting
     assert _TICK_STROKE in meeting
