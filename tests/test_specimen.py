@@ -210,7 +210,7 @@ def test_catalog_index_html_is_dumb():
     assert 'href="158x210/"' in html
     assert 'src="supernote-nomad/cover.svg"' in html
     assert "<script" not in html
-    assert html.count("<section>") == 2
+    assert html.count("<section") == 2
     nav = html[html.index("<nav>") : html.index("</nav>")]
     assert html.index("<nav>") < html.index("<section")
     for device_id in ids:
