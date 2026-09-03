@@ -206,11 +206,11 @@
         stroke: (_, _) => (bottom: regular_stroke + black),
       
         grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [Priorities]))),
-        box(height: regular_height, align(horizon, [$square.stroked$])),
-      box(height: regular_height, align(horizon, [$square.stroked$])),
-      box(height: regular_height, align(horizon, [$square.stroked$])),
-      box(height: regular_height, align(horizon, [$square.stroked$])),
-      box(height: regular_height, align(horizon, [$square.stroked$]))
+        box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick()))
       ),
       grid(
         columns: (1fr, auto),
@@ -249,7 +249,7 @@
     ''',
     'preamble': '''
       #import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width
-      #import "house.typ": dotted_centered, lined_fill, task_fill, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, mos_strip, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
+      #import "house.typ": dotted_centered, lined_fill, task_tick, task_fill, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, mos_strip, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
       #let page-margin = page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)
       #set page(width: page-width, height: page-height, margin: page-margin(left))
       
@@ -269,6 +269,7 @@
       #let lined_fill = lined_fill.with(regular_height: regular_height, regular_stroke: regular_stroke)
       #let review_lined = lined_fill(paint: black)
       #let lined_fill = lined_fill()
+      #let task_tick = task_tick.with(regular_stroke: regular_stroke)
       #let task_fill = task_fill(page-width: page-width, regular_height: regular_height, regular_stroke: regular_stroke)
       #let scratch_pad = lined_well(dotted_centered)
       #let padded_link = padded_link.with(padding: link_padding)
@@ -435,11 +436,11 @@
         stroke: (_, _) => (bottom: regular_stroke + black),
       
         grid.cell(stroke: (bottom: regular_stroke + black), box(height: regular_height, align(horizon, [Priorities]))),
-        box(height: regular_height, align(horizon, [$square.stroked$])),
-      box(height: regular_height, align(horizon, [$square.stroked$])),
-      box(height: regular_height, align(horizon, [$square.stroked$])),
-      box(height: regular_height, align(horizon, [$square.stroked$])),
-      box(height: regular_height, align(horizon, [$square.stroked$]))
+        box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick())),
+      box(height: regular_height, align(horizon + start, task_tick()))
       ),
       grid(
         columns: (1fr, auto),
@@ -478,7 +479,7 @@
     ''',
     'preamble': '''
       #import "device.typ": page-width, page-height, toolbar-edge, toolbar-clearance, writing-clearance, mos-width
-      #import "house.typ": dotted_centered, lined_fill, task_fill, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, mos_strip, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
+      #import "house.typ": dotted_centered, lined_fill, task_tick, task_fill, padded_link, contents_bars, lead_pair, trail_heading, mos_frame, well_frame, mos_tabs, mos_rail, mos_strip, month_grid, month_weeks, week_matrix, lined_well, daily_well, quarter_well, page-margin
       #let page-margin = page-margin.with(toolbar-edge: toolbar-edge, toolbar-clearance: toolbar-clearance, writing-clearance: writing-clearance)
       #set page(width: page-width, height: page-height, margin: page-margin(left))
       
@@ -498,6 +499,7 @@
       #let lined_fill = lined_fill.with(regular_height: regular_height, regular_stroke: regular_stroke)
       #let review_lined = lined_fill(paint: black)
       #let lined_fill = lined_fill()
+      #let task_tick = task_tick.with(regular_stroke: regular_stroke)
       #let task_fill = task_fill(page-width: page-width, regular_height: regular_height, regular_stroke: regular_stroke)
       #let scratch_pad = lined_well(dotted_centered)
       #let padded_link = padded_link.with(padding: link_padding)

@@ -21,5 +21,5 @@ class DailyPriorities:
 )"""
 
     def _lines(self) -> str:
-        cell = "box(height: regular_height, align(horizon, [$square.stroked$]))"
+        cell = "box(height: regular_height, align(horizon + start, task_tick()))"
         return ",\n".join([cell] * self.number)
