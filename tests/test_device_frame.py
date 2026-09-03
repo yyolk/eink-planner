@@ -171,7 +171,7 @@ def test_toolbar_band_or_absent(device_id):
         tx, ty, tw, th = _rect_box(toolbar)
         assert tw == pytest.approx(sw)
         assert tx == pytest.approx(sx)
-        assert ty + th <= sy + 1e-9
+        assert ty == pytest.approx(sy)
         mm = float(device.toolbar_clearance.removesuffix("mm"))
         assert th == pytest.approx(round(mm / MM_PER_INCH * PT_PER_INCH, 2))
         assert toolbar.get("fill") == f"url(#{HATCH_ID})"

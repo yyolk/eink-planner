@@ -10,7 +10,7 @@
   <rect id="power" x="307.05" y="0" width="9.92" height="3.12" fill="#c8c8c8" stroke="#000" stroke-width="1"/>
   <line x1="14.18" y1="106.35" x2="14.18" y2="405.87" stroke="#000" stroke-width="1"/>
   <line x1="379.49" y1="106.35" x2="379.49" y2="405.87" stroke="#000" stroke-width="1"/>
-  <rect id="toolbar" x="28.35" y="8.79" width="336.96" height="22.68" fill="url(#hatch)" stroke="#000" stroke-width="1"/>
-  <text x="196.83" y="20.13" text-anchor="middle" dominant-baseline="middle" fill="#000" font-size="9.07" font-family="sans-serif">toolbar</text>
+  <rect id="toolbar" x="28.35" y="31.47" width="336.96" height="22.68" fill="url(#hatch)" stroke="#000" stroke-width="1"/>
+  <text x="196.83" y="42.81" text-anchor="middle" dominant-baseline="middle" fill="#000" font-size="9.07" font-family="sans-serif">toolbar</text>
   <rect id="screen" x="28.35" y="31.47" width="336.96" height="449.28" fill="none" stroke="#000" stroke-width="1"/>
 </svg>

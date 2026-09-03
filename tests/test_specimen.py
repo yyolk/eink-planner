@@ -26,6 +26,8 @@ _FRAME_IDS = (
     "kindle-scribe",
     "158x210",
 )
+_SUPERNOTE = ("supernote-nomad", "supernote-manta")
+_NO_TOOLBAR = ("kindle-scribe", "158x210")
 
 
 def _local(tag: str) -> str:
@@ -84,6 +86,44 @@ def test_compose_dummy_page_is_identity_scale(device_id):
     assert float(nested.get("height")) / page_h == pytest.approx(1.0)
     assert _by_id(ET.fromstring(out), "page") is not None
     assert _by_id(ET.fromstring(out), "screen") is not None
+
+
+@pytest.mark.parametrize("device_id", _SUPERNOTE)
+def test_compose_nests_page_before_toolbar(device_id):
+    device = get_device(device_id)
+    frame = frame_svg(device)
+    out = compose_specimen(frame, _dummy_page(device))
+    root = ET.fromstring(out)
+    screen = _by_id(root, "screen")
+    toolbar = _by_id(root, "toolbar")
+    nested = _nested_svg(out)
+    assert screen is not None and toolbar is not None
+    assert float(nested.get("x")) == pytest.approx(float(screen.get("x")))
+    assert float(nested.get("y")) == pytest.approx(float(screen.get("y")))
+    order = []
+    for el in root:
+        if _local(el.tag) == "svg" and el.get("x") is not None:
+            order.append("page")
+        elif el.get("id") == "toolbar":
+            order.append("toolbar")
+        elif _local(el.tag) == "text" and (el.text or "").strip() == "toolbar":
+            order.append("label")
+    assert order == ["page", "toolbar", "label"]
+    assert out.find("<svg x=") < out.find('id="toolbar"')
+
+
+@pytest.mark.parametrize("device_id", _NO_TOOLBAR)
+def test_compose_without_toolbar_inserts_before_close(device_id):
+    device = get_device(device_id)
+    frame = frame_svg(device)
+    out = compose_specimen(frame, _dummy_page(device))
+    assert 'id="toolbar"' not in out
+    last = list(ET.fromstring(out))[-1]
+    assert _local(last.tag) == "svg"
+    assert last.get("x") is not None
+    close = out.rfind("</svg>")
+    assert close > 0
+    assert out[close:].strip() == "</svg>"
 
 
 @pytest.mark.parametrize(

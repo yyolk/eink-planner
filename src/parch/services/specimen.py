@@ -57,6 +57,18 @@ def _xmlns_extras(tag: str) -> str:
     return "".join(extras)
 
 
+def _insert_nested(frame: str, nested: str) -> str:
+    """Place the page under #toolbar when present; otherwise before </svg>."""
+    mark = frame.find('id="toolbar"')
+    if mark >= 0:
+        insert = frame.rfind("<", 0, mark)
+    else:
+        insert = frame.rfind("</svg>")
+    if insert < 0:
+        raise ValueError("frame is not an SVG document")
+    return frame[:insert] + nested + "\n" + frame[insert:]
+
+
 def compose_specimen(frame: str, page: str) -> str:
     """Nest a page SVG at #screen; sizes already match, so do not stretch."""
     screen = _screen_el(frame)
@@ -83,10 +95,7 @@ def compose_specimen(frame: str, page: str) -> str:
         f"{page[end:close]}"
         f"</svg>"
     )
-    insert = frame.rfind("</svg>")
-    if insert < 0:
-        raise ValueError("frame is not an SVG document")
-    return frame[:insert] + nested + "\n" + frame[insert:]
+    return _insert_nested(frame, nested)
 
 
 def framed_specimen(device: Device, page: str) -> str:
