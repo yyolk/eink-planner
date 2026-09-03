@@ -15,6 +15,12 @@ del _XML10_C0[0x09]
 del _XML10_C0[0x0A]
 del _XML10_C0[0x0D]
 
+SPECIMEN_PAPERS = ("lined", "dotted")
+SPECIMEN_HANDS = ("left", "right")
+PERMUTATIONS = tuple(
+    f"{paper}-{hand}" for paper in SPECIMEN_PAPERS for hand in SPECIMEN_HANDS
+)
+
 
 def _xml10_svg(svg: str) -> str:
     """Drop C0 controls other than tab, LF, and CR so the SVG is XML 1.0."""
@@ -26,9 +32,20 @@ def catalog_dest(workdir: str | Path) -> Path:
     return Path(workdir) / "specimens"
 
 
-def specimens_dest(workdir: str | Path, device_id: str) -> Path:
-    """Per-device dir: ``<workdir>/specimens/<device-id>/``."""
-    return catalog_dest(workdir) / device_id
+def specimens_dest(
+    workdir: str | Path, device_id: str, perm_id: str | None = None
+) -> Path:
+    """Per-device or per-perm dir: ``<workdir>/specimens/<device-id>/[<perm-id>/]``."""
+    dest = catalog_dest(workdir) / device_id
+    if perm_id is not None:
+        return dest / perm_id
+    return dest
+
+
+def perm_parts(perm_id: str) -> tuple[str, str]:
+    """Split ``{paper}-{hand}`` into paper and hand."""
+    paper, _, hand = perm_id.partition("-")
+    return paper, hand
 
 
 def listed_catalog_devices(root: Path) -> list[str]:
@@ -113,65 +130,88 @@ def framed_specimen(device: Device, page: str) -> str:
     return compose_specimen(frame_svg(device), page)
 
 
-def specimen_index_html(device_id: str, stems: Sequence[str] = SAMPLE_STEMS) -> str:
-    """Dumb catalog page that lists each framed sample."""
-    figures = [
-        f'<figure><img src="{stem}.svg" alt="{stem}"><figcaption>{stem}</figcaption></figure>'
-        for stem in stems
-    ]
+def _catalog_style() -> str:
     return (
-        "<!DOCTYPE html>\n"
-        f"<title>parch specimens — {device_id}</title>\n"
         "<style>figure{display:inline-block;margin:1rem;vertical-align:top}"
         "img{width:16rem;height:auto}</style>\n"
-        '<p><a href="../">specimens</a></p>\n'
-        + "\n".join(figures)
-        + "\n"
     )
 
 
-def catalog_index_html(
-    device_ids: Sequence[str], stems: Sequence[str] = SAMPLE_STEMS
-) -> str:
-    """Dumb catalog root that links each framed device folder."""
-    nav = (
+def _perm_nav_list(device_ids: Sequence[str]) -> str:
+    """Nested paper → hand → device links. No JS."""
+    lines = ["<ul>"]
+    for paper in SPECIMEN_PAPERS:
+        lines.append(f"<li>{paper}")
+        lines.append("<ul>")
+        for hand in SPECIMEN_HANDS:
+            lines.append(f"<li>{hand}")
+            lines.append("<ul>")
+            perm = f"{paper}-{hand}"
+            for device_id in device_ids:
+                lines.append(f'<li><a href="{device_id}/#{perm}">{device_id}</a></li>')
+            lines.append("</ul></li>")
+        lines.append("</ul></li>")
+    lines.append("</ul>")
+    return "\n".join(lines)
+
+
+def specimen_index_html(device_id: str, stems: Sequence[str] = SAMPLE_STEMS) -> str:
+    """Dumb device page: perm TOC, then four perm galleries."""
+    toc = (
         "<nav>\n"
-        + "\n".join(f'<a href="#{device_id}">{device_id}</a>' for device_id in device_ids)
+        + "\n".join(f'<a href="#{perm}">{perm}</a>' for perm in PERMUTATIONS)
         + "\n</nav>\n"
     )
     sections: list[str] = []
-    for device_id in device_ids:
+    for perm in PERMUTATIONS:
         figures = [
-            f'<figure><img src="{device_id}/{stem}.svg" alt="{device_id} {stem}">'
+            f'<figure><img src="{perm}/{stem}.svg" alt="{stem}">'
             f"<figcaption>{stem}</figcaption></figure>"
             for stem in stems
         ]
         sections.append(
-            f'<section id="{device_id}"><h2><a href="{device_id}/">{device_id}</a></h2>\n'
-            + "\n".join(figures)
-            + "</section>"
+            f'<section id="{perm}">\n' + "\n".join(figures) + "</section>"
         )
     return (
         "<!DOCTYPE html>\n"
-        "<title>parch specimens</title>\n"
-        "<style>figure{display:inline-block;margin:1rem;vertical-align:top}"
-        "img{width:16rem;height:auto}</style>\n"
-        + nav
+        f"<title>parch specimens — {device_id}</title>\n"
+        + _catalog_style()
+        + '<p><a href="../">specimens</a></p>\n'
+        + toc
         + "\n".join(sections)
         + "\n"
     )
 
 
-def write_catalog_index(
-    root: Path,
-    device_ids: Sequence[str],
-    *,
-    stems: Sequence[str] = SAMPLE_STEMS,
-) -> Path:
+def catalog_index_html(device_ids: Sequence[str]) -> str:
+    """Dumb catalog root: nested paper → hand → device list. No galleries."""
+    return (
+        "<!DOCTYPE html>\n"
+        "<title>parch specimens</title>\n"
+        + _catalog_style()
+        + _perm_nav_list(device_ids)
+        + "\n"
+    )
+
+
+def write_catalog_index(root: Path, device_ids: Sequence[str]) -> Path:
     """Write the catalog root index.html listing *device_ids*."""
     root.mkdir(parents=True, exist_ok=True)
     index = root / "index.html"
-    index.write_text(catalog_index_html(device_ids, stems), encoding="utf-8")
+    index.write_text(catalog_index_html(device_ids), encoding="utf-8")
+    return index
+
+
+def write_device_index(
+    dest: Path,
+    device_id: str,
+    *,
+    stems: Sequence[str] = SAMPLE_STEMS,
+) -> Path:
+    """Write the per-device index.html with four perm sections."""
+    dest.mkdir(parents=True, exist_ok=True)
+    index = dest / "index.html"
+    index.write_text(specimen_index_html(device_id, stems), encoding="utf-8")
     return index
 
 
@@ -182,7 +222,7 @@ def write_specimens(
     *,
     stems: Sequence[str] = SAMPLE_STEMS,
 ) -> Path:
-    """Write framed sample SVGs and index.html under *dest*."""
+    """Write framed sample SVGs under *dest* (a perm dir)."""
     dest.mkdir(parents=True, exist_ok=True)
     chrome = frame_svg(device)
     for stem in stems:
@@ -190,6 +230,4 @@ def write_specimens(
             compose_specimen(chrome, pages[stem]),
             encoding="utf-8",
         )
-    index = dest / "index.html"
-    index.write_text(specimen_index_html(device.id, stems), encoding="utf-8")
-    return index
+    return dest

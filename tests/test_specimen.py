@@ -1,26 +1,37 @@
 """Specimen catalog: compose at #screen, identity scale; unknown ids raise."""
 
+from pathlib import Path
 from xml.etree import ElementTree as ET
 
 import pytest
 
 import tomllib
 
-from parch.cli import build_parser, main, specimen_cmd
+from parch.cli import _set_job_paper, build_parser, main, samples_dest, specimen_cmd
+from parch.config import load
 from parch.device_frame import FRAME_DEVICE_IDS, frame_svg
 from parch.devices import DEVICES, get_device
 from parch.services.config_file import open_resolved
-from parch.services.job_file import CANONICAL_SECTIONS, DEFAULT_SECTIONS
+from parch.services.job_file import (
+    CANONICAL_SECTIONS,
+    DEFAULT_SECTIONS,
+    emit_job,
+    spec_from_device,
+)
 from parch.services.preview_svg import SAMPLE_STEMS
+from parch.toml_config import apply_hand
 from parch.services.specimen import (
+    PERMUTATIONS,
     catalog_dest,
     catalog_index_html,
     compose_specimen,
     framed_specimen,
     listed_catalog_devices,
+    perm_parts,
     specimen_index_html,
     specimens_dest,
     write_catalog_index,
+    write_device_index,
     write_specimens,
 )
 
@@ -159,6 +170,7 @@ def test_specimen_help_has_hand(capsys):
     assert exc.value.code == 0
     out = capsys.readouterr().out
     assert "--hand" in out
+    assert "--paper" not in out
     assert "specimen" in out
 
 
@@ -170,9 +182,25 @@ def test_specimen_rejects_unknown_device_before_press(tmp_path, capsys):
     assert not (tmp_path / "specimens").exists()
 
 
+def test_permutation_order():
+    assert PERMUTATIONS == ("lined-left", "lined-right", "dotted-left", "dotted-right")
+    assert [perm_parts(perm) for perm in PERMUTATIONS] == [
+        ("lined", "left"),
+        ("lined", "right"),
+        ("dotted", "left"),
+        ("dotted", "right"),
+    ]
+
+
 def test_catalog_dest_is_specimens_root(tmp_path):
     assert catalog_dest(tmp_path) == tmp_path / "specimens"
     assert specimens_dest(tmp_path, "158x210") == tmp_path / "specimens" / "158x210"
+    assert specimens_dest(tmp_path, "158x210", "lined-left") == (
+        tmp_path / "specimens" / "158x210" / "lined-left"
+    )
+    assert specimens_dest(tmp_path, "supernote-nomad", "dotted-right") == (
+        tmp_path / "specimens" / "supernote-nomad" / "dotted-right"
+    )
 
 
 def test_write_specimens_strips_nul_from_page_href(tmp_path):
@@ -184,7 +212,7 @@ def test_write_specimens_strips_nul_from_page_href(tmp_path):
         f'<use xlink:href="#\x00deadbeef"/>'
         f"</svg>"
     )
-    dest = specimens_dest(tmp_path, device.id)
+    dest = specimens_dest(tmp_path, device.id, "lined-left")
     write_specimens(dest, device, {"cover": page}, stems=("cover",))
     raw = (dest / "cover.svg").read_bytes()
     assert b"\x00" not in raw
@@ -196,16 +224,24 @@ def test_write_specimens_strips_nul_from_page_href(tmp_path):
 def test_write_specimens_catalog(tmp_path):
     device = get_device("158x210")
     pages = {stem: _dummy_page(device) for stem in SAMPLE_STEMS}
-    dest = specimens_dest(tmp_path, device.id)
-    index = write_specimens(dest, device, pages)
-    assert index == dest / "index.html"
+    device_dir = specimens_dest(tmp_path, device.id)
+    for perm in PERMUTATIONS:
+        write_specimens(specimens_dest(tmp_path, device.id, perm), device, pages)
+    index = write_device_index(device_dir, device.id)
+    assert index == device_dir / "index.html"
     html = index.read_text(encoding="utf-8")
-    for stem in SAMPLE_STEMS:
-        assert (dest / f"{stem}.svg").is_file()
-        assert f'src="{stem}.svg"' in html
-        assert 'preserveAspectRatio="none"' not in (dest / f"{stem}.svg").read_text()
+    for perm in PERMUTATIONS:
+        assert f'<section id="{perm}">' in html
+        assert f'href="#{perm}"' in html
+        for stem in SAMPLE_STEMS:
+            assert (device_dir / perm / f"{stem}.svg").is_file()
+            assert f'src="{perm}/{stem}.svg"' in html
+            assert 'preserveAspectRatio="none"' not in (
+                device_dir / perm / f"{stem}.svg"
+            ).read_text()
     assert "annual.svg" in html
-    assert html.count("<figure>") == len(SAMPLE_STEMS)
+    assert html.count("<figure>") == len(SAMPLE_STEMS) * len(PERMUTATIONS)
+    assert html.count("<section") == 4
     assert 'href="../"' in html
     for stem in (
         "projects",
@@ -219,43 +255,52 @@ def test_write_specimens_catalog(tmp_path):
         "meetings",
         "meeting-1",
     ):
-        assert f'src="{stem}.svg"' in html
+        assert f'src="lined-left/{stem}.svg"' in html
 
 
 def test_write_catalog_index_root(tmp_path):
     device = get_device("158x210")
     pages = {stem: _dummy_page(device) for stem in SAMPLE_STEMS}
-    dest = specimens_dest(tmp_path, device.id)
-    write_specimens(dest, device, pages)
+    device_dir = specimens_dest(tmp_path, device.id)
+    write_specimens(specimens_dest(tmp_path, device.id, "lined-left"), device, pages)
+    write_device_index(device_dir, device.id)
     root = catalog_dest(tmp_path)
     index = write_catalog_index(root, listed_catalog_devices(root))
     assert index == root / "index.html"
     html = index.read_text(encoding="utf-8")
-    assert 'href="158x210/"' in html
-    assert 'src="158x210/cover.svg"' in html
-    assert 'src="158x210/projects.svg"' in html
-    assert 'src="158x210/project-1.svg"' in html
+    assert 'href="158x210/#dotted-right"' in html
+    assert 'href="158x210/#lined-left"' in html
+    assert "<figure>" not in html
+    assert 'src="158x210/cover.svg"' not in html
     assert "<script" not in html
+    assert "<nav>" not in html
+    assert "<section" not in html
+    assert 'href="#158x210"' not in html
+    assert 'id="158x210"' not in html
     assert listed_catalog_devices(root) == ["158x210"]
-    assert 'href="#158x210"' in html
-    assert 'id="158x210"' in html
 
 
 def test_catalog_index_html_is_dumb():
     ids = ["158x210", "supernote-nomad"]
     html = catalog_index_html(ids)
-    assert 'href="158x210/"' in html
-    assert 'src="supernote-nomad/cover.svg"' in html
-    assert 'src="supernote-nomad/meetings.svg"' in html
+    assert 'href="supernote-nomad/#dotted-right"' in html
+    assert "<figure>" not in html
+    assert ".svg" not in html
     assert "<script" not in html
-    assert html.count("<section") == 2
-    nav = html[html.index("<nav>") : html.index("</nav>")]
-    assert html.index("<nav>") < html.index("<section")
+    assert "<nav>" not in html
+    assert "<section" not in html
+    assert html.index("<li>lined") < html.index("<li>dotted")
+    assert html.index("<li>left") < html.index("<li>right")
+    assert html.index("lined-left") < html.index("lined-right")
+    assert html.index("lined-right") < html.index("dotted-left")
     for device_id in ids:
-        assert f'href="#{device_id}"' in nav
-        assert f'<section id="{device_id}">' in html
-        assert f'<h2><a href="{device_id}/">{device_id}</a></h2>' in html
-    assert nav.index('href="#158x210"') < nav.index('href="#supernote-nomad"')
+        assert f'href="#{device_id}"' not in html
+        assert f'<section id="{device_id}">' not in html
+        for perm in PERMUTATIONS:
+            assert f'href="{device_id}/#{perm}"' in html
+    assert html.index('href="158x210/#lined-left"') < html.index(
+        'href="supernote-nomad/#lined-left"'
+    )
 
 
 def test_listed_catalog_devices_prefers_frame_ids(tmp_path):
@@ -277,8 +322,14 @@ def test_specimen_index_html_is_dumb():
     assert "supernote-nomad" in html
     assert "<script" not in html
     assert 'href="../"' in html
+    assert html.count("<section") == 4
+    for perm in PERMUTATIONS:
+        assert f'<section id="{perm}">' in html
+        assert f'href="#{perm}"' in html
+    toc = html[html.index("<nav>") : html.index("</nav>")]
+    assert toc.index('href="#lined-left"') < toc.index('href="#dotted-right"')
     for stem in SAMPLE_STEMS:
-        assert f"{stem}.svg" in html
+        assert f"lined-left/{stem}.svg" in html
     for stem in (
         "projects",
         "project-1",
@@ -291,7 +342,30 @@ def test_specimen_index_html_is_dumb():
         "meetings",
         "meeting-1",
     ):
-        assert f"{stem}.svg" in html
+        assert f"dotted-right/{stem}.svg" in html
+
+
+def test_proof_samples_dest_is_not_four_times_catalog():
+    dest = samples_dest(Path("/tmp/out"), "158x210")
+    assert dest == Path("/tmp/out/158x210")
+    assert dest.name == "158x210"
+    assert "lined-left" not in dest.parts
+    assert "specimens" not in dest.parts
+    assert len(SAMPLE_STEMS) == len(set(SAMPLE_STEMS))
+    assert all(perm not in SAMPLE_STEMS for perm in PERMUTATIONS)
+    args = build_parser().parse_args(["proof", "158x210", "--samples"])
+    assert args.samples is True
+    assert not hasattr(args, "paper")
+
+
+def test_set_job_paper_overlays_scratch_pad(tmp_path):
+    path = tmp_path / "job.toml"
+    path.write_text(emit_job(spec_from_device("158x210")), encoding="utf-8")
+    assert load(path)["planner"]["params"]["scratch_pad"] == "dotted"
+    _set_job_paper(path, "lined")
+    dto = apply_hand(load(path), "right")
+    assert dto["planner"]["params"]["scratch_pad"] == "lined"
+    assert dto["planner"]["params"]["mos_layout"]["side_menu_position"] == "right"
 
 
 def test_specimen_job_uses_canonical_sections():

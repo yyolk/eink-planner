@@ -3,6 +3,7 @@
 import argparse
 import sys
 import tempfile
+import tomllib
 from pathlib import Path
 
 from parch import ConfigError, __version__
@@ -15,7 +16,13 @@ from parch.mos.preamble import copy_house_typ
 from parch.services.compile import OUTPUT_FILE, Compile, CompileError
 from parch.services.generate import Generate
 from parch.services.config_file import open_resolved, run_edit, run_new, shipped_help
-from parch.services.job_file import CANONICAL_SECTIONS, DEFAULT_DEVICE
+from parch.services.job_file import (
+    CANONICAL_SECTIONS,
+    DEFAULT_DEVICE,
+    emit_job,
+    spec_from_data,
+    with_overrides,
+)
 from parch.devices import get_device
 from parch.device_frame import frame_svg
 from parch.services.preview_svg import (
@@ -27,10 +34,13 @@ from parch.services.preview_svg import (
     sample_stems_for_sections,
 )
 from parch.services.specimen import (
+    PERMUTATIONS,
     catalog_dest,
     listed_catalog_devices,
+    perm_parts,
     specimens_dest,
     write_catalog_index,
+    write_device_index,
     write_specimens,
 )
 
@@ -229,7 +239,7 @@ def build_parser() -> argparse.ArgumentParser:
         "-w",
         "--workdir",
         default="./out",
-        help="Working directory; catalog is <workdir>/specimens/<device-id>/",
+        help="Working directory; catalog is <workdir>/specimens/<device-id>/<perm-id>/",
     )
     specimen.add_argument(
         "-l",
@@ -417,54 +427,66 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
     return 0
 
 
+def _set_job_paper(config_path: Path, paper: str) -> None:
+    """Overlay style.scratch_pad on a live job file."""
+    spec = spec_from_data(tomllib.loads(config_path.read_text(encoding="utf-8")))
+    config_path.write_text(emit_job(with_overrides(spec, paper=paper)), encoding="utf-8")
+
+
 def specimen_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
     repo = _repo_root()
+    workdir = Path(args.workdir)
+    argv_list = list(argv) if argv is not None else list(sys.argv)
     with open_resolved(args.config, sections=CANONICAL_SECTIONS) as config_path:
-        i18n = I18n.load_default(args.locale)
         dto = apply_debug(load(config_path), debug=bool(args.debug))
         dto = apply_year(dto, args.year)
-        dto = apply_hand(dto, getattr(args, "hand", None))
-        dto = apply_provenance(
-            dto,
-            collect_provenance(
-                config_path=config_path,
-                argv=list(argv) if argv is not None else list(sys.argv),
-            ),
-        )
         device = get_device(str(dto["device"]))
         try:
             frame_svg(device)
         except ValueError as exc:
             raise ConfigError(str(exc)) from exc
-    typst_source = Generate(i18n=i18n).generate(dto)
-    workdir = Path(args.workdir)
-    _write_generated_book(workdir, typst_source, device=device.id)
-    cfg = Configurator(dto)
-    year = cfg.start_date().year
-    week_id = cfg.start_date().week().id
-    jan1 = f"{year:04d}-01-01"
-    stems = sample_page_numbers(
-        typst_source, year=year, week_id=week_id, jan1=jan1, stems=SAMPLE_STEMS
-    )
-    pages = list(stems.values())
-    written = Compile().compile_svg(
-        workdir=workdir,
-        file="index.typst",
-        pages=pages,
-        dest_pattern="preview-{p}.svg",
-        tools_dir=repo / ".tools",
-    )
-    by_page = {int(path.stem.split("-")[-1]): path for path in written}
-    dest_dir = specimens_dest(workdir, device.id)
-    pages_by_stem = {
-        stem: by_page[stems[stem]].read_text(encoding="utf-8") for stem in SAMPLE_STEMS
-    }
-    write_specimens(dest_dir, device, pages_by_stem)
+    i18n = I18n.load_default(args.locale)
+    device_dir = specimens_dest(workdir, device.id)
+    for perm_id in PERMUTATIONS:
+        paper, hand = perm_parts(perm_id)
+        with open_resolved(args.config, sections=CANONICAL_SECTIONS) as config_path:
+            _set_job_paper(config_path, paper)
+            dto = apply_debug(load(config_path), debug=bool(args.debug))
+            dto = apply_year(dto, args.year)
+            dto = apply_hand(dto, hand)
+            dto = apply_provenance(
+                dto,
+                collect_provenance(config_path=config_path, argv=argv_list),
+            )
+        typst_source = Generate(i18n=i18n).generate(dto)
+        _write_generated_book(workdir, typst_source, device=device.id)
+        cfg = Configurator(dto)
+        year = cfg.start_date().year
+        week_id = cfg.start_date().week().id
+        jan1 = f"{year:04d}-01-01"
+        stems = sample_page_numbers(
+            typst_source, year=year, week_id=week_id, jan1=jan1, stems=SAMPLE_STEMS
+        )
+        pages = list(stems.values())
+        written = Compile().compile_svg(
+            workdir=workdir,
+            file="index.typst",
+            pages=pages,
+            dest_pattern="preview-{p}.svg",
+            tools_dir=repo / ".tools",
+        )
+        by_page = {int(path.stem.split("-")[-1]): path for path in written}
+        dest_dir = specimens_dest(workdir, device.id, perm_id)
+        pages_by_stem = {
+            stem: by_page[stems[stem]].read_text(encoding="utf-8") for stem in SAMPLE_STEMS
+        }
+        write_specimens(dest_dir, device, pages_by_stem)
+        for stem in SAMPLE_STEMS:
+            print(f"Wrote {dest_dir / f'{stem}.svg'} (page {stems[stem]})")
+    index = write_device_index(device_dir, device.id)
     root = catalog_dest(workdir)
     catalog = write_catalog_index(root, listed_catalog_devices(root))
-    for stem in SAMPLE_STEMS:
-        print(f"Wrote {dest_dir / f'{stem}.svg'} (page {stems[stem]})")
-    print(f"Wrote {dest_dir / 'index.html'}")
+    print(f"Wrote {index}")
     print(f"Wrote {catalog}")
     return 0
 
