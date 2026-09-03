@@ -42,7 +42,12 @@
     stroke: (bottom: regular_stroke + black),
     align(
       horizon + start,
-      $square.stroked$,
+      square(
+        size: 0.7em,
+        fill: none,
+        stroke: regular_stroke + black,
+        inset: 0pt,
+      ),
     )
   ),
 )

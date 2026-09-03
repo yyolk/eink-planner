@@ -361,11 +361,21 @@ def test_preamble_imports_house_and_does_not_inline_bodies():
         "    stroke: (bottom: regular_stroke + black),\n"
         "    align(\n"
         "      horizon + start,\n"
-        "      $square.stroked$,\n"
+        "      square(\n"
+        "        size: 0.7em,\n"
+        "        fill: none,\n"
+        "        stroke: regular_stroke + black,\n"
+        "        inset: 0pt,\n"
+        "      ),\n"
         "    )\n"
         "  ),\n"
         ")\n"
     )
+    assert "$square.stroked$" not in task_fill
+    assert "$" not in task_fill
+    assert "text(" not in task_fill
+    assert "square(" in task_fill
+    assert "fill: none" in task_fill
     assert "layout(" not in task_fill
     assert "calc.floor" not in task_fill
     assert "#let lined_well(" in house
