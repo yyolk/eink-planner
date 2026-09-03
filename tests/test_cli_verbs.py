@@ -63,6 +63,7 @@ def test_press_help(capsys):
     assert press_exc.value.code == 0
     press_help = capsys.readouterr().out
     assert "--workdir" in press_help
+    assert "--output" in press_help
     assert "--hand" in press_help
     assert "--pages" not in press_help
 

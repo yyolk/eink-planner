@@ -30,7 +30,8 @@ parch press supernote-nomad
 
 | Flag | Default | Meaning |
 | --- | --- | --- |
-| `-w` / `--workdir` | `./out` | Where `index.typst` and `index.pdf` are written |
+| `-w` / `--workdir` | (none) | Persist `index.typst` and `index.pdf` here. Without `-w`, compile in a temp dir |
+| `-o` / `--output` | `./<config-stem>.pdf` | Product PDF in cwd (`mine.toml` → `./mine.pdf`). With `-w` only, dest is workdir/`index.pdf` |
 | `-l` / `--locale` | `en` | Locale code |
 | `-g` / `--with-ghostscript` | off | Optional PDF shrink via `gs` |
 | `--debug` | off | Draw MOS debug strokes (not a config key) |
