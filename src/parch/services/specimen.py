@@ -10,6 +10,15 @@ from parch.devices import Device
 from parch.services.preview_svg import SAMPLE_STEMS, _root_open_tag, _split_length
 
 _ATTR = re.compile(r'\b([:\w]+)="([^"]*)"')
+_XML10_C0 = dict.fromkeys(range(0x00, 0x20))
+del _XML10_C0[0x09]
+del _XML10_C0[0x0A]
+del _XML10_C0[0x0D]
+
+
+def _xml10_svg(svg: str) -> str:
+    """Drop C0 controls other than tab, LF, and CR so the SVG is XML 1.0."""
+    return svg.translate(_XML10_C0)
 
 
 def catalog_dest(workdir: str | Path) -> Path:
@@ -71,6 +80,7 @@ def _insert_nested(frame: str, nested: str) -> str:
 
 def compose_specimen(frame: str, page: str) -> str:
     """Nest a page SVG at #screen; sizes already match, so do not stretch."""
+    page = _xml10_svg(page)
     screen = _screen_el(frame)
     sx = screen.get("x") or "0"
     sy = screen.get("y") or "0"

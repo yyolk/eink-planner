@@ -175,6 +175,24 @@ def test_catalog_dest_is_specimens_root(tmp_path):
     assert specimens_dest(tmp_path, "158x210") == tmp_path / "specimens" / "158x210"
 
 
+def test_write_specimens_strips_nul_from_page_href(tmp_path):
+    device = get_device("158x210")
+    page = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"'
+        f' width="{device.width_pt}pt" height="{device.height_pt}pt"'
+        f' viewBox="0 0 {device.width_pt} {device.height_pt}">'
+        f'<use xlink:href="#\x00deadbeef"/>'
+        f"</svg>"
+    )
+    dest = specimens_dest(tmp_path, device.id)
+    write_specimens(dest, device, {"cover": page}, stems=("cover",))
+    raw = (dest / "cover.svg").read_bytes()
+    assert b"\x00" not in raw
+    text = raw.decode("utf-8")
+    assert 'xlink:href="#deadbeef"' in text
+    ET.fromstring(text)
+
+
 def test_write_specimens_catalog(tmp_path):
     device = get_device("158x210")
     pages = {stem: _dummy_page(device) for stem in SAMPLE_STEMS}

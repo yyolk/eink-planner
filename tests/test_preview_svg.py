@@ -1,4 +1,5 @@
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 import pytest
 
@@ -378,6 +379,28 @@ def test_lined_well_svg_uses_tiling_fill(tmp_path):
     assert "<pattern" in out
     assert 'fill="url(#' in out
     assert 'viewBox="0 0 447.874015748 595.275590551"' in raw
+
+
+def test_task_fill_svg_has_no_nul(tmp_path):
+    src = tmp_path / "index.typst"
+    src.write_text(
+        Preamble(Configurator(load(base_config("158x210")))).generate()
+        + "\n#lined_well(task_fill)\n",
+        encoding="utf-8",
+    )
+    copy_house_typ(tmp_path, device="158x210")
+    paths = Compile().compile_svg(
+        tmp_path,
+        pages=[1],
+        dest_pattern="preview-{p}.svg",
+        tools_dir=REPO / ".tools",
+    )
+    raw = paths[0].read_bytes()
+    assert b"\x00" not in raw
+    text = raw.decode("utf-8")
+    assert "<pattern" in text
+    assert "$square.stroked$" not in house_typ_resource().read_text(encoding="utf-8")
+    ET.fromstring(text)
 
 
 def test_compile_svg_tiny_two_pages_py(tmp_path, monkeypatch):
