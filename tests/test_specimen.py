@@ -268,40 +268,39 @@ def test_write_catalog_index_root(tmp_path):
     index = write_catalog_index(root, listed_catalog_devices(root))
     assert index == root / "index.html"
     html = index.read_text(encoding="utf-8")
-    assert 'href="158x210/"' in html
     assert 'href="158x210/#dotted-right"' in html
+    assert 'href="158x210/#lined-left"' in html
     assert "<figure>" not in html
     assert 'src="158x210/cover.svg"' not in html
     assert "<script" not in html
+    assert "<nav>" not in html
+    assert "<section" not in html
+    assert 'href="#158x210"' not in html
+    assert 'id="158x210"' not in html
     assert listed_catalog_devices(root) == ["158x210"]
-    assert 'href="#158x210"' in html
-    assert 'id="158x210"' in html
 
 
 def test_catalog_index_html_is_dumb():
     ids = ["158x210", "supernote-nomad"]
     html = catalog_index_html(ids)
-    assert 'href="158x210/"' in html
     assert 'href="supernote-nomad/#dotted-right"' in html
     assert "<figure>" not in html
     assert ".svg" not in html
     assert "<script" not in html
-    assert html.count("<section") == 2
-    assert html.index("<ul>") < html.index("<nav>")
-    assert html.rindex("</ul>") < html.index("<nav>")
+    assert "<nav>" not in html
+    assert "<section" not in html
     assert html.index("<li>lined") < html.index("<li>dotted")
     assert html.index("<li>left") < html.index("<li>right")
     assert html.index("lined-left") < html.index("lined-right")
     assert html.index("lined-right") < html.index("dotted-left")
-    nav = html[html.index("<nav>") : html.index("</nav>")]
-    assert html.index("<nav>") < html.index("<section")
     for device_id in ids:
-        assert f'href="#{device_id}"' in nav
-        assert f'<section id="{device_id}">' in html
-        assert f'<h2><a href="{device_id}/">{device_id}</a></h2>' in html
+        assert f'href="#{device_id}"' not in html
+        assert f'<section id="{device_id}">' not in html
         for perm in PERMUTATIONS:
             assert f'href="{device_id}/#{perm}"' in html
-    assert nav.index('href="#158x210"') < nav.index('href="#supernote-nomad"')
+    assert html.index('href="158x210/#lined-left"') < html.index(
+        'href="supernote-nomad/#lined-left"'
+    )
 
 
 def test_listed_catalog_devices_prefers_frame_ids(tmp_path):

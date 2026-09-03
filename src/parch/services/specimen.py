@@ -184,24 +184,12 @@ def specimen_index_html(device_id: str, stems: Sequence[str] = SAMPLE_STEMS) -> 
 
 
 def catalog_index_html(device_ids: Sequence[str]) -> str:
-    """Dumb catalog root: perm list first, then device TOC. No galleries."""
-    toc = (
-        "<nav>\n"
-        + "\n".join(f'<a href="#{device_id}">{device_id}</a>' for device_id in device_ids)
-        + "\n</nav>\n"
-    )
-    sections = [
-        f'<section id="{device_id}"><h2><a href="{device_id}/">{device_id}</a></h2></section>'
-        for device_id in device_ids
-    ]
+    """Dumb catalog root: nested paper → hand → device list. No galleries."""
     return (
         "<!DOCTYPE html>\n"
         "<title>parch specimens</title>\n"
         + _catalog_style()
         + _perm_nav_list(device_ids)
-        + "\n"
-        + toc
-        + "\n".join(sections)
         + "\n"
     )
 
