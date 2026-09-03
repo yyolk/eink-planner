@@ -8,6 +8,7 @@ from parch.mos.configurator import Configurator
 from parch.mos.preamble import Preamble, copy_house_typ, house_typ_resource
 from parch.services.compile import Compile, CompileError
 from parch.services.generate import Generate
+from parch.services.job_file import DEFAULT_SECTIONS
 from parch.services.preview_svg import (
     DEFAULT_SCALE,
     SAMPLE_STEMS,
@@ -16,6 +17,7 @@ from parch.services.preview_svg import (
     parse_pages,
     preview_svg,
     sample_page_numbers,
+    sample_stems_for_sections,
     scale_svg,
 )
 from tests.helpers import base_config, load_default
@@ -215,12 +217,45 @@ def test_sample_stems_include_canonical_extras():
 
 def test_sample_page_numbers_finds_extras_in_generated_book():
     typst = Generate(i18n=load_default()).generate(load(base_config("158x210", extras=True)))
-    pages = sample_page_numbers(typst, year=2026, week_id="2026W01", jan1="2026-01-01")
+    pages = sample_page_numbers(
+        typst, year=2026, week_id="2026W01", jan1="2026-01-01", stems=SAMPLE_STEMS
+    )
     for stem in SAMPLE_STEMS:
         assert stem in pages
         assert pages[stem] >= 1
     assert pages["projects"] < pages["habits"] < pages["review"]
     assert pages["review"] < pages["tasks"] < pages["meetings"] < pages["colophon"]
+
+
+def test_sample_stems_for_default_sections_omit_extras():
+    stems = sample_stems_for_sections(DEFAULT_SECTIONS)
+    for extra in ("projects", "habits", "review", "tasks", "meetings"):
+        assert extra not in stems
+    assert stems[0] == "cover"
+    assert stems[-1] == "colophon"
+    assert "contents" in stems
+    assert "notes-jan1" in stems
+
+
+def test_sample_page_numbers_compact_job_does_not_request_extras():
+    typst = Generate(i18n=load_default()).generate(load(base_config("158x210")))
+    stems = sample_stems_for_sections(DEFAULT_SECTIONS)
+    pages = sample_page_numbers(
+        typst, year=2026, week_id="2026W01", jan1="2026-01-01", stems=stems
+    )
+    for extra in ("projects", "habits", "review", "tasks", "meetings"):
+        assert extra not in pages
+    assert "cover" in pages
+    assert "colophon" in pages
+    assert "contents" in pages
+
+
+def test_sample_page_numbers_canonical_raises_if_extra_missing():
+    typst = Generate(i18n=load_default()).generate(load(base_config("158x210")))
+    with pytest.raises(ValueError, match="projects"):
+        sample_page_numbers(
+            typst, year=2026, week_id="2026W01", jan1="2026-01-01", stems=SAMPLE_STEMS
+        )
 
 
 def _house_paper() -> str:

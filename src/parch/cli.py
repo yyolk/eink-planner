@@ -23,6 +23,7 @@ from parch.services.preview_svg import (
     parse_pages,
     preview_svg,
     sample_page_numbers,
+    sample_stems_for_sections,
 )
 from parch.services.specimen import (
     catalog_dest,
@@ -301,7 +302,12 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
         year = cfg.start_date().year
         week_id = cfg.start_date().week().id
         jan1 = f"{year:04d}-01-01"
-        stems = sample_page_numbers(typst_source, year=year, week_id=week_id, jan1=jan1)
+        wanted = sample_stems_for_sections(
+            [section["name"] for section in cfg.enabled_sections()]
+        )
+        stems = sample_page_numbers(
+            typst_source, year=year, week_id=week_id, jan1=jan1, stems=wanted
+        )
         pages = list(stems.values())
     else:
         try:
@@ -362,7 +368,9 @@ def specimen_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
     year = cfg.start_date().year
     week_id = cfg.start_date().week().id
     jan1 = f"{year:04d}-01-01"
-    stems = sample_page_numbers(typst_source, year=year, week_id=week_id, jan1=jan1)
+    stems = sample_page_numbers(
+        typst_source, year=year, week_id=week_id, jan1=jan1, stems=SAMPLE_STEMS
+    )
     pages = list(stems.values())
     written = Compile().compile_svg(
         workdir=workdir,
