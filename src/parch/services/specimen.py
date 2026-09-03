@@ -114,6 +114,7 @@ def specimen_index_html(device_id: str, stems: Sequence[str] = SAMPLE_STEMS) -> 
         f"<title>parch specimens — {device_id}</title>\n"
         "<style>figure{display:inline-block;margin:1rem;vertical-align:top}"
         "img{width:16rem;height:auto}</style>\n"
+        '<p><a href="../">specimens</a></p>\n'
         + "\n".join(figures)
         + "\n"
     )
@@ -123,6 +124,11 @@ def catalog_index_html(
     device_ids: Sequence[str], stems: Sequence[str] = SAMPLE_STEMS
 ) -> str:
     """Dumb catalog root that links each framed device folder."""
+    nav = (
+        "<nav>\n"
+        + "\n".join(f'<a href="#{device_id}">{device_id}</a>' for device_id in device_ids)
+        + "\n</nav>\n"
+    )
     sections: list[str] = []
     for device_id in device_ids:
         figures = [
@@ -131,7 +137,7 @@ def catalog_index_html(
             for stem in stems
         ]
         sections.append(
-            f'<section><h2><a href="{device_id}/">{device_id}</a></h2>\n'
+            f'<section id="{device_id}"><h2><a href="{device_id}/">{device_id}</a></h2>\n'
             + "\n".join(figures)
             + "</section>"
         )
@@ -140,6 +146,7 @@ def catalog_index_html(
         "<title>parch specimens</title>\n"
         "<style>figure{display:inline-block;margin:1rem;vertical-align:top}"
         "img{width:16rem;height:auto}</style>\n"
+        + nav
         + "\n".join(sections)
         + "\n"
     )

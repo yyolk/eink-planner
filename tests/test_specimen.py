@@ -184,6 +184,7 @@ def test_write_specimens_catalog(tmp_path):
         assert 'preserveAspectRatio="none"' not in (dest / f"{stem}.svg").read_text()
     assert "annual.svg" in html
     assert html.count("<figure>") == len(SAMPLE_STEMS)
+    assert 'href="../"' in html
 
 
 def test_write_catalog_index_root(tmp_path):
@@ -199,14 +200,24 @@ def test_write_catalog_index_root(tmp_path):
     assert 'src="158x210/cover.svg"' in html
     assert "<script" not in html
     assert listed_catalog_devices(root) == ["158x210"]
+    assert 'href="#158x210"' in html
+    assert 'id="158x210"' in html
 
 
 def test_catalog_index_html_is_dumb():
-    html = catalog_index_html(["158x210", "supernote-nomad"])
+    ids = ["158x210", "supernote-nomad"]
+    html = catalog_index_html(ids)
     assert 'href="158x210/"' in html
     assert 'src="supernote-nomad/cover.svg"' in html
     assert "<script" not in html
     assert html.count("<section>") == 2
+    nav = html[html.index("<nav>") : html.index("</nav>")]
+    assert html.index("<nav>") < html.index("<section")
+    for device_id in ids:
+        assert f'href="#{device_id}"' in nav
+        assert f'<section id="{device_id}">' in html
+        assert f'<h2><a href="{device_id}/">{device_id}</a></h2>' in html
+    assert nav.index('href="#158x210"') < nav.index('href="#supernote-nomad"')
 
 
 def test_listed_catalog_devices_prefers_frame_ids(tmp_path):
@@ -227,5 +238,6 @@ def test_specimen_index_html_is_dumb():
     html = specimen_index_html("supernote-nomad")
     assert "supernote-nomad" in html
     assert "<script" not in html
+    assert 'href="../"' in html
     for stem in SAMPLE_STEMS:
         assert f"{stem}.svg" in html
