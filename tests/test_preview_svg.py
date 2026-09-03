@@ -172,14 +172,29 @@ padded_link(<daily-note-2026-01-01-page-1>)
 text(size: h1)[1 <daily-note-2026-01-01-page-1>]
 #pagebreak()
 text(size: h1)[Projects <projects>]
+padded_link(<project-1>, box(width: 100%, height: 100%, align(horizon + left, [1])))
+#pagebreak()
+#[] <project-1>
 #pagebreak()
 text(size: h1)[Habits <habits>]
+padded_link(<habits-january>, box(width: 100%, height: 100%, align(horizon + left, [January])))
+#pagebreak()
+text(size: h1)[January<habits-january>]
 #pagebreak()
 text(size: h1)[Review <review>]
+padded_link(<review-2026W01>, box(width: 100%, height: 100%, align(horizon + left, [1])))
+#pagebreak()
+[1 <review-2026W01> #h(0.6em) #text(size: 0.85em)[Dec 29 – Jan 4]]
 #pagebreak()
 text(size: h1)[Tasks <tasks>]
+padded_link(<tasks-2026W01>, box(width: 100%, height: 100%, align(horizon + left, [1])))
+#pagebreak()
+#[] <tasks-2026W01>
 #pagebreak()
 text(size: h1)[Meetings <meetings>]
+padded_link(<meeting-1>, box(width: 100%, height: 100%, align(horizon + left, [1])))
+#pagebreak()
+#[] <meeting-1>
 #pagebreak()
 text(size: h1, weight: "bold")[About this notebook <colophon>]
 """
@@ -196,11 +211,16 @@ text(size: h1, weight: "bold")[About this notebook <colophon>]
         "daily-jan1": 8,
         "notes-jan1": 9,
         "projects": 10,
-        "habits": 11,
-        "review": 12,
-        "tasks": 13,
-        "meetings": 14,
-        "colophon": 15,
+        "project-1": 11,
+        "habits": 12,
+        "habits-jan": 13,
+        "review": 14,
+        "review-w01": 15,
+        "tasks": 16,
+        "tasks-w01": 17,
+        "meetings": 18,
+        "meeting-1": 19,
+        "colophon": 20,
     }
 
 
@@ -210,9 +230,24 @@ def test_sample_page_numbers_missing_label():
 
 
 def test_sample_stems_include_canonical_extras():
-    for stem in ("projects", "habits", "review", "tasks", "meetings"):
+    extras = (
+        "projects",
+        "project-1",
+        "habits",
+        "habits-jan",
+        "review",
+        "review-w01",
+        "tasks",
+        "tasks-w01",
+        "meetings",
+        "meeting-1",
+    )
+    for stem in extras:
         assert stem in SAMPLE_STEMS
+    positions = [SAMPLE_STEMS.index(stem) for stem in extras]
+    assert positions == sorted(positions)
     assert SAMPLE_STEMS.index("projects") < SAMPLE_STEMS.index("colophon")
+    assert SAMPLE_STEMS.index("meeting-1") < SAMPLE_STEMS.index("colophon")
 
 
 def test_sample_page_numbers_finds_extras_in_generated_book():
@@ -223,13 +258,27 @@ def test_sample_page_numbers_finds_extras_in_generated_book():
     for stem in SAMPLE_STEMS:
         assert stem in pages
         assert pages[stem] >= 1
-    assert pages["projects"] < pages["habits"] < pages["review"]
-    assert pages["review"] < pages["tasks"] < pages["meetings"] < pages["colophon"]
+    assert pages["projects"] < pages["project-1"] < pages["habits"]
+    assert pages["habits"] < pages["habits-jan"] < pages["review"]
+    assert pages["review"] < pages["review-w01"] < pages["tasks"]
+    assert pages["tasks"] < pages["tasks-w01"] < pages["meetings"]
+    assert pages["meetings"] < pages["meeting-1"] < pages["colophon"]
 
 
 def test_sample_stems_for_default_sections_omit_extras():
     stems = sample_stems_for_sections(DEFAULT_SECTIONS)
-    for extra in ("projects", "habits", "review", "tasks", "meetings"):
+    for extra in (
+        "projects",
+        "project-1",
+        "habits",
+        "habits-jan",
+        "review",
+        "review-w01",
+        "tasks",
+        "tasks-w01",
+        "meetings",
+        "meeting-1",
+    ):
         assert extra not in stems
     assert stems[0] == "cover"
     assert stems[-1] == "colophon"
@@ -243,7 +292,18 @@ def test_sample_page_numbers_compact_job_does_not_request_extras():
     pages = sample_page_numbers(
         typst, year=2026, week_id="2026W01", jan1="2026-01-01", stems=stems
     )
-    for extra in ("projects", "habits", "review", "tasks", "meetings"):
+    for extra in (
+        "projects",
+        "project-1",
+        "habits",
+        "habits-jan",
+        "review",
+        "review-w01",
+        "tasks",
+        "tasks-w01",
+        "meetings",
+        "meeting-1",
+    ):
         assert extra not in pages
     assert "cover" in pages
     assert "colophon" in pages
@@ -255,6 +315,14 @@ def test_sample_page_numbers_canonical_raises_if_extra_missing():
     with pytest.raises(ValueError, match="projects"):
         sample_page_numbers(
             typst, year=2026, week_id="2026W01", jan1="2026-01-01", stems=SAMPLE_STEMS
+        )
+    with pytest.raises(ValueError, match="project board"):
+        sample_page_numbers(
+            typst,
+            year=2026,
+            week_id="2026W01",
+            jan1="2026-01-01",
+            stems=("project-1",),
         )
 
 

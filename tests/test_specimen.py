@@ -189,7 +189,18 @@ def test_write_specimens_catalog(tmp_path):
     assert "annual.svg" in html
     assert html.count("<figure>") == len(SAMPLE_STEMS)
     assert 'href="../"' in html
-    for stem in ("projects", "habits", "review", "tasks", "meetings"):
+    for stem in (
+        "projects",
+        "project-1",
+        "habits",
+        "habits-jan",
+        "review",
+        "review-w01",
+        "tasks",
+        "tasks-w01",
+        "meetings",
+        "meeting-1",
+    ):
         assert f'src="{stem}.svg"' in html
 
 
@@ -205,6 +216,7 @@ def test_write_catalog_index_root(tmp_path):
     assert 'href="158x210/"' in html
     assert 'src="158x210/cover.svg"' in html
     assert 'src="158x210/projects.svg"' in html
+    assert 'src="158x210/project-1.svg"' in html
     assert "<script" not in html
     assert listed_catalog_devices(root) == ["158x210"]
     assert 'href="#158x210"' in html
@@ -249,7 +261,18 @@ def test_specimen_index_html_is_dumb():
     assert 'href="../"' in html
     for stem in SAMPLE_STEMS:
         assert f"{stem}.svg" in html
-    for stem in ("projects", "habits", "review", "tasks", "meetings"):
+    for stem in (
+        "projects",
+        "project-1",
+        "habits",
+        "habits-jan",
+        "review",
+        "review-w01",
+        "tasks",
+        "tasks-w01",
+        "meetings",
+        "meeting-1",
+    ):
         assert f"{stem}.svg" in html
 
 

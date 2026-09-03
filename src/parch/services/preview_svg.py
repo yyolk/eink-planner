@@ -205,10 +205,15 @@ SAMPLE_STEMS = (
     "daily-jan1",
     "notes-jan1",
     "projects",
+    "project-1",
     "habits",
+    "habits-jan",
     "review",
+    "review-w01",
     "tasks",
+    "tasks-w01",
     "meetings",
+    "meeting-1",
     "colophon",
 )
 
@@ -222,10 +227,15 @@ _STEM_SECTION = {
     "daily-jan1": "daily",
     "notes-jan1": "daily_notes",
     "projects": "projects",
+    "project-1": "projects",
     "habits": "habits",
+    "habits-jan": "habits",
     "review": "review",
+    "review-w01": "review",
     "tasks": "tasks",
+    "tasks-w01": "tasks",
     "meetings": "meetings",
+    "meeting-1": "meetings",
     "colophon": "colophon",
 }
 
@@ -294,10 +304,19 @@ def sample_page_numbers(
             chunks, f"<daily-note-{jan1}-page-1>]", "daily notes"
         ),
         "projects": lambda: _first_page(chunks, "<projects>]", "projects"),
+        "project-1": lambda: _first_page(chunks, "#[] <project-1>", "project board"),
         "habits": lambda: _first_page(chunks, "<habits>]", "habits"),
+        "habits-jan": lambda: _first_page(
+            chunks, "January<habits-january>", "habits month"
+        ),
         "review": lambda: _first_page(chunks, "<review>]", "review"),
+        "review-w01": lambda: _first_dest(chunks, f"review-{week_id}", "review week"),
         "tasks": lambda: _first_page(chunks, "<tasks>]", "tasks"),
+        "tasks-w01": lambda: _first_page(
+            chunks, f"#[] <tasks-{week_id}>", "tasks week"
+        ),
         "meetings": lambda: _first_page(chunks, "<meetings>]", "meetings"),
+        "meeting-1": lambda: _first_page(chunks, "#[] <meeting-1>", "meeting"),
         "colophon": lambda: _first_page(chunks, "<colophon>]", "colophon"),
     }
     pages: dict[str, int] = {}
