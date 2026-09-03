@@ -34,6 +34,12 @@
   ),
 )
 
+#let task_tick(regular_stroke: none) = square(
+  size: 0.8em,
+  fill: none,
+  stroke: regular_stroke + black,
+)
+
 #let task_fill(page-width: none, regular_height: none, regular_stroke: none) = tiling(
   size: (page-width, regular_height),
   block(
@@ -42,7 +48,7 @@
     stroke: (bottom: regular_stroke + black),
     align(
       horizon + start,
-      square(size: 0.8em, fill: none, stroke: regular_stroke + black),
+      task_tick(regular_stroke: regular_stroke),
     )
   ),
 )
