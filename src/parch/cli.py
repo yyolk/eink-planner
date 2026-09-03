@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+import tempfile
 from pathlib import Path
 
 from parch import ConfigError, __version__
@@ -11,7 +12,7 @@ from parch.toml_config import apply_debug, apply_hand, apply_year
 from parch.provenance import apply_provenance, collect_provenance
 from parch.mos.configurator import Configurator
 from parch.mos.preamble import copy_house_typ
-from parch.services.compile import Compile, CompileError
+from parch.services.compile import OUTPUT_FILE, Compile, CompileError
 from parch.services.generate import Generate
 from parch.services.config_file import open_resolved, run_edit, run_new, shipped_help
 from parch.services.job_file import CANONICAL_SECTIONS, DEFAULT_DEVICE
@@ -41,6 +42,34 @@ def _repo_root() -> Path:
 def samples_dest(workdir: Path, config: str | Path) -> Path:
     """Named sample dir: ``<workdir>/<config-stem>/``."""
     return Path(workdir) / Path(config).stem
+
+
+def _mutex_outfile(positional: str | None, flagged: str | None) -> str | None:
+    """Return positional or -o; ConfigError if both are set and disagree."""
+    if positional and flagged and positional != flagged:
+        raise ConfigError("give outfile as a positional or -o, not both")
+    if positional is None:
+        return flagged
+    return positional
+
+
+def press_outfile(args: argparse.Namespace) -> str | None:
+    """Positional or -o for press; ConfigError if both are set and disagree."""
+    return _mutex_outfile(getattr(args, "outfile", None), getattr(args, "output", None))
+
+
+def press_dest(
+    config: str | Path,
+    *,
+    workdir: str | Path | None = None,
+    outfile: str | Path | None = None,
+) -> Path:
+    """Product PDF: -o, else workdir/index.pdf, else cwd/<config-stem>.pdf."""
+    if outfile is not None:
+        return Path(outfile)
+    if workdir is not None:
+        return Path(workdir) / OUTPUT_FILE
+    return Path.cwd() / f"{Path(config).stem}.pdf"
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -107,11 +136,17 @@ def build_parser() -> argparse.ArgumentParser:
 
     press = sub.add_parser("press", help="Press a profile to PDF")
     press.add_argument("config", help="Planner job file or device id")
+    press.add_argument("outfile", nargs="?", help="Output path")
     press.add_argument(
         "-w",
         "--workdir",
-        default="./out",
-        help="Working directory for index.typst / index.pdf (default: ./out)",
+        default=None,
+        help="Persist index.typst / index.pdf here",
+    )
+    press.add_argument(
+        "-o",
+        "--output",
+        help="Output path (alias for outfile)",
     )
     press.add_argument(
         "-l",
@@ -229,11 +264,7 @@ def _add_hand_flag(parser: argparse.ArgumentParser) -> None:
 
 
 def new_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
-    outfile = args.outfile
-    if outfile and args.output and outfile != args.output:
-        raise ConfigError("give outfile as a positional or -o, not both")
-    if outfile is None:
-        outfile = args.output
+    outfile = _mutex_outfile(args.outfile, args.output)
     return run_new(
         outfile=outfile,
         device=args.device,
@@ -250,6 +281,9 @@ def edit_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
 
 
 def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
+    outfile = press_outfile(args)
+    workdir_arg = args.workdir
+    dest = press_dest(args.config, workdir=workdir_arg, outfile=outfile)
     with open_resolved(args.config) as config_path:
         i18n = I18n.load_default(args.locale)
         dto = apply_debug(load(config_path), debug=bool(args.debug))
@@ -263,18 +297,59 @@ def generate_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
             ),
         )
     typst_source = Generate(i18n=i18n).generate(dto)
+    device = str(dto["device"])
+    if workdir_arg:
+        return _press_from_workdir(Path(workdir_arg), dest, typst_source, device, args)
+    return _press_from_temp(dest, typst_source, device, args)
 
-    workdir = Path(args.workdir)
-    _write_generated_book(workdir, typst_source, device=str(dto["device"]))
 
-    pdf = Compile().compile(
+def _compile_book(
+    workdir: Path,
+    typst_source: str,
+    device: str,
+    args: argparse.Namespace,
+    *,
+    announce: bool,
+) -> Path:
+    """Write Typst and compile; dest placement is the caller's job."""
+    _write_generated_book(workdir, typst_source, device, announce=announce)
+    return Compile().compile(
         workdir=workdir,
         file="index.typst",
         enable_ghostscript=args.with_ghostscript,
         tools_dir=_repo_root() / ".tools",
     )
-    print(f"Wrote {pdf}")
+
+
+def _press_from_workdir(
+    workdir: Path,
+    dest: Path,
+    typst_source: str,
+    device: str,
+    args: argparse.Namespace,
+) -> int:
+    """Persist intermediates in workdir; copy to -o when dest is elsewhere."""
+    pdf = _compile_book(workdir, typst_source, device, args, announce=True)
+    if dest.resolve() != pdf.resolve():
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        pdf.copy(dest)
+    print(f"Wrote {dest}")
     return 0
+
+
+def _press_from_temp(
+    dest: Path,
+    typst_source: str,
+    device: str,
+    args: argparse.Namespace,
+) -> int:
+    """Compile in a TemporaryDirectory and Path.move the PDF onto dest before cleanup."""
+    with tempfile.TemporaryDirectory() as tmp:
+        pdf = _compile_book(Path(tmp), typst_source, device, args, announce=False)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        pdf.move(dest)
+        print(f"Wrote {dest}")
+        return 0
 
 
 def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
@@ -394,12 +469,15 @@ def specimen_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
     return 0
 
 
-def _write_generated_book(workdir: Path, typst_source: str, device: str) -> None:
+def _write_generated_book(
+    workdir: Path, typst_source: str, device: str, *, announce: bool = True
+) -> None:
     """Write index.typst, house.typ, and the parameterized device.typ."""
     workdir.mkdir(parents=True, exist_ok=True)
     (workdir / "index.typst").write_text(typst_source, encoding="utf-8")
     copy_house_typ(workdir, device=device)
-    print(f"Wrote {workdir / 'index.typst'}")
+    if announce:
+        print(f"Wrote {workdir / 'index.typst'}")
 
 
 def main(argv: list[str] | None = None) -> int:

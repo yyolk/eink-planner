@@ -115,6 +115,9 @@ def test_press_cli_unchanged():
     args = parser.parse_args(["press", "supernote-nomad"])
     assert args.command == "press"
     assert args.run is generate_cmd
+    assert args.workdir is None
+    assert args.outfile is None
+    assert args.output is None
     assert not hasattr(args, "pages")
     assert not hasattr(args, "samples")
 
