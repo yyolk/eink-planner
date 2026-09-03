@@ -100,10 +100,9 @@ def test_preview_svg_cli_requires_pages_or_samples():
         parser.parse_args(["proof", "158x210"])
 
 
-def test_samples_dest_uses_config_stem():
-    assert samples_dest(Path("/repo"), "158x210") == Path(
-        "/repo/docs/samples/158x210"
-    )
+def test_samples_dest_uses_workdir_stem():
+    assert samples_dest(Path("/tmp/out"), "158x210") == Path("/tmp/out/158x210")
+    assert "docs" not in samples_dest(Path("/tmp/out"), "158x210").parts
 
 
 def test_press_cli_unchanged():

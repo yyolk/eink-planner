@@ -9,10 +9,14 @@ from parch.device_frame import FRAME_DEVICE_IDS, frame_svg
 from parch.devices import DEVICES, get_device
 from parch.services.preview_svg import SAMPLE_STEMS
 from parch.services.specimen import (
+    catalog_dest,
+    catalog_index_html,
     compose_specimen,
     framed_specimen,
+    listed_catalog_devices,
     specimen_index_html,
     specimens_dest,
+    write_catalog_index,
     write_specimens,
 )
 
@@ -122,6 +126,11 @@ def test_specimen_rejects_unknown_device_before_press(tmp_path, capsys):
     assert not (tmp_path / "specimens").exists()
 
 
+def test_catalog_dest_is_specimens_root(tmp_path):
+    assert catalog_dest(tmp_path) == tmp_path / "specimens"
+    assert specimens_dest(tmp_path, "158x210") == tmp_path / "specimens" / "158x210"
+
+
 def test_write_specimens_catalog(tmp_path):
     device = get_device("158x210")
     pages = {stem: _dummy_page(device) for stem in SAMPLE_STEMS}
@@ -135,6 +144,43 @@ def test_write_specimens_catalog(tmp_path):
         assert 'preserveAspectRatio="none"' not in (dest / f"{stem}.svg").read_text()
     assert "annual.svg" in html
     assert html.count("<figure>") == len(SAMPLE_STEMS)
+
+
+def test_write_catalog_index_root(tmp_path):
+    device = get_device("158x210")
+    pages = {stem: _dummy_page(device) for stem in SAMPLE_STEMS}
+    dest = specimens_dest(tmp_path, device.id)
+    write_specimens(dest, device, pages)
+    root = catalog_dest(tmp_path)
+    index = write_catalog_index(root, listed_catalog_devices(root))
+    assert index == root / "index.html"
+    html = index.read_text(encoding="utf-8")
+    assert 'href="158x210/"' in html
+    assert 'src="158x210/cover.svg"' in html
+    assert "<script" not in html
+    assert listed_catalog_devices(root) == ["158x210"]
+
+
+def test_catalog_index_html_is_dumb():
+    html = catalog_index_html(["158x210", "supernote-nomad"])
+    assert 'href="158x210/"' in html
+    assert 'src="supernote-nomad/cover.svg"' in html
+    assert "<script" not in html
+    assert html.count("<section>") == 2
+
+
+def test_listed_catalog_devices_prefers_frame_ids(tmp_path):
+    root = catalog_dest(tmp_path)
+    for device_id in ("158x210", "supernote-nomad", "extra-device"):
+        dest = root / device_id
+        dest.mkdir(parents=True)
+        (dest / "index.html").write_text("<title>x</title>\n", encoding="utf-8")
+    assert listed_catalog_devices(root) == [
+        "158x210",
+        "supernote-nomad",
+        "extra-device",
+    ]
+    assert listed_catalog_devices(tmp_path / "missing") == []
 
 
 def test_specimen_index_html_is_dumb():

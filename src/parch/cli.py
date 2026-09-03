@@ -24,16 +24,22 @@ from parch.services.preview_svg import (
     preview_svg,
     sample_page_numbers,
 )
-from parch.services.specimen import specimens_dest, write_specimens
+from parch.services.specimen import (
+    catalog_dest,
+    listed_catalog_devices,
+    specimens_dest,
+    write_catalog_index,
+    write_specimens,
+)
 
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
-def samples_dest(repo: Path, config: str | Path) -> Path:
-    """README sample dir: docs/samples/<config-stem>/."""
-    return repo / "docs" / "samples" / Path(config).stem
+def samples_dest(workdir: Path, config: str | Path) -> Path:
+    """Named sample dir: ``<workdir>/<config-stem>/``."""
+    return Path(workdir) / Path(config).stem
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -156,7 +162,7 @@ def build_parser() -> argparse.ArgumentParser:
     pages_or_samples.add_argument(
         "--samples",
         action="store_true",
-        help="Export README sample pages by Typst label to docs/samples/<config-stem>/",
+        help="Export sample pages by Typst label to <workdir>/<config-stem>/",
     )
     proof.add_argument(
         "--scale",
@@ -319,7 +325,7 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
             )
             print(f"Wrote {path}")
         return 0
-    dest_dir = samples_dest(repo, args.config)
+    dest_dir = samples_dest(workdir, args.config)
     dest_dir.mkdir(parents=True, exist_ok=True)
     by_page = {int(path.stem.split("-")[-1]): path for path in written}
     for stem, number in stems.items():
@@ -371,9 +377,12 @@ def specimen_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
         stem: by_page[stems[stem]].read_text(encoding="utf-8") for stem in SAMPLE_STEMS
     }
     write_specimens(dest_dir, device, pages_by_stem)
+    root = catalog_dest(workdir)
+    catalog = write_catalog_index(root, listed_catalog_devices(root))
     for stem in SAMPLE_STEMS:
         print(f"Wrote {dest_dir / f'{stem}.svg'} (page {stems[stem]})")
     print(f"Wrote {dest_dir / 'index.html'}")
+    print(f"Wrote {catalog}")
     return 0
 
 

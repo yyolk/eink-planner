@@ -50,3 +50,36 @@ jobs:
         run: |
           uv run parch proof 158x210 --pages 1 -w out/proof-py
           test -s out/proof-py/preview-1.svg
+
+  pages:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.14.7"
+          cache-suffix: pages
+      - run: uv sync --group dev
+      - name: Build specimen catalog
+        run: |
+          mapfile -t ids < <(uv run python -c "from parch.device_frame import FRAME_DEVICE_IDS; print('\n'.join(sorted(FRAME_DEVICE_IDS)))")
+          for id in "${ids[@]}"; do
+            uv run parch specimen "$id" -w out
+          done
+          test -s out/specimens/index.html
+          test -s out/specimens/158x210/cover.svg
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: out/specimens
+      - id: deploy
+        uses: actions/deploy-pages@v4
