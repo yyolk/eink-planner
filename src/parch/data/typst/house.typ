@@ -42,12 +42,7 @@
     stroke: (bottom: regular_stroke + black),
     align(
       horizon + start,
-      square(
-        size: 0.7em,
-        fill: none,
-        stroke: regular_stroke + black,
-        inset: 0pt,
-      ),
+      square(size: 1em, fill: none, stroke: regular_stroke + black),
     )
   ),
 )
