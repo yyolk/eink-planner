@@ -7,15 +7,20 @@ from parch.config import load
 from parch.mos.configurator import Configurator
 from parch.mos.preamble import Preamble, copy_house_typ, house_typ_resource
 from parch.services.compile import Compile, CompileError
+from parch.services.generate import Generate
+from parch.services.job_file import DEFAULT_SECTIONS
 from parch.services.preview_svg import (
     DEFAULT_SCALE,
+    SAMPLE_STEMS,
     crop_svg,
     format_pages,
     parse_pages,
     preview_svg,
+    sample_page_numbers,
+    sample_stems_for_sections,
     scale_svg,
 )
-from tests.helpers import base_config
+from tests.helpers import base_config, load_default
 
 REPO = __import__("pathlib").Path(__file__).resolve().parents[1]
 
@@ -166,6 +171,16 @@ padded_link(<daily-note-2026-01-01-page-1>)
 #pagebreak()
 text(size: h1)[1 <daily-note-2026-01-01-page-1>]
 #pagebreak()
+text(size: h1)[Projects <projects>]
+#pagebreak()
+text(size: h1)[Habits <habits>]
+#pagebreak()
+text(size: h1)[Review <review>]
+#pagebreak()
+text(size: h1)[Tasks <tasks>]
+#pagebreak()
+text(size: h1)[Meetings <meetings>]
+#pagebreak()
 text(size: h1, weight: "bold")[About this notebook <colophon>]
 """
     pages = sample_page_numbers(
@@ -180,15 +195,67 @@ text(size: h1, weight: "bold")[About this notebook <colophon>]
         "weekly-w01": 7,
         "daily-jan1": 8,
         "notes-jan1": 9,
-        "colophon": 10,
+        "projects": 10,
+        "habits": 11,
+        "review": 12,
+        "tasks": 13,
+        "meetings": 14,
+        "colophon": 15,
     }
 
 
 def test_sample_page_numbers_missing_label():
-    from parch.services.preview_svg import sample_page_numbers
-
     with pytest.raises(ValueError, match="contents"):
         sample_page_numbers("cover only", year=2026, week_id="2026W01", jan1="2026-01-01")
+
+
+def test_sample_stems_include_canonical_extras():
+    for stem in ("projects", "habits", "review", "tasks", "meetings"):
+        assert stem in SAMPLE_STEMS
+    assert SAMPLE_STEMS.index("projects") < SAMPLE_STEMS.index("colophon")
+
+
+def test_sample_page_numbers_finds_extras_in_generated_book():
+    typst = Generate(i18n=load_default()).generate(load(base_config("158x210", extras=True)))
+    pages = sample_page_numbers(
+        typst, year=2026, week_id="2026W01", jan1="2026-01-01", stems=SAMPLE_STEMS
+    )
+    for stem in SAMPLE_STEMS:
+        assert stem in pages
+        assert pages[stem] >= 1
+    assert pages["projects"] < pages["habits"] < pages["review"]
+    assert pages["review"] < pages["tasks"] < pages["meetings"] < pages["colophon"]
+
+
+def test_sample_stems_for_default_sections_omit_extras():
+    stems = sample_stems_for_sections(DEFAULT_SECTIONS)
+    for extra in ("projects", "habits", "review", "tasks", "meetings"):
+        assert extra not in stems
+    assert stems[0] == "cover"
+    assert stems[-1] == "colophon"
+    assert "contents" in stems
+    assert "notes-jan1" in stems
+
+
+def test_sample_page_numbers_compact_job_does_not_request_extras():
+    typst = Generate(i18n=load_default()).generate(load(base_config("158x210")))
+    stems = sample_stems_for_sections(DEFAULT_SECTIONS)
+    pages = sample_page_numbers(
+        typst, year=2026, week_id="2026W01", jan1="2026-01-01", stems=stems
+    )
+    for extra in ("projects", "habits", "review", "tasks", "meetings"):
+        assert extra not in pages
+    assert "cover" in pages
+    assert "colophon" in pages
+    assert "contents" in pages
+
+
+def test_sample_page_numbers_canonical_raises_if_extra_missing():
+    typst = Generate(i18n=load_default()).generate(load(base_config("158x210")))
+    with pytest.raises(ValueError, match="projects"):
+        sample_page_numbers(
+            typst, year=2026, week_id="2026W01", jan1="2026-01-01", stems=SAMPLE_STEMS
+        )
 
 
 def _house_paper() -> str:

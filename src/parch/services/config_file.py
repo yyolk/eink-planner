@@ -4,7 +4,7 @@ import os
 import sys
 import tempfile
 import tomllib
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
@@ -53,12 +53,18 @@ def _packaged_or_path(spec: str) -> Path | str:
 
 
 @contextmanager
-def open_resolved(spec: str) -> Iterator[Path]:
+def open_resolved(spec: str, *, sections: Sequence[str] | None = None) -> Iterator[Path]:
     """Yield a live path for a job file or a device id (temp complete job)."""
     resolved = _packaged_or_path(spec)
-    if isinstance(resolved, Path):
+    if isinstance(resolved, Path) and sections is None:
         yield resolved
         return
+    if isinstance(resolved, Path):
+        job = spec_from_data(tomllib.loads(resolved.read_text(encoding="utf-8")))
+    else:
+        job = spec_from_device(resolved)
+    if sections is not None:
+        job.sections = list(sections)
     tmp: Path | None = None
     try:
         fd, tmp_name = tempfile.mkstemp(suffix=".toml")
@@ -69,7 +75,7 @@ def open_resolved(spec: str) -> Iterator[Path]:
             os.close(fd)
             raise
         with handle:
-            handle.write(emit_job(spec_from_device(resolved)))
+            handle.write(emit_job(job))
         yield tmp
     finally:
         if tmp is not None:

@@ -57,6 +57,18 @@ def _xmlns_extras(tag: str) -> str:
     return "".join(extras)
 
 
+def _insert_nested(frame: str, nested: str) -> str:
+    """Place the page under #toolbar when present; otherwise before </svg>."""
+    mark = frame.find('id="toolbar"')
+    if mark >= 0:
+        insert = frame.rfind("<", 0, mark)
+    else:
+        insert = frame.rfind("</svg>")
+    if insert < 0:
+        raise ValueError("frame is not an SVG document")
+    return frame[:insert] + nested + "\n" + frame[insert:]
+
+
 def compose_specimen(frame: str, page: str) -> str:
     """Nest a page SVG at #screen; sizes already match, so do not stretch."""
     screen = _screen_el(frame)
@@ -83,10 +95,7 @@ def compose_specimen(frame: str, page: str) -> str:
         f"{page[end:close]}"
         f"</svg>"
     )
-    insert = frame.rfind("</svg>")
-    if insert < 0:
-        raise ValueError("frame is not an SVG document")
-    return frame[:insert] + nested + "\n" + frame[insert:]
+    return _insert_nested(frame, nested)
 
 
 def framed_specimen(device: Device, page: str) -> str:
@@ -105,6 +114,7 @@ def specimen_index_html(device_id: str, stems: Sequence[str] = SAMPLE_STEMS) -> 
         f"<title>parch specimens — {device_id}</title>\n"
         "<style>figure{display:inline-block;margin:1rem;vertical-align:top}"
         "img{width:16rem;height:auto}</style>\n"
+        '<p><a href="../">specimens</a></p>\n'
         + "\n".join(figures)
         + "\n"
     )
@@ -114,6 +124,11 @@ def catalog_index_html(
     device_ids: Sequence[str], stems: Sequence[str] = SAMPLE_STEMS
 ) -> str:
     """Dumb catalog root that links each framed device folder."""
+    nav = (
+        "<nav>\n"
+        + "\n".join(f'<a href="#{device_id}">{device_id}</a>' for device_id in device_ids)
+        + "\n</nav>\n"
+    )
     sections: list[str] = []
     for device_id in device_ids:
         figures = [
@@ -122,7 +137,7 @@ def catalog_index_html(
             for stem in stems
         ]
         sections.append(
-            f'<section><h2><a href="{device_id}/">{device_id}</a></h2>\n'
+            f'<section id="{device_id}"><h2><a href="{device_id}/">{device_id}</a></h2>\n'
             + "\n".join(figures)
             + "</section>"
         )
@@ -131,6 +146,7 @@ def catalog_index_html(
         "<title>parch specimens</title>\n"
         "<style>figure{display:inline-block;margin:1rem;vertical-align:top}"
         "img{width:16rem;height:auto}</style>\n"
+        + nav
         + "\n".join(sections)
         + "\n"
     )

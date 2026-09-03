@@ -158,7 +158,7 @@ def _supernote_frame(device: Device) -> str:
     bx, by = 0.0, nub_h
     sx, sy = bezel, round(nub_h + bezel, 2)
     toolbar_h = _mm_to_pt(_mm_token(device.toolbar_clearance))
-    toolbar_y = round(sy - toolbar_h, 2)
+    toolbar_y = sy
     slider_h = round(sh * 2 / 3, 2)
     slider_y = round(sy + (sh - slider_h) / 2, 2)
     left_x = round(bx + bezel / 2, 2)

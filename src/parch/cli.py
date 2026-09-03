@@ -14,7 +14,7 @@ from parch.mos.preamble import copy_house_typ
 from parch.services.compile import Compile, CompileError
 from parch.services.generate import Generate
 from parch.services.config_file import open_resolved, run_edit, run_new, shipped_help
-from parch.services.job_file import DEFAULT_DEVICE
+from parch.services.job_file import CANONICAL_SECTIONS, DEFAULT_DEVICE
 from parch.devices import get_device
 from parch.device_frame import frame_svg
 from parch.services.preview_svg import (
@@ -23,6 +23,7 @@ from parch.services.preview_svg import (
     parse_pages,
     preview_svg,
     sample_page_numbers,
+    sample_stems_for_sections,
 )
 from parch.services.specimen import (
     catalog_dest,
@@ -301,7 +302,12 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
         year = cfg.start_date().year
         week_id = cfg.start_date().week().id
         jan1 = f"{year:04d}-01-01"
-        stems = sample_page_numbers(typst_source, year=year, week_id=week_id, jan1=jan1)
+        wanted = sample_stems_for_sections(
+            [section["name"] for section in cfg.enabled_sections()]
+        )
+        stems = sample_page_numbers(
+            typst_source, year=year, week_id=week_id, jan1=jan1, stems=wanted
+        )
         pages = list(stems.values())
     else:
         try:
@@ -338,7 +344,7 @@ def preview_svg_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> 
 
 def specimen_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int:
     repo = _repo_root()
-    with open_resolved(args.config) as config_path:
+    with open_resolved(args.config, sections=CANONICAL_SECTIONS) as config_path:
         i18n = I18n.load_default(args.locale)
         dto = apply_debug(load(config_path), debug=bool(args.debug))
         dto = apply_year(dto, args.year)
@@ -362,7 +368,9 @@ def specimen_cmd(args: argparse.Namespace, argv: list[str] | None = None) -> int
     year = cfg.start_date().year
     week_id = cfg.start_date().week().id
     jan1 = f"{year:04d}-01-01"
-    stems = sample_page_numbers(typst_source, year=year, week_id=week_id, jan1=jan1)
+    stems = sample_page_numbers(
+        typst_source, year=year, week_id=week_id, jan1=jan1, stems=SAMPLE_STEMS
+    )
     pages = list(stems.values())
     written = Compile().compile_svg(
         workdir=workdir,

@@ -1,6 +1,7 @@
 """Shrink Typst SVG pages for previews (half-scale or crop)."""
 
 import re
+from collections.abc import Sequence
 from xml.etree import ElementTree as ET
 
 _LENGTH = re.compile(
@@ -203,8 +204,36 @@ SAMPLE_STEMS = (
     "weekly-w01",
     "daily-jan1",
     "notes-jan1",
+    "projects",
+    "habits",
+    "review",
+    "tasks",
+    "meetings",
     "colophon",
 )
+
+_STEM_SECTION = {
+    "cover": "cover",
+    "contents": "index",
+    "annual": "annual",
+    "quarterly-q1": "quarterly",
+    "monthly-jan": "monthly",
+    "weekly-w01": "weekly",
+    "daily-jan1": "daily",
+    "notes-jan1": "daily_notes",
+    "projects": "projects",
+    "habits": "habits",
+    "review": "review",
+    "tasks": "tasks",
+    "meetings": "meetings",
+    "colophon": "colophon",
+}
+
+
+def sample_stems_for_sections(sections: Sequence[str]) -> tuple[str, ...]:
+    """SAMPLE_STEMS whose planner section is enabled, in catalog order."""
+    enabled = set(sections)
+    return tuple(stem for stem in SAMPLE_STEMS if _STEM_SECTION[stem] in enabled)
 
 
 # Links are padded_link(<id>)[...] or padded_link(<id>, [...]); strip them
@@ -230,25 +259,51 @@ def _first_dest(chunks: list[str], label: str, name: str) -> int:
     raise ValueError(f"no {name} page matching '<{label}>'")
 
 
-def sample_page_numbers(typst: str, *, year: int, week_id: str, jan1: str) -> dict[str, int]:
-    """1-based pages for the README 158×210 samples, from Typst labels.
+def sample_page_numbers(
+    typst: str,
+    *,
+    year: int,
+    week_id: str,
+    jan1: str,
+    stems: Sequence[str] = SAMPLE_STEMS,
+) -> dict[str, int]:
+    """1-based pages for requested sample stems, from Typst labels.
 
     Destinations attach the label inside ``[...]``. Quarterly and monthly
     titles still glue ``>]`` to the id. Weekly titles may put a helper
     (``#h(...)`` + range) between the label and ``]``, so Week 1 is that
     destination — not a leftover ``padded_link(<week.id>, box(...))``.
+    Only *stems* are located; a missing requested dest still raises.
     """
     chunks = typst.split("#pagebreak()")
     if not chunks:
         raise ValueError("empty typst")
-    return {
-        "cover": 1,
-        "contents": _first_page(chunks, "<index>]", "contents"),
-        "annual": _first_page(chunks, "<annual>]", "annual"),
-        "quarterly-q1": _first_page(chunks, f"<quarter-{year}-1>]", "quarterly"),
-        "monthly-jan": _first_page(chunks, f"<month-{jan1}>]", "monthly"),
-        "weekly-w01": _first_dest(chunks, week_id, "weekly"),
-        "daily-jan1": _first_page(chunks, f"text(size: h1)[1 <{jan1}>]", "daily"),
-        "notes-jan1": _first_page(chunks, f"<daily-note-{jan1}-page-1>]", "daily notes"),
-        "colophon": _first_page(chunks, "<colophon>]", "colophon"),
+    locate = {
+        "cover": lambda: 1,
+        "contents": lambda: _first_page(chunks, "<index>]", "contents"),
+        "annual": lambda: _first_page(chunks, "<annual>]", "annual"),
+        "quarterly-q1": lambda: _first_page(
+            chunks, f"<quarter-{year}-1>]", "quarterly"
+        ),
+        "monthly-jan": lambda: _first_page(chunks, f"<month-{jan1}>]", "monthly"),
+        "weekly-w01": lambda: _first_dest(chunks, week_id, "weekly"),
+        "daily-jan1": lambda: _first_page(
+            chunks, f"text(size: h1)[1 <{jan1}>]", "daily"
+        ),
+        "notes-jan1": lambda: _first_page(
+            chunks, f"<daily-note-{jan1}-page-1>]", "daily notes"
+        ),
+        "projects": lambda: _first_page(chunks, "<projects>]", "projects"),
+        "habits": lambda: _first_page(chunks, "<habits>]", "habits"),
+        "review": lambda: _first_page(chunks, "<review>]", "review"),
+        "tasks": lambda: _first_page(chunks, "<tasks>]", "tasks"),
+        "meetings": lambda: _first_page(chunks, "<meetings>]", "meetings"),
+        "colophon": lambda: _first_page(chunks, "<colophon>]", "colophon"),
     }
+    pages: dict[str, int] = {}
+    for stem in stems:
+        finder = locate.get(stem)
+        if finder is None:
+            raise ValueError(f"unknown sample stem {stem!r}")
+        pages[stem] = finder()
+    return pages
