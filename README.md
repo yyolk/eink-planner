@@ -6,9 +6,9 @@ Yearly planner PDFs for e-ink, a Python port of [Vitaliy Kudryk’s LYP](https:/
 [![CI](https://github.com/yyolk/parch/actions/workflows/ci.yml/badge.svg)](https://github.com/yyolk/parch/actions/workflows/ci.yml)
 
 <p>
-<img src="docs/samples/158x210/cover.svg" alt="Cover" width="180" />
-<img src="docs/samples/158x210/contents.svg" alt="Contents" width="180" />
-<img src="docs/samples/158x210/monthly-jan.svg" alt="January" width="180" />
+<img src="https://yyolk.github.io/parch/158x210/cover.svg" alt="Cover" width="180" />
+<img src="https://yyolk.github.io/parch/158x210/contents.svg" alt="Contents" width="180" />
+<img src="https://yyolk.github.io/parch/158x210/monthly-jan.svg" alt="January" width="180" />
 </p>
 
 ## Install
@@ -74,7 +74,7 @@ uv sync
 uv run pytest
 ```
 
-CI runs pytest and a Nomad `parch press`.
+CI runs pytest and a Nomad `parch press`. On master, CI also runs `parch specimen` for the framed devices and deploys the catalog to GitHub Pages.
 
 Experimental: compile through the PyPI [`typst`](https://pypi.org/project/typst/) binding instead of the CLI.
 
@@ -87,7 +87,7 @@ Or `uv tool install --with typst==0.15.0 parch`, then `PARCH_TYPST=py parch pres
 
 `uv run pytest` skips the full-book comparison (`slow`). Run it with `uv run pytest -m slow -o addopts=`.
 
-Regenerate the thumbs above with `parch proof 158x210 --samples`.
+Regenerate the thumbs above with `parch specimen 158x210`.
 
 Ship steps live in [Releasing](docs/releasing.md).
 

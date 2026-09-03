@@ -5,16 +5,31 @@ from collections.abc import Sequence
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
-from parch.device_frame import frame_svg
+from parch.device_frame import FRAME_DEVICE_IDS, frame_svg
 from parch.devices import Device
 from parch.services.preview_svg import SAMPLE_STEMS, _root_open_tag, _split_length
 
 _ATTR = re.compile(r'\b([:\w]+)="([^"]*)"')
 
 
+def catalog_dest(workdir: str | Path) -> Path:
+    """Catalog root: ``<workdir>/specimens/``."""
+    return Path(workdir) / "specimens"
+
+
 def specimens_dest(workdir: str | Path, device_id: str) -> Path:
-    """Catalog dir: ``<workdir>/specimens/<device-id>/``."""
-    return Path(workdir) / "specimens" / device_id
+    """Per-device dir: ``<workdir>/specimens/<device-id>/``."""
+    return catalog_dest(workdir) / device_id
+
+
+def listed_catalog_devices(root: Path) -> list[str]:
+    """Device folders under the catalog root that have an index.html."""
+    if not root.is_dir():
+        return []
+    found = {p.name for p in root.iterdir() if p.is_dir() and (p / "index.html").is_file()}
+    preferred = [d for d in sorted(FRAME_DEVICE_IDS) if d in found]
+    extras = sorted(found - FRAME_DEVICE_IDS)
+    return preferred + extras
 
 
 def _local(tag: str) -> str:
@@ -93,6 +108,45 @@ def specimen_index_html(device_id: str, stems: Sequence[str] = SAMPLE_STEMS) -> 
         + "\n".join(figures)
         + "\n"
     )
+
+
+def catalog_index_html(
+    device_ids: Sequence[str], stems: Sequence[str] = SAMPLE_STEMS
+) -> str:
+    """Dumb catalog root that links each framed device folder."""
+    sections: list[str] = []
+    for device_id in device_ids:
+        figures = [
+            f'<figure><img src="{device_id}/{stem}.svg" alt="{device_id} {stem}">'
+            f"<figcaption>{stem}</figcaption></figure>"
+            for stem in stems
+        ]
+        sections.append(
+            f'<section><h2><a href="{device_id}/">{device_id}</a></h2>\n'
+            + "\n".join(figures)
+            + "</section>"
+        )
+    return (
+        "<!DOCTYPE html>\n"
+        "<title>parch specimens</title>\n"
+        "<style>figure{display:inline-block;margin:1rem;vertical-align:top}"
+        "img{width:16rem;height:auto}</style>\n"
+        + "\n".join(sections)
+        + "\n"
+    )
+
+
+def write_catalog_index(
+    root: Path,
+    device_ids: Sequence[str],
+    *,
+    stems: Sequence[str] = SAMPLE_STEMS,
+) -> Path:
+    """Write the catalog root index.html listing *device_ids*."""
+    root.mkdir(parents=True, exist_ok=True)
+    index = root / "index.html"
+    index.write_text(catalog_index_html(device_ids, stems), encoding="utf-8")
+    return index
 
 
 def write_specimens(

@@ -75,6 +75,7 @@ def test_proof_help(capsys):
     assert "--pages" in proof_help
     assert "--samples" in proof_help
     assert "--hand" in proof_help
+    assert "docs/samples" not in proof_help
 
 
 def test_dropped_aliases_are_unknown(capsys):
