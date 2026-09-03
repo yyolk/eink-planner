@@ -76,7 +76,8 @@ jobs:
             uv run parch specimen "$id" -w out
           done
           test -s out/specimens/index.html
-          test -s out/specimens/158x210/cover.svg
+          test -s out/specimens/158x210/lined-left/cover.svg
+          test -s out/specimens/158x210/dotted-right/cover.svg
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
