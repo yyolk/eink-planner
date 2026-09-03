@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from parch.cli import build_parser, generate_cmd, main, press_dest, press_outfile
-from parch.services.compile import OUTPUT_FILE
+from parch.services.compile import CompileError, OUTPUT_FILE
 from tests.toml_fixtures import _minimal
 
 
