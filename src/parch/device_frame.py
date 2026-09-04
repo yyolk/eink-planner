@@ -7,6 +7,8 @@ FRAME_DEVICE_IDS = frozenset(
         "supernote-nomad",
         "supernote-manta",
         "kindle-scribe",
+        "remarkable-1",
+        "remarkable-2",
         "158x210",
     }
 )
@@ -202,7 +204,7 @@ def frame_svg(device: Device) -> str:
     match device.id:
         case "158x210":
             return _paper_frame(device)
-        case "kindle-scribe":
+        case "kindle-scribe" | "remarkable-1" | "remarkable-2":
             return _scribe_frame(device)
         case "supernote-nomad" | "supernote-manta":
             return _supernote_frame(device)
