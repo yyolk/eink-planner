@@ -39,10 +39,12 @@ _FRAME_IDS = (
     "supernote-nomad",
     "supernote-manta",
     "kindle-scribe",
+    "remarkable-1",
+    "remarkable-2",
     "158x210",
 )
 _SUPERNOTE = ("supernote-nomad", "supernote-manta")
-_NO_TOOLBAR = ("kindle-scribe", "158x210")
+_NO_TOOLBAR = ("kindle-scribe", "remarkable-1", "remarkable-2", "158x210")
 
 
 def _local(tag: str) -> str:
@@ -175,7 +177,7 @@ def test_specimen_help_has_hand(capsys):
 
 
 def test_specimen_rejects_unknown_device_before_press(tmp_path, capsys):
-    code = main(["specimen", "remarkable-1", "-w", str(tmp_path)])
+    code = main(["specimen", "remarkable-paper-pure", "-w", str(tmp_path)])
     assert code == 1
     assert "no device frame" in capsys.readouterr().err
     assert not (tmp_path / "index.typst").exists()
@@ -303,14 +305,28 @@ def test_catalog_index_html_is_dumb():
     )
 
 
+def test_catalog_lists_remarkable_when_framed():
+    assert "remarkable-1" in FRAME_DEVICE_IDS
+    assert "remarkable-2" in FRAME_DEVICE_IDS
+    assert FRAME_DEVICE_IDS == frozenset(_FRAME_IDS)
+
+
 def test_listed_catalog_devices_prefers_frame_ids(tmp_path):
     root = catalog_dest(tmp_path)
-    for device_id in ("158x210", "supernote-nomad", "extra-device"):
+    for device_id in (
+        "158x210",
+        "supernote-nomad",
+        "remarkable-1",
+        "remarkable-2",
+        "extra-device",
+    ):
         dest = root / device_id
         dest.mkdir(parents=True)
         (dest / "index.html").write_text("<title>x</title>\n", encoding="utf-8")
     assert listed_catalog_devices(root) == [
         "158x210",
+        "remarkable-1",
+        "remarkable-2",
         "supernote-nomad",
         "extra-device",
     ]

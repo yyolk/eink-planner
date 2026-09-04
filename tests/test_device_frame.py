@@ -14,9 +14,13 @@ _FRAME_IDS = (
     "supernote-nomad",
     "supernote-manta",
     "kindle-scribe",
+    "remarkable-1",
+    "remarkable-2",
     "158x210",
 )
 _SUPERNOTE = ("supernote-nomad", "supernote-manta")
+_SCRIBE_PACK = ("kindle-scribe", "remarkable-1", "remarkable-2")
+_NO_TOOLBAR = (*_SCRIBE_PACK, "158x210")
 
 
 def _local(tag: str) -> str:
@@ -139,7 +143,7 @@ def test_screen_not_inset_by_toolbar_clearance(device_id):
     assert sh == pytest.approx(device.height_pt)
 
 
-@pytest.mark.parametrize("device_id", ("kindle-scribe", "158x210"))
+@pytest.mark.parametrize("device_id", _NO_TOOLBAR)
 def test_even_bezel_on_scribe_and_paper(device_id):
     device = get_device(device_id)
     root = _parse(frame_svg(device))
@@ -216,15 +220,24 @@ def test_supernote_chrome(device_id):
     assert len(lines) == 2
 
 
-def test_scribe_is_not_supernote_chrome():
-    root = _parse(frame_svg(get_device("kindle-scribe")))
+@pytest.mark.parametrize("device_id", _SCRIBE_PACK)
+def test_scribe_is_not_supernote_chrome(device_id):
+    root = _parse(frame_svg(get_device(device_id)))
     body = _by_id(root, "body")
     assert body is not None
     assert float(body.get("rx") or 0) > 0
     assert _by_id(root, "toolbar") is None
     assert _by_id(root, "sensor") is None
     assert not any(_local(el.tag) == "line" for el in root.iter())
+    assert not _has_pattern(root)
+    assert not any(_local(el.tag) == "text" for el in root.iter())
     assert _by_id(root, "power") is not None
+
+
+def test_frame_device_ids_include_remarkable():
+    assert "remarkable-1" in FRAME_DEVICE_IDS
+    assert "remarkable-2" in FRAME_DEVICE_IDS
+    assert FRAME_DEVICE_IDS == frozenset(_FRAME_IDS)
 
 
 def test_paper_is_generic_two_rect():
